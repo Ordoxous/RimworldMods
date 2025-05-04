@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+
+	<Operation Class="XmlExtensions.FindMod">
+		<mods>
+			<li>FrozenSnowFox.ComplexJobs</li>
+		</mods>
+		<packageId>true</packageId>
+		<caseTrue>
+			<Operation Class="XmlExtensions.HybridPatch">
+				<xpath>Defs/ThingDef[defName="Mech_Lifter"]/race/mechEnabledWorkTypes</xpath>
+				<value>
+					<li Operation="SafeAdd" Compare="InnerText">FSFMerge</li>
+					<li Operation="SafeAdd" Compare="InnerText">FSFDeliver</li>
+				</value>
+			</Operation>
+		</caseTrue>
+	</Operation>
+
+	<Operation Class="XmlExtensions.FindMod">
+		<mods>
+			<li>Zei33.SimpleImprove</li>
+		</mods>
+		<packageId>true</packageId>
+		<caseTrue>
+			<Operation Class="XmlExtensions.HybridPatch">
+				<xpath>Defs/ThingDef[defName="Mech_Constructoid"]/race/mechEnabledWorkTypes</xpath>
+				<value>
+					<li Operation="SafeAdd" Compare="InnerText">WorkType_Improving</li>
+				</value>
+			</Operation>
+		</caseTrue>
+	</Operation>
+	
+</Patch>

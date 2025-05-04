@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+
+	<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+		<xpath>Defs/ThingDef[defName="StandardRecharger"]/building/requiredMechWeightClasses[li/text()="Medium"]</xpath>
+		<compare>Both</compare>
+		<value>
+			<li>Light</li>
+		</value>
+	</Operation>
+
+</Patch>

@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+
+	<Operation Class="XmlExtensions.FindMod">
+		<mods>
+			<li>ReSplice.XOTR.Core</li>
+		</mods>
+		<packageId>true</packageId>
+		<caseTrue>
+
+			<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+				<xpath>Defs/ThingDef[defName="RS_GeneVault" or defName="RS_GeneRepository" or defName="RS_GeneCentrifuge" or defName="RS_XenoGermDuplicator"]</xpath>
+				<compare>Both</compare>
+				<value>
+					<minifiedDef>MinifiedThing</minifiedDef>
+					<thingCategories>
+						<li>BuildingsProduction</li>
+					</thingCategories>
+				</value>
+			</Operation>
+
+		</caseTrue>
+	</Operation>
+
+</Patch>

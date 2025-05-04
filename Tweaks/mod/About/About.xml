@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+  <name>Tweaks</name>
+  <author>Ordoxous</author>
+  <url>https://github.com/Ordoxous/RimworldMods/tree/master/BioFuelFertilizer</url>
+  <supportedVersions>
+    <li>1.6</li>
+  </supportedVersions>
+  <modDependencies>
+    <li>
+      <packageId>brrainz.harmony</packageId>
+      <displayName>Harmony</displayName>
+    </li>
+    <li>
+      <packageId>Ludeon.RimWorld.Biotech</packageId>
+      <displayName>Biotech</displayName>
+    </li>
+    <li>
+      <packageId>wvc.sergkart.biotech.MoreMechanoidsWorkModes</packageId>
+      <displayName>WVC - Work Modes</displayName>
+      <steamWorkshopUrl>steam://url/CommunityFilePage/2888380373</steamWorkshopUrl>
+    </li>
+    <li>
+      <packageId>imranfish.xmlextensions</packageId>
+      <displayName>XML Extensions</displayName>
+      <downloadUrl>https://github.com/15adhami/XmlExtensions/releases</downloadUrl>
+      <steamWorkshopUrl>steam://url/CommunityFilePage/2574315206</steamWorkshopUrl>
+    </li>
+  </modDependencies>
+  <loadAfter>
+    <li>brrainz.harmony</li>
+    <li>wvc.sergkart.biotech.MoreMechanoidsWorkModes</li>
+    <li>imranfish.xmlextensions</li>
+    <li>VanillaExpanded.VFEPower</li>
+    <li>ferny.progressionagriculture</li>
+  </loadAfter>
+  <packageId>Ordo.Tweaks</packageId>
+  <description>Various configurable tweaks</description>
+</ModMetaData>

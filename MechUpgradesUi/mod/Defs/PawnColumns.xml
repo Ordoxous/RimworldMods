@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+  <PawnColumnDef>
+    <defName>MechUpgradesUi_UpgradePolicy</defName>
+    <label>Upgrade Policy</label>
+    <workerClass>Ordo.MechUpgradesUi.PawnColumnWorker_MechUpgradePolicy</workerClass>
+    <paintable>true</paintable>
+  </PawnColumnDef>
+
+  <PawnColumnDef>
+    <defName>MechUpgradesUi_Upgrades</defName>
+    <label>Upgrades</label>
+    <workerClass>Ordo.MechUpgradesUi.PawnColumnWorker_MechUpgrades</workerClass>
+    <paintable>true</paintable>
+  </PawnColumnDef>
+
+  <PawnColumnDef>
+    <defName>MechUpgradesUi_Work</defName>
+    <label>Work</label>
+    <width>200</width>
+    <workerClass>Ordo.MechUpgradesUi.PawnColumnWorker_MechWorkView</workerClass>
+    <paintable>true</paintable>
+  </PawnColumnDef>
+
+</Defs>

@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+
+	<Operation Class="XmlExtensions.FindMod">
+		<mods>
+			<li>drilledhead.MechaWeaponChanger</li>
+		</mods>
+		<packageId>true</packageId>
+		<caseTrue>
+
+			<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+				<xpath>Defs/ThingDef[defName="MechaWeaponChanger"]</xpath>
+				<compare>Both</compare>
+				<value>
+					<minifiedDef>MinifiedThing</minifiedDef>
+					<thingCategories>
+						<li>BuildingsProduction</li>
+					</thingCategories>
+				</value>
+			</Operation>
+
+		</caseTrue>
+	</Operation>
+
+	<Operation Class="XmlExtensions.FindMod">
+		<mods>
+			<li>GoGaTio.MechanoidUpgrades</li>
+		</mods>
+		<packageId>true</packageId>
+		<caseTrue>
+
+			<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+				<xpath>Defs/ThingDef[defName="MU_MechUpgrader"]</xpath>
+				<compare>Both</compare>
+				<value>
+					<minifiedDef>MinifiedThing</minifiedDef>
+					<thingCategories>
+						<li>BuildingsProduction</li>
+					</thingCategories>
+				</value>
+			</Operation>
+
+		</caseTrue>
+	</Operation>
+
+</Patch>

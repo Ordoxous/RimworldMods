@@ -9,24 +9,18 @@
         <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
         <OutputType>Library</OutputType>
         <AppDesignerFolder>Properties</AppDesignerFolder>
-        <AssemblyName>BioFuelFertilizer</AssemblyName>
-        <RootNamespace>Ordo.BioFuelFertilizer</RootNamespace>
+        <RootNamespace>Ordo.Tweaks</RootNamespace>
         <FileAlignment>512</FileAlignment>
     </PropertyGroup>
 
     <ItemGroup>
-        <Reference Include="VFEF">
-            <HintPath>F:\SteamLibrary\steamapps\workshop\content\294100\1957158779\$(RimworldVersion)\Assemblies\VFEF.dll</HintPath>
+        <Reference Include="WVC_MoreMechanoidsWorkModes_Main">
+            <HintPath>F:\SteamLibrary\steamapps\workshop\content\294100\2888380373\$(RimworldVersion)\Assemblies\WVC_MoreMechanoidsWorkModes_Main.dll</HintPath>
             <Private>False</Private>
         </Reference>
-
-        <Reference Include="VFEF">
-            <HintPath>F:\SteamLibrary\steamapps\workshop\content\294100\3155781848\$(RimworldVersion)\Assemblies\VanillaRecyclingExpanded.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-
-        <Reference Include="BadHygiene">
-            <HintPath>F:\SteamLibrary\steamapps\workshop\content\294100\836308268\$(RimworldVersion)\Assemblies\BadHygiene.dll</HintPath>
+        
+        <Reference Include="WVC_MoreMechanoidsWorkModes_Main">
+            <HintPath>F:\SteamLibrary\steamapps\workshop\content\294100\3418017359\$(RimworldVersion)\Assemblies\ProgressionAgriculture.dll</HintPath>
             <Private>False</Private>
         </Reference>
     </ItemGroup>

@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+
+  <!-- TODO: https://github.com/15adhami/XmlExtensions/wiki/XmlExtensions.UseSetting -->
+  <!-- TODO: Align fuel cost to portability -->
+
+	<Operation Class="XmlExtensions.FindMod">
+		<mods>
+			<li>VanillaExpanded.VFEPower</li>
+		</mods>
+		<packageId>true</packageId>
+		<caseTrue>
+
+			<Operation Class="PatchOperationReplace">
+				<xpath>
+					Defs/ThingDef[
+					defName="VFE_PortableWoodFiredGenerator" or
+					defName="VFE_PortableChemfuelPoweredGenerator"
+					]/comps/li[@Class="CompProperties_Power"]/basePowerConsumption
+				</xpath>
+				<value>
+					<!-- The default is -500, which makes it more useful than the larger generators -->
+					<!-- Considers per-tile generation as 200 -->
+					<basePowerConsumption>-200</basePowerConsumption>
+				</value>
+			</Operation>
+
+			<Operation Class="PatchOperationReplace">
+				<xpath>
+					Defs/ThingDef[
+					  defName="VFE_IndustrialWoodFiredGenerator" or
+					  defName="VFE_IndustrialChemfuelPoweredGenerator"
+					]/comps/li[compClass="CompPowerPlant"]/basePowerConsumption
+				</xpath>
+				<value>
+					<!-- The default is -2400, bumped to be fair to the research cost -->
+					<!-- Considers per-tile generation as 300 -->
+					<basePowerConsumption>-3000</basePowerConsumption>
+				</value>
+			</Operation>
+
+			<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+				<xpath>
+					Defs/ThingDef[
+					  defName="VFE_IndustrialWoodFiredGenerator" or
+					  defName="VFE_IndustrialChemfuelPoweredGenerator"
+					]
+				</xpath>
+				<value>
+					<minifiedDef>MinifiedThing</minifiedDef>
+					<thingCategories>
+						<li>BuildingsPower</li>
+					</thingCategories>
+				</value>
+			</Operation>
+
+		</caseTrue>
+	</Operation>
+
+</Patch>

@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+
+	<Operation Class="XmlExtensions.FindMod">
+		<mods>
+			<li>VanillaExpanded.VFEProduction</li>
+		</mods>
+		<packageId>true</packageId>
+		<caseTrue>
+
+			<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+				<xpath>Defs/ThingDef[defName="VFE_ComponentFabricationBench"]</xpath>
+				<compare>Both</compare>
+				<value>
+					<minifiedDef>MinifiedThing</minifiedDef>
+					<thingCategories>
+						<li>BuildingsProduction</li>
+					</thingCategories>
+				</value>
+			</Operation>
+
+		</caseTrue>
+	</Operation>
+
+</Patch>

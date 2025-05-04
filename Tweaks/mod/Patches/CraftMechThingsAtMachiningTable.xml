@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+
+	<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+		<xpath>Defs/ThingDef/recipeMaker/recipeUsers[li/text()="SubcoreEncoder"]</xpath>
+		<compare>Both</compare>
+		<value>
+			<li>TableMachining</li>
+		</value>
+	</Operation>
+	
+</Patch>

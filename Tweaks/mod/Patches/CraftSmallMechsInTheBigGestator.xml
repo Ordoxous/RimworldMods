@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+
+	<Operation Class="XmlExtensions.Conditional">
+		<xpath>Defs/RecipeDef/recipeUsers[li/text()="MechGestator"]</xpath>
+		<caseTrue>
+			<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+				<xpath>Defs/RecipeDef/recipeUsers[li/text()="MechGestator"]</xpath>
+				<compare>InnerText</compare>
+				<value>
+					<li>LargeMechGestator</li>
+				</value>
+			</Operation>
+		</caseTrue>
+	</Operation>
+
+	<Operation Class="XmlExtensions.ForEachLoop">
+		<xpath>Defs/ThingDef[defName="MechGestator"]/recipes/li</xpath>
+		<storeIn>path</storeIn>
+		<apply>
+			<Operation Class="XmlExtensions.CreateVariable">
+				<value>{path}</value>
+				<storeIn>defName</storeIn>
+				<fromXml>true</fromXml>
+				<apply>
+					<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+						<xpath>Defs/RecipeDef[defName="{defName}"]</xpath>
+						<compare>Both</compare>
+						<value>
+							<recipeUsers>
+								<li>LargeMechGestator</li>
+							</recipeUsers>
+						</value>
+					</Operation>
+				</apply>
+			</Operation>
+		</apply>
+	</Operation>
+
+</Patch>

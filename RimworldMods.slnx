@@ -1,4 +1,6 @@
 ﻿<Solution>
-  <Project Path="BioFuelFertilizer\BioFuelFertilizer.csproj" Type="Classic C#" />
-  <Project Path="MechUpgradesUi_1.5\MechUpgradesUi_1.5.csproj" Type="Classic C#" />
+  <Project Path="BioFuelFertilizer\BioFuelFertilizer.csproj" Type="C#" />
+  <Project Path="BlueprintMaterials/BlueprintMaterials.csproj" />
+  <Project Path="MechUpgradesUi\MechUpgradesUi.csproj" Type="C#" />
+  <Project Path="Tweaks\Tweaks.csproj" Type="C#" />
 </Solution>

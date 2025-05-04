@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+  <WorkGiverDef>
+    <defName>Tweaks</defName>
+    <label>haul mechs for repair</label>
+    <giverClass>Ordo.Tweaks.WorkGiver_HaulMechForRepair</giverClass>
+    <workType>Hauling</workType>
+    <verb>haul</verb>
+    <gerund>hauling</gerund>
+    <priorityInType>90</priorityInType>
+    <requiredCapacities>
+      <li>Manipulation</li>
+    </requiredCapacities>
+    <canBeDoneByMechs>true</canBeDoneByMechs>
+  </WorkGiverDef>
+  
+  <JobDef>
+    <defName>HaulMechForRepair</defName>
+    <driverClass>Ordo.Tweaks.JobDriver_HaulMechForRepair</driverClass>
+    <reportString>hauling TargetA for repair.</reportString>
+  </JobDef>
+
+</Defs>

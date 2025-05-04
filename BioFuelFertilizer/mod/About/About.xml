@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+  <name>BioFuelFertilizer</name>
+  <author>Ordoxous</author>
+  <url>https://github.com/Ordoxous/RimworldMods/tree/master/BioFuelFertilizer</url>
+  <supportedVersions>
+    <li>1.6</li>
+  </supportedVersions>
+  <modDependencies>
+    <li>
+      <packageId>VanillaExpanded.Recycling</packageId>
+      <displayName>Vanilla Recycling Expanded</displayName>
+      <steamWorkshopUrl>steam://url/CommunityFilePage/3155781848</steamWorkshopUrl>
+    </li>
+  </modDependencies>
+  <loadAfter>
+    <li>VanillaExpanded.Recycling</li>
+    <li>Dubwise.DubsBadHygiene</li>
+  </loadAfter>
+  <packageId>Ordo.BioFuelFertilizer</packageId>
+  <description>Allows using reclaimed biopacks from VE Recycling on plant growers as fertilizer (fuel)</description>
+</ModMetaData>

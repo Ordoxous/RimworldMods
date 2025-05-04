@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+	
+	<Operation Class="XmlExtensions.PatchOperationSafeRemove">
+		<xpath>Defs/ThingDef[defName="WaterWellInlet"]/placeWorkers/li[text()="PlaceWorker_InvalidOverSubstructure"]</xpath>
+	</Operation>
+	
+</Patch>

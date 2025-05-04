@@ -1,0 +1,108 @@
+﻿<Project>
+    <PropertyGroup>
+        <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+        <LangVersion>latest</LangVersion>
+        <Prefer32Bit>false</Prefer32Bit>
+        <OutputType>Library</OutputType>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <DebugSymbols>false</DebugSymbols>
+        <DebugType>full</DebugType>
+        <Optimize>false</Optimize>
+        <OutputPath>$(MSBuildProjectDirectory)\out\Assemblies</OutputPath>
+        <DefineConstants>DEBUG;TRACE</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <DebugType>pdbonly</DebugType>
+        <Optimize>true</Optimize>
+        <OutputPath>$(MSBuildProjectDirectory)\out\Assemblies</OutputPath>
+        <DefineConstants>TRACE</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+    </PropertyGroup>
+
+    <PropertyGroup>
+      <RimworldVersion>1.6</RimworldVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Krafs.Rimworld.Ref" Version="$(RimworldVersion).*" />
+      <PackageReference Include="Lib.Harmony" Version="2.3.6" />
+    </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>F:\SteamLibrary\steamapps\workshop\content\294100\2009463077\Current\Assemblies\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>F:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System"/>
+    <Reference Include="System.Core"/>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data"/>
+    <Reference Include="System.Xml"/>
+    <Reference Include="UnityEngine">
+      <HintPath>F:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>F:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>F:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>F:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+    <ItemGroup>
+        <Compile Include="Properties\AssemblyInfo.cs" />
+        <Compile Include="src\**" />
+        <Content Include="mod\**" />
+    </ItemGroup>
+
+    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <ItemGroup>
+            <MyMod Include="$(MSBuildProjectDirectory)\mod\**\*.*" />
+        </ItemGroup>
+
+        <RemoveDir Directories="$(MSBuildProjectDirectory)\out\About" />
+        <RemoveDir Directories="$(MSBuildProjectDirectory)\out\Defs" />
+        <RemoveDir Directories="$(MSBuildProjectDirectory)\out\Patches" />
+        <Copy SourceFiles="@(MyMod)" DestinationFolder="$(MSBuildProjectDirectory)\out\%(RecursiveDir)" />
+    </Target>
+
+    <Target Name="CopyToRimworldDebug">
+        <ItemGroup>
+            <BuiltMod Include="$(MSBuildProjectDirectory)\out\**\*.*" />
+        </ItemGroup>
+
+        <RemoveDir Directories="G:\RimWorld_Debug\Mods\$(MSBuildProjectName)" />
+        <Copy SourceFiles="@(BuiltMod)" DestinationFolder="G:\RimWorld_Debug\Mods\$(MSBuildProjectName)\%(RecursiveDir)" />
+    </Target>
+
+    <Target Name="CopyToRimworld">
+        <ItemGroup>
+            <BuiltMod Include="$(MSBuildProjectDirectory)\out\**\*.*" />
+        </ItemGroup>
+
+        <RemoveDir Directories="F:\SteamLibrary\steamapps\common\RimWorld\Mods\$(MSBuildProjectName)" />
+        <Copy SourceFiles="@(BuiltMod)" DestinationFolder="F:\SteamLibrary\steamapps\common\RimWorld\Mods\$(MSBuildProjectName)\%(RecursiveDir)" />
+    </Target>
+</Project>

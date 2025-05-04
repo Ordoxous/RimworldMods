@@ -9,24 +9,14 @@
         <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
         <OutputType>Library</OutputType>
         <AppDesignerFolder>Properties</AppDesignerFolder>
-        <AssemblyName>BioFuelFertilizer</AssemblyName>
-        <RootNamespace>Ordo.BioFuelFertilizer</RootNamespace>
+        <AssemblyName>MechUpgradesUi</AssemblyName>
+        <RootNamespace>Ordo.MechUpgradesUi</RootNamespace>
         <FileAlignment>512</FileAlignment>
     </PropertyGroup>
 
     <ItemGroup>
-        <Reference Include="VFEF">
-            <HintPath>F:\SteamLibrary\steamapps\workshop\content\294100\1957158779\$(RimworldVersion)\Assemblies\VFEF.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-
-        <Reference Include="VFEF">
-            <HintPath>F:\SteamLibrary\steamapps\workshop\content\294100\3155781848\$(RimworldVersion)\Assemblies\VanillaRecyclingExpanded.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-
-        <Reference Include="BadHygiene">
-            <HintPath>F:\SteamLibrary\steamapps\workshop\content\294100\836308268\$(RimworldVersion)\Assemblies\BadHygiene.dll</HintPath>
+        <Reference Include="MechanoidUpgrades">
+            <HintPath>F:\SteamLibrary\steamapps\workshop\content\294100\3365118555\$(RimworldVersion)\Assemblies\MechanoidUpgrades.dll</HintPath>
             <Private>False</Private>
         </Reference>
     </ItemGroup>

@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+
+	<Operation Class="XmlExtensions.FindMod">
+		<mods>
+			<li>VanillaExpanded.Temperature</li>
+		</mods>
+		<packageId>true</packageId>
+		<caseTrue>
+
+			<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+				<xpath>
+					Defs/ThingDef[
+					  defName="VTE_WallMountedHeater" or
+					  defName="VTE_WallMountedCooler" or
+					  defName="VTE_WallMountedVent"
+					]
+				</xpath>
+				<compare>Both</compare>
+				<value>
+					<minifiedDef>MinifiedThing</minifiedDef>
+					<thingCategories>
+						<li>BuildingsTemperature</li>
+					</thingCategories>
+				</value>
+			</Operation>
+
+		</caseTrue>
+	</Operation>
+
+</Patch>

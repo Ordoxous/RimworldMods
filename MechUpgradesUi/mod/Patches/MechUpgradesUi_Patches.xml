@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+
+	<Operation Class="PatchOperationReplace">
+		<success>Always</success>
+		<xpath>Defs/ThingDef[comps/li[@Class = "CompProperties_OverseerSubject"]]/comps/li[@Class = "MU.CompProperties_UpgradableMechanoid"]</xpath>
+		<value>
+			<li Class="Ordo.MechUpgradesUi.CompProperties_CompUpgradableMechWithPolicy"/>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationInsert">
+		<xpath>Defs/PawnTableDef[defName="Mechs"]/columns/li[text()="AutoRepair"]</xpath>
+		<order>Append</order>
+		<value>
+			<li>MechUpgradesUi_UpgradePolicy</li>
+			<li>MechUpgradesUi_Upgrades</li>
+			<li>MechUpgradesUi_Work</li>
+		</value>
+	</Operation>
+	
+	<Operation Class="PatchOperationFindMod">
+		<mods>
+			<li>Work Tab</li>
+		</mods>
+		
+		<match Class="PatchOperationReplace">
+			<xpath>Defs/PawnTableDef[defName="Mechs"]/columns/li[text()="MechUpgradesUi_Work"]</xpath>
+			<value>
+				<li>Job</li>
+			</value>
+		</match>
+		
+	</Operation>
+
+	<Operation Class="PatchOperationInsert">
+		<xpath>Defs/ThinkTreeDef[defName="Mechanoid"]/thinkRoot/subNodes/li[@Class="ThinkNode_ConditionalPlayerControlledMech"]/subNodes/li[@Class="ThinkNode_ConditionalNotFormingCaravan"]/subNodes/li[@Class ="ThinkNode_ConditionalRecharging"]</xpath>
+		<order>Append</order>
+		<value>
+			<li Class="Ordo.MechUpgradesUi.JobGiver_OptimizeUpgrades"/>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/ThingDef[defName="MU_MechUpgrader"]/thingClass</xpath>
+		<value>
+			<thingClass>Ordo.MechUpgradesUi.Building_AutoMechUpgrader</thingClass>
+		</value>
+	</Operation>
+
+	<Operation Class="PatchOperationReplace">
+		<xpath>Defs/ThingDef[defName="MU_MechUpgrader"]/label</xpath>
+		<value>
+			<label>Auto mech upgrader</label>
+		</value>
+	</Operation>
+	
+</Patch>
