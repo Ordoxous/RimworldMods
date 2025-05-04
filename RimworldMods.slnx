@@ -1,0 +1,4 @@
+﻿<Solution>
+  <Project Path="BioFuelFertilizer\BioFuelFertilizer.csproj" Type="Classic C#" />
+  <Project Path="MechUpgradesUi_1.5\MechUpgradesUi_1.5.csproj" Type="Classic C#" />
+</Solution>

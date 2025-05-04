@@ -1,0 +1,35 @@
+<ModMetaData>
+  <name>MechUi</name>
+  <author>Ordoxous</author>
+  <supportedVersions>
+    <li>1.5</li>
+  </supportedVersions>
+  <modDependencies>
+    <li>
+      <packageId>Ludeon.RimWorld.Biotech</packageId>
+      <displayName>Biotech</displayName>
+    </li>
+    <li>
+      <packageId>GoGaTio.MechanoidUpgrades</packageId>
+      <displayName>Mechanoid Upgrades</displayName>
+      <steamWorkshopUrl>steam://url/CommunityFilePage/3365118555</steamWorkshopUrl>
+    </li>
+    <li>
+      <packageId>VanillaExpanded.Recycling</packageId>
+      <displayName>Vanilla Recycling Expanded</displayName>
+      <steamWorkshopUrl>steam://url/CommunityFilePage/3155781848</steamWorkshopUrl>
+    </li>
+    <li>
+      <packageId>VanillaExpanded.VFEFarming</packageId>
+      <displayName>Vanilla Furniture Expanded - Farming</displayName>
+      <steamWorkshopUrl>steam://url/CommunityFilePage/1957158779</steamWorkshopUrl>
+    </li>
+  </modDependencies>
+  <loadAfter>
+    <li>GoGaTio.MechanoidUpgrades</li>
+    <li>VanillaExpanded.Recycling</li>
+    <li>VanillaExpanded.VFEFarming</li>
+  </loadAfter>
+  <packageId>Ordoxous.MechUi</packageId>
+  <description>Upgrading UI for mechanoids</description>
+</ModMetaData>

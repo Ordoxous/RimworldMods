@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+  <PawnColumnDef>
+    <defName>MechUi_UpgradePolicy</defName>
+    <label>Upgrade Policy</label>
+    <workerClass>MechUi.PawnColumnWorker_MechUpgradePolicy</workerClass>
+    <paintable>true</paintable>
+  </PawnColumnDef>
+
+  <PawnColumnDef>
+    <defName>MechUi_Upgrades</defName>
+    <label>Upgrades</label>
+    <workerClass>MechUi.PawnColumnWorker_MechUpgrades</workerClass>
+    <paintable>true</paintable>
+  </PawnColumnDef>
+
+  <PawnColumnDef>
+    <defName>MechUi_Work</defName>
+    <label>Upgrades</label>
+    <workerClass>MechUi.PawnColumnWorker_MechWorkView</workerClass>
+    <paintable>true</paintable>
+  </PawnColumnDef>
+
+</Defs>
