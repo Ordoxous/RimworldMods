@@ -33,6 +33,7 @@
     <li>imranfish.xmlextensions</li>
     <li>VanillaExpanded.VFEPower</li>
     <li>ferny.progressionagriculture</li>
+    <li>Tinda.Medieval.Tailor.Continued</li>
   </loadAfter>
   <packageId>Ordo.Tweaks</packageId>
   <description>Various configurable tweaks</description>

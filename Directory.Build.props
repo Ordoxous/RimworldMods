@@ -8,8 +8,8 @@
 
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
         <PlatformTarget>AnyCPU</PlatformTarget>
-        <DebugSymbols>false</DebugSymbols>
-        <DebugType>full</DebugType>
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>pdbonly</DebugType>
         <Optimize>false</Optimize>
         <OutputPath>$(MSBuildProjectDirectory)\out\Assemblies</OutputPath>
         <DefineConstants>DEBUG;TRACE</DefineConstants>

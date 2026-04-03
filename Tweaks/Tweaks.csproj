@@ -23,6 +23,11 @@
             <HintPath>F:\SteamLibrary\steamapps\workshop\content\294100\3418017359\$(RimworldVersion)\Assemblies\ProgressionAgriculture.dll</HintPath>
             <Private>False</Private>
         </Reference>
+        
+        <Reference Include="WVC_MoreMechanoidsWorkModes_Main">
+            <HintPath>F:\SteamLibrary\steamapps\workshop\content\294100\3461060466\1.6\Assemblies\BiotechPatch.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
     </ItemGroup>
 
 </Project>

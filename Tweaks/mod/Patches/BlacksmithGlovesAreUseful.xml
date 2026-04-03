@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+
+    <Operation Class="XmlExtensions.FindMod">
+        <mods>
+            <li>Tinda.Medieval.Tailor.Continued</li>
+        </mods>
+        <packageId>true</packageId>
+        <caseTrue>
+            <Operation Class="XmlExtensions.PatchOperationSafeAdd">
+                <xpath>Defs/ThingDef[defName="AMT_Handwear_BlacksmithGloves"]/equippedStatOffsets</xpath>
+                <compare>Both</compare>
+                <value>
+                    <WorkSpeedGlobal>0.05</WorkSpeedGlobal>
+                </value>
+            </Operation>
+        </caseTrue>
+    </Operation>
+
+</Patch>

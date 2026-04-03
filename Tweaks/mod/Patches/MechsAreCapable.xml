@@ -15,6 +15,14 @@
 					<li Operation="SafeAdd" Compare="InnerText">FSFDeliver</li>
 				</value>
 			</Operation>
+
+			<Operation Class="XmlExtensions.HybridPatch">
+				<xpath>Defs/ThingDef[defName="VR_Construct_Lifter"]/race/mechEnabledWorkTypes</xpath>
+				<value>
+					<li Operation="SafeAdd" Compare="InnerText">FSFMerge</li>
+					<li Operation="SafeAdd" Compare="InnerText">FSFDeliver</li>
+				</value>
+			</Operation>
 		</caseTrue>
 	</Operation>
 
@@ -26,6 +34,13 @@
 		<caseTrue>
 			<Operation Class="XmlExtensions.HybridPatch">
 				<xpath>Defs/ThingDef[defName="Mech_Constructoid"]/race/mechEnabledWorkTypes</xpath>
+				<value>
+					<li Operation="SafeAdd" Compare="InnerText">WorkType_Improving</li>
+				</value>
+			</Operation>
+
+			<Operation Class="XmlExtensions.HybridPatch">
+				<xpath>Defs/ThingDef[defName="VR_Construct_Constructoid"]/race/mechEnabledWorkTypes</xpath>
 				<value>
 					<li Operation="SafeAdd" Compare="InnerText">WorkType_Improving</li>
 				</value>

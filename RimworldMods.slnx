@@ -1,6 +1,13 @@
 ﻿<Solution>
-  <Project Path="BioFuelFertilizer\BioFuelFertilizer.csproj" Type="C#" />
+  <Project Path="BioFuelFertilizer\BioFuelFertilizer.csproj">
+    <Build Project="false" />
+  </Project>
   <Project Path="BlueprintMaterials/BlueprintMaterials.csproj" />
-  <Project Path="MechUpgradesUi\MechUpgradesUi.csproj" Type="C#" />
-  <Project Path="Tweaks\Tweaks.csproj" Type="C#" />
+  <Project Path="LegendaryIsUnique/LegendaryIsUnique.csproj" />
+  <Project Path="MechUpgradesUi\MechUpgradesUi.csproj">
+    <Build Project="false" />
+  </Project>
+  <Project Path="Tweaks\Tweaks.csproj">
+    <Build Solution="Debug|*" Project="false" />
+  </Project>
 </Solution>
