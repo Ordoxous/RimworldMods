@@ -20,7 +20,7 @@ public class Building_AutoMechUpgrader : Building_MechUpgrader
 
         var compAffectedByFacilities = this.TryGetComp<CompAffectedByFacilities>();
         var availableUpgrades = compAffectedByFacilities.LinkedFacilitiesListForReading
-            .Where(f => compAffectedByFacilities.IsFacilityActive(f))
+            .Where(compAffectedByFacilities.IsFacilityActive)
             .Select(s => s.TryGetComp<CompUpgradesStorage>())
             .SelectMany(s => s.Upgrades)
             .GroupBy(p => p.def.exclusionTags.First())
@@ -30,7 +30,8 @@ public class Building_AutoMechUpgrader : Building_MechUpgrader
         
         var wantedOperations = MechUpgradeUtility.GetOperationsFromLists(
             currentUpgrades,
-            availableUpgrades.Concat(upgradesToKeep).ToList()
+            availableUpgrades.Concat(upgradesToKeep).ToList(),
+            new Building_MechUpgrader()
         )
             .GroupBy(o => o.type)
             .ToDictionary(g => g.Key, g => g.ToList());

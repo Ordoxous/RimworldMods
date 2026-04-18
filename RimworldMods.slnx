@@ -5,9 +5,7 @@
   <Project Path="BlueprintMaterials/BlueprintMaterials.csproj" />
   <Project Path="LegendaryIsUnique/LegendaryIsUnique.csproj" />
   <Project Path="MechUpgradesUi\MechUpgradesUi.csproj">
-    <Build Project="false" />
+    <Build Solution="Release|*" Project="false" />
   </Project>
-  <Project Path="Tweaks\Tweaks.csproj">
-    <Build Solution="Debug|*" Project="false" />
-  </Project>
+  <Project Path="Tweaks\Tweaks.csproj" />
 </Solution>
