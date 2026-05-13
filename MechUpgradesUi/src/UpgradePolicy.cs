@@ -15,7 +15,7 @@ public class UpgradePolicy : Policy
     {
     }
 
-    protected override string LoadKey => nameof (UpgradePolicy);
+    public override string LoadKey => nameof (UpgradePolicy);
 
     public override void CopyFrom(Policy other)
     {

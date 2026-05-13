@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using MU;
@@ -60,11 +59,11 @@ public class Building_AutoMechUpgrader : Building_MechUpgrader
             foreach (var operation in additions)
             {
                 var operationPoints = operation.upgrade.def.upgradePoints;
-                if (availablePoints - operationPoints >= 0)
-                {
-                    allowedOperations.Add(operation);
-                    availablePoints -= operationPoints;
-                }
+                if (availablePoints - operationPoints < 0)
+                    continue;
+
+                allowedOperations.Add(operation);
+                availablePoints -= operationPoints;
             }
         }
 
@@ -103,28 +102,28 @@ public class Building_AutoMechUpgrader : Building_MechUpgrader
         innerContainer.TryAddOrTransfer(pawn);
         
         operations = wantedOperations;
-        if (!operations.NullOrEmpty())
-        {
-            foreach (var o in operations.Where(o => o.type == UpgradeOperationType.Add))
-            {
-                var comp = this.TryGetComp<CompAffectedByFacilities>();
-                foreach (var linkedFacility in comp.LinkedFacilitiesListForReading)
-                {
-                    var compUpgradesStorage = linkedFacility.TryGetComp<CompUpgradesStorage>();
-                    var storageUpgrades = compUpgradesStorage.Upgrades;
-                    if (comp.IsFacilityActive(linkedFacility) && storageUpgrades.Contains(o.upgrade))
-                    {
-                        var upgrade = compUpgradesStorage.innerContainer.FirstOrDefault(innerThing => innerThing.TryGetComp<CompMechUpgrade>()?.upgrade == o.upgrade);
-                        if (upgrade != null)
-                        {
-                            compUpgradesStorage.innerContainer.Remove(upgrade);
-                            break;
-                        }
-                    } 
-                }
-            }
+        if (operations.NullOrEmpty()) 
+            return;
 
-            fabricationTicksLeft = 2500 * operations.Last().upgrade.def.upgradePoints;
+        foreach (var o in operations.Where(o => o.type == UpgradeOperationType.Add))
+        {
+            var comp = this.TryGetComp<CompAffectedByFacilities>();
+            foreach (var linkedFacility in comp.LinkedFacilitiesListForReading)
+            {
+                var compUpgradesStorage = linkedFacility.TryGetComp<CompUpgradesStorage>();
+                var storageUpgrades = compUpgradesStorage.Upgrades;
+                if (comp.IsFacilityActive(linkedFacility) && storageUpgrades.Contains(o.upgrade))
+                {
+                    var upgrade = compUpgradesStorage.innerContainer.FirstOrDefault(innerThing => innerThing.TryGetComp<CompMechUpgrade>()?.upgrade == o.upgrade);
+                    if (upgrade != null)
+                    {
+                        compUpgradesStorage.innerContainer.Remove(upgrade);
+                        break;
+                    }
+                } 
+            }
         }
+
+        fabricationTicksLeft = 2500 * operations.Last().upgrade.def.upgradePoints;
     }
 }

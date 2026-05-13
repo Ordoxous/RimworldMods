@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+	<MU_Upgrades_Ui_Policy_Title>Mech Upgrade Policies</MU_Upgrades_Ui_Policy_Title>
+	<MU_Upgrades_Ui_Policy_Tip>Manage policies for automatic mech upgrades.</MU_Upgrades_Ui_Policy_Tip>
+	<MU_Upgrades_Ui_Policy_Mech_Selector>Select a mech to filter the upgrades below.</MU_Upgrades_Ui_Policy_Mech_Selector>
+
+</LanguageData>

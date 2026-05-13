@@ -10,7 +10,7 @@ public class JobGiver_OptimizeUpgrades : ThinkNode_JobGiver
 
     public override float GetPriority(Pawn pawn) => 5.9f;
 
-    protected override Job TryGiveJob(Pawn pawn)
+    public override Job TryGiveJob(Pawn pawn)
     {
         if (Find.TickManager.TicksGame < pawn.mindState.nextApparelOptimizeTick)
             return null;

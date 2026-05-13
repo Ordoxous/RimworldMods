@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+
+    <Operation Class="XmlExtensions.FindMod">
+        <mods>
+            <li>vanillaexpanded.skills</li>
+        </mods>
+        <packageId>true</packageId>
+        <caseTrue>
+            <Operation Class="XmlExtensions.PatchOperationSafeReplace">
+                <xpath>Defs/VSE.Passions.PassionDef[defName="VSE_Critical"]</xpath>
+                <compare>Both</compare>
+                <value>
+                    <learnRateFactorOther>0.75</learnRateFactorOther>
+                </value>
+            </Operation>
+        </caseTrue>
+    </Operation>
+
+</Patch>

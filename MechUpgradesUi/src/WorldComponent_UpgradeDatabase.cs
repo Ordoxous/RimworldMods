@@ -8,6 +8,7 @@ namespace Ordo.MechUpgradesUi;
 
 public class WorldComponent_UpgradeDatabase : WorldComponent
 {
+    
     private List<UpgradePolicy> _policies = [];
 
     /// <inheritdoc />
