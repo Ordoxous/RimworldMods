@@ -2,7 +2,7 @@
 <ModMetaData>
   <name>Mech Upgrade Policies</name>
   <author>Ordoxous</author>
-  <url>https://github.com/Ordoxous/RimworldMods/tree/master/BioFuelFertilizer</url>
+  <url>https://github.com/Ordoxous/RimworldMods/tree/master/MechUpgradesUi</url>
   <supportedVersions>
     <li>1.6</li>
   </supportedVersions>
@@ -30,5 +30,7 @@
     The mechs with that policy will then try to fill their upgrade points from the auto mech upgraders (Replace your existing one with one of these).
 
     When a mech has unwanted upgrades (Per the policy), the auto upgrade will try to remove them.
+    
+    Source available at: https://github.com/Ordoxous/RimworldMods/tree/master/MechUpgradesUi
   </description>
 </ModMetaData>
