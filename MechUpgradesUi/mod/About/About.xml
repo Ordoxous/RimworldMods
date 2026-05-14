@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ModMetaData>
-  <name>MechUpgradesUi</name>
+  <name>Mech Upgrade Policies</name>
   <author>Ordoxous</author>
   <url>https://github.com/Ordoxous/RimworldMods/tree/master/BioFuelFertilizer</url>
   <supportedVersions>
@@ -22,5 +22,13 @@
     <li>Fluffy.WorkTab</li>
   </loadAfter>
   <packageId>Ordo.MechUpgradesUi</packageId>
-  <description>Upgrading UI for mechanoids</description>
+  <description>
+    Allows defining automatic upgrade policies for mech upgrades from https://steamcommunity.com/sharedfiles/filedetails/?id=3365118555.
+
+    You can specify policies the same way you would apparel for a colonist.
+
+    The mechs with that policy will then try to fill their upgrade points from the auto mech upgraders (Replace your existing one with one of these).
+
+    When a mech has unwanted upgrades (Per the policy), the auto upgrade will try to remove them.
+  </description>
 </ModMetaData>
