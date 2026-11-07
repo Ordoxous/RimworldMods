@@ -1,7 +1,4 @@
 ﻿<Solution>
-  <Project Path="BioFuelFertilizer\BioFuelFertilizer.csproj">
-    <Build Solution="Release|*" Project="false" />
-  </Project>
   <Project Path="BlueprintMaterials/BlueprintMaterials.csproj" />
   <Project Path="LegendaryIsUnique/LegendaryIsUnique.csproj" />
   <Project Path="MechUpgradesUi\MechUpgradesUi.csproj">
