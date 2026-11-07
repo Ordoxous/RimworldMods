@@ -1,4 +1,5 @@
 ﻿**/bin/
 **/obj/
 **/out/
-**/294100/*.DotSettings.user
+**/294100/
+*.DotSettings.user
