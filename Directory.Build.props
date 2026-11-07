@@ -1,7 +1,6 @@
 ﻿<Project>
     <PropertyGroup>
-        <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-        <TargetFramework>net48</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <LangVersion>latest</LangVersion>
         <Prefer32Bit>false</Prefer32Bit>
         <OutputType>Library</OutputType>
@@ -9,7 +8,7 @@
         <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     </PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
         <PlatformTarget>AnyCPU</PlatformTarget>
         <DebugSymbols>true</DebugSymbols>
         <DebugType>embedded</DebugType>
@@ -20,7 +19,7 @@
         <WarningLevel>4</WarningLevel>
     </PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
         <PlatformTarget>AnyCPU</PlatformTarget>
         <DebugType>embedded</DebugType>
         <Optimize>true</Optimize>
@@ -31,13 +30,15 @@
     </PropertyGroup>
 
     <PropertyGroup>
-      <RimworldVersion>1.6</RimworldVersion>
+      <RimworldVersion>1.7</RimworldVersion>
+      <!-- Used for workshop dependencies that do not ship a $(RimworldVersion) folder yet -->
+      <RimworldFallbackVersion>1.6</RimworldFallbackVersion>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Krafs.Publicizer" Version="2.3.0" />
-        <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.*" />
-        <PackageReference Include="Lib.Harmony" Version="2.3.6" ExcludeAssets="runtime" />
+        <PackageReference Include="Krafs.Rimworld.Ref" Version="1.7.*-*" />
+        <PackageReference Include="Lib.Harmony" Version="3.0.0-rc.3" ExcludeAssets="runtime" />
     </ItemGroup>
 
     <ItemGroup>

@@ -83,10 +83,7 @@ public class Dialog_ManageUpgradePolicies(
     /// <inheritdoc />
     public override void SetDefaultPolicy(
         UpgradePolicy policy
-    )
-    {
-        throw new NotImplementedException();
-    }
+    ) => Find.World.GetComponent<WorldComponent_UpgradeDatabase>().SetDefaultPolicy(policy);
 
     public override AcceptanceReport TryDeletePolicy(UpgradePolicy policy) =>
         Find.World.GetComponent<WorldComponent_UpgradeDatabase>().TryDelete(policy);

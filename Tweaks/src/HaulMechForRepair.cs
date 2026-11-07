@@ -19,7 +19,7 @@ public class JobDriver_HaulMechForRepair : JobDriver
                && pawn.Reserve(job.GetTarget(MechIndex), job, errorOnFailed: errorOnFailed);
     }
 
-    protected override IEnumerable<Toil> MakeNewToils()
+    public override IEnumerable<Toil> MakeNewToils()
     {
         this.FailOnDestroyedOrNull(MechIndex);
         this.FailOnDespawnedNullOrForbidden(ZoneCellIndex);

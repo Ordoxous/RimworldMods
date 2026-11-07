@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using HarmonyLib;
+﻿using HarmonyLib;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -38,12 +37,12 @@ public class BioFuelFertilizerMod : Mod
         var harmony = new Harmony(typeof(BioFuelFertilizerMod).Namespace);
 
         harmony.Patch(
-            typeof(FertilityGrid).GetMethod("CalculateFertilityAt", BindingFlags.NonPublic | BindingFlags.Instance),
+            AccessTools.Method(typeof(FertilityGrid), nameof(FertilityGrid.CalculateFertilityAt)),
             postfix: new HarmonyMethod(Postfix_FertilityGrid_CalculateFertilityAt)
         );
 
         harmony.Patch(
-            typeof(Building_PlantGrower).GetMethod(nameof(Building_PlantGrower.TickRare)),
+            AccessTools.Method(typeof(Building_PlantGrower), nameof(Building_PlantGrower.TickRare)),
             postfix: new HarmonyMethod(Postfix_Building_PlantGrower_TickRare)
         );
 
@@ -99,24 +98,17 @@ public class BioFuelFertilizerMod : Mod
             );
     }
 
-    // FIXME: This is too expensive
     private static void Postfix_FertilityGrid_CalculateFertilityAt(
         IntVec3 loc,
         ref float __result,
         FertilityGrid __instance
     )
     {
-        var map = Traverse.Create(__instance).Field<Map>("map").Value;
-        var building = loc.GetEdifice(map);
-        if (building != null && typeof(Building_PlantGrower).IsAssignableFrom(building.GetType()))
+        if (loc.GetEdifice(__instance.map) is Building_PlantGrower building
+            && building.TryGetComp<CompRefuelable>(out var refuelable)
+            && refuelable.HasFuel)
         {
-            if (building.TryGetComp<CompRefuelable>(out var refuelable))
-            {
-                if (refuelable.HasFuel)
-                {
-                    __result *= Settings.FertilityMultiplier;
-                }
-            }
+            __result *= Settings.FertilityMultiplier;
         }
     }
 
@@ -124,9 +116,7 @@ public class BioFuelFertilizerMod : Mod
         Building_PlantGrower __instance
     )
     {
-        var compPower = Traverse.Create(__instance).Field<CompPowerTrader>("compPower").Value;
-        
-        if (compPower is { PowerOn: false })
+        if (__instance.compPower is { PowerOn: false })
             // Consume fuel only when power is on for a powerable
             return;
         

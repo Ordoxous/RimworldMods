@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Runtime.CompilerServices;
 using BiotechPatch;
 using BiotechPatch.HemogenFarmAnyone;
 using HarmonyLib;
@@ -14,14 +15,22 @@ public class HemogenTilSet
 
     static HemogenTilSet()
     {
-        var harmony = new Harmony(typeof(HemogenTilSet).Namespace);
+        if (!ModsConfig.IsActive("biotechpatch.1trickPwnyta"))
+            return;
 
-        harmony.Patch(
-            typeof(Comp_HemogenFarm).GetMethod(nameof(Comp_HemogenFarm.CompTick)),
-            prefix: new HarmonyMethod(Prefix_Comp_HemogenFarm_CompTick)
-        );
+        Patch(new Harmony(typeof(HemogenTilSet).Namespace));
 
         hemogenPackDef = ThingDef.Named("HemogenPack");
+    }
+
+    // Kept out of the static constructor so BiotechPatch types are only resolved when the mod is active
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void Patch(Harmony harmony)
+    {
+        harmony.Patch(
+            AccessTools.Method(typeof(Comp_HemogenFarm), nameof(Comp_HemogenFarm.CompTick)),
+            prefix: new HarmonyMethod(Prefix_Comp_HemogenFarm_CompTick)
+        );
     }
 
     public static bool Prefix_Comp_HemogenFarm_CompTick(Comp_HemogenFarm __instance)

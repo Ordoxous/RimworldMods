@@ -14,7 +14,7 @@ public static class ShowArmorIndicators {
         var harmony = new Harmony(typeof(ShowArmorIndicators).Namespace);
 
         harmony.Patch(
-            typeof(Thing).GetMethod(nameof(Thing.TakeDamage)),
+            AccessTools.Method(typeof(Thing), nameof(Thing.TakeDamage)),
             postfix: new HarmonyMethod(Postfix_Thing_TakeDamage)
         );
     }

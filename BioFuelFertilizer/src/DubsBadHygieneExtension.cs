@@ -10,14 +10,14 @@ public static class DubsBadHygieneExtension
 {
     public static bool IsAvailable()
     {
-        return AccessTools.TypeByName("DubsBadHygieneMod") != null;
+        return ModsConfig.IsActive("Dubwise.DubsBadHygiene");
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static void PatchDubsBadHygiene(Harmony harmony)
     {
         harmony.Patch(
-            typeof(DefExtensions).GetMethod(nameof(DefExtensions.GiveFuel)),
+            AccessTools.Method(typeof(DefExtensions), nameof(DefExtensions.GiveFuel)),
             prefix: new HarmonyMethod(Prefix_DubsBadHygiene_DefExtensions_GiveFuel)
         );
     }

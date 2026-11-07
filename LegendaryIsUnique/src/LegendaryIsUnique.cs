@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using HarmonyLib;
 using JetBrains.Annotations;
@@ -22,22 +20,20 @@ public class LegendaryIsUnique {
 		var harmony = new Harmony(typeof(LegendaryIsUnique).Namespace);
 
 		harmony.Patch(
-			typeof(GenRecipe).GetMethod("PostProcessProduct", BindingFlags.NonPublic | BindingFlags.Static),
+			AccessTools.Method(typeof(GenRecipe), nameof(GenRecipe.PostProcessProduct)),
 			prefix: new HarmonyMethod(Prefix_ThingWithComps_PostProcessProduct),
 			postfix: new HarmonyMethod(Postfix_ThingWithComps_PostProcessProduct)
 		);
 
 		harmony.Patch(
-			typeof(QualityUtility).GetMethod(nameof(QualityUtility.GenerateQualityCreatedByPawn), [typeof(Pawn), typeof(SkillDef), typeof(bool)]),
+			AccessTools.Method(typeof(QualityUtility), nameof(QualityUtility.GenerateQualityCreatedByPawn), [typeof(Pawn), typeof(SkillDef), typeof(bool)]),
 			prefix: new HarmonyMethod(Prefix_QualityUtility_GenerateQualityCreatedByPawn)
 		);
 
-		if (ModLister.HasActiveModWithName("Vanilla Skills Expanded"))
+		if (ModsConfig.IsActive("vanillaexpanded.skills"))
 		{
-			var withType = Traverse.CreateWithType("VSE.Stats.QualityUtility").GetValue<Type>();
-			var traverse = withType.GetMethod("GenerateQuality");
 			harmony.Patch(
-				traverse,
+				AccessTools.Method("VSE.Stats.QualityUtility:GenerateQuality"),
 				prefix: new HarmonyMethod(Prefix_VES_QualityUtility_GenerateQuality)
 			);
 		}
@@ -95,27 +91,27 @@ public class LegendaryIsUnique {
 			return;
 		}
 
-		__result = ThingMaker.MakeThing(__state.UniqueThingDef, __result.Stuff);
-		
-		if (__result.def.Minifiable)
-			__result = __result.MakeMinified();
-		
-		var compQuality = product.TryGetComp<CompQuality>();
+		var unique = ThingMaker.MakeThing(__state.UniqueThingDef, product.Stuff);
+
+		var compQuality = unique.TryGetComp<CompQuality>();
 		compQuality?.SetQuality(__state.QualityToCreate, ArtGenerationContext.Colony);
 
-		var compArt = product.TryGetComp<CompArt>();
+		var compArt = unique.TryGetComp<CompArt>();
 		compArt?.JustCreatedBy(worker);
-		
+
 		if (worker.Ideo != null)
-			__result.StyleDef = worker.Ideo.GetStyleFor(__result.def);
+			unique.StyleDef = worker.Ideo.GetStyleFor(unique.def);
 
 		if (precept != null)
-			__result.StyleSourcePrecept = precept;
+			unique.StyleSourcePrecept = precept;
 		else if (style != null)
-			__result.StyleDef = style;
+			unique.StyleDef = style;
 		else if (!__state.UniqueThingDef.randomStyle.NullOrEmpty() && Rand.Chance(__state.UniqueThingDef.randomStyleChance))
-			__result.SetStyleDef(__state.UniqueThingDef.randomStyle.RandomElementByWeight(x => x.Chance).StyleDef);
-		__result.overrideGraphicIndex = overrideGraphicIndex;
+			unique.SetStyleDef(__state.UniqueThingDef.randomStyle.RandomElementByWeight(x => x.Chance).StyleDef);
+		unique.overrideGraphicIndex = overrideGraphicIndex;
+
+		// Minify last so the comps and style above land on the inner thing
+		__result = unique.def.Minifiable ? unique.MakeMinified() : unique;
 	}
 
 	public static bool Prefix_QualityUtility_GenerateQualityCreatedByPawn(

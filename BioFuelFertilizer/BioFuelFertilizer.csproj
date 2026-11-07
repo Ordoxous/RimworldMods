@@ -15,17 +15,20 @@
 
     <ItemGroup>
         <Reference Include="VFEF">
-            <HintPath>F:\SteamLibrary\steamapps\workshop\content\294100\1957158779\$(RimworldVersion)\Assemblies\VFEF.dll</HintPath>
+            <HintPath Condition="Exists('F:\SteamLibrary\steamapps\workshop\content\294100\1957158779\$(RimworldVersion)\Assemblies\VFEF.dll')">F:\SteamLibrary\steamapps\workshop\content\294100\1957158779\$(RimworldVersion)\Assemblies\VFEF.dll</HintPath>
+            <HintPath Condition="!Exists('F:\SteamLibrary\steamapps\workshop\content\294100\1957158779\$(RimworldVersion)\Assemblies\VFEF.dll')">F:\SteamLibrary\steamapps\workshop\content\294100\1957158779\$(RimworldFallbackVersion)\Assemblies\VFEF.dll</HintPath>
             <Private>False</Private>
         </Reference>
 
         <Reference Include="VFEF">
-            <HintPath>F:\SteamLibrary\steamapps\workshop\content\294100\3155781848\$(RimworldVersion)\Assemblies\VanillaRecyclingExpanded.dll</HintPath>
+            <HintPath Condition="Exists('F:\SteamLibrary\steamapps\workshop\content\294100\3155781848\$(RimworldVersion)\Assemblies\VanillaRecyclingExpanded.dll')">F:\SteamLibrary\steamapps\workshop\content\294100\3155781848\$(RimworldVersion)\Assemblies\VanillaRecyclingExpanded.dll</HintPath>
+            <HintPath Condition="!Exists('F:\SteamLibrary\steamapps\workshop\content\294100\3155781848\$(RimworldVersion)\Assemblies\VanillaRecyclingExpanded.dll')">F:\SteamLibrary\steamapps\workshop\content\294100\3155781848\$(RimworldFallbackVersion)\Assemblies\VanillaRecyclingExpanded.dll</HintPath>
             <Private>False</Private>
         </Reference>
 
         <Reference Include="BadHygiene">
-            <HintPath>F:\SteamLibrary\steamapps\workshop\content\294100\836308268\$(RimworldVersion)\Assemblies\BadHygiene.dll</HintPath>
+            <HintPath Condition="Exists('F:\SteamLibrary\steamapps\workshop\content\294100\836308268\$(RimworldVersion)\Assemblies\BadHygiene.dll')">F:\SteamLibrary\steamapps\workshop\content\294100\836308268\$(RimworldVersion)\Assemblies\BadHygiene.dll</HintPath>
+            <HintPath Condition="!Exists('F:\SteamLibrary\steamapps\workshop\content\294100\836308268\$(RimworldVersion)\Assemblies\BadHygiene.dll')">F:\SteamLibrary\steamapps\workshop\content\294100\836308268\$(RimworldFallbackVersion)\Assemblies\BadHygiene.dll</HintPath>
             <Private>False</Private>
         </Reference>
     </ItemGroup>

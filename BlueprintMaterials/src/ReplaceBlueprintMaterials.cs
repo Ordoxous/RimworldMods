@@ -17,7 +17,7 @@ public class ReplaceBlueprintMaterials
         var harmony = new Harmony(typeof(ReplaceBlueprintMaterials).Namespace);
 
         harmony.Patch(
-            typeof(Blueprint_Build).GetMethod(nameof(Blueprint_Build.GetGizmos)),
+            AccessTools.Method(typeof(Blueprint_Build), nameof(Blueprint_Build.GetGizmos)),
             postfix: new HarmonyMethod(Postfix_Blueprint_Build_GetGizmos)
         );
     }

@@ -31,6 +31,13 @@ public class WorldComponent_UpgradeDatabase : WorldComponent
         return policies.FirstOrDefault() ?? TryCreate();
     }
 
+    public void SetDefaultPolicy(UpgradePolicy policy)
+    {
+        // The default policy is the first in the list
+        if (_policies.Remove(policy))
+            _policies.Insert(0, policy);
+    }
+
     public AcceptanceReport TryDelete(UpgradePolicy policy)
     {
         foreach (var pawn in PawnsFinder.All_AliveOrDead)
@@ -47,7 +54,7 @@ public class WorldComponent_UpgradeDatabase : WorldComponent
             if (pawn.IsColonyMech && pawn.TryGetComp<CompUpgradableMechWithPolicy>(out var comp))
             {
                 if (comp.CurrentUpgradePolicy == policy)
-                    pawn.outfits.CurrentApparelPolicy = null;
+                    comp.CurrentUpgradePolicy = null;
             }
         }
 
