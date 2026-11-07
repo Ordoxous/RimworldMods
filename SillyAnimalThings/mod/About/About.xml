@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+  <name>SillyAnimalThings</name>
+  <author>Ordoxous</author>
+  <url>https://github.com/Ordoxous/RimworldMods/tree/master/SillyAnimalThings</url>
+  <supportedVersions>
+    <li>1.7</li>
+  </supportedVersions>
+  <modDependencies>
+    <li>
+      <packageId>brrainz.harmony</packageId>
+      <displayName>Harmony</displayName>
+    </li>
+    <li>
+      <packageId>ludeon.rimworld.odyssey</packageId>
+      <displayName>Odyssey</displayName>
+    </li>
+  </modDependencies>
+  <loadAfter>
+    <li>brrainz.harmony</li>
+    <li>ludeon.rimworld.biotech</li>
+    <li>ludeon.rimworld.odyssey</li>
+  </loadAfter>
+  <packageId>Ordo.SillyAnimalThings</packageId>
+  <description>Gives animals silly abilities, using the same special-training system as Odyssey's war trumpet. Wild and manhunting animals use them on their own; tamed animals use them once trained.
+
+- Elephant: trunk blast (a water spray that knocks enemies back, staggers them and puts out fires) and trunk throw (picks up a nearby rock chunk and launches it)
+- Boomalope: detonate (charges a target and blows itself up)
+- Alphabeaver: gnaw (chews through wooden structures and eats them; hungry wild alphabeavers will snack on your buildings)
+- Boomrat: fire burst (sprays burning fuel around itself, requires Biotech)
+- Penguin: belly slide (a fast dash along the ground)
+- Walrus: charge (barrels into a target, battering and knocking back nearby enemies)
+- Wolverine: regenerate (a burst of rapid healing, used automatically when badly hurt)
+- Tiger: hidden dragon (turns invisible until it strikes, used automatically before pouncing)</description>
+</ModMetaData>

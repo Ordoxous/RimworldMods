@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <HediffDef>
+    <defName>Ordo_Regenerating</defName>
+    <label>regenerating</label>
+    <description>Wounds are closing at a furious pace.</description>
+    <hediffClass>HediffWithComps</hediffClass>
+    <isBad>false</isBad>
+    <comps>
+      <li Class="HediffCompProperties_Disappears">
+        <showRemainingTime>True</showRemainingTime>
+      </li>
+      <li Class="HediffCompProperties_DisappearsOnDeath" />
+      <li Class="Ordo.SillyAnimalThings.HediffCompProperties_Regenerate">
+        <intervalTicks>60</intervalTicks>
+        <healPerInterval>1</healPerInterval>
+      </li>
+    </comps>
+  </HediffDef>
+
+  <!-- Same invisibility as the psychic invisibility psycast, but it ends as soon as the tiger attacks -->
+  <HediffDef>
+    <defName>Ordo_HiddenDragon</defName>
+    <label>hidden dragon</label>
+    <description>Crouched low and impossible to see, waiting to pounce. Attacking will reveal this creature.</description>
+    <hediffClass>HediffWithComps</hediffClass>
+    <isBad>false</isBad>
+    <comps>
+      <li Class="HediffCompProperties_Invisibility">
+        <visibleToPlayer>true</visibleToPlayer>
+      </li>
+      <li Class="HediffCompProperties_Disappears">
+        <showRemainingTime>True</showRemainingTime>
+      </li>
+      <li Class="HediffCompProperties_DisappearsOnDeath" />
+      <li Class="Ordo.SillyAnimalThings.HediffCompProperties_RemoveOnAttack" />
+    </comps>
+  </HediffDef>
+
+</Defs>

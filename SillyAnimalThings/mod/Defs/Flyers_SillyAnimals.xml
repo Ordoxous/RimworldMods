@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <!-- No height, so the pawn travels along the ground instead of jumping -->
+
+  <ThingDef ParentName="PawnFlyerBase">
+    <defName>Ordo_PawnFlyer_Slide</defName>
+    <pawnFlyer>
+      <flightDurationMin>0.3</flightDurationMin>
+      <flightSpeed>20</flightSpeed>
+      <heightFactor>0</heightFactor>
+    </pawnFlyer>
+  </ThingDef>
+
+  <ThingDef ParentName="PawnFlyerBase">
+    <defName>Ordo_PawnFlyer_Charge</defName>
+    <thingClass>Ordo.SillyAnimalThings.PawnFlyer_Charge</thingClass>
+    <pawnFlyer>
+      <flightDurationMin>0.3</flightDurationMin>
+      <flightSpeed>16</flightSpeed>
+      <heightFactor>0</heightFactor>
+    </pawnFlyer>
+  </ThingDef>
+
+</Defs>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <TrainableDef>
+    <defName>Ordo_TrunkBlast</defName>
+    <label>trunk blast</label>
+    <description>Command the elephant to blast water from its trunk. The spray knocks back and staggers anyone it hits, and puts out fires. Once trained, the elephant will only blast when commanded.</description>
+    <listPriority>0</listPriority>
+    <difficulty>200</difficulty>
+    <steps>2</steps>
+    <specialTrainable>true</specialTrainable>
+    <enablesAbility>Ordo_TrunkBlast</enablesAbility>
+  </TrainableDef>
+
+  <TrainableDef>
+    <defName>Ordo_TrunkThrow</defName>
+    <label>trunk throw</label>
+    <description>Command the elephant to pick up a nearby chunk with its trunk and hurl it at a target. Once trained, the elephant will only throw when commanded.</description>
+    <listPriority>0</listPriority>
+    <difficulty>200</difficulty>
+    <steps>3</steps>
+    <specialTrainable>true</specialTrainable>
+    <enablesAbility>Ordo_TrunkThrow</enablesAbility>
+  </TrainableDef>
+
+  <TrainableDef>
+    <defName>Ordo_Detonate</defName>
+    <label>detonate</label>
+    <description>Command the boomalope to charge a target and detonate its chemical sac. The boomalope will not survive. Once trained, the boomalope will only detonate when commanded.</description>
+    <listPriority>0</listPriority>
+    <difficulty>200</difficulty>
+    <steps>2</steps>
+    <specialTrainable>true</specialTrainable>
+    <enablesAbility>Ordo_Detonate</enablesAbility>
+  </TrainableDef>
+
+  <TrainableDef>
+    <defName>Ordo_Gnaw</defName>
+    <label>gnaw</label>
+    <description>Command the alphabeaver to gnaw on a wooden structure, damaging it and feeding itself.</description>
+    <listPriority>0</listPriority>
+    <difficulty>200</difficulty>
+    <steps>2</steps>
+    <specialTrainable>true</specialTrainable>
+    <enablesAbility>Ordo_Gnaw</enablesAbility>
+  </TrainableDef>
+
+  <TrainableDef MayRequire="Ludeon.RimWorld.Biotech">
+    <defName>Ordo_BoomratFireBurst</defName>
+    <label>fire burst</label>
+    <description>Command the boomrat to spray burning fuel in all directions. Once trained, the boomrat will only burst when commanded.</description>
+    <listPriority>0</listPriority>
+    <difficulty>200</difficulty>
+    <steps>2</steps>
+    <specialTrainable>true</specialTrainable>
+    <enablesAbility>Ordo_BoomratFireBurst</enablesAbility>
+  </TrainableDef>
+
+  <TrainableDef>
+    <defName>Ordo_BellySlide</defName>
+    <label>belly slide</label>
+    <description>Command the penguin to flop onto its belly and slide quickly to a nearby spot.</description>
+    <listPriority>0</listPriority>
+    <difficulty>200</difficulty>
+    <steps>2</steps>
+    <specialTrainable>true</specialTrainable>
+    <enablesAbility>Ordo_BellySlide</enablesAbility>
+  </TrainableDef>
+
+  <TrainableDef>
+    <defName>Ordo_WalrusCharge</defName>
+    <label>charge</label>
+    <description>Command the walrus to barrel into a target, battering and knocking back nearby enemies. Once trained, the walrus will only charge when commanded.</description>
+    <listPriority>0</listPriority>
+    <difficulty>200</difficulty>
+    <steps>2</steps>
+    <specialTrainable>true</specialTrainable>
+    <enablesAbility>Ordo_WalrusCharge</enablesAbility>
+  </TrainableDef>
+
+  <TrainableDef>
+    <defName>Ordo_Regenerate</defName>
+    <label>regenerate</label>
+    <description>Teach the wolverine to trigger a burst of rapid healing. Once trained, it will also do this on its own when badly hurt.</description>
+    <listPriority>0</listPriority>
+    <difficulty>200</difficulty>
+    <steps>2</steps>
+    <specialTrainable>true</specialTrainable>
+    <enablesAbility>Ordo_Regenerate</enablesAbility>
+  </TrainableDef>
+
+  <TrainableDef>
+    <defName>Ordo_HiddenDragon</defName>
+    <label>hidden dragon</label>
+    <description>Teach the tiger to vanish from sight until it strikes. Once trained, it will also do this on its own before pouncing.</description>
+    <listPriority>0</listPriority>
+    <difficulty>200</difficulty>
+    <steps>3</steps>
+    <specialTrainable>true</specialTrainable>
+    <enablesAbility>Ordo_HiddenDragon</enablesAbility>
+  </TrainableDef>
+
+</Defs>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <Ordo_SillyAnimalThings_GnawNotWooden>Must target a wooden structure.</Ordo_SillyAnimalThings_GnawNotWooden>
+  <Ordo_SillyAnimalThings_TrunkThrowNoChunk>{PAWN_labelShort} needs a chunk nearby to throw.</Ordo_SillyAnimalThings_TrunkThrowNoChunk>
+
+</LanguageData>

@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <!-- Elephant -->
+
+  <AbilityDef>
+    <defName>Ordo_TrunkBlast</defName>
+    <label>trunk blast</label>
+    <description>Blast a jet of water from the trunk. Anyone caught in the spray is knocked back and staggered, and any fires it hits are put out.</description>
+    <iconPath>Things/Mote/Splash</iconPath>
+    <cooldownTicksRange>2500</cooldownTicksRange> <!-- 1 hour -->
+    <aiCanUse>true</aiCanUse>
+    <ai_IsIncendiary>false</ai_IsIncendiary>
+    <displayGizmoWhileUndrafted>true</displayGizmoWhileUndrafted>
+    <disableGizmoWhileUndrafted>false</disableGizmoWhileUndrafted>
+    <verbProperties>
+      <verbClass>Verb_CastAbility</verbClass>
+      <range>7.9</range>
+      <warmupTime>1</warmupTime>
+      <soundCast>Foam_Impact</soundCast>
+      <targetParams>
+        <canTargetLocations>true</canTargetLocations>
+        <canTargetPawns>true</canTargetPawns>
+        <canTargetBuildings>true</canTargetBuildings>
+      </targetParams>
+    </verbProperties>
+    <comps>
+      <li Class="CompProperties_AbilityRequiresTrainable">
+        <trainableDef>Ordo_TrunkBlast</trainableDef>
+        <aiCanCastWithoutTrainable>true</aiCanCastWithoutTrainable>
+      </li>
+      <li Class="CompProperties_AbilitySprayLiquid">
+        <projectileDef>Ordo_Proj_WaterBlast</projectileDef>
+        <numCellsToHit>7</numCellsToHit>
+      </li>
+    </comps>
+  </AbilityDef>
+
+  <AbilityDef>
+    <defName>Ordo_TrunkThrow</defName>
+    <label>trunk throw</label>
+    <description>Pick up a nearby chunk with the trunk and hurl it at a target. Needs a stone or slag chunk close by.</description>
+    <iconPath>UI/Icons/ThingCategories/StoneChunks</iconPath>
+    <cooldownTicksRange>1250</cooldownTicksRange> <!-- 30 minutes -->
+    <aiCanUse>true</aiCanUse>
+    <ai_IsIncendiary>false</ai_IsIncendiary>
+    <displayGizmoWhileUndrafted>true</displayGizmoWhileUndrafted>
+    <disableGizmoWhileUndrafted>false</disableGizmoWhileUndrafted>
+    <verbProperties>
+      <verbClass>Verb_CastAbility</verbClass>
+      <range>19.9</range>
+      <warmupTime>1.5</warmupTime>
+      <requireLineOfSight>true</requireLineOfSight>
+      <targetParams>
+        <canTargetLocations>true</canTargetLocations>
+        <canTargetPawns>true</canTargetPawns>
+        <canTargetBuildings>true</canTargetBuildings>
+      </targetParams>
+    </verbProperties>
+    <comps>
+      <li Class="CompProperties_AbilityRequiresTrainable">
+        <trainableDef>Ordo_TrunkThrow</trainableDef>
+        <aiCanCastWithoutTrainable>true</aiCanCastWithoutTrainable>
+      </li>
+      <li Class="Ordo.SillyAnimalThings.CompProperties_AbilityTrunkThrow">
+        <projectileDef>Ordo_Proj_ThrownChunk</projectileDef>
+        <chunkSearchRadius>2.9</chunkSearchRadius>
+      </li>
+    </comps>
+  </AbilityDef>
+
+  <!-- Boomalope -->
+
+  <AbilityDef ParentName="AbilityTouchBase">
+    <defName>Ordo_Detonate</defName>
+    <label>detonate</label>
+    <description>Charge at a target and detonate the volatile chemical sac. The boomalope dies in the explosion.</description>
+    <iconPath>UI/Commands/Detonate</iconPath>
+    <cooldownTicksRange>60</cooldownTicksRange>
+    <aiCanUse>true</aiCanUse>
+    <ai_IsIncendiary>true</ai_IsIncendiary>
+    <confirmationDialogText>{PAWN_labelShort} will die in the explosion. Are you sure?</confirmationDialogText>
+    <verbProperties>
+      <verbClass>Verb_CastAbilityTouch</verbClass>
+      <drawAimPie>false</drawAimPie>
+      <range>-1</range>
+      <warmupTime>0.5</warmupTime>
+      <targetParams>
+        <canTargetSelf>false</canTargetSelf>
+        <canTargetPawns>true</canTargetPawns>
+        <canTargetBuildings>true</canTargetBuildings>
+      </targetParams>
+    </verbProperties>
+    <comps>
+      <li Class="CompProperties_AbilityRequiresTrainable">
+        <trainableDef>Ordo_Detonate</trainableDef>
+        <aiCanCastWithoutTrainable>true</aiCanCastWithoutTrainable>
+      </li>
+      <li Class="Ordo.SillyAnimalThings.CompProperties_AbilityDetonate">
+        <aiMaxDistance>15</aiMaxDistance>
+      </li>
+    </comps>
+  </AbilityDef>
+
+  <!-- Alphabeaver -->
+
+  <AbilityDef ParentName="AbilityTouchBase">
+    <defName>Ordo_Gnaw</defName>
+    <label>gnaw</label>
+    <description>Gnaw on a wooden structure, damaging it and eating the wood.</description>
+    <iconPath>Things/Mote/WoodBit</iconPath>
+    <cooldownTicksRange>600</cooldownTicksRange> <!-- 10 seconds -->
+    <hostile>false</hostile>
+    <verbProperties>
+      <verbClass>Verb_CastAbilityTouch</verbClass>
+      <drawAimPie>false</drawAimPie>
+      <range>-1</range>
+      <warmupTime>2</warmupTime>
+      <targetParams>
+        <canTargetSelf>false</canTargetSelf>
+        <canTargetPawns>false</canTargetPawns>
+        <canTargetBuildings>true</canTargetBuildings>
+      </targetParams>
+    </verbProperties>
+    <comps>
+      <li Class="CompProperties_AbilityRequiresTrainable">
+        <trainableDef>Ordo_Gnaw</trainableDef>
+      </li>
+      <li Class="Ordo.SillyAnimalThings.CompProperties_AbilityGnaw">
+        <damage>80</damage>
+        <nutritionGain>0.25</nutritionGain>
+      </li>
+    </comps>
+  </AbilityDef>
+
+  <!-- Boomrat -->
+
+  <AbilityDef MayRequire="Ludeon.RimWorld.Biotech">
+    <defName>Ordo_BoomratFireBurst</defName>
+    <label>fire burst</label>
+    <description>Spray burning fuel in all directions, forming puddles of ignited liquid on the ground.</description>
+    <jobDef>CastAbilityOnThingWithoutWeapon</jobDef>
+    <iconPath>UI/Abilities/FireBurst</iconPath>
+    <cooldownTicksRange>2700</cooldownTicksRange>
+    <aiCanUse>true</aiCanUse>
+    <targetRequired>false</targetRequired>
+    <displayGizmoWhileUndrafted>true</displayGizmoWhileUndrafted>
+    <disableGizmoWhileUndrafted>false</disableGizmoWhileUndrafted>
+    <showCastingProgressBar>true</showCastingProgressBar>
+    <verbProperties>
+      <verbClass>Verb_CastAbility</verbClass>
+      <warmupEffecter>Fire_Burst_Warmup</warmupEffecter>
+      <warmupTime>2</warmupTime>
+      <requireLineOfSight>false</requireLineOfSight>
+      <range>2.9</range>
+      <drawAimPie>false</drawAimPie>
+      <targetParams>
+        <canTargetSelf>true</canTargetSelf>
+      </targetParams>
+    </verbProperties>
+    <comps>
+      <li Class="CompProperties_AbilityRequiresTrainable">
+        <trainableDef>Ordo_BoomratFireBurst</trainableDef>
+        <aiCanCastWithoutTrainable>true</aiCanCastWithoutTrainable>
+      </li>
+      <li Class="CompProperties_AbilityFireBurst">
+        <compClass>Ordo.SillyAnimalThings.CompAbilityEffect_FireBurstNearEnemy</compClass>
+        <radius>2.9</radius>
+      </li>
+    </comps>
+  </AbilityDef>
+
+  <!-- Penguin -->
+
+  <AbilityDef>
+    <defName>Ordo_BellySlide</defName>
+    <label>belly slide</label>
+    <description>Flop onto the belly and slide rapidly across the ground to a nearby spot.</description>
+    <iconPath>UI/Icons/MoveSpeedBonus</iconPath>
+    <cooldownTicksRange>1250</cooldownTicksRange> <!-- 30 minutes -->
+    <hostile>false</hostile>
+    <casterMustBeCapableOfViolence>false</casterMustBeCapableOfViolence>
+    <displayGizmoWhileUndrafted>true</displayGizmoWhileUndrafted>
+    <disableGizmoWhileUndrafted>false</disableGizmoWhileUndrafted>
+    <jobDef>CastJump</jobDef>
+    <verbProperties>
+      <verbClass>Ordo.SillyAnimalThings.Verb_CastAbilityDash</verbClass>
+      <label>slide</label>
+      <violent>false</violent>
+      <forceNormalTimeSpeed>false</forceNormalTimeSpeed>
+      <warmupTime>0.3</warmupTime>
+      <minRange>2.9</minRange>
+      <range>14.9</range>
+      <requireLineOfSight>true</requireLineOfSight>
+      <targetParams>
+        <canTargetLocations>true</canTargetLocations>
+        <canTargetPawns>false</canTargetPawns>
+        <canTargetBuildings>false</canTargetBuildings>
+      </targetParams>
+    </verbProperties>
+    <comps>
+      <li Class="CompProperties_AbilityRequiresTrainable">
+        <trainableDef>Ordo_BellySlide</trainableDef>
+      </li>
+    </comps>
+    <modExtensions>
+      <li Class="Ordo.SillyAnimalThings.DashExtension">
+        <flyerDef>Ordo_PawnFlyer_Slide</flyerDef>
+      </li>
+    </modExtensions>
+  </AbilityDef>
+
+  <!-- Walrus -->
+
+  <AbilityDef>
+    <defName>Ordo_WalrusCharge</defName>
+    <label>charge</label>
+    <description>Barrel across the ground at a target, battering and knocking back any enemies next to where the walrus lands.</description>
+    <iconPath>UI/Commands/AttackMelee</iconPath>
+    <cooldownTicksRange>2500</cooldownTicksRange> <!-- 1 hour -->
+    <aiCanUse>true</aiCanUse>
+    <ai_IsIncendiary>false</ai_IsIncendiary>
+    <displayGizmoWhileUndrafted>true</displayGizmoWhileUndrafted>
+    <disableGizmoWhileUndrafted>false</disableGizmoWhileUndrafted>
+    <jobDef>CastJump</jobDef>
+    <verbProperties>
+      <verbClass>Ordo.SillyAnimalThings.Verb_CastAbilityDash</verbClass>
+      <label>charge</label>
+      <forceNormalTimeSpeed>false</forceNormalTimeSpeed>
+      <warmupTime>0.75</warmupTime>
+      <minRange>2.9</minRange>
+      <range>11.9</range>
+      <requireLineOfSight>true</requireLineOfSight>
+      <targetParams>
+        <canTargetLocations>true</canTargetLocations>
+        <canTargetPawns>true</canTargetPawns>
+        <canTargetBuildings>false</canTargetBuildings>
+      </targetParams>
+    </verbProperties>
+    <comps>
+      <li Class="CompProperties_AbilityRequiresTrainable">
+        <trainableDef>Ordo_WalrusCharge</trainableDef>
+        <aiCanCastWithoutTrainable>true</aiCanCastWithoutTrainable>
+      </li>
+      <li Class="Ordo.SillyAnimalThings.CompProperties_AbilityChargeTarget">
+        <aiMinDistance>3.9</aiMinDistance>
+      </li>
+    </comps>
+    <modExtensions>
+      <li Class="Ordo.SillyAnimalThings.DashExtension">
+        <flyerDef>Ordo_PawnFlyer_Charge</flyerDef>
+      </li>
+    </modExtensions>
+  </AbilityDef>
+
+  <!-- Wolverine: cast automatically by SelfBuffAutoCast when badly hurt -->
+
+  <AbilityDef>
+    <defName>Ordo_Regenerate</defName>
+    <label>regenerate</label>
+    <description>Trigger a burst of furious healing, rapidly closing wounds for a short time. Wolverines do this on their own when badly hurt.</description>
+    <iconPath>UI/Icons/Medical/TendedWell</iconPath>
+    <cooldownTicksRange>30000</cooldownTicksRange> <!-- 12 hours -->
+    <hostile>false</hostile>
+    <casterMustBeCapableOfViolence>false</casterMustBeCapableOfViolence>
+    <targetRequired>false</targetRequired>
+    <displayGizmoWhileUndrafted>true</displayGizmoWhileUndrafted>
+    <disableGizmoWhileUndrafted>false</disableGizmoWhileUndrafted>
+    <jobDef>CastAbilityOnThingWithoutWeapon</jobDef>
+    <verbProperties>
+      <verbClass>Verb_CastAbility</verbClass>
+      <range>0</range>
+      <warmupTime>0</warmupTime>
+      <drawAimPie>false</drawAimPie>
+      <requireLineOfSight>false</requireLineOfSight>
+      <targetParams>
+        <canTargetSelf>true</canTargetSelf>
+      </targetParams>
+    </verbProperties>
+    <comps>
+      <li Class="CompProperties_AbilityRequiresTrainable">
+        <trainableDef>Ordo_Regenerate</trainableDef>
+      </li>
+      <li Class="CompProperties_AbilityGiveHediff">
+        <compClass>CompAbilityEffect_GiveHediff</compClass>
+        <hediffDef>Ordo_Regenerating</hediffDef>
+        <onlyApplyToSelf>true</onlyApplyToSelf>
+        <replaceExisting>true</replaceExisting>
+        <durationSecondsOverride>30~30</durationSecondsOverride>
+      </li>
+    </comps>
+  </AbilityDef>
+
+  <!-- Tiger: cast automatically by SelfBuffAutoCast before closing in on an enemy -->
+
+  <AbilityDef>
+    <defName>Ordo_HiddenDragon</defName>
+    <label>hidden dragon</label>
+    <description>Crouch low and vanish from sight. The tiger stays invisible for a short time, or until it strikes. Wild tigers do this on their own before pouncing.</description>
+    <iconPath>UI/Commands/AnimalAttack</iconPath>
+    <cooldownTicksRange>5000</cooldownTicksRange> <!-- 2 hours -->
+    <hostile>false</hostile>
+    <targetRequired>false</targetRequired>
+    <displayGizmoWhileUndrafted>true</displayGizmoWhileUndrafted>
+    <disableGizmoWhileUndrafted>false</disableGizmoWhileUndrafted>
+    <jobDef>CastAbilityOnThingWithoutWeapon</jobDef>
+    <verbProperties>
+      <verbClass>Verb_CastAbility</verbClass>
+      <range>0</range>
+      <warmupTime>1</warmupTime>
+      <drawAimPie>false</drawAimPie>
+      <requireLineOfSight>false</requireLineOfSight>
+      <targetParams>
+        <canTargetSelf>true</canTargetSelf>
+      </targetParams>
+    </verbProperties>
+    <comps>
+      <li Class="CompProperties_AbilityRequiresTrainable">
+        <trainableDef>Ordo_HiddenDragon</trainableDef>
+      </li>
+      <li Class="CompProperties_AbilityGiveHediff">
+        <compClass>CompAbilityEffect_GiveHediff</compClass>
+        <hediffDef>Ordo_HiddenDragon</hediffDef>
+        <onlyApplyToSelf>true</onlyApplyToSelf>
+        <replaceExisting>true</replaceExisting>
+        <durationSecondsOverride>20~20</durationSecondsOverride>
+      </li>
+    </comps>
+  </AbilityDef>
+
+</Defs>

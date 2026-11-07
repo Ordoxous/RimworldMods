@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+
+  <!-- Elephant: already has abilities and specialTrainables from Odyssey's war trumpet -->
+
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/PawnKindDef[defName="Elephant"]/abilities</xpath>
+    <value>
+      <li>Ordo_TrunkBlast</li>
+      <li>Ordo_TrunkThrow</li>
+    </value>
+  </Operation>
+
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/ThingDef[defName="Elephant"]/race/specialTrainables</xpath>
+    <value>
+      <li>Ordo_TrunkBlast</li>
+      <li>Ordo_TrunkThrow</li>
+    </value>
+  </Operation>
+
+  <!-- Boomalope -->
+
+  <Operation Class="PatchOperationConditional">
+    <xpath>Defs/PawnKindDef[defName="Boomalope"]/abilities</xpath>
+    <nomatch Class="PatchOperationAdd">
+      <xpath>Defs/PawnKindDef[defName="Boomalope"]</xpath>
+      <value>
+        <abilities />
+      </value>
+    </nomatch>
+  </Operation>
+
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/PawnKindDef[defName="Boomalope"]/abilities</xpath>
+    <value>
+      <li>Ordo_Detonate</li>
+    </value>
+  </Operation>
+
+  <Operation Class="PatchOperationConditional">
+    <xpath>Defs/ThingDef[defName="Boomalope"]/race/specialTrainables</xpath>
+    <nomatch Class="PatchOperationAdd">
+      <xpath>Defs/ThingDef[defName="Boomalope"]/race</xpath>
+      <value>
+        <specialTrainables />
+      </value>
+    </nomatch>
+  </Operation>
+
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/ThingDef[defName="Boomalope"]/race/specialTrainables</xpath>
+    <value>
+      <li>Ordo_Detonate</li>
+    </value>
+  </Operation>
+
+  <!-- Alphabeaver -->
+
+  <Operation Class="PatchOperationConditional">
+    <xpath>Defs/PawnKindDef[defName="Alphabeaver"]/abilities</xpath>
+    <nomatch Class="PatchOperationAdd">
+      <xpath>Defs/PawnKindDef[defName="Alphabeaver"]</xpath>
+      <value>
+        <abilities />
+      </value>
+    </nomatch>
+  </Operation>
+
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/PawnKindDef[defName="Alphabeaver"]/abilities</xpath>
+    <value>
+      <li>Ordo_Gnaw</li>
+    </value>
+  </Operation>
+
+  <Operation Class="PatchOperationConditional">
+    <xpath>Defs/ThingDef[defName="Alphabeaver"]/race/specialTrainables</xpath>
+    <nomatch Class="PatchOperationAdd">
+      <xpath>Defs/ThingDef[defName="Alphabeaver"]/race</xpath>
+      <value>
+        <specialTrainables />
+      </value>
+    </nomatch>
+  </Operation>
+
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/ThingDef[defName="Alphabeaver"]/race/specialTrainables</xpath>
+    <value>
+      <li>Ordo_Gnaw</li>
+    </value>
+  </Operation>
+
+  <!-- Boomrat: fire burst reuses Biotech's effects -->
+
+  <Operation Class="PatchOperationSequence" MayRequire="Ludeon.RimWorld.Biotech">
+    <operations>
+      <li Class="PatchOperationConditional">
+        <xpath>Defs/PawnKindDef[defName="Boomrat"]/abilities</xpath>
+        <nomatch Class="PatchOperationAdd">
+          <xpath>Defs/PawnKindDef[defName="Boomrat"]</xpath>
+          <value>
+            <abilities />
+          </value>
+        </nomatch>
+      </li>
+      <li Class="PatchOperationAdd">
+        <xpath>Defs/PawnKindDef[defName="Boomrat"]/abilities</xpath>
+        <value>
+          <li>Ordo_BoomratFireBurst</li>
+        </value>
+      </li>
+      <li Class="PatchOperationConditional">
+        <xpath>Defs/ThingDef[defName="Boomrat"]/race/specialTrainables</xpath>
+        <nomatch Class="PatchOperationAdd">
+          <xpath>Defs/ThingDef[defName="Boomrat"]/race</xpath>
+          <value>
+            <specialTrainables />
+          </value>
+        </nomatch>
+      </li>
+      <li Class="PatchOperationAdd">
+        <xpath>Defs/ThingDef[defName="Boomrat"]/race/specialTrainables</xpath>
+        <value>
+          <li>Ordo_BoomratFireBurst</li>
+        </value>
+      </li>
+    </operations>
+  </Operation>
+
+  <!-- Penguin -->
+
+  <Operation Class="PatchOperationConditional">
+    <xpath>Defs/PawnKindDef[defName="Penguin"]/abilities</xpath>
+    <nomatch Class="PatchOperationAdd">
+      <xpath>Defs/PawnKindDef[defName="Penguin"]</xpath>
+      <value>
+        <abilities />
+      </value>
+    </nomatch>
+  </Operation>
+
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/PawnKindDef[defName="Penguin"]/abilities</xpath>
+    <value>
+      <li>Ordo_BellySlide</li>
+    </value>
+  </Operation>
+
+  <Operation Class="PatchOperationConditional">
+    <xpath>Defs/ThingDef[defName="Penguin"]/race/specialTrainables</xpath>
+    <nomatch Class="PatchOperationAdd">
+      <xpath>Defs/ThingDef[defName="Penguin"]/race</xpath>
+      <value>
+        <specialTrainables />
+      </value>
+    </nomatch>
+  </Operation>
+
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/ThingDef[defName="Penguin"]/race/specialTrainables</xpath>
+    <value>
+      <li>Ordo_BellySlide</li>
+    </value>
+  </Operation>
+
+  <!-- Walrus -->
+
+  <Operation Class="PatchOperationConditional">
+    <xpath>Defs/PawnKindDef[defName="Walrus"]/abilities</xpath>
+    <nomatch Class="PatchOperationAdd">
+      <xpath>Defs/PawnKindDef[defName="Walrus"]</xpath>
+      <value>
+        <abilities />
+      </value>
+    </nomatch>
+  </Operation>
+
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/PawnKindDef[defName="Walrus"]/abilities</xpath>
+    <value>
+      <li>Ordo_WalrusCharge</li>
+    </value>
+  </Operation>
+
+  <Operation Class="PatchOperationConditional">
+    <xpath>Defs/ThingDef[defName="Walrus"]/race/specialTrainables</xpath>
+    <nomatch Class="PatchOperationAdd">
+      <xpath>Defs/ThingDef[defName="Walrus"]/race</xpath>
+      <value>
+        <specialTrainables />
+      </value>
+    </nomatch>
+  </Operation>
+
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/ThingDef[defName="Walrus"]/race/specialTrainables</xpath>
+    <value>
+      <li>Ordo_WalrusCharge</li>
+    </value>
+  </Operation>
+
+  <!-- Wolverine -->
+
+  <Operation Class="PatchOperationConditional">
+    <xpath>Defs/PawnKindDef[defName="Wolverine"]/abilities</xpath>
+    <nomatch Class="PatchOperationAdd">
+      <xpath>Defs/PawnKindDef[defName="Wolverine"]</xpath>
+      <value>
+        <abilities />
+      </value>
+    </nomatch>
+  </Operation>
+
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/PawnKindDef[defName="Wolverine"]/abilities</xpath>
+    <value>
+      <li>Ordo_Regenerate</li>
+    </value>
+  </Operation>
+
+  <Operation Class="PatchOperationConditional">
+    <xpath>Defs/ThingDef[defName="Wolverine"]/race/specialTrainables</xpath>
+    <nomatch Class="PatchOperationAdd">
+      <xpath>Defs/ThingDef[defName="Wolverine"]/race</xpath>
+      <value>
+        <specialTrainables />
+      </value>
+    </nomatch>
+  </Operation>
+
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/ThingDef[defName="Wolverine"]/race/specialTrainables</xpath>
+    <value>
+      <li>Ordo_Regenerate</li>
+    </value>
+  </Operation>
+
+  <!-- Tiger -->
+
+  <Operation Class="PatchOperationConditional">
+    <xpath>Defs/PawnKindDef[defName="Tiger"]/abilities</xpath>
+    <nomatch Class="PatchOperationAdd">
+      <xpath>Defs/PawnKindDef[defName="Tiger"]</xpath>
+      <value>
+        <abilities />
+      </value>
+    </nomatch>
+  </Operation>
+
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/PawnKindDef[defName="Tiger"]/abilities</xpath>
+    <value>
+      <li>Ordo_HiddenDragon</li>
+    </value>
+  </Operation>
+
+  <Operation Class="PatchOperationConditional">
+    <xpath>Defs/ThingDef[defName="Tiger"]/race/specialTrainables</xpath>
+    <nomatch Class="PatchOperationAdd">
+      <xpath>Defs/ThingDef[defName="Tiger"]/race</xpath>
+      <value>
+        <specialTrainables />
+      </value>
+    </nomatch>
+  </Operation>
+
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/ThingDef[defName="Tiger"]/race/specialTrainables</xpath>
+    <value>
+      <li>Ordo_HiddenDragon</li>
+    </value>
+  </Operation>
+
+</Patch>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <ThingDef>
+    <defName>Ordo_Proj_WaterBlast</defName>
+    <label>water blast</label>
+    <thingClass>Ordo.SillyAnimalThings.Projectile_WaterBlast</thingClass>
+    <category>Projectile</category>
+    <tickerType>Normal</tickerType>
+    <altitudeLayer>Projectile</altitudeLayer>
+    <useHitPoints>False</useHitPoints>
+    <neverMultiSelect>True</neverMultiSelect>
+    <graphicData>
+      <texPath>Things/Projectile/FoamLong/Foam</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <color>(110,170,230)</color>
+      <drawSize>0.85</drawSize>
+    </graphicData>
+    <projectile>
+      <damageDef>Extinguish</damageDef>
+      <damageAmountBase>100</damageAmountBase>
+      <speed>30</speed>
+      <arcHeightFactor>0.2</arcHeightFactor>
+      <shadowSize>0</shadowSize>
+      <landedEffecter>ExtinguisherPuffSmall</landedEffecter>
+    </projectile>
+  </ThingDef>
+
+  <ThingDef ParentName="BaseBullet">
+    <defName>Ordo_Proj_ThrownChunk</defName>
+    <label>thrown chunk</label>
+    <thingClass>Ordo.SillyAnimalThings.Projectile_ThrownChunk</thingClass>
+    <graphicData>
+      <!-- Placeholder; the thrown chunk's own graphic is drawn instead -->
+      <texPath>Things/Mote/ThrownDebris</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <drawSize>1.2</drawSize>
+    </graphicData>
+    <projectile>
+      <damageDef>Blunt</damageDef>
+      <damageAmountBase>20</damageAmountBase>
+      <armorPenetrationBase>0.2</armorPenetrationBase>
+      <stoppingPower>2.5</stoppingPower>
+      <speed>28</speed>
+      <arcHeightFactor>0.6</arcHeightFactor>
+      <shadowSize>0.6</shadowSize>
+      <spinRate>2</spinRate>
+      <flyOverhead>false</flyOverhead>
+    </projectile>
+  </ThingDef>
+
+</Defs>
