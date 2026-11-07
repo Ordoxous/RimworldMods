@@ -11,16 +11,12 @@ namespace Ordo.Tweaks;
 [StaticConstructorOnStartup]
 public class HemogenTilSet
 {
-    private static ThingDef hemogenPackDef;
-
     static HemogenTilSet()
     {
         if (!ModsConfig.IsActive("biotechpatch.1trickPwnyta"))
             return;
 
         Patch(new Harmony(typeof(HemogenTilSet).Namespace));
-
-        hemogenPackDef = ThingDef.Named("HemogenPack");
     }
 
     // Kept out of the static constructor so BiotechPatch types are only resolved when the mod is active
@@ -35,20 +31,22 @@ public class HemogenTilSet
 
     public static bool Prefix_Comp_HemogenFarm_CompTick(Comp_HemogenFarm __instance)
     {
+        // Caravan and transport pod pawns still tick comps but have no map
         if (
-            !BiotechPatchSettings.HemogenFarmAnyone
+            !__instance.Pawn.Spawned
+            || !__instance.Pawn.IsHashIntervalTick(15000)
+            || !BiotechPatchSettings.HemogenFarmAnyone
             || !__instance.HemogenFarmEnabled
             || __instance.Pawn.IsPrisoner
-            || !__instance.Pawn.IsHashIntervalTick(15000)
             || !SanguophageUtility.CanSafelyBeQueuedForHemogenExtraction(__instance.Pawn)
+            || __instance.Pawn.BillStack.Bills.Any(b => b.recipe == RecipeDefOf.ExtractHemogenPack)
         )
         {
             return false;
         }
         
-        var thingsOfDef = __instance.Pawn.Map.listerThings.ThingsOfDef(hemogenPackDef);
-        var aggregate = thingsOfDef.Aggregate(0, (acc, curr) => acc + curr.stackCount);
-        if (aggregate >= 30) {
+        var packCount = __instance.Pawn.Map.listerThings.ThingsOfDef(ThingDefOf.HemogenPack).Sum(t => t.stackCount);
+        if (packCount >= 30) {
             return false;
         }
 

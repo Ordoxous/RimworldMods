@@ -3,8 +3,9 @@
 <Defs>
 
     <ThingCategoryDef>
-        <defName>Tools</defName>
+        <defName>Ordo_Tools</defName>
         <label>tools</label>
+        <parent>Weapons</parent>
     </ThingCategoryDef>
 
 </Defs>

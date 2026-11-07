@@ -1,10 +1,19 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
 using Verse;
 using Verse.AI;
 using WVC_WorkModes;
 
 namespace Ordo.Tweaks;
+
+[DefOf]
+public static class TweaksDefOf
+{
+    public static JobDef HaulMechForRepair;
+
+    static TweaksDefOf() => DefOfHelper.EnsureInitializedInCtor(typeof(TweaksDefOf));
+}
 
 public class JobDriver_HaulMechForRepair : JobDriver
 {
@@ -37,7 +46,12 @@ public class WorkGiver_HaulMechForRepair : WorkGiver_Scanner
 
     public override IEnumerable<Thing> PotentialWorkThingsGlobal(
         Pawn pawn
-    ) => pawn.Map.mapPawns.SpawnedColonyMechs;
+    ) => pawn.Map.mapPawns.SpawnedColonyMechs.Where(mech => mech.Downed);
+
+    public override bool ShouldSkip(
+        Pawn pawn,
+        bool forced = false
+    ) => !PotentialWorkThingsGlobal(pawn).Any();
 
     public override bool HasJobOnThing(
         Pawn pawn,
@@ -66,7 +80,7 @@ public class WorkGiver_HaulMechForRepair : WorkGiver_Scanner
             return false;
         }
 
-        return ShutdownUtility.TryFindRandomMechShutdownZone(allZones, targetPawn, targetPawn.Map, MechanoidWorkType.Work, out var closestSpot);
+        return ShutdownUtility.TryFindRandomMechShutdownZone(allZones, targetPawn, targetPawn.Map, MechanoidWorkType.Work, out _);
     }
 
     public override Job JobOnThing(
@@ -81,7 +95,7 @@ public class WorkGiver_HaulMechForRepair : WorkGiver_Scanner
 
         if (ShutdownUtility.TryFindRandomMechShutdownZone(allZones, targetPawn, targetPawn.Map, MechanoidWorkType.Work, out var targetSpot))
         {
-            var job = JobMaker.MakeJob(DefDatabase<JobDef>.GetNamed("HaulMechForRepair"), (LocalTargetInfo) targetPawn, targetSpot);
+            var job = JobMaker.MakeJob(TweaksDefOf.HaulMechForRepair, (LocalTargetInfo) targetPawn, targetSpot);
             job.count = 1;
             return job;
         }

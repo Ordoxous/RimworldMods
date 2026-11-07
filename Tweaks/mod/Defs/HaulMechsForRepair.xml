@@ -2,7 +2,7 @@
 <Defs>
 
   <WorkGiverDef>
-    <defName>Tweaks</defName>
+    <defName>Ordo_HaulMechForRepair</defName>
     <label>haul mechs for repair</label>
     <giverClass>Ordo.Tweaks.WorkGiver_HaulMechForRepair</giverClass>
     <workType>Hauling</workType>
@@ -18,7 +18,7 @@
   <JobDef>
     <defName>HaulMechForRepair</defName>
     <driverClass>Ordo.Tweaks.JobDriver_HaulMechForRepair</driverClass>
-    <reportString>hauling TargetA for repair.</reportString>
+    <reportString>hauling TargetA for repair</reportString>
   </JobDef>
 
 </Defs>

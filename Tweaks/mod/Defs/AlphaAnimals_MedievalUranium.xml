@@ -2,10 +2,10 @@
 <Defs>
 
 
-<RecipeDef>
+<RecipeDef MayRequire="sarg.alphaanimals,DankPyon.Medieval.Overhaul">
 		<defName>AA_ExtractUranium_Medieval</defName>
 		<label>process uranium crystals</label>
-		<description>Extract uranium from .</description>
+		<description>Extract uranium from uranium crystals.</description>
 		<jobString>Extracting useful materials from unrefined uranium crystals.</jobString>
 		<effectWorking>Cremate</effectWorking>
 		<soundWorking>Recipe_Cremate</soundWorking>
