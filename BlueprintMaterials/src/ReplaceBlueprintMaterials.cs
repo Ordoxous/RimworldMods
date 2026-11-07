@@ -11,6 +11,9 @@ namespace Ordo.BlueprintMaterials;
 [StaticConstructorOnStartup]
 public class ReplaceBlueprintMaterials
 {
+    // Defs don't change at runtime, so these lookups are built once per key.
+    private static readonly Dictionary<DesignatorDropdownGroupDef, List<(TerrainDef def, ThingDef materialDef)>> SimilarTerrainCache = new();
+    private static readonly Dictionary<BuildableDef, List<ThingDef>> StuffCache = new();
 
     static ReplaceBlueprintMaterials()
     {
@@ -22,11 +25,49 @@ public class ReplaceBlueprintMaterials
         );
     }
 
-    private static IEnumerable<Blueprint_Build> GetSelectedBlueprintsOfType(ThingDef def) {
-        return Find.Selector.SelectedObjects
-            .Where(s => s is Blueprint_Build)
-            .Cast<Blueprint_Build>()
-            .Where(t => t.def == def);
+    private static List<(TerrainDef def, ThingDef materialDef)> GetSimilarTerrain(DesignatorDropdownGroupDef groupDef)
+    {
+        if (SimilarTerrainCache.TryGetValue(groupDef, out var cached))
+            return cached;
+
+        cached = DefDatabase<TerrainDef>
+            .AllDefsListForReading
+            .Where(def => def.designatorDropdown == groupDef)
+            .Select(def => (def, materialDef: def.CostList.FirstOrDefault()?.thingDef))
+            .Where(entry => entry.materialDef is not null)
+            .ToList();
+        SimilarTerrainCache[groupDef] = cached;
+        return cached;
+    }
+
+    private static List<ThingDef> GetPossibleStuffs(BuildableDef entityDef)
+    {
+        if (StuffCache.TryGetValue(entityDef, out var cached))
+            return cached;
+
+        cached = GenStuff.AllowedStuffsFor(entityDef).ToList();
+        StuffCache[entityDef] = cached;
+        return cached;
+    }
+
+    private static bool IsAvailable(ThingDef materialDef, Map map) =>
+        DebugSettings.godMode || map.listerThings.ThingsOfDef(materialDef).Count > 0;
+
+    // Plain loops: these run every frame for every selected blueprint.
+    private static bool HasAlternative(List<(TerrainDef def, ThingDef materialDef)> similarDefs, TerrainDef current, Map map)
+    {
+        foreach (var (def, materialDef) in similarDefs)
+            if (def != current && IsAvailable(materialDef, map))
+                return true;
+        return false;
+    }
+
+    private static bool HasAlternative(List<ThingDef> stuffs, ThingDef current, Map map)
+    {
+        foreach (var stuff in stuffs)
+            if (stuff != current && IsAvailable(stuff, map))
+                return true;
+        return false;
     }
 
     static IEnumerable<Gizmo> Postfix_Blueprint_Build_GetGizmos(
@@ -59,100 +100,84 @@ public class ReplaceBlueprintMaterials
             return false;
         }
 
-        var similarDefs = DefDatabase<TerrainDef>
-            .AllDefsListForReading
-            .Where(def => def.designatorDropdown == groupDef)
-            .Select(def => (def, def.CostList.FirstOrDefault()?.thingDef))
-            .Where(entry => {
-                    var (def, materialDef) = entry;
-                    return materialDef is not null
-                           && (DebugSettings.godMode || def == entityDef || Find.CurrentMap.listerThings.ThingsOfDef(materialDef).Count > 0);
-                }
-            )
-            .ToList();
+        var map = blueprint.Map;
+        var similarDefs = GetSimilarTerrain(groupDef);
 
-        var allowedMaterials = similarDefs.Select(s => s.thingDef).ToList();
-
-        // TODO: Keep this from grouping with other's of the same group but different materials
-        action = new Command_Action_AlternativeMaterial(terrainDef, entityDef.CostList.FirstOrDefault()?.thingDef, allowedMaterials)
+        var command = new Command_Action_AlternativeMaterial(blueprint, HasAlternative(similarDefs, terrainDef, map))
         {
             icon = terrainDef.uiIcon,
             defaultIconColor = entityDef.uiIconColor,
             iconTexCoords = Widgets.CroppedTerrainTextureRect(terrainDef.uiIcon),
-            action = () =>
-            {
-                var floatMenuOptionList = similarDefs
-                    .Select(entity =>
-                        {
-                            var (def, materialDef) = entity;
+        };
+        command.action = () =>
+        {
+            var floatMenuOptionList = similarDefs
+                .Where(entry => entry.def == terrainDef || IsAvailable(entry.materialDef, map))
+                .Select(entity =>
+                    {
+                        var (def, materialDef) = entity;
 
-                            return new FloatMenuOption(
-                                materialDef.LabelAsStuff,
-                                () =>
-                                {
-                                    var selectedBlueprints = GetSelectedBlueprintsOfType(blueprint.def).ToList();
-                                    foreach (var selected in selectedBlueprints) {
-                                        selected.Destroy(DestroyMode.Cancel);
-                                        var newBlueprint = GenConstruct.PlaceBlueprintForBuild(def, selected.Position, Find.CurrentMap, def.defaultPlacingRot, Faction.OfPlayer, null);
-                                        Find.Selector.Select(newBlueprint, false, false);
-                                    }
-                                },
-                                materialDef.uiIcon,
-                                materialDef.uiIconColor
-                            );
-                        }
-                    ).ToList();
+                        return new FloatMenuOption(
+                            materialDef.LabelAsStuff,
+                            () =>
+                            {
+                                foreach (var selected in command.SelectedBlueprints().ToList()) {
+                                    selected.Destroy(DestroyMode.Cancel);
+                                    var newBlueprint = GenConstruct.PlaceBlueprintForBuild(def, selected.Position, map, def.defaultPlacingRot, Faction.OfPlayer, null);
+                                    Find.Selector.Select(newBlueprint, false, false);
+                                }
+                            },
+                            materialDef.uiIcon,
+                            materialDef.uiIconColor
+                        );
+                    }
+                ).ToList();
 
-                Find.WindowStack.Add(new FloatMenu(floatMenuOptionList));
-            }
+            Find.WindowStack.Add(new FloatMenu(floatMenuOptionList));
         };
 
+        action = command;
         return true;
     }
 
     private static bool TryBuildAlternativeMaterialsGizmo(Blueprint_Build blueprint, out Command_Action action)
     {
-        if (blueprint.stuffToUse == null)
+        if (blueprint.stuffToUse is not { } currentStuff)
         {
             action = null;
             return false;
         }
 
+        var map = blueprint.Map;
         var entityDef = blueprint.BuildDef;
         var selectedStyle = blueprint.selectedStyleDef ?? blueprint.StyleDef;
+        var possibleStuffs = GetPossibleStuffs(entityDef);
 
-        var allowedStuffs = Find.CurrentMap
-                .resourceCounter
-                .AllCountedAmounts
-                .Keys
-                .Where(def => def.IsStuff
-                              && def.stuffProps.CanMake(entityDef)
-                              && (DebugSettings.godMode || def == entityDef || Find.CurrentMap.listerThings.ThingsOfDef(def).Count > 0))
-            .ToList();
-
-        action = new Command_Action_AlternativeMaterial(entityDef, blueprint.stuffToUse, allowedStuffs)
+        var command = new Command_Action_AlternativeMaterial(blueprint, HasAlternative(possibleStuffs, currentStuff, map))
         {
-            icon = Widgets.GetIconFor(entityDef, blueprint.stuffToUse, selectedStyle),
-            defaultIconColor = blueprint.stuffToUse != null ? entityDef.GetColorForStuff(blueprint.stuffToUse) : entityDef.uiIconColor,
+            icon = Widgets.GetIconFor(entityDef, currentStuff, selectedStyle),
+            defaultIconColor = entityDef.GetColorForStuff(currentStuff),
             iconProportions = entityDef.graphicData.drawSize.RotatedBy(entityDef.defaultPlacingRot),
             iconDrawScale = GenUI.IconDrawScale(entityDef),
-            action = () => {
-                var floatMenuOptionList = allowedStuffs
-                    .Select(stuff => new FloatMenuOption(
-                            stuff.LabelAsStuff,
-                            () => {
-                                foreach (var selected in GetSelectedBlueprintsOfType(blueprint.def))
-                                    selected.stuffToUse = stuff;
-                            },
-                            stuff.uiIcon,
-                            stuff.uiIconColor
-                        )
-                    ).ToList();
+        };
+        command.action = () => {
+            var floatMenuOptionList = possibleStuffs
+                .Where(def => def == currentStuff || IsAvailable(def, map))
+                .Select(stuff => new FloatMenuOption(
+                        stuff.LabelAsStuff,
+                        () => {
+                            foreach (var selected in command.SelectedBlueprints())
+                                selected.stuffToUse = stuff;
+                        },
+                        stuff.uiIcon,
+                        stuff.uiIconColor
+                    )
+                ).ToList();
 
-                Find.WindowStack.Add(new FloatMenu(floatMenuOptionList));
-            }
+            Find.WindowStack.Add(new FloatMenu(floatMenuOptionList));
         };
 
+        action = command;
         return true;
     }
 }
@@ -161,21 +186,37 @@ public class Command_Action_AlternativeMaterial : Command_Action {
 
     private static readonly CachedTexture ChangeStyleTex = new("UI/Gizmos/ChangeStyle");
 
+    private readonly ThingDef _blueprintDef;
     private readonly ThingDef _currentMaterial;
 
-    public Command_Action_AlternativeMaterial(
-        BuildableDef entityDef,
-        ThingDef currentMaterial,
-        IList<ThingDef> allowedDefs
-    )
+    // Floors carry their material in the blueprint def, so their stuffToUse is null.
+    public Command_Action_AlternativeMaterial(Blueprint_Build blueprint, bool hasAlternative)
     {
-        _currentMaterial = currentMaterial;
-        defaultLabel = "Select Material";
-        defaultDesc = $"Update the selected material for this ({entityDef.LabelCap}) blueprint";
+        _blueprintDef = blueprint.def;
+        _currentMaterial = blueprint.stuffToUse;
+        defaultLabel = "Ordo_BlueprintMaterials_SelectMaterial".Translate();
         groupable = true;
-        disabled = allowedDefs.Count == 1;
-        disabledReason = "Only one material available";
+        if (!hasAlternative)
+            Disable("Ordo_BlueprintMaterials_OnlyOneMaterial".Translate());
         Order = 15f;
+    }
+
+    // Formatted only when the tooltip is shown, not every time the gizmo is built.
+    public override string Desc => "Ordo_BlueprintMaterials_SelectMaterialDesc".Translate(_blueprintDef.entityDefToBuild.LabelCap);
+
+    private bool Matches(Blueprint_Build blueprint) =>
+        blueprint.def == _blueprintDef && blueprint.stuffToUse == _currentMaterial;
+
+    // Same rule as grouping, so a click changes exactly the blueprints this gizmo stands for.
+    public IEnumerable<Blueprint_Build> SelectedBlueprints() =>
+        Find.Selector.SelectedObjects.OfType<Blueprint_Build>().Where(Matches);
+
+    public override bool GroupsWith(Gizmo other)
+    {
+        return other is Command_Action_AlternativeMaterial otherMaterial
+               && otherMaterial._blueprintDef == _blueprintDef
+               && otherMaterial._currentMaterial == _currentMaterial
+               && base.GroupsWith(other);
     }
 
     public override GizmoResult GizmoOnGUI(Vector2 topLeft, float maxWidth, GizmoRenderParms parms)

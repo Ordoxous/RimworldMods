@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+	<Ordo_BlueprintMaterials_SelectMaterial>Select Material</Ordo_BlueprintMaterials_SelectMaterial>
+	<Ordo_BlueprintMaterials_SelectMaterialDesc>Change the material used for this {0} blueprint.</Ordo_BlueprintMaterials_SelectMaterialDesc>
+	<Ordo_BlueprintMaterials_OnlyOneMaterial>No other material is available.</Ordo_BlueprintMaterials_OnlyOneMaterial>
+
+</LanguageData>
