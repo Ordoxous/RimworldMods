@@ -6,4 +6,8 @@
 		<xpath>Defs/ThingDef[defName="WaterWellInlet"]/placeWorkers/li[text()="PlaceWorker_InvalidOverSubstructure"]</xpath>
 	</Operation>
 	
+	<Operation Class="XmlExtensions.PatchOperationSafeRemove">
+		<xpath>Defs/ThingDef[defName="DeepWaterWellInlet"]/placeWorkers/li[text()="PlaceWorker_InvalidOverSubstructure"]</xpath>
+	</Operation>
+	
 </Patch>

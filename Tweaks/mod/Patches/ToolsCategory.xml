@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+    <Operation Class="XmlExtensions.Conditional">
+        <xpath>Defs/ThingDef/equippedStatOffsets</xpath>
+        <caseTrue>
+            <Operation Class="XmlExtensions.PatchOperationSafeAdd">
+                <xpath>Defs/ThingDef/thingCategories[li/text()="WeaponsMelee" or li/text()="WeaponsRanged"]</xpath>
+                <compare>InnerText</compare>
+                <value>
+                    <li>Tools</li>
+                </value>
+            </Operation>
+        </caseTrue>
+    </Operation>
+</Patch>
