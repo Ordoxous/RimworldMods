@@ -22,5 +22,5 @@
     <li>vanillaexpanded.skills</li>
   </loadAfter>
   <packageId>Ordo.LegendaryIsUnique</packageId>
-  <description>WIP</description>
+  <description>When a colonist crafts a weapon that has an Odyssey unique variant and rolls Legendary quality, they make the unique version of that weapon instead, with its quality, art and style kept. In the mod settings you can lower the threshold to Masterwork or Excellent. Weapons without a unique variant work as normal. Works with Vanilla Skills Expanded's quality rolls.</description>
 </ModMetaData>
