@@ -11,60 +11,39 @@ public class Building_AutoMechUpgrader : Building_MechUpgrader
     public List<MechUpgradeOperation> WantedOperations(
         Pawn pawn,
         List<MechUpgrade> currentUpgrades,
-        List<MechUpgradeDef> wantedUpgrades,
-        List<MechUpgrade> unwantedUpgrades
+        List<MechUpgrade> upgradesToKeep,
+        List<MechUpgradeDef> wantedUpgrades
     )
     {
-        var upgradesToKeep = currentUpgrades.Where(u => !unwantedUpgrades.Contains(u)).ToList();
-
         var compAffectedByFacilities = this.TryGetComp<CompAffectedByFacilities>();
         var availableUpgrades = compAffectedByFacilities.LinkedFacilitiesListForReading
             .Where(compAffectedByFacilities.IsFacilityActive)
             .Select(s => s.TryGetComp<CompUpgradesStorage>())
             .SelectMany(s => s.Upgrades)
-            .GroupBy(p => p.def.exclusionTags.First())
-            .Select(g => g.MinBy(u => u.def.defName))
             .Where(u => wantedUpgrades.Contains(u.def))
+            .OrderBy(u => u.def.defName);
+
+        // Not using MechUpgradeUtility.GetOperationsFromLists: it overwrites the given upgrader's saved upgrades list
+        var allowedOperations = currentUpgrades
+            .Where(u => !upgradesToKeep.Contains(u))
+            .Select(u => new MechUpgradeOperation(u, UpgradeOperationType.Remove))
             .ToList();
-        
-        var wantedOperations = MechUpgradeUtility.GetOperationsFromLists(
-            currentUpgrades,
-            availableUpgrades.Concat(upgradesToKeep).ToList(),
-            new Building_MechUpgrader()
-        )
-            .GroupBy(o => o.type)
-            .ToDictionary(g => g.Key, g => g.ToList());
 
-        if (!wantedOperations.Any())
-            return [];
-        
-        var allowedOperations = new List<MechUpgradeOperation>();
+        var availablePoints = MechUpgradeUtility.MaxUpgradePoints(pawn) - MechUpgradeUtility.CurrentPoints(upgradesToKeep);
 
-        var maxPoints = MechUpgradeUtility.MaxUpgradePoints(pawn);
-        var currentPoints = MechUpgradeUtility.CurrentPoints(pawn);
+        // Check each addition against everything the mech will end up with, so duplicates and
+        // conflicting exclusion tags between candidates are rejected the same way MU does
+        var resultingUpgrades = new List<MechUpgrade>(upgradesToKeep);
 
-        var availablePoints = maxPoints - currentPoints;
-
-        if (wantedOperations.TryGetValue(UpgradeOperationType.Remove, out var removals))
+        foreach (var upgrade in availableUpgrades)
         {
-            foreach (var operation in removals)
-            {
-                allowedOperations.Add(operation);
-                availablePoints += operation.upgrade.def.upgradePoints;
-            }
-        }
+            var upgradePoints = upgrade.def.upgradePoints;
+            if (availablePoints - upgradePoints < 0 || !upgrade.def.CanAdd(pawn.def, resultingUpgrades))
+                continue;
 
-        if (wantedOperations.TryGetValue(UpgradeOperationType.Add, out var additions))
-        {
-            foreach (var operation in additions)
-            {
-                var operationPoints = operation.upgrade.def.upgradePoints;
-                if (availablePoints - operationPoints < 0)
-                    continue;
-
-                allowedOperations.Add(operation);
-                availablePoints -= operationPoints;
-            }
+            allowedOperations.Add(new MechUpgradeOperation(upgrade, UpgradeOperationType.Add));
+            resultingUpgrades.Add(upgrade);
+            availablePoints -= upgradePoints;
         }
 
         return allowedOperations;
@@ -76,21 +55,24 @@ public class Building_AutoMechUpgrader : Building_MechUpgrader
             return;
 
         var mechComp = pawn.GetComp<CompUpgradableMechWithPolicy>();
-        // (d.upgradePoints <= MechUpgradeUtility.MaxUpgradePoints(Mech) - MechUpgradeUtility.CurrentPoints(Mech))
-        var wantedOperations = WantedOperations(
-            pawn,
-            mechComp.upgrades,
-            mechComp.WantedUpgrades(),
-            mechComp.UnwantedUpgrades()
-        );
-
-        if (wantedOperations.NullOrEmpty())
+        if (mechComp != null)
         {
-            base.TryAcceptPawn(pawn);
-            return;
+            var upgradesToKeep = mechComp.UpgradesToKeep();
+            var wantedOperations = WantedOperations(
+                pawn,
+                mechComp.upgrades,
+                upgradesToKeep,
+                mechComp.WantedUpgrades(upgradesToKeep)
+            );
+
+            if (wantedOperations.Count > 0)
+            {
+                ApplyOperations(pawn, wantedOperations);
+                return;
+            }
         }
 
-        ApplyOperations(pawn, wantedOperations);
+        base.TryAcceptPawn(pawn);
     }
 
     private void ApplyOperations(
@@ -100,27 +82,31 @@ public class Building_AutoMechUpgrader : Building_MechUpgrader
     {
         pawn.DeSpawnOrDeselect();
         innerContainer.TryAddOrTransfer(pawn);
-        
-        operations = wantedOperations;
-        if (operations.NullOrEmpty()) 
-            return;
 
-        foreach (var o in operations.Where(o => o.type == UpgradeOperationType.Add))
+        operations = wantedOperations;
+
+        // Mirror MU's configure dialog, where upgrades holds the pending additions
+        upgrades = operations
+            .Where(o => o.type == UpgradeOperationType.Add)
+            .Select(o => o.upgrade)
+            .ToList();
+
+        foreach (var pendingUpgrade in upgrades)
         {
             var comp = this.TryGetComp<CompAffectedByFacilities>();
             foreach (var linkedFacility in comp.LinkedFacilitiesListForReading)
             {
                 var compUpgradesStorage = linkedFacility.TryGetComp<CompUpgradesStorage>();
                 var storageUpgrades = compUpgradesStorage.Upgrades;
-                if (comp.IsFacilityActive(linkedFacility) && storageUpgrades.Contains(o.upgrade))
+                if (comp.IsFacilityActive(linkedFacility) && storageUpgrades.Contains(pendingUpgrade))
                 {
-                    var upgrade = compUpgradesStorage.innerContainer.FirstOrDefault(innerThing => innerThing.TryGetComp<CompMechUpgrade>()?.upgrade == o.upgrade);
+                    var upgrade = compUpgradesStorage.innerContainer.FirstOrDefault(innerThing => innerThing.TryGetComp<CompMechUpgrade>()?.upgrade == pendingUpgrade);
                     if (upgrade != null)
                     {
                         compUpgradesStorage.innerContainer.Remove(upgrade);
                         break;
                     }
-                } 
+                }
             }
         }
 

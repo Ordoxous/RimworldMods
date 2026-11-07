@@ -23,7 +23,7 @@
   </loadAfter>
   <packageId>Ordo.MechUpgradesUi</packageId>
   <description>
-    Allows defining automatic upgrade policies for mech upgrades from https://steamcommunity.com/sharedfiles/filedetails/?id=3365118555.
+    Allows defining automatic upgrade policies for mech upgrades from [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3365118555]Mechanoid Upgrades[/url].
 
     You can specify policies the same way you would apparel for a colonist.
 
@@ -31,6 +31,6 @@
 
     When a mech has unwanted upgrades (Per the policy), the auto upgrade will try to remove them.
     
-    Source available at: https://github.com/Ordoxous/RimworldMods/tree/master/MechUpgradesUi
+    Source available on [url=https://github.com/Ordoxous/RimworldMods/tree/master/MechUpgradesUi]GitHub[/url].
   </description>
 </ModMetaData>

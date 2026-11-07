@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
@@ -15,7 +14,7 @@ public class Dialog_ManageUpgradePolicies(
     [CanBeNull] CompUpgradableMechanoid upgradableMechanoid)
     : Dialog_ManagePolicies<UpgradePolicy>(currentPolicy)
 {
-    private static readonly ConcurrentDictionary<ThingDef, ThingFilter> MechFilterByDef = new();
+    private static readonly Dictionary<ThingDef, ThingFilter> MechFilterByDef = new();
 
     private static ThingFilter GlobalFilter
     {
@@ -40,22 +39,23 @@ public class Dialog_ManageUpgradePolicies(
 
     private static ThingFilter MechFilterForDef(ThingDef mechDef)
     {
-        return MechFilterByDef.GetOrAdd(mechDef, key =>
-        {
-            var upgradeDefs = MechUpgradeUtility
-                .UpgradesDatabase
-                .Where(u => u.CanAdd(key))
-                .Select(u => u.linkedThingDef);
-
-            var filter = new ThingFilter();
-
-            foreach (var def in upgradeDefs)
-            {
-                filter.SetAllow(def, true);
-            }
-
+        if (MechFilterByDef.TryGetValue(mechDef, out var filter))
             return filter;
-        });
+
+        var upgradeDefs = MechUpgradeUtility
+            .UpgradesDatabase
+            .Where(u => u.CanAdd(mechDef))
+            .Select(u => u.linkedThingDef);
+
+        filter = new ThingFilter();
+
+        foreach (var def in upgradeDefs)
+        {
+            filter.SetAllow(def, true);
+        }
+
+        MechFilterByDef[mechDef] = filter;
+        return filter;
     }
 
     private readonly ThingFilterUI.UIState _thingFilterState = new();
@@ -103,7 +103,7 @@ public class Dialog_ManageUpgradePolicies(
         yield return new Widgets.DropdownMenuElement<ThingDef>
         {
             payload = null,
-            option = new FloatMenuOption("All", () => dialog._mechDef = null)
+            option = new FloatMenuOption("MU_Upgrades_Ui_Policy_Mech_All".Translate(), () => dialog._mechDef = null)
         };
     }
 
@@ -121,7 +121,7 @@ public class Dialog_ManageUpgradePolicies(
             target: this,
             getPayload: dialog => dialog._mechDef,
             menuGenerator: MechRaceSelectorMenuGenerator,
-            buttonLabel: $"Mech Type: {_mechDef?.LabelCap ?? "All"}"
+            buttonLabel: "MU_Upgrades_Ui_Policy_Mech_Type".Translate(_mechDef?.LabelCap ?? "MU_Upgrades_Ui_Policy_Mech_All".Translate())
         );
 
         TooltipHandler.TipRegionByKey(mechSelectorRect, "MU_Upgrades_Ui_Policy_Mech_Selector");

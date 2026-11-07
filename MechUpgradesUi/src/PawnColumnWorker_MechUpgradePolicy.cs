@@ -15,7 +15,7 @@ public class PawnColumnWorker_MechUpgradePolicy : PawnColumnWorker
         base.DoHeader(rect, table);
         MouseoverSounds.DoRegion(rect);
         var rect1 = new Rect(rect.x, rect.y + (rect.height - 65f), Mathf.Min(rect.width, 360f), 32f);
-        if (Widgets.ButtonText(rect1, "Manage Upgrade Policies"))
+        if (Widgets.ButtonText(rect1, "MU_Upgrades_Ui_Manage_Policies".Translate()))
         {
             Find.WindowStack.Add(new Dialog_ManageUpgradePolicies(null, null));
         }

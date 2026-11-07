@@ -44,7 +44,7 @@ public class WorldComponent_UpgradeDatabase : WorldComponent
         {
             if (pawn.IsColonyMech && pawn.TryGetComp<CompUpgradableMechWithPolicy>(out var comp))
             {
-                if (comp.CurrentUpgradePolicy == policy)
+                if (comp.AssignedUpgradePolicy == policy)
                     return new AcceptanceReport("OutfitInUse".Translate((NamedArgument) (Thing) pawn));
             }
         }
@@ -53,7 +53,7 @@ public class WorldComponent_UpgradeDatabase : WorldComponent
         {
             if (pawn.IsColonyMech && pawn.TryGetComp<CompUpgradableMechWithPolicy>(out var comp))
             {
-                if (comp.CurrentUpgradePolicy == policy)
+                if (comp.AssignedUpgradePolicy == policy)
                     comp.CurrentUpgradePolicy = null;
             }
         }

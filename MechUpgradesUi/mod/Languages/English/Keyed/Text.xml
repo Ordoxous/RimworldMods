@@ -4,5 +4,8 @@
 	<MU_Upgrades_Ui_Policy_Title>Mech Upgrade Policies</MU_Upgrades_Ui_Policy_Title>
 	<MU_Upgrades_Ui_Policy_Tip>Manage policies for automatic mech upgrades.</MU_Upgrades_Ui_Policy_Tip>
 	<MU_Upgrades_Ui_Policy_Mech_Selector>Select a mech to filter the upgrades below.</MU_Upgrades_Ui_Policy_Mech_Selector>
+	<MU_Upgrades_Ui_Policy_Mech_Type>Mech Type: {0}</MU_Upgrades_Ui_Policy_Mech_Type>
+	<MU_Upgrades_Ui_Policy_Mech_All>All</MU_Upgrades_Ui_Policy_Mech_All>
+	<MU_Upgrades_Ui_Manage_Policies>Manage Upgrade Policies</MU_Upgrades_Ui_Manage_Policies>
 
 </LanguageData>
