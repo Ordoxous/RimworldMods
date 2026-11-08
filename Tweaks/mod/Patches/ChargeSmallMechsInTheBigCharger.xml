@@ -2,12 +2,19 @@
 
 <Patch>
 
-	<Operation Class="XmlExtensions.PatchOperationSafeAdd">
-		<xpath>Defs/ThingDef[defName="StandardRecharger"]/building/requiredMechWeightClasses[li/text()="Medium"]</xpath>
-		<compare>Both</compare>
-		<value>
-			<li>Light</li>
-		</value>
+	<Operation Class="XmlExtensions.OptionalPatch">
+		<modId>Ordo.Tweaks</modId>
+		<key>LightMechsUseStandardChargers</key>
+		<defaultValue>true</defaultValue>
+		<caseTrue>
+			<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+				<xpath>Defs/ThingDef[defName="StandardRecharger"]/building/requiredMechWeightClasses[li/text()="Medium"]</xpath>
+				<compare>Both</compare>
+				<value>
+					<li>Light</li>
+				</value>
+			</Operation>
+		</caseTrue>
 	</Operation>
 
 </Patch>

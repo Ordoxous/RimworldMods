@@ -24,19 +24,28 @@ public static class ShowArmorIndicators {
         Thing __instance,
         DamageWorker.DamageResult __result
     ) {
-        var damageBeforeMitigation = dinfo.Amount;
-        var damageAfterMitigation = __result.totalDamageDealt;
-
-        if (__instance is not Pawn || __instance.Map is null)
+        if (!TweaksSettings.ArmorIndicators)
         {
             return;
         }
 
+        var damageBeforeMitigation = dinfo.Amount;
+        var damageAfterMitigation = __result.totalDamageDealt;
+
+        // A killing blow despawns the pawn, so fall back to where its corpse is held
+        var map = __instance.MapHeld;
+        if (__instance is not Pawn || map is null)
+        {
+            return;
+        }
+
+        var position = __instance.Spawned ? __instance.DrawPos : __instance.PositionHeld.ToVector3Shifted();
+
         if (__result.deflected || __result.diminished)
         {
             MoteMaker.ThrowText(
-                __instance.DrawPos, 
-                __instance.Map,
+                position,
+                map,
                 new StringBuilder().AppendStriked((damageBeforeMitigation - damageAfterMitigation).ToString("F0")).ToString(),
                 __result.deflectedByMetalArmor || __result.diminishedByMetalArmor ? Color.white : Color.cyan, 
                 3.65f
@@ -49,9 +58,9 @@ public static class ShowArmorIndicators {
         }
 
         MoteMaker.ThrowText(
-            __instance.DrawPos, 
-            __instance.Map,
-            damageAfterMitigation.ToString("F0"), 
+            position,
+            map,
+            damageAfterMitigation.ToString("F0"),
             Color.red, 
             3.65f
         );

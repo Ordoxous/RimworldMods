@@ -2,15 +2,22 @@
 
 <Patch>
 
-	<Operation Class="XmlExtensions.Conditional">
-		<xpath>Defs/ThingDef/recipeMaker/recipeUsers[li/text()="MU_BasicUpgradesAssembler"]</xpath>
+	<Operation Class="XmlExtensions.OptionalPatch">
+		<modId>Ordo.Tweaks</modId>
+		<key>SmallUpgradesAtAdvancedAssembler</key>
+		<defaultValue>true</defaultValue>
 		<caseTrue>
-			<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+			<Operation Class="XmlExtensions.Conditional">
 				<xpath>Defs/ThingDef/recipeMaker/recipeUsers[li/text()="MU_BasicUpgradesAssembler"]</xpath>
-				<compare>InnerText</compare>
-				<value>
-					<li>MU_AdvancedUpgradesAssembler</li>
-				</value>
+				<caseTrue>
+					<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+						<xpath>Defs/ThingDef/recipeMaker/recipeUsers[li/text()="MU_BasicUpgradesAssembler"]</xpath>
+						<compare>InnerText</compare>
+						<value>
+							<li>MU_AdvancedUpgradesAssembler</li>
+						</value>
+					</Operation>
+				</caseTrue>
 			</Operation>
 		</caseTrue>
 	</Operation>

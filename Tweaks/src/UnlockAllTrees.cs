@@ -24,18 +24,24 @@ public static class UnlockAllTrees
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static void Patch(Harmony harmony)
     {
+        // GameComponent_UnlockedCrops doesn't override FinalizeInit, so the base method is the only one to patch
         harmony.Patch(
-            AccessTools.Method(typeof(GameComponent_UnlockedCrops), nameof(GameComponent_UnlockedCrops.FinalizeInit)),
-            postfix: new HarmonyMethod(Postfix_GameComponent_UnlockedCrops_FinalizeInit)
+            AccessTools.DeclaredMethod(typeof(GameComponent), nameof(GameComponent.FinalizeInit)),
+            postfix: new HarmonyMethod(Postfix_GameComponent_FinalizeInit)
         );
     }
 
-    public static void Postfix_GameComponent_UnlockedCrops_FinalizeInit(
-        HashSet<ThingDef> ___unlockedCrops
-    )
+    public static void Postfix_GameComponent_FinalizeInit(GameComponent __instance)
     {
+        if (__instance is not GameComponent_UnlockedCrops || !TweaksSettings.UnlockAllTrees)
+            return;
+
+        var unlockedCrops = (HashSet<ThingDef>) AccessTools
+            .Field(typeof(GameComponent_UnlockedCrops), "unlockedCrops")
+            .GetValue(__instance);
+
         var woodLogDef = ThingDef.Named("WoodLog");
-        ___unlockedCrops.AddRange(
+        unlockedCrops.AddRange(
             DefDatabase<ThingDef>.AllDefsListForReading
                 .Where(x => x?.plant is { Sowable: true }
                             && (

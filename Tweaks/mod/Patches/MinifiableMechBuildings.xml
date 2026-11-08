@@ -8,18 +8,23 @@
 		</mods>
 		<packageId>true</packageId>
 		<caseTrue>
-
-			<Operation Class="XmlExtensions.PatchOperationSafeAdd">
-				<xpath>Defs/ThingDef[defName="MechaWeaponChanger"]</xpath>
-				<compare>Both</compare>
-				<value>
-					<minifiedDef>MinifiedThing</minifiedDef>
-					<thingCategories>
-						<li>BuildingsProduction</li>
-					</thingCategories>
-				</value>
+			<Operation Class="XmlExtensions.OptionalPatch">
+				<modId>Ordo.Tweaks</modId>
+				<key>MinifiableMechaWeaponChanger</key>
+				<defaultValue>true</defaultValue>
+				<caseTrue>
+					<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+						<xpath>Defs/ThingDef[defName="MechaWeaponChanger"]</xpath>
+						<compare>Both</compare>
+						<value>
+							<minifiedDef>MinifiedThing</minifiedDef>
+							<thingCategories>
+								<li>BuildingsProduction</li>
+							</thingCategories>
+						</value>
+					</Operation>
+				</caseTrue>
 			</Operation>
-
 		</caseTrue>
 	</Operation>
 
@@ -29,18 +34,23 @@
 		</mods>
 		<packageId>true</packageId>
 		<caseTrue>
-
-			<Operation Class="XmlExtensions.PatchOperationSafeAdd">
-				<xpath>Defs/ThingDef[defName="MU_MechUpgrader"]</xpath>
-				<compare>Both</compare>
-				<value>
-					<minifiedDef>MinifiedThing</minifiedDef>
-					<thingCategories>
-						<li>BuildingsProduction</li>
-					</thingCategories>
-				</value>
+			<Operation Class="XmlExtensions.OptionalPatch">
+				<modId>Ordo.Tweaks</modId>
+				<key>MinifiableMechUpgrader</key>
+				<defaultValue>true</defaultValue>
+				<caseTrue>
+					<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+						<xpath>Defs/ThingDef[defName="MU_MechUpgrader"]</xpath>
+						<compare>Both</compare>
+						<value>
+							<minifiedDef>MinifiedThing</minifiedDef>
+							<thingCategories>
+								<li>BuildingsProduction</li>
+							</thingCategories>
+						</value>
+					</Operation>
+				</caseTrue>
 			</Operation>
-
 		</caseTrue>
 	</Operation>
 

@@ -8,12 +8,20 @@
         </mods>
         <packageId>true</packageId>
         <caseTrue>
-            <Operation Class="XmlExtensions.PatchOperationSafeAdd">
-                <xpath>Defs/ThingDef[defName="AMT_Handwear_BlacksmithGloves"]/equippedStatOffsets</xpath>
-                <compare>Both</compare>
-                <value>
-                    <WorkSpeedGlobal>0.05</WorkSpeedGlobal>
-                </value>
+            <Operation Class="XmlExtensions.UseSetting">
+                <modId>Ordo.Tweaks</modId>
+                <key>BlacksmithGlovesWorkSpeed</key>
+                <defaultValue>0.25</defaultValue>
+                <apply>
+                    <!-- Replaces rather than adds: the gloves ship with their own WorkSpeedGlobal -->
+                    <Operation Class="XmlExtensions.PatchOperationSafeAddOrReplace">
+                        <xpath>Defs/ThingDef[defName="AMT_Handwear_BlacksmithGloves"]/equippedStatOffsets</xpath>
+                        <compare>Name</compare>
+                        <value>
+                            <WorkSpeedGlobal>{BlacksmithGlovesWorkSpeed}</WorkSpeedGlobal>
+                        </value>
+                    </Operation>
+                </apply>
             </Operation>
         </caseTrue>
     </Operation>

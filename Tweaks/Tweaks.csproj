@@ -13,21 +13,26 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Reference Include="XmlExtensions">
+            <HintPath>$(WorkshopDirectory)\2574315206\$(RimworldVersion)\Assemblies\XmlExtensions.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+
         <Reference Include="WVC_MoreMechanoidsWorkModes_Main">
-            <HintPath Condition="Exists('F:\SteamLibrary\steamapps\workshop\content\294100\2888380373\$(RimworldVersion)\Assemblies\WVC_MoreMechanoidsWorkModes_Main.dll')">F:\SteamLibrary\steamapps\workshop\content\294100\2888380373\$(RimworldVersion)\Assemblies\WVC_MoreMechanoidsWorkModes_Main.dll</HintPath>
-            <HintPath Condition="!Exists('F:\SteamLibrary\steamapps\workshop\content\294100\2888380373\$(RimworldVersion)\Assemblies\WVC_MoreMechanoidsWorkModes_Main.dll')">F:\SteamLibrary\steamapps\workshop\content\294100\2888380373\$(RimworldFallbackVersion)\Assemblies\WVC_MoreMechanoidsWorkModes_Main.dll</HintPath>
+            <HintPath Condition="Exists('$(WorkshopDirectory)\2888380373\$(RimworldVersion)\Assemblies\WVC_MoreMechanoidsWorkModes_Main.dll')">$(WorkshopDirectory)\2888380373\$(RimworldVersion)\Assemblies\WVC_MoreMechanoidsWorkModes_Main.dll</HintPath>
+            <HintPath Condition="!Exists('$(WorkshopDirectory)\2888380373\$(RimworldVersion)\Assemblies\WVC_MoreMechanoidsWorkModes_Main.dll')">$(WorkshopDirectory)\2888380373\$(RimworldFallbackVersion)\Assemblies\WVC_MoreMechanoidsWorkModes_Main.dll</HintPath>
             <Private>False</Private>
         </Reference>
         
         <Reference Include="WVC_MoreMechanoidsWorkModes_Main">
-            <HintPath Condition="Exists('F:\SteamLibrary\steamapps\workshop\content\294100\3418017359\$(RimworldVersion)\Assemblies\ProgressionAgriculture.dll')">F:\SteamLibrary\steamapps\workshop\content\294100\3418017359\$(RimworldVersion)\Assemblies\ProgressionAgriculture.dll</HintPath>
-            <HintPath Condition="!Exists('F:\SteamLibrary\steamapps\workshop\content\294100\3418017359\$(RimworldVersion)\Assemblies\ProgressionAgriculture.dll')">F:\SteamLibrary\steamapps\workshop\content\294100\3418017359\$(RimworldFallbackVersion)\Assemblies\ProgressionAgriculture.dll</HintPath>
+            <HintPath Condition="Exists('$(WorkshopDirectory)\3418017359\$(RimworldVersion)\Assemblies\ProgressionAgriculture.dll')">$(WorkshopDirectory)\3418017359\$(RimworldVersion)\Assemblies\ProgressionAgriculture.dll</HintPath>
+            <HintPath Condition="!Exists('$(WorkshopDirectory)\3418017359\$(RimworldVersion)\Assemblies\ProgressionAgriculture.dll')">$(WorkshopDirectory)\3418017359\$(RimworldFallbackVersion)\Assemblies\ProgressionAgriculture.dll</HintPath>
             <Private>False</Private>
         </Reference>
         
         <Reference Include="WVC_MoreMechanoidsWorkModes_Main">
-            <HintPath Condition="Exists('F:\SteamLibrary\steamapps\workshop\content\294100\3461060466\$(RimworldVersion)\Assemblies\BiotechPatch.dll')">F:\SteamLibrary\steamapps\workshop\content\294100\3461060466\$(RimworldVersion)\Assemblies\BiotechPatch.dll</HintPath>
-            <HintPath Condition="!Exists('F:\SteamLibrary\steamapps\workshop\content\294100\3461060466\$(RimworldVersion)\Assemblies\BiotechPatch.dll')">F:\SteamLibrary\steamapps\workshop\content\294100\3461060466\$(RimworldFallbackVersion)\Assemblies\BiotechPatch.dll</HintPath>
+            <HintPath Condition="Exists('$(WorkshopDirectory)\3461060466\$(RimworldVersion)\Assemblies\BiotechPatch.dll')">$(WorkshopDirectory)\3461060466\$(RimworldVersion)\Assemblies\BiotechPatch.dll</HintPath>
+            <HintPath Condition="!Exists('$(WorkshopDirectory)\3461060466\$(RimworldVersion)\Assemblies\BiotechPatch.dll')">$(WorkshopDirectory)\3461060466\$(RimworldFallbackVersion)\Assemblies\BiotechPatch.dll</HintPath>
             <Private>False</Private>
         </Reference>
     </ItemGroup>

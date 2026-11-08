@@ -8,12 +8,19 @@
         </mods>
         <packageId>true</packageId>
         <caseTrue>
-            <Operation Class="XmlExtensions.PatchOperationSafeReplace">
-                <xpath>Defs/VSE.Passions.PassionDef[defName="VSE_Critical"]</xpath>
-                <compare>Both</compare>
-                <value>
-                    <learnRateFactorOther>0.75</learnRateFactorOther>
-                </value>
+            <Operation Class="XmlExtensions.UseSetting">
+                <modId>Ordo.Tweaks</modId>
+                <key>VseCriticalLearnRateOther</key>
+                <defaultValue>0.75</defaultValue>
+                <apply>
+                    <Operation Class="XmlExtensions.PatchOperationSafeReplace">
+                        <xpath>Defs/VSE.Passions.PassionDef[defName="VSE_Critical"]</xpath>
+                        <compare>Name</compare>
+                        <value>
+                            <learnRateFactorOther>{VseCriticalLearnRateOther}</learnRateFactorOther>
+                        </value>
+                    </Operation>
+                </apply>
             </Operation>
         </caseTrue>
     </Operation>

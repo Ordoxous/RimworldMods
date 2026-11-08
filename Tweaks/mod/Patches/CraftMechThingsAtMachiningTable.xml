@@ -2,12 +2,19 @@
 
 <Patch>
 
-	<Operation Class="XmlExtensions.PatchOperationSafeAdd">
-		<xpath>Defs/ThingDef/recipeMaker/recipeUsers[li/text()="SubcoreEncoder"]</xpath>
-		<compare>Both</compare>
-		<value>
-			<li>TableMachining</li>
-		</value>
+	<Operation Class="XmlExtensions.OptionalPatch">
+		<modId>Ordo.Tweaks</modId>
+		<key>MechItemsAtMachiningTable</key>
+		<defaultValue>true</defaultValue>
+		<caseTrue>
+			<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+				<xpath>Defs/ThingDef/recipeMaker/recipeUsers[li/text()="SubcoreEncoder"]</xpath>
+				<compare>Both</compare>
+				<value>
+					<li>TableMachining</li>
+				</value>
+			</Operation>
+		</caseTrue>
 	</Operation>
-	
+
 </Patch>

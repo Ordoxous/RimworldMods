@@ -32,7 +32,9 @@ public class JobDriver_HaulMechForRepair : JobDriver
     {
         this.FailOnDestroyedOrNull(MechIndex);
         this.FailOnDespawnedNullOrForbidden(ZoneCellIndex);
-        yield return Toils_Goto.GotoThing(MechIndex, PathEndMode.ClosestTouch).FailOnSomeonePhysicallyInteracting(MechIndex);
+        yield return Toils_Goto.GotoThing(MechIndex, PathEndMode.ClosestTouch)
+            .FailOnSomeonePhysicallyInteracting(MechIndex)
+            .FailOn(() => !((Pawn) job.GetTarget(MechIndex).Thing).Downed);
         yield return Toils_Haul.StartCarryThing(MechIndex);
         yield return Toils_Haul.CarryHauledThingToCell(ZoneCellIndex, PathEndMode.OnCell);
         yield return Toils_Haul.PlaceHauledThingInCell(ZoneCellIndex, null, false);
@@ -51,7 +53,7 @@ public class WorkGiver_HaulMechForRepair : WorkGiver_Scanner
     public override bool ShouldSkip(
         Pawn pawn,
         bool forced = false
-    ) => !PotentialWorkThingsGlobal(pawn).Any();
+    ) => !TweaksSettings.HaulDownedMechs || !PotentialWorkThingsGlobal(pawn).Any();
 
     public override bool HasJobOnThing(
         Pawn pawn,

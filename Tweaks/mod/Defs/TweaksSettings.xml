@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+	<!-- Defaults here must match TweaksSettings.cs and the matching defaultValue in Patches -->
+	<XmlExtensions.SettingsMenuDef>
+		<defName>Ordo_TweaksSettings</defName>
+		<modId>Ordo.Tweaks</modId>
+		<label>Tweaks</label>
+		<defaultSpacing>4</defaultSpacing>
+		<settings>
+
+			<li Class="XmlExtensions.Setting.Text">
+				<text>Settings marked * need a game restart. Settings for mods you don't have active are hidden.</text>
+			</li>
+			<li Class="XmlExtensions.Setting.GapLine"><spacing>12</spacing></li>
+
+			<!-- Interface -->
+			<li Class="XmlExtensions.Setting.Text">
+				<text>Interface</text>
+				<font>Medium</font>
+			</li>
+			<li Class="XmlExtensions.Setting.Checkbox">
+				<key>ArmorIndicators</key>
+				<defaultValue>true</defaultValue>
+				<label>Show armor and damage numbers</label>
+				<tooltip>Shows floating numbers for damage dealt and damage blocked by armor.</tooltip>
+			</li>
+			<li Class="XmlExtensions.Setting.GapLine"><spacing>12</spacing></li>
+
+			<!-- Mechs -->
+			<li Class="XmlExtensions.Setting.Text">
+				<text>Mechs</text>
+				<font>Medium</font>
+			</li>
+			<li Class="XmlExtensions.Setting.Checkbox">
+				<key>HaulDownedMechs</key>
+				<defaultValue>true</defaultValue>
+				<label>Haul downed mechs to shutdown zones</label>
+				<tooltip>Haulers carry downed colony mechs to a shutdown zone from WVC - Work Modes.</tooltip>
+			</li>
+			<li Class="XmlExtensions.Setting.Checkbox">
+				<key>LightMechsUseStandardChargers</key>
+				<defaultValue>true</defaultValue>
+				<label>Light mechs can use standard chargers *</label>
+			</li>
+			<li Class="XmlExtensions.Setting.Checkbox">
+				<key>MechItemsAtMachiningTable</key>
+				<defaultValue>true</defaultValue>
+				<label>Craft mech items at the machining table *</label>
+				<tooltip>Anything made at the subcore encoder can also be made at a machining table.</tooltip>
+			</li>
+			<li Class="XmlExtensions.Setting.Checkbox">
+				<key>SmallMechsInLargeGestator</key>
+				<defaultValue>true</defaultValue>
+				<label>Gestate small mechs in the large gestator *</label>
+			</li>
+			<li MayRequire="GoGaTio.MechanoidUpgrades" Class="XmlExtensions.Setting.Checkbox">
+				<key>SmallUpgradesAtAdvancedAssembler</key>
+				<defaultValue>true</defaultValue>
+				<label>Craft small upgrades at the advanced assembler *</label>
+			</li>
+			<li MayRequireAnyOf="FrozenSnowFox.ComplexJobs,Zei33.SimpleImprove" Class="XmlExtensions.Setting.Checkbox">
+				<key>MechExtraWorkTypes</key>
+				<defaultValue>true</defaultValue>
+				<label>Extra mech work types *</label>
+				<tooltip>Lifters can do Complex Jobs merging and delivering. Constructoids can do Simple Improve work.</tooltip>
+			</li>
+			<li Class="XmlExtensions.Setting.GapLine"><spacing>12</spacing></li>
+
+			<!-- Colony -->
+			<li Class="XmlExtensions.Setting.Text">
+				<text>Colony</text>
+				<font>Medium</font>
+			</li>
+			<li MayRequire="biotechpatch.1trickPwnyta" Class="XmlExtensions.Setting.Checkbox">
+				<key>LimitHemogenFarming</key>
+				<defaultValue>true</defaultValue>
+				<label>Limit hemogen farming to a pack cap</label>
+				<tooltip>Stops queueing extractions from colonists once the map holds this many hemogen packs. When off, farming follows Biotech Patch's own behavior.</tooltip>
+			</li>
+			<li MayRequire="biotechpatch.1trickPwnyta" Class="XmlExtensions.Setting.Slider">
+				<key>HemogenPackCap</key>
+				<defaultValue>30</defaultValue>
+				<label>Hemogen pack cap: {key}</label>
+				<min>5</min>
+				<max>200</max>
+				<decimals>0</decimals>
+			</li>
+			<li MayRequire="ferny.progressionagriculture" Class="XmlExtensions.Setting.Checkbox">
+				<key>UnlockAllTrees</key>
+				<defaultValue>true</defaultValue>
+				<label>Unlock all trees</label>
+				<tooltip>Progression: Agriculture treats every sowable tree as already unlocked. Applies the next time a game loads. Turning this off won't re-lock trees in an existing save.</tooltip>
+			</li>
+			<li Class="XmlExtensions.Setting.Checkbox">
+				<key>ToolsCategory</key>
+				<defaultValue>true</defaultValue>
+				<label>Tools category for stockpiles *</label>
+				<tooltip>Adds weapons that boost a work stat when equipped to a "tools" category. Weapons with only other stat changes, such as the minigun's move speed penalty, are left out.</tooltip>
+			</li>
+			<li Class="XmlExtensions.Setting.GapLine"><spacing>12</spacing></li>
+
+			<!-- Mod balance -->
+			<li Class="XmlExtensions.Setting.Text">
+				<text>Mod balance</text>
+				<font>Medium</font>
+			</li>
+			<li MayRequire="vanillaexpanded.skills" Class="XmlExtensions.Setting.Slider">
+				<key>VseCriticalLearnRateOther</key>
+				<defaultValue>0.75</defaultValue>
+				<label>VSE Critical passion, learning rate in other skills *: {key}</label>
+				<tooltip>Vanilla Skills Expanded's own value is 0.25.</tooltip>
+				<min>0.25</min>
+				<max>1</max>
+				<decimals>2</decimals>
+			</li>
+			<li MayRequire="Tinda.Medieval.Tailor.Continued" Class="XmlExtensions.Setting.Slider">
+				<key>BlacksmithGlovesWorkSpeed</key>
+				<defaultValue>0.25</defaultValue>
+				<label>Blacksmith gloves global work speed *: {key}</label>
+				<tooltip>Medieval Tailor's own value is 0.2.</tooltip>
+				<min>0</min>
+				<max>0.5</max>
+				<decimals>2</decimals>
+			</li>
+			<li MayRequire="VanillaExpanded.VFEPower" Class="XmlExtensions.Setting.Checkbox">
+				<key>VfeGeneratorRebalance</key>
+				<defaultValue>true</defaultValue>
+				<label>Rebalance VFE generators *</label>
+				<tooltip>Applies the outputs below and makes the industrial generators minifiable.</tooltip>
+			</li>
+			<li MayRequire="VanillaExpanded.VFEPower" Class="XmlExtensions.Setting.Slider">
+				<key>VfePortableGeneratorWatts</key>
+				<defaultValue>200</defaultValue>
+				<label>Portable generator output *: {key} W</label>
+				<tooltip>VFE's own value is 500 W.</tooltip>
+				<min>100</min>
+				<max>1000</max>
+				<decimals>0</decimals>
+			</li>
+			<li MayRequire="VanillaExpanded.VFEPower" Class="XmlExtensions.Setting.Slider">
+				<key>VfeIndustrialGeneratorWatts</key>
+				<defaultValue>3000</defaultValue>
+				<label>Industrial generator output *: {key} W</label>
+				<tooltip>VFE's own value is 2400 W.</tooltip>
+				<min>1000</min>
+				<max>6000</max>
+				<decimals>0</decimals>
+			</li>
+			<li Class="XmlExtensions.Setting.GapLine"><spacing>12</spacing></li>
+
+			<!-- Mod compatibility -->
+			<li Class="XmlExtensions.Setting.Text">
+				<text>Mod compatibility</text>
+				<font>Medium</font>
+			</li>
+			<li MayRequire="drilledhead.MechaWeaponChanger" Class="XmlExtensions.Setting.Checkbox">
+				<key>MinifiableMechaWeaponChanger</key>
+				<defaultValue>true</defaultValue>
+				<label>Minifiable: Mecha Weapon Changer *</label>
+			</li>
+			<li MayRequire="GoGaTio.MechanoidUpgrades" Class="XmlExtensions.Setting.Checkbox">
+				<key>MinifiableMechUpgrader</key>
+				<defaultValue>true</defaultValue>
+				<label>Minifiable: mech upgrader *</label>
+			</li>
+			<li MayRequire="ReSplice.XOTR.Core" Class="XmlExtensions.Setting.Checkbox">
+				<key>MinifiableResplice</key>
+				<defaultValue>true</defaultValue>
+				<label>Minifiable: ReSplice gene buildings *</label>
+			</li>
+			<li MayRequire="VanillaExpanded.VFEProduction" Class="XmlExtensions.Setting.Checkbox">
+				<key>MinifiableVfeFabricationBench</key>
+				<defaultValue>true</defaultValue>
+				<label>Minifiable: VFE component fabrication bench *</label>
+			</li>
+			<li MayRequire="VanillaExpanded.Temperature" Class="XmlExtensions.Setting.Checkbox">
+				<key>MinifiableVteWallUnits</key>
+				<defaultValue>true</defaultValue>
+				<label>Minifiable: Vanilla Temperature wall units *</label>
+			</li>
+			<li MayRequire="VanillaExpanded.VFEProduction" Class="XmlExtensions.Setting.Checkbox">
+				<key>VfeBenchLinksFabricationCabinet</key>
+				<defaultValue>true</defaultValue>
+				<label>VFE fabrication bench links to the fabrication cabinet *</label>
+			</li>
+			<li MayRequire="dubwise.dubsbadhygiene" Class="XmlExtensions.Setting.Checkbox">
+				<key>DubsWellsOnGravships</key>
+				<defaultValue>true</defaultValue>
+				<label>Dubs water wells can be placed on gravships *</label>
+			</li>
+			<li MayRequire="VanillaExpanded.VFEFactory" Class="XmlExtensions.Setting.Checkbox">
+				<key>VfeFactoryComponentResearchFix</key>
+				<defaultValue>true</defaultValue>
+				<label>VFE Factory: remove research requirement from component assembly *</label>
+			</li>
+
+		</settings>
+	</XmlExtensions.SettingsMenuDef>
+
+</Defs>

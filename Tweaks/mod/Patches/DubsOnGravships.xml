@@ -1,13 +1,22 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 
 <Patch>
-	
-	<Operation Class="XmlExtensions.PatchOperationSafeRemove">
-		<xpath>Defs/ThingDef[defName="WaterWellInlet"]/placeWorkers/li[text()="PlaceWorker_InvalidOverSubstructure"]</xpath>
+
+	<Operation Class="XmlExtensions.OptionalPatch">
+		<modId>Ordo.Tweaks</modId>
+		<key>DubsWellsOnGravships</key>
+		<defaultValue>true</defaultValue>
+		<caseTrue>
+
+			<Operation Class="XmlExtensions.PatchOperationSafeRemove">
+				<xpath>Defs/ThingDef[defName="WaterWellInlet"]/placeWorkers/li[text()="PlaceWorker_InvalidOverSubstructure"]</xpath>
+			</Operation>
+
+			<Operation Class="XmlExtensions.PatchOperationSafeRemove">
+				<xpath>Defs/ThingDef[defName="DeepWaterWellInlet"]/placeWorkers/li[text()="PlaceWorker_InvalidOverSubstructure"]</xpath>
+			</Operation>
+
+		</caseTrue>
 	</Operation>
-	
-	<Operation Class="XmlExtensions.PatchOperationSafeRemove">
-		<xpath>Defs/ThingDef[defName="DeepWaterWellInlet"]/placeWorkers/li[text()="PlaceWorker_InvalidOverSubstructure"]</xpath>
-	</Operation>
-	
+
 </Patch>

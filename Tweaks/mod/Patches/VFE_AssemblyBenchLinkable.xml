@@ -7,14 +7,19 @@
     </mods>
     <packageId>true</packageId>
     <caseTrue>
-
-      <Operation Class="PatchOperationAdd">
-        <xpath>Defs/ThingDef[defName="VFE_ComponentFabricationBench"]/comps/li[@Class="CompProperties_AffectedByFacilities"]/linkableFacilities</xpath>
-        <value>
-          <li>VFE_FabricationCabinet</li>
-        </value>
+      <Operation Class="XmlExtensions.OptionalPatch">
+        <modId>Ordo.Tweaks</modId>
+        <key>VfeBenchLinksFabricationCabinet</key>
+        <defaultValue>true</defaultValue>
+        <caseTrue>
+          <Operation Class="PatchOperationAdd">
+            <xpath>Defs/ThingDef[defName="VFE_ComponentFabricationBench"]/comps/li[@Class="CompProperties_AffectedByFacilities"]/linkableFacilities</xpath>
+            <value>
+              <li>VFE_FabricationCabinet</li>
+            </value>
+          </Operation>
+        </caseTrue>
       </Operation>
-
     </caseTrue>
   </Operation>
 

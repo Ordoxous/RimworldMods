@@ -32,10 +32,19 @@ public class HemogenTilSet
     public static bool Prefix_Comp_HemogenFarm_CompTick(Comp_HemogenFarm __instance)
     {
         // Caravan and transport pod pawns still tick comps but have no map
+        if (!__instance.Pawn.Spawned || !__instance.Pawn.IsHashIntervalTick(15000))
+        {
+            return false;
+        }
+
+        // Checked after the interval, since this runs every tick. The original only acts on this interval too
+        if (!TweaksSettings.LimitHemogenFarming)
+        {
+            return true;
+        }
+
         if (
-            !__instance.Pawn.Spawned
-            || !__instance.Pawn.IsHashIntervalTick(15000)
-            || !BiotechPatchSettings.HemogenFarmAnyone
+            !BiotechPatchSettings.HemogenFarmAnyone
             || !__instance.HemogenFarmEnabled
             || __instance.Pawn.IsPrisoner
             || !SanguophageUtility.CanSafelyBeQueuedForHemogenExtraction(__instance.Pawn)
@@ -46,7 +55,7 @@ public class HemogenTilSet
         }
         
         var packCount = __instance.Pawn.Map.listerThings.ThingsOfDef(ThingDefOf.HemogenPack).Sum(t => t.stackCount);
-        if (packCount >= 30) {
+        if (packCount >= TweaksSettings.HemogenPackCap) {
             return false;
         }
 

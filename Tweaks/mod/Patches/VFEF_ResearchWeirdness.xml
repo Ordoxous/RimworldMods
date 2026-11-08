@@ -1,11 +1,22 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 
 <Patch>
-    <Operation Class="XmlExtensions.PatchOperationSafeRemove">
-        <xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_AssembleComponent"]/researchPrerequisites</xpath>
+
+    <Operation Class="XmlExtensions.OptionalPatch">
+        <modId>Ordo.Tweaks</modId>
+        <key>VfeFactoryComponentResearchFix</key>
+        <defaultValue>true</defaultValue>
+        <caseTrue>
+
+            <Operation Class="XmlExtensions.PatchOperationSafeRemove">
+                <xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_AssembleComponent"]/researchPrerequisites</xpath>
+            </Operation>
+
+            <Operation Class="XmlExtensions.PatchOperationSafeRemove">
+                <xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_AssembleAdvancedComponent"]/researchPrerequisites</xpath>
+            </Operation>
+
+        </caseTrue>
     </Operation>
 
-    <Operation Class="XmlExtensions.PatchOperationSafeRemove">
-        <xpath>Defs/PipeSystem.ProcessDef[defName="VFEFactory_AssembleAdvancedComponent"]/researchPrerequisites</xpath>
-    </Operation>
 </Patch>
