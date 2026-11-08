@@ -91,4 +91,64 @@
     <specialTrainable>true</specialTrainable>
   </TrainableDef>
 
+  <TrainableDef>
+    <defName>Ordo_Howl</defName>
+    <label>howl</label>
+    <description>Teach the animal to rally nearby allies with a howl. Once trained, it will also do this on its own when enemies get close.</description>
+    <listPriority>0</listPriority>
+    <difficulty>200</difficulty>
+    <steps>2</steps>
+    <specialTrainable>true</specialTrainable>
+  </TrainableDef>
+
+  <TrainableDef>
+    <defName>Ordo_PoisonBite</defName>
+    <label>poison bite</label>
+    <description>Command the animal to deliver a venomous bite. Once trained, the animal will only use it when commanded.</description>
+    <listPriority>0</listPriority>
+    <difficulty>200</difficulty>
+    <steps>2</steps>
+    <specialTrainable>true</specialTrainable>
+  </TrainableDef>
+
+  <TrainableDef>
+    <defName>Ordo_Intimidate</defName>
+    <label>intimidate</label>
+    <description>Command the animal to threaten nearby enemies. This has a chance to send them fleeing in terror. Once trained, the animal will only do this when commanded.</description>
+    <listPriority>0</listPriority>
+    <difficulty>200</difficulty>
+    <steps>2</steps>
+    <specialTrainable>true</specialTrainable>
+  </TrainableDef>
+
+  <TrainableDef>
+    <defName>Ordo_Withdraw</defName>
+    <label>withdraw</label>
+    <description>Teach the animal to pull back into its protective shell. Once trained, it will also do this on its own when hurt.</description>
+    <listPriority>0</listPriority>
+    <difficulty>200</difficulty>
+    <steps>2</steps>
+    <specialTrainable>true</specialTrainable>
+  </TrainableDef>
+
+  <TrainableDef>
+    <defName>Ordo_Kick</defName>
+    <label>kick</label>
+    <description>Command the animal to kick a target, knocking it back. Once trained, the animal will only kick when commanded.</description>
+    <listPriority>0</listPriority>
+    <difficulty>200</difficulty>
+    <steps>2</steps>
+    <specialTrainable>true</specialTrainable>
+  </TrainableDef>
+
+  <TrainableDef>
+    <defName>Ordo_Spit</defName>
+    <label>spit</label>
+    <description>Command the animal to spit at a target, leaving it half blind for a short time. Once trained, the animal will only spit when commanded.</description>
+    <listPriority>0</listPriority>
+    <difficulty>200</difficulty>
+    <steps>2</steps>
+    <specialTrainable>true</specialTrainable>
+  </TrainableDef>
+
 </Defs>

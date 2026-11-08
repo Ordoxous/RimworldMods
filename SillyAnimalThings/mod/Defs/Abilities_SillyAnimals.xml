@@ -289,6 +289,11 @@
         <durationSecondsOverride>30~30</durationSecondsOverride>
       </li>
     </comps>
+    <modExtensions>
+      <li Class="Ordo.SillyAnimalThings.AutoCastExtension">
+        <castBelowHealth>0.6</castBelowHealth>
+      </li>
+    </modExtensions>
   </AbilityDef>
 
   <!-- Big cat: cast automatically by SelfBuffAutoCast before closing in on an enemy -->
@@ -324,6 +329,284 @@
         <onlyApplyToSelf>true</onlyApplyToSelf>
         <replaceExisting>true</replaceExisting>
         <durationSecondsOverride>20~20</durationSecondsOverride>
+      </li>
+    </comps>
+    <modExtensions>
+      <li Class="Ordo.SillyAnimalThings.AutoCastExtension">
+        <castWhenEnemyFartherThan>6.9</castWhenEnemyFartherThan>
+      </li>
+    </modExtensions>
+  </AbilityDef>
+
+  <!-- Pack howler: cast automatically by SelfBuffAutoCast when an enemy is close -->
+
+  <AbilityDef>
+    <defName>Ordo_Howl</defName>
+    <label>howl</label>
+    <description>Let out a rallying howl. Nearby allies who hear it fight harder and move faster for a short time. The animal does this on its own when enemies get close.</description>
+    <iconPath>UI/Commands/WarTrumpet</iconPath>
+    <cooldownTicksRange>7500</cooldownTicksRange> <!-- 3 hours -->
+    <hostile>false</hostile>
+    <casterMustBeCapableOfViolence>false</casterMustBeCapableOfViolence>
+    <targetRequired>false</targetRequired>
+    <displayOrder>300</displayOrder>
+    <displayGizmoWhileUndrafted>true</displayGizmoWhileUndrafted>
+    <disableGizmoWhileUndrafted>false</disableGizmoWhileUndrafted>
+    <statBases>
+      <Ability_EffectRadius>14.9</Ability_EffectRadius>
+    </statBases>
+    <verbProperties>
+      <verbClass>Verb_CastAbility</verbClass>
+      <violent>false</violent>
+      <range>14.9</range>
+      <warmupTime>0.5</warmupTime>
+      <requireLineOfSight>false</requireLineOfSight>
+      <drawAimPie>false</drawAimPie>
+      <targetParams>
+        <canTargetSelf>true</canTargetSelf>
+        <canTargetPawns>true</canTargetPawns>
+        <canTargetBuildings>false</canTargetBuildings>
+        <canTargetMechs>false</canTargetMechs>
+        <mapObjectTargetsMustBeAutoAttackable>false</mapObjectTargetsMustBeAutoAttackable>
+      </targetParams>
+    </verbProperties>
+    <comps>
+      <li Class="CompProperties_AbilityRequiresTrainable">
+        <trainableDef>Ordo_Howl</trainableDef>
+      </li>
+      <li Class="CompProperties_AbilityEffect">
+        <compClass>Ordo.SillyAnimalThings.CompAbilityEffect_OnlyTargetAllies</compClass>
+      </li>
+      <li Class="CompProperties_AbilityAnimalRoar">
+        <chanceFromHearingCurve>
+          <points>
+            <li>(0.0, 0.0)</li>
+            <li>(0.8, 1.0)</li>
+          </points>
+        </chanceFromHearingCurve>
+      </li>
+      <li Class="CompProperties_AbilityGiveHediff">
+        <compClass>CompAbilityEffect_GiveHediff</compClass>
+        <hediffDef>Ordo_Rallied</hediffDef>
+        <replaceExisting>true</replaceExisting>
+        <durationSecondsOverride>30~30</durationSecondsOverride>
+      </li>
+      <li Class="CompProperties_AbilityEffecterOnCaster">
+        <effecterDef>WarTrumpet</effecterDef>
+        <maintainTicks>20</maintainTicks>
+      </li>
+    </comps>
+    <modExtensions>
+      <li Class="Ordo.SillyAnimalThings.AutoCastExtension">
+        <castWhenEnemyWithin>19.9</castWhenEnemyWithin>
+      </li>
+    </modExtensions>
+  </AbilityDef>
+
+  <!-- Venomous -->
+
+  <AbilityDef ParentName="AbilityTouchBase">
+    <defName>Ordo_PoisonBite</defName>
+    <label>poison bite</label>
+    <description>Sink venomous teeth into a target, building up toxins in its blood. Bigger animals bite harder and deliver more venom.</description>
+    <iconPath>Things/Mote/ToxicDamage</iconPath>
+    <cooldownTicksRange>1250</cooldownTicksRange> <!-- 30 minutes -->
+    <aiCanUse>true</aiCanUse>
+    <ai_IsIncendiary>false</ai_IsIncendiary>
+    <verbProperties>
+      <verbClass>Verb_CastAbilityTouch</verbClass>
+      <drawAimPie>false</drawAimPie>
+      <range>-1</range>
+      <warmupTime>0.5</warmupTime>
+      <targetParams>
+        <canTargetSelf>false</canTargetSelf>
+        <canTargetBuildings>false</canTargetBuildings>
+        <canTargetMechs>false</canTargetMechs>
+      </targetParams>
+    </verbProperties>
+    <comps>
+      <li Class="CompProperties_AbilityRequiresTrainable">
+        <trainableDef>Ordo_PoisonBite</trainableDef>
+        <aiCanCastWithoutTrainable>true</aiCanCastWithoutTrainable>
+      </li>
+      <li Class="Ordo.SillyAnimalThings.CompProperties_AbilityStrike">
+        <damageDef>ToxicBite</damageDef>
+        <damageBase>4</damageBase>
+        <damagePerBodySize>6</damagePerBodySize>
+        <armorPenetration>0.1</armorPenetration>
+      </li>
+    </comps>
+  </AbilityDef>
+
+  <!-- Intimidating -->
+
+  <AbilityDef>
+    <defName>Ordo_Intimidate</defName>
+    <label>intimidate</label>
+    <description>Let out a threatening display that has a chance to send nearby hostile humans and animals fleeing in terror.</description>
+    <iconPath>UI/Commands/TerrorRoar</iconPath>
+    <cooldownTicksRange>7500</cooldownTicksRange> <!-- 3 hours -->
+    <stunTargetWhileCasting>true</stunTargetWhileCasting>
+    <targetRequired>false</targetRequired>
+    <aiCanUse>true</aiCanUse>
+    <ai_SearchAOEForTargets>true</ai_SearchAOEForTargets>
+    <ai_IsIncendiary>false</ai_IsIncendiary>
+    <displayOrder>300</displayOrder>
+    <displayGizmoWhileUndrafted>true</displayGizmoWhileUndrafted>
+    <disableGizmoWhileUndrafted>false</disableGizmoWhileUndrafted>
+    <statBases>
+      <Ability_EffectRadius>9.9</Ability_EffectRadius>
+    </statBases>
+    <verbProperties>
+      <verbClass>Verb_CastAbility</verbClass>
+      <range>9.9</range>
+      <warmupTime>0.5</warmupTime>
+      <requireLineOfSight>false</requireLineOfSight>
+      <targetParams>
+        <canTargetSelf>true</canTargetSelf>
+        <canTargetPawns>true</canTargetPawns>
+        <canTargetAnimals>true</canTargetAnimals>
+        <canTargetHumans>true</canTargetHumans>
+        <canTargetMechs>false</canTargetMechs>
+        <canTargetEntities>false</canTargetEntities>
+        <canTargetSubhumans>false</canTargetSubhumans>
+        <canTargetBuildings>false</canTargetBuildings>
+      </targetParams>
+    </verbProperties>
+    <comps>
+      <li Class="CompProperties_AbilityRequiresTrainable">
+        <trainableDef>Ordo_Intimidate</trainableDef>
+        <aiCanCastWithoutTrainable>true</aiCanCastWithoutTrainable>
+      </li>
+      <li Class="CompProperties_AbilityGiveMentalState">
+        <compClass>CompAbilityEffect_GiveMentalState</compClass>
+        <stateDef>Terror</stateDef>
+      </li>
+      <li Class="CompProperties_AbilityEffect">
+        <compClass>CompAbilityEffect_OnlyTargetHostiles</compClass>
+      </li>
+      <li Class="CompProperties_AbilityAnimalRoar">
+        <chanceFromHearingCurve>
+          <points>
+            <li>(0.0, 0.0)</li>
+            <li>(1.0, 0.4)</li>
+          </points>
+        </chanceFromHearingCurve>
+      </li>
+      <li Class="CompProperties_AbilityEffecterOnCaster">
+        <effecterDef>TerrorRoar</effecterDef>
+        <maintainTicks>20</maintainTicks>
+      </li>
+    </comps>
+  </AbilityDef>
+
+  <!-- Shelled: cast automatically by SelfBuffAutoCast when hurt -->
+
+  <AbilityDef>
+    <defName>Ordo_Withdraw</defName>
+    <label>withdraw</label>
+    <description>Pull back into a protective shell, gaining heavy armor but barely moving for a short time. The animal does this on its own when hurt.</description>
+    <iconPath>UI/Commands/HideZone</iconPath>
+    <cooldownTicksRange>5000</cooldownTicksRange> <!-- 2 hours -->
+    <hostile>false</hostile>
+    <casterMustBeCapableOfViolence>false</casterMustBeCapableOfViolence>
+    <targetRequired>false</targetRequired>
+    <displayGizmoWhileUndrafted>true</displayGizmoWhileUndrafted>
+    <disableGizmoWhileUndrafted>false</disableGizmoWhileUndrafted>
+    <verbProperties>
+      <verbClass>Verb_CastAbility</verbClass>
+      <violent>false</violent>
+      <range>0</range>
+      <warmupTime>0</warmupTime>
+      <drawAimPie>false</drawAimPie>
+      <requireLineOfSight>false</requireLineOfSight>
+      <targetParams>
+        <canTargetSelf>true</canTargetSelf>
+      </targetParams>
+    </verbProperties>
+    <comps>
+      <li Class="CompProperties_AbilityRequiresTrainable">
+        <trainableDef>Ordo_Withdraw</trainableDef>
+      </li>
+      <li Class="CompProperties_AbilityGiveHediff">
+        <compClass>CompAbilityEffect_GiveHediff</compClass>
+        <hediffDef>Ordo_Withdrawn</hediffDef>
+        <onlyApplyToSelf>true</onlyApplyToSelf>
+        <replaceExisting>true</replaceExisting>
+        <durationSecondsOverride>20~20</durationSecondsOverride>
+      </li>
+    </comps>
+    <modExtensions>
+      <li Class="Ordo.SillyAnimalThings.AutoCastExtension">
+        <castBelowHealth>0.75</castBelowHealth>
+      </li>
+    </modExtensions>
+  </AbilityDef>
+
+  <!-- Kicker -->
+
+  <AbilityDef ParentName="AbilityTouchBase">
+    <defName>Ordo_Kick</defName>
+    <label>kick</label>
+    <description>Deliver a heavy kick that knocks the target back and staggers it. Bigger animals kick harder.</description>
+    <iconPath>UI/Commands/AttackMelee</iconPath>
+    <cooldownTicksRange>1250</cooldownTicksRange> <!-- 30 minutes -->
+    <aiCanUse>true</aiCanUse>
+    <ai_IsIncendiary>false</ai_IsIncendiary>
+    <verbProperties>
+      <verbClass>Verb_CastAbilityTouch</verbClass>
+      <drawAimPie>false</drawAimPie>
+      <range>-1</range>
+      <warmupTime>0.5</warmupTime>
+      <targetParams>
+        <canTargetSelf>false</canTargetSelf>
+        <canTargetBuildings>false</canTargetBuildings>
+      </targetParams>
+    </verbProperties>
+    <comps>
+      <li Class="CompProperties_AbilityRequiresTrainable">
+        <trainableDef>Ordo_Kick</trainableDef>
+        <aiCanCastWithoutTrainable>true</aiCanCastWithoutTrainable>
+      </li>
+      <li Class="Ordo.SillyAnimalThings.CompProperties_AbilityStrike">
+        <damageDef>Blunt</damageDef>
+        <damageBase>6</damageBase>
+        <damagePerBodySize>5</damagePerBodySize>
+        <armorPenetration>0.2</armorPenetration>
+        <knockbackStaggerTicks>120</knockbackStaggerTicks>
+      </li>
+    </comps>
+  </AbilityDef>
+
+  <!-- Spitter -->
+
+  <AbilityDef>
+    <defName>Ordo_Spit</defName>
+    <label>spit</label>
+    <description>Spit a foul wad of saliva at a target's face, leaving it half blind for a short time.</description>
+    <iconPath>Things/Mote/AcidSpray</iconPath>
+    <cooldownTicksRange>2500</cooldownTicksRange> <!-- 1 hour -->
+    <aiCanUse>true</aiCanUse>
+    <ai_IsIncendiary>false</ai_IsIncendiary>
+    <displayGizmoWhileUndrafted>true</displayGizmoWhileUndrafted>
+    <disableGizmoWhileUndrafted>false</disableGizmoWhileUndrafted>
+    <verbProperties>
+      <verbClass>Verb_CastAbility</verbClass>
+      <range>7.9</range>
+      <warmupTime>0.75</warmupTime>
+      <requireLineOfSight>true</requireLineOfSight>
+      <targetParams>
+        <canTargetBuildings>false</canTargetBuildings>
+        <canTargetMechs>false</canTargetMechs>
+      </targetParams>
+    </verbProperties>
+    <comps>
+      <li Class="CompProperties_AbilityRequiresTrainable">
+        <trainableDef>Ordo_Spit</trainableDef>
+        <aiCanCastWithoutTrainable>true</aiCanCastWithoutTrainable>
+      </li>
+      <li Class="CompProperties_AbilityLaunchProjectile">
+        <projectileDef>Ordo_Proj_Spit</projectileDef>
       </li>
     </comps>
   </AbilityDef>

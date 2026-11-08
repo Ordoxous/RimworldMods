@@ -117,4 +117,93 @@
     </races>
   </Ordo.SillyAnimalThings.AnimalTagDef>
 
+  <Ordo.SillyAnimalThings.AnimalTagDef>
+    <defName>Ordo_Tag_PackHowler</defName>
+    <label>pack howler</label>
+    <abilities>
+      <li>Ordo_Howl</li>
+    </abilities>
+    <races>
+      <li>Wolf_Timber</li>
+      <li>Wolf_Arctic</li>
+      <li>Warg</li>
+      <li>Wolf_Great</li>
+      <li>BogHound</li>
+      <li>Husky</li>
+    </races>
+  </Ordo.SillyAnimalThings.AnimalTagDef>
+
+  <Ordo.SillyAnimalThings.AnimalTagDef>
+    <defName>Ordo_Tag_Venomous</defName>
+    <label>venomous</label>
+    <abilities>
+      <li>Ordo_PoisonBite</li>
+    </abilities>
+    <races>
+      <li>Rat</li>
+      <li MayRequire="Ludeon.RimWorld.Biotech">WasteRat</li>
+      <li>Cobra</li>
+      <li>Megaspider</li>
+      <li>MonitorLizard</li>
+    </races>
+  </Ordo.SillyAnimalThings.AnimalTagDef>
+
+  <Ordo.SillyAnimalThings.AnimalTagDef>
+    <defName>Ordo_Tag_Intimidating</defName>
+    <label>intimidating</label>
+    <abilities>
+      <li>Ordo_Intimidate</li>
+    </abilities>
+    <races>
+      <li>Goose</li>
+      <li>Gorilla</li>
+      <li>Bear_Grizzly</li>
+      <li>Cobra</li>
+    </races>
+  </Ordo.SillyAnimalThings.AnimalTagDef>
+
+  <Ordo.SillyAnimalThings.AnimalTagDef>
+    <defName>Ordo_Tag_Shelled</defName>
+    <label>shelled</label>
+    <abilities>
+      <li>Ordo_Withdraw</li>
+    </abilities>
+    <races>
+      <li>Tortoise</li>
+      <li>SeaTurtle</li>
+      <li>HermitCrab</li>
+      <li>StoneCrab</li>
+      <li>LavaSnail</li>
+      <li>Armadillo</li>
+      <li>Megascarab</li>
+    </races>
+  </Ordo.SillyAnimalThings.AnimalTagDef>
+
+  <Ordo.SillyAnimalThings.AnimalTagDef>
+    <defName>Ordo_Tag_Kicker</defName>
+    <label>kicker</label>
+    <abilities>
+      <li>Ordo_Kick</li>
+    </abilities>
+    <races>
+      <li>Horse</li>
+      <li>Donkey</li>
+      <li>Ostrich</li>
+      <li>Emu</li>
+      <li>Cassowary</li>
+    </races>
+  </Ordo.SillyAnimalThings.AnimalTagDef>
+
+  <Ordo.SillyAnimalThings.AnimalTagDef>
+    <defName>Ordo_Tag_Spitter</defName>
+    <label>spitter</label>
+    <abilities>
+      <li>Ordo_Spit</li>
+    </abilities>
+    <races>
+      <li>Dromedary</li>
+      <li>Alpaca</li>
+    </races>
+  </Ordo.SillyAnimalThings.AnimalTagDef>
+
 </Defs>

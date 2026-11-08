@@ -38,4 +38,77 @@
     </comps>
   </HediffDef>
 
+  <HediffDef>
+    <defName>Ordo_Rallied</defName>
+    <label>rallied</label>
+    <description>Stirred up by a rallying howl, fighting harder and moving faster.</description>
+    <hediffClass>HediffWithComps</hediffClass>
+    <isBad>false</isBad>
+    <comps>
+      <li Class="HediffCompProperties_Disappears">
+        <showRemainingTime>True</showRemainingTime>
+      </li>
+      <li Class="HediffCompProperties_DisappearsOnDeath" />
+    </comps>
+    <stages>
+      <li>
+        <statFactors>
+          <MeleeDamageFactor>1.25</MeleeDamageFactor>
+          <MoveSpeed>1.2</MoveSpeed>
+        </statFactors>
+      </li>
+    </stages>
+  </HediffDef>
+
+  <!-- Slows through MoveSpeed rather than the Moving capacity: a pawn with no Moving capacity counts as downed -->
+  <HediffDef>
+    <defName>Ordo_Withdrawn</defName>
+    <label>withdrawn</label>
+    <description>Pulled back into a protective shell. Very well armored, but barely able to move.</description>
+    <hediffClass>HediffWithComps</hediffClass>
+    <isBad>false</isBad>
+    <comps>
+      <li Class="HediffCompProperties_Disappears">
+        <showRemainingTime>True</showRemainingTime>
+      </li>
+      <li Class="HediffCompProperties_DisappearsOnDeath" />
+    </comps>
+    <stages>
+      <li>
+        <statOffsets>
+          <ArmorRating_Sharp>1.2</ArmorRating_Sharp>
+          <ArmorRating_Blunt>1.2</ArmorRating_Blunt>
+          <ArmorRating_Heat>0.6</ArmorRating_Heat>
+        </statOffsets>
+        <statFactors>
+          <MoveSpeed>0.05</MoveSpeed>
+        </statFactors>
+      </li>
+    </stages>
+  </HediffDef>
+
+  <HediffDef>
+    <defName>Ordo_SpitInEyes</defName>
+    <label>spit in eyes</label>
+    <description>A foul wad of saliva in the eyes is making it hard to see.</description>
+    <hediffClass>HediffWithComps</hediffClass>
+    <comps>
+      <li Class="HediffCompProperties_Disappears">
+        <disappearsAfterTicks>900~900</disappearsAfterTicks>
+        <showRemainingTime>True</showRemainingTime>
+      </li>
+      <li Class="HediffCompProperties_DisappearsOnDeath" />
+    </comps>
+    <stages>
+      <li>
+        <capMods>
+          <li>
+            <capacity>Sight</capacity>
+            <postFactor>0.5</postFactor>
+          </li>
+        </capMods>
+      </li>
+    </stages>
+  </HediffDef>
+
 </Defs>

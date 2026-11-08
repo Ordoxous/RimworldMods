@@ -4,19 +4,38 @@ using Verse.AI;
 
 namespace Ordo.SillyAnimalThings;
 
+// Conditions under which a self-targeted ability casts itself. Any unset condition is ignored.
+public class AutoCastExtension : DefModExtension
+{
+	// Cast straight away when damage leaves the pawn below this fraction of its health
+	public float castBelowHealth = -1f;
+
+	// Cast at the start of a fight, depending on how far away the enemy is
+	public float castWhenEnemyFartherThan = -1f;
+
+	public float castWhenEnemyWithin = -1f;
+
+	public bool CastsInCombat => castWhenEnemyFartherThan > 0f || castWhenEnemyWithin > 0f;
+
+	public bool EnemyDistanceAllowsCast(
+		Pawn pawn,
+		Thing enemy
+	)
+	{
+		return (castWhenEnemyFartherThan <= 0f || !enemy.Position.InHorDistOf(pawn.Position, castWhenEnemyFartherThan))
+		       && (castWhenEnemyWithin <= 0f || enemy.Position.InHorDistOf(pawn.Position, castWhenEnemyWithin));
+	}
+}
+
 // Self-targeted abilities that vanilla AI can't use properly: the combat AI would aim them at the enemy instead
 public static class SelfBuffAutoCast
 {
-	private const float RegenerateHealthThreshold = 0.6f;
-
-	private const float HiddenDragonMinDistance = 6.9f;
-
 	private static bool CanAutoCast(
 		Pawn pawn,
 		Ability ability
 	)
 	{
-		if (ability == null || !ability.CanCast)
+		if (!ability.CanCast)
 		{
 			return false;
 		}
@@ -35,10 +54,15 @@ public static class SelfBuffAutoCast
 			return;
 		}
 
-		var regenerate = __instance.abilities.GetAbility(SillyAnimalThingsDefOf.Ordo_Regenerate);
-		if (__instance.health.summaryHealth.SummaryHealthPercent < RegenerateHealthThreshold && CanAutoCast(__instance, regenerate))
+		foreach (var ability in __instance.abilities.abilities)
 		{
-			regenerate.Activate(__instance, __instance);
+			var autoCast = ability.def.GetModExtension<AutoCastExtension>();
+			if (autoCast != null
+			    && __instance.health.summaryHealth.SummaryHealthPercent < autoCast.castBelowHealth
+			    && CanAutoCast(__instance, ability))
+			{
+				ability.Activate(__instance, __instance);
+			}
 		}
 	}
 
@@ -48,15 +72,23 @@ public static class SelfBuffAutoCast
 		ref Job __result
 	)
 	{
-		var hiddenDragon = pawn.abilities?.GetAbility(SillyAnimalThingsDefOf.Ordo_HiddenDragon);
-		if (!CanAutoCast(pawn, hiddenDragon)
-		    || pawn.IsPsychologicallyInvisible()
-		    || enemyTarget.Position.InHorDistOf(pawn.Position, HiddenDragonMinDistance))
+		if (pawn.abilities == null)
 		{
 			return true;
 		}
 
-		__result = hiddenDragon.GetJob(pawn, pawn);
-		return false;
+		foreach (var ability in pawn.abilities.abilities)
+		{
+			var autoCast = ability.def.GetModExtension<AutoCastExtension>();
+			if (autoCast is { CastsInCombat: true }
+			    && autoCast.EnemyDistanceAllowsCast(pawn, enemyTarget)
+			    && CanAutoCast(pawn, ability))
+			{
+				__result = ability.GetJob(pawn, pawn);
+				return false;
+			}
+		}
+
+		return true;
 	}
 }

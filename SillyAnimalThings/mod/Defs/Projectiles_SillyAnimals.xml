@@ -49,4 +49,26 @@
     </projectile>
   </ThingDef>
 
+  <ThingDef ParentName="BaseBullet">
+    <defName>Ordo_Proj_Spit</defName>
+    <label>spit</label>
+    <thingClass>Ordo.SillyAnimalThings.Projectile_ApplyHediff</thingClass>
+    <graphicData>
+      <texPath>Things/Projectile/FoamLong/Foam</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <color>(170,190,120)</color>
+      <drawSize>0.7</drawSize>
+    </graphicData>
+    <projectile>
+      <damageDef>Blunt</damageDef>
+      <damageAmountBase>1</damageAmountBase>
+      <speed>30</speed>
+    </projectile>
+    <modExtensions>
+      <li Class="Ordo.SillyAnimalThings.ProjectileHediffExtension">
+        <hediffDef>Ordo_SpitInEyes</hediffDef>
+      </li>
+    </modExtensions>
+  </ThingDef>
+
 </Defs>

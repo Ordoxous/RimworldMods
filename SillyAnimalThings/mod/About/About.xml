@@ -31,6 +31,11 @@
 - Penguin, otter, seal, sea lion: belly slide (a fast dash along the ground)
 - Walrus, rhinoceros, hippo, bison, muffalo, wild boar, ibex, goat, moose, elk, mastodon, elephant: charge (barrels into a target, battering and knocking back nearby enemies)
 - Wolverine, badger: regenerate (a burst of rapid healing, used automatically when badly hurt)
-- Tiger, cougar, panther, scimitar cat: hidden dragon (turns invisible until it strikes, used automatically before closing in)</description>
-
+- Tiger, cougar, panther, scimitar cat: hidden dragon (turns invisible until it strikes, used automatically before closing in)
+- Wolves, warg, bog hound, husky: howl (rallies nearby allies, used automatically when enemies get close)
+- Rat, waste rat, cobra, megaspider, monitor lizard: poison bite (a venomous bite that builds up toxins)
+- Goose, gorilla, grizzly bear, cobra: intimidate (a threat that can send nearby enemies fleeing in terror)
+- Tortoise, sea turtle, crabs, lava snail, armadillo, megascarab: withdraw (heavy armor but barely moving, used automatically when hurt)
+- Horse, donkey, ostrich, emu, cassowary: kick (a heavy hit with knockback)
+- Dromedary, alpaca: spit (leaves a target half blind for a short time)</description>
 </ModMetaData>
