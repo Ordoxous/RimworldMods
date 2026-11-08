@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Defs>
 
-  <!-- Elephant -->
+  <!-- Trunked -->
 
   <AbilityDef>
     <defName>Ordo_TrunkBlast</defName>
@@ -69,17 +69,17 @@
     </comps>
   </AbilityDef>
 
-  <!-- Boomalope -->
+  <!-- Volatile -->
 
   <AbilityDef ParentName="AbilityTouchBase">
     <defName>Ordo_Detonate</defName>
     <label>detonate</label>
-    <description>Charge at a target and detonate the volatile chemical sac. The boomalope dies in the explosion.</description>
+    <description>Run at a target and burst, releasing whatever volatile contents the body holds. The animal does not survive.</description>
     <iconPath>UI/Commands/Detonate</iconPath>
     <cooldownTicksRange>60</cooldownTicksRange>
     <aiCanUse>true</aiCanUse>
     <ai_IsIncendiary>true</ai_IsIncendiary>
-    <confirmationDialogText>{PAWN_labelShort} will die in the explosion. Are you sure?</confirmationDialogText>
+    <confirmationDialogText>{PAWN_labelShort} will die in the process. Are you sure?</confirmationDialogText>
     <verbProperties>
       <verbClass>Verb_CastAbilityTouch</verbClass>
       <drawAimPie>false</drawAimPie>
@@ -102,7 +102,7 @@
     </comps>
   </AbilityDef>
 
-  <!-- Alphabeaver -->
+  <!-- Woodchewer -->
 
   <AbilityDef ParentName="AbilityTouchBase">
     <defName>Ordo_Gnaw</defName>
@@ -133,10 +133,10 @@
     </comps>
   </AbilityDef>
 
-  <!-- Boomrat -->
+  <!-- Incendiary -->
 
   <AbilityDef MayRequire="Ludeon.RimWorld.Biotech">
-    <defName>Ordo_BoomratFireBurst</defName>
+    <defName>Ordo_FireBurst</defName>
     <label>fire burst</label>
     <description>Spray burning fuel in all directions, forming puddles of ignited liquid on the ground.</description>
     <jobDef>CastAbilityOnThingWithoutWeapon</jobDef>
@@ -160,7 +160,7 @@
     </verbProperties>
     <comps>
       <li Class="CompProperties_AbilityRequiresTrainable">
-        <trainableDef>Ordo_BoomratFireBurst</trainableDef>
+        <trainableDef>Ordo_FireBurst</trainableDef>
         <aiCanCastWithoutTrainable>true</aiCanCastWithoutTrainable>
       </li>
       <li Class="CompProperties_AbilityFireBurst">
@@ -170,7 +170,7 @@
     </comps>
   </AbilityDef>
 
-  <!-- Penguin -->
+  <!-- Slider -->
 
   <AbilityDef>
     <defName>Ordo_BellySlide</defName>
@@ -210,12 +210,12 @@
     </modExtensions>
   </AbilityDef>
 
-  <!-- Walrus -->
+  <!-- Charger -->
 
   <AbilityDef>
-    <defName>Ordo_WalrusCharge</defName>
+    <defName>Ordo_Charge</defName>
     <label>charge</label>
-    <description>Barrel across the ground at a target, battering and knocking back any enemies next to where the walrus lands.</description>
+    <description>Barrel across the ground at a target, battering and knocking back any enemies next to where it lands. Bigger animals hit harder.</description>
     <iconPath>UI/Commands/AttackMelee</iconPath>
     <cooldownTicksRange>2500</cooldownTicksRange> <!-- 1 hour -->
     <aiCanUse>true</aiCanUse>
@@ -239,7 +239,7 @@
     </verbProperties>
     <comps>
       <li Class="CompProperties_AbilityRequiresTrainable">
-        <trainableDef>Ordo_WalrusCharge</trainableDef>
+        <trainableDef>Ordo_Charge</trainableDef>
         <aiCanCastWithoutTrainable>true</aiCanCastWithoutTrainable>
       </li>
       <li Class="Ordo.SillyAnimalThings.CompProperties_AbilityChargeTarget">
@@ -253,12 +253,12 @@
     </modExtensions>
   </AbilityDef>
 
-  <!-- Wolverine: cast automatically by SelfBuffAutoCast when badly hurt -->
+  <!-- Tenacious: cast automatically by SelfBuffAutoCast when badly hurt -->
 
   <AbilityDef>
     <defName>Ordo_Regenerate</defName>
     <label>regenerate</label>
-    <description>Trigger a burst of furious healing, rapidly closing wounds for a short time. Wolverines do this on their own when badly hurt.</description>
+    <description>Trigger a burst of furious healing, rapidly closing wounds for a short time. The animal does this on its own when badly hurt.</description>
     <iconPath>UI/Icons/Medical/TendedWell</iconPath>
     <cooldownTicksRange>30000</cooldownTicksRange> <!-- 12 hours -->
     <hostile>false</hostile>
@@ -266,9 +266,9 @@
     <targetRequired>false</targetRequired>
     <displayGizmoWhileUndrafted>true</displayGizmoWhileUndrafted>
     <disableGizmoWhileUndrafted>false</disableGizmoWhileUndrafted>
-    <jobDef>CastAbilityOnThingWithoutWeapon</jobDef>
     <verbProperties>
       <verbClass>Verb_CastAbility</verbClass>
+      <violent>false</violent>
       <range>0</range>
       <warmupTime>0</warmupTime>
       <drawAimPie>false</drawAimPie>
@@ -291,21 +291,21 @@
     </comps>
   </AbilityDef>
 
-  <!-- Tiger: cast automatically by SelfBuffAutoCast before closing in on an enemy -->
+  <!-- Big cat: cast automatically by SelfBuffAutoCast before closing in on an enemy -->
 
   <AbilityDef>
     <defName>Ordo_HiddenDragon</defName>
     <label>hidden dragon</label>
-    <description>Crouch low and vanish from sight. The tiger stays invisible for a short time, or until it strikes. Wild tigers do this on their own before pouncing.</description>
+    <description>Crouch low and vanish from sight. The cat stays invisible for a short time, or until it strikes. It does this on its own before closing in on an enemy.</description>
     <iconPath>UI/Commands/AnimalAttack</iconPath>
     <cooldownTicksRange>5000</cooldownTicksRange> <!-- 2 hours -->
     <hostile>false</hostile>
     <targetRequired>false</targetRequired>
     <displayGizmoWhileUndrafted>true</displayGizmoWhileUndrafted>
     <disableGizmoWhileUndrafted>false</disableGizmoWhileUndrafted>
-    <jobDef>CastAbilityOnThingWithoutWeapon</jobDef>
     <verbProperties>
       <verbClass>Verb_CastAbility</verbClass>
+      <violent>false</violent>
       <range>0</range>
       <warmupTime>1</warmupTime>
       <drawAimPie>false</drawAimPie>

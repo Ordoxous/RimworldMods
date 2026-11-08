@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <!--
+    Each tag gives its abilities to every pawn kind of its races, and adds the trainables those abilities require.
+    To add another mod's animal, patch the race into a tag's races list, or add a new AnimalTagDef.
+  -->
+
+  <Ordo.SillyAnimalThings.AnimalTagDef>
+    <defName>Ordo_Tag_Trunked</defName>
+    <label>trunked</label>
+    <abilities>
+      <li>Ordo_TrunkBlast</li>
+      <li>Ordo_TrunkThrow</li>
+    </abilities>
+    <races>
+      <li>Elephant</li>
+      <li>Mastodon</li>
+    </races>
+  </Ordo.SillyAnimalThings.AnimalTagDef>
+
+  <Ordo.SillyAnimalThings.AnimalTagDef>
+    <defName>Ordo_Tag_Woodchewer</defName>
+    <label>woodchewer</label>
+    <abilities>
+      <li>Ordo_Gnaw</li>
+    </abilities>
+    <races>
+      <li>Alphabeaver</li>
+    </races>
+  </Ordo.SillyAnimalThings.AnimalTagDef>
+
+  <Ordo.SillyAnimalThings.AnimalTagDef>
+    <defName>Ordo_Tag_Volatile</defName>
+    <label>volatile</label>
+    <abilities>
+      <li>Ordo_Detonate</li>
+    </abilities>
+    <races>
+      <li>Boomalope</li>
+      <li>Boomrat</li>
+      <li MayRequire="Ludeon.RimWorld.Biotech">Toxalope</li>
+    </races>
+  </Ordo.SillyAnimalThings.AnimalTagDef>
+
+  <Ordo.SillyAnimalThings.AnimalTagDef MayRequire="Ludeon.RimWorld.Biotech">
+    <defName>Ordo_Tag_Incendiary</defName>
+    <label>incendiary</label>
+    <abilities>
+      <li>Ordo_FireBurst</li>
+    </abilities>
+    <races>
+      <li>Boomrat</li>
+      <li>LavaSnail</li>
+    </races>
+  </Ordo.SillyAnimalThings.AnimalTagDef>
+
+  <Ordo.SillyAnimalThings.AnimalTagDef>
+    <defName>Ordo_Tag_BigCat</defName>
+    <label>big cat</label>
+    <abilities>
+      <li>Ordo_HiddenDragon</li>
+    </abilities>
+    <races>
+      <li>Tiger</li>
+      <li>Cougar</li>
+      <li>Panther</li>
+      <li>Cat_Scimitar</li>
+    </races>
+  </Ordo.SillyAnimalThings.AnimalTagDef>
+
+  <Ordo.SillyAnimalThings.AnimalTagDef>
+    <defName>Ordo_Tag_Charger</defName>
+    <label>charger</label>
+    <abilities>
+      <li>Ordo_Charge</li>
+    </abilities>
+    <races>
+      <li>Walrus</li>
+      <li>Rhinoceros</li>
+      <li>Hippo</li>
+      <li>Bison</li>
+      <li>Muffalo</li>
+      <li>WildBoar</li>
+      <li>Ibex</li>
+      <li>Goat</li>
+      <li>Moose</li>
+      <li>Elk</li>
+      <li>Mastodon</li>
+      <li>Elephant</li>
+    </races>
+  </Ordo.SillyAnimalThings.AnimalTagDef>
+
+  <Ordo.SillyAnimalThings.AnimalTagDef>
+    <defName>Ordo_Tag_Slider</defName>
+    <label>slider</label>
+    <abilities>
+      <li>Ordo_BellySlide</li>
+    </abilities>
+    <races>
+      <li>Penguin</li>
+      <li>Otter</li>
+      <li>Seal</li>
+      <li>SeaLion</li>
+    </races>
+  </Ordo.SillyAnimalThings.AnimalTagDef>
+
+  <Ordo.SillyAnimalThings.AnimalTagDef>
+    <defName>Ordo_Tag_Tenacious</defName>
+    <label>tenacious</label>
+    <abilities>
+      <li>Ordo_Regenerate</li>
+    </abilities>
+    <races>
+      <li>Wolverine</li>
+      <li>Badger</li>
+    </races>
+  </Ordo.SillyAnimalThings.AnimalTagDef>
+
+</Defs>

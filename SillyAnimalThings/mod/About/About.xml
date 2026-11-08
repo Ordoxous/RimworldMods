@@ -22,14 +22,15 @@
     <li>ludeon.rimworld.odyssey</li>
   </loadAfter>
   <packageId>Ordo.SillyAnimalThings</packageId>
-  <description>Gives animals silly abilities, using the same special-training system as Odyssey's war trumpet. Wild and manhunting animals use them on their own; tamed animals use them once trained.
+  <description>Gives animals silly abilities, using the same special-training system as Odyssey's war trumpet. Wild and hostile animals use most of them on their own; tamed animals use them once trained.
 
-- Elephant: trunk blast (a water spray that knocks enemies back, staggers them and puts out fires) and trunk throw (picks up a nearby rock chunk and launches it)
-- Boomalope: detonate (charges a target and blows itself up)
+- Elephant, mastodon: trunk blast (a water spray that knocks enemies back, staggers them and puts out fires) and trunk throw (picks up a nearby rock chunk and launches it)
+- Boomalope, boomrat, toxalope: detonate (runs at a target and blows itself up)
 - Alphabeaver: gnaw (chews through wooden structures and eats them; hungry wild alphabeavers will snack on your buildings)
-- Boomrat: fire burst (sprays burning fuel around itself, requires Biotech)
-- Penguin: belly slide (a fast dash along the ground)
-- Walrus: charge (barrels into a target, battering and knocking back nearby enemies)
-- Wolverine: regenerate (a burst of rapid healing, used automatically when badly hurt)
-- Tiger: hidden dragon (turns invisible until it strikes, used automatically before pouncing)</description>
+- Boomrat, lava snail: fire burst (sprays burning fuel around itself, requires Biotech)
+- Penguin, otter, seal, sea lion: belly slide (a fast dash along the ground)
+- Walrus, rhinoceros, hippo, bison, muffalo, wild boar, ibex, goat, moose, elk, mastodon, elephant: charge (barrels into a target, battering and knocking back nearby enemies)
+- Wolverine, badger: regenerate (a burst of rapid healing, used automatically when badly hurt)
+- Tiger, cougar, panther, scimitar cat: hidden dragon (turns invisible until it strikes, used automatically before closing in)</description>
+
 </ModMetaData>

@@ -11,6 +11,8 @@ public static class SillyAnimalThings
 
 	static SillyAnimalThings()
 	{
+		AnimalTagUtility.ApplyAllTags();
+
 		var harmony = new Harmony(typeof(SillyAnimalThings).Namespace);
 
 		harmony.Patch(

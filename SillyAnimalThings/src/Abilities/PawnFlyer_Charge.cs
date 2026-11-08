@@ -7,7 +7,10 @@ namespace Ordo.SillyAnimalThings;
 // On landing, rams every hostile pawn at or next to the landing cell, knocking them away from where the charge started
 public class PawnFlyer_Charge : PawnFlyer
 {
-	private const float ImpactDamage = 25f;
+	// A walrus (body size 2) hits for 25; the same ability is shared by goats and elephants
+	private const float ImpactDamageBase = 10f;
+
+	private const float ImpactDamagePerBodySize = 7.5f;
 
 	private const float ImpactArmorPenetration = 0.3f;
 
@@ -40,9 +43,16 @@ public class PawnFlyer_Charge : PawnFlyer
 
 		CollectVictims(landingCell, map, charger);
 
+		var damage = ImpactDamageBase + ImpactDamagePerBodySize * charger.BodySize;
 		foreach (var victim in _tmpVictims)
 		{
-			victim.TakeDamage(new DamageInfo(DamageDefOf.Blunt, ImpactDamage, ImpactArmorPenetration, instigator: charger));
+			// An earlier victim may have blown up and taken this one with it
+			if (victim.Dead || !victim.Spawned)
+			{
+				continue;
+			}
+
+			victim.TakeDamage(new DamageInfo(DamageDefOf.Blunt, damage, ImpactArmorPenetration, instigator: charger));
 			if (victim.Spawned && !victim.Dead)
 			{
 				KnockbackUtility.KnockBack(victim, startCell, charger, StaggerTicks);
