@@ -22,7 +22,7 @@
     <!-- User settings -->
     <PropertyGroup>
         <!-- Path to RimWorld root folder (optional, overrides auto-detection) -->
-        <RimWorldDirectory>F:\SteamLibrary\steamapps\common\RimWorld</RimWorldDirectory>
+        <RimWorldDirectory>$(SteamLibraryDirectory)\steamapps\common\RimWorld</RimWorldDirectory>
 
         <!-- Require exact patch match? Set to false for wildcard match -->
         <UseStrictRimWorldVersionComparison>true</UseStrictRimWorldVersionComparison>
@@ -39,7 +39,7 @@
         </RimWorldDirectory>
 
         <!-- Windows: all users -->
-        <RimWorldDirectory Condition="'$(RimWorldDirectory)'=='' AND Exists('$(MSBuildProgramFiles32))\Steam\steamapps\common\RimWorld')">
+        <RimWorldDirectory Condition="'$(RimWorldDirectory)'=='' AND Exists('$(MSBuildProgramFiles32)\Steam\steamapps\common\RimWorld')">
             $(MSBuildProgramFiles32)\Steam\steamapps\common\RimWorld
         </RimWorldDirectory>
 
@@ -88,12 +88,13 @@
         </ReadLinesFromFile>
 
         <PropertyGroup>
-            <RimWorldVersion>$([System.String]::Copy('%(VersionFileLine.Identity)').Split(' ')[0])</RimWorldVersion>
-            <RimWorldVersionMinor>$([System.String]::Copy('$(RimWorldVersion)').Split('.')[1])</RimWorldVersionMinor>
-            <RimWorldVersionPatch>$([System.String]::Copy('$(RimWorldVersion)').Split('.')[2])</RimWorldVersionPatch>
+            <!-- Not RimWorldVersion: MSBuild names ignore case, so that would overwrite RimworldVersion from the props file -->
+            <InstalledRimWorldVersion>$([System.String]::Copy('%(VersionFileLine.Identity)').Split(' ')[0])</InstalledRimWorldVersion>
+            <RimWorldVersionMinor>$([System.String]::Copy('$(InstalledRimWorldVersion)').Split('.')[1])</RimWorldVersionMinor>
+            <RimWorldVersionPatch>$([System.String]::Copy('$(InstalledRimWorldVersion)').Split('.')[2])</RimWorldVersionPatch>
         </PropertyGroup>
 
-        <Message Text="RimWorld version: $(RimWorldVersion)" Importance="high"/>
+        <Message Text="RimWorld version: $(InstalledRimWorldVersion)" Importance="high"/>
     </Target>
 
     <Target Name="ResolveRimRefVersion" DependsOnTargets="GetRimRef">

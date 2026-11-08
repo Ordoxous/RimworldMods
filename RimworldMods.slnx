@@ -1,9 +1,7 @@
 ﻿<Solution>
   <Project Path="BlueprintMaterials/BlueprintMaterials.csproj" />
   <Project Path="LegendaryIsUnique/LegendaryIsUnique.csproj" />
-  <Project Path="MechUpgradesUi\MechUpgradesUi.csproj">
-    <Build Solution="Release|*" Project="false" />
-  </Project>
+  <Project Path="MechUpgradesUi\MechUpgradesUi.csproj" />
   <Project Path="SillyAnimalThings/SillyAnimalThings.csproj" />
   <Project Path="Tweaks\Tweaks.csproj" />
 </Solution>

@@ -1,4 +1,13 @@
 ﻿<Project>
+    <!-- Optional and git-ignored: override SteamLibraryDirectory or RimWorldDebugDirectory for this machine -->
+    <Import Project="$(MSBuildThisFileDirectory)Directory.Build.local.props" Condition="Exists('$(MSBuildThisFileDirectory)Directory.Build.local.props')" />
+
+    <PropertyGroup>
+        <SteamLibraryDirectory Condition="'$(SteamLibraryDirectory)' == ''">D:\SteamLibrary</SteamLibraryDirectory>
+        <RimWorldDebugDirectory Condition="'$(RimWorldDebugDirectory)' == ''">G:\RimWorld_Debug</RimWorldDebugDirectory>
+        <WorkshopDirectory>$(SteamLibraryDirectory)\steamapps\workshop\content\294100</WorkshopDirectory>
+    </PropertyGroup>
+
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
         <LangVersion>latest</LangVersion>
@@ -66,8 +75,8 @@
             <BuiltMod Include="$(MSBuildProjectDirectory)\out\**\*.*" />
         </ItemGroup>
 
-        <RemoveDir Directories="G:\RimWorld_Debug\Mods\$(MSBuildProjectName)" />
-        <Copy SourceFiles="@(BuiltMod)" DestinationFolder="G:\RimWorld_Debug\Mods\$(MSBuildProjectName)\%(RecursiveDir)" />
+        <RemoveDir Directories="$(RimWorldDebugDirectory)\Mods\$(MSBuildProjectName)" />
+        <Copy SourceFiles="@(BuiltMod)" DestinationFolder="$(RimWorldDebugDirectory)\Mods\$(MSBuildProjectName)\%(RecursiveDir)" />
     </Target>
 
     <Target Name="CopyToRimworld">
@@ -75,7 +84,7 @@
             <BuiltMod Include="$(MSBuildProjectDirectory)\out\**\*.*" />
         </ItemGroup>
 
-        <RemoveDir Directories="F:\SteamLibrary\steamapps\common\RimWorld\Mods\$(MSBuildProjectName)" />
-        <Copy SourceFiles="@(BuiltMod)" DestinationFolder="F:\SteamLibrary\steamapps\common\RimWorld\Mods\$(MSBuildProjectName)\%(RecursiveDir)" />
+        <RemoveDir Directories="$(SteamLibraryDirectory)\steamapps\common\RimWorld\Mods\$(MSBuildProjectName)" />
+        <Copy SourceFiles="@(BuiltMod)" DestinationFolder="$(SteamLibraryDirectory)\steamapps\common\RimWorld\Mods\$(MSBuildProjectName)\%(RecursiveDir)" />
     </Target>
 </Project>
