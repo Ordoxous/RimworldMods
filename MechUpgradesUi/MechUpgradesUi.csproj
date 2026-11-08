@@ -14,8 +14,8 @@
 
     <ItemGroup>
         <Reference Include="MechanoidUpgrades">
-            <HintPath Condition="Exists('F:\SteamLibrary\steamapps\workshop\content\294100\3365118555\$(RimworldVersion)\Assemblies\MechanoidUpgrades.dll')">F:\SteamLibrary\steamapps\workshop\content\294100\3365118555\$(RimworldVersion)\Assemblies\MechanoidUpgrades.dll</HintPath>
-            <HintPath Condition="!Exists('F:\SteamLibrary\steamapps\workshop\content\294100\3365118555\$(RimworldVersion)\Assemblies\MechanoidUpgrades.dll')">F:\SteamLibrary\steamapps\workshop\content\294100\3365118555\$(RimworldFallbackVersion)\Assemblies\MechanoidUpgrades.dll</HintPath>
+            <HintPath Condition="Exists('$(WorkshopDirectory)\3365118555\$(RimworldVersion)\Assemblies\MechanoidUpgrades.dll')">$(WorkshopDirectory)\3365118555\$(RimworldVersion)\Assemblies\MechanoidUpgrades.dll</HintPath>
+            <HintPath Condition="!Exists('$(WorkshopDirectory)\3365118555\$(RimworldVersion)\Assemblies\MechanoidUpgrades.dll')">$(WorkshopDirectory)\3365118555\$(RimworldFallbackVersion)\Assemblies\MechanoidUpgrades.dll</HintPath>
             <Private>False</Private>
         </Reference>
     </ItemGroup>

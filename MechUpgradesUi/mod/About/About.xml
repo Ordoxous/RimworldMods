@@ -30,6 +30,8 @@
     The mechs with that policy will then try to fill their upgrade points from the auto mech upgraders (Replace your existing one with one of these).
 
     When a mech has unwanted upgrades (Per the policy), the auto upgrade will try to remove them.
+
+    Mechs without a policy are left alone, so existing upgrades are safe until you assign one. You can change this, and how often mechs check their policy, in the mod settings.
     
     Source available on [url=https://github.com/Ordoxous/RimworldMods/tree/master/MechUpgradesUi]GitHub[/url].
   </description>

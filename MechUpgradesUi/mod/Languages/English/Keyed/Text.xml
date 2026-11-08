@@ -6,6 +6,14 @@
 	<MU_Upgrades_Ui_Policy_Mech_Selector>Select a mech to filter the upgrades below.</MU_Upgrades_Ui_Policy_Mech_Selector>
 	<MU_Upgrades_Ui_Policy_Mech_Type>Mech Type: {0}</MU_Upgrades_Ui_Policy_Mech_Type>
 	<MU_Upgrades_Ui_Policy_Mech_All>All</MU_Upgrades_Ui_Policy_Mech_All>
+	<MU_Upgrades_Ui_Policy_None>None (manual)</MU_Upgrades_Ui_Policy_None>
+	<MU_Upgrades_Ui_Policy_Default>Default ({0})</MU_Upgrades_Ui_Policy_Default>
+	<MU_Upgrades_Ui_Settings_UseDefault>Use the default policy for mechs without one</MU_Upgrades_Ui_Settings_UseDefault>
+	<MU_Upgrades_Ui_Settings_UseDefault_Tip>Warning: mechs without a policy will follow the default policy, and upgrades it doesn't allow will be removed at an auto mech upgrader. A new policy allows nothing until you tick upgrades in it.</MU_Upgrades_Ui_Settings_UseDefault_Tip>
+	<MU_Upgrades_Ui_Settings_ManualDialog>Always show the configure dialog when you insert a mech yourself</MU_Upgrades_Ui_Settings_ManualDialog>
+	<MU_Upgrades_Ui_Settings_ManualDialog_Tip>When off, a mech with a policy that wants changes has it applied straight away instead. Either way, a mech with a policy goes back to matching it the next time it checks.</MU_Upgrades_Ui_Settings_ManualDialog_Tip>
+	<MU_Upgrades_Ui_Settings_Interval>Policy check interval: about {0} hours</MU_Upgrades_Ui_Settings_Interval>
+	<MU_Upgrades_Ui_Settings_Interval_Tip>How often, in in-game hours, a mech checks whether its policy wants changes. Each check varies by up to 20%. Assigning a policy triggers a check right away.</MU_Upgrades_Ui_Settings_Interval_Tip>
 	<MU_Upgrades_Ui_Manage_Policies>Manage Upgrade Policies</MU_Upgrades_Ui_Manage_Policies>
 
 </LanguageData>

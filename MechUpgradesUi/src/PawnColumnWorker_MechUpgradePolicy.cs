@@ -32,20 +32,30 @@ public class PawnColumnWorker_MechUpgradePolicy : PawnColumnWorker
 
         var upgradeDatabase = Find.World.GetComponent<WorldComponent_UpgradeDatabase>();
         var policies = upgradeDatabase.GetPolicies();
+        string noPolicyLabel = MechUpgradesUiMod.Settings.UseDefaultPolicyForUnassigned
+            ? "MU_Upgrades_Ui_Policy_Default".Translate(upgradeDatabase.DefaultPolicy().label)
+            : "MU_Upgrades_Ui_Policy_None".Translate();
+        var currentLabel = comp.CurrentUpgradePolicy?.label ?? noPolicyLabel;
 
         Widgets.Dropdown(
             left,
             comp,
             p => p.CurrentUpgradePolicy,
             MenuGenerator,
-            comp.CurrentUpgradePolicy.label.Truncate(left.width),
-            dragLabel: comp.CurrentUpgradePolicy.label,
+            currentLabel.Truncate(left.width),
+            dragLabel: currentLabel,
             paintable: true
         );
         return;
 
         IEnumerable<Widgets.DropdownMenuElement<UpgradePolicy>> MenuGenerator(CompUpgradableMechWithPolicy currComp)
         {
+            // Must stay ahead of the edit option: painting picks the first option matching the payload, and both are null
+            yield return new Widgets.DropdownMenuElement<UpgradePolicy>
+            {
+                option = new FloatMenuOption(noPolicyLabel, () => currComp.CurrentUpgradePolicy = null), payload = null
+            };
+
             foreach (var policy in policies)
             {
                 yield return new Widgets.DropdownMenuElement<UpgradePolicy>

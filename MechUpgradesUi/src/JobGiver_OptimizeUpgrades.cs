@@ -16,29 +16,29 @@ public class JobGiver_OptimizeUpgrades : ThinkNode_JobGiver
             return null;
 
         var mechComp = pawn.TryGetComp<CompUpgradableMechWithPolicy>();
-        if (mechComp == null)
+        if (mechComp?.EffectiveUpgradePolicy == null)
             return null;
+
+        // Set up front, so a trip that fails partway can't be retried in a tight loop
+        var intervalTicks = MechUpgradesUiMod.Settings.PolicyCheckIntervalHours * GenDate.TicksPerHour;
+        pawn.mindState.nextApparelOptimizeTick = Find.TickManager.TicksGame + Rand.Range((int) (intervalTicks * 0.8f), (int) (intervalTicks * 1.2f));
 
         var upgraders = pawn.Map.listerBuildings
             .AllColonistBuildingsOfType<Building_AutoMechUpgrader>()
-            .Where(b => b.CanAcceptPawn(pawn))
+            .Where(b => b.CanAcceptPawn(pawn)
+                        && !b.IsForbidden(pawn)
+                        && pawn.CanReserveAndReach(b, PathEndMode.InteractionCell, Danger.Deadly))
             .ToList();
 
         if (upgraders.Count == 0)
-        {
-            pawn.mindState.nextApparelOptimizeTick = Find.TickManager.TicksGame + Rand.Range(6000, 9000);
             return null;
-        }
 
         var currentUpgrades = mechComp.upgrades;
         var upgradesToKeep = mechComp.UpgradesToKeep();
         var wantedUpgrades = mechComp.WantedUpgrades(upgradesToKeep);
 
         if (wantedUpgrades.Empty() && upgradesToKeep.Count == currentUpgrades.Count)
-        {
-            pawn.mindState.nextApparelOptimizeTick = Find.TickManager.TicksGame + Rand.Range(6000, 9000);
             return null;
-        }
 
         var operationsByUpgrader = upgraders.ToDictionary(
             upgrader => upgrader,
@@ -53,7 +53,6 @@ public class JobGiver_OptimizeUpgrades : ThinkNode_JobGiver
             }
         }
 
-        pawn.mindState.nextApparelOptimizeTick = Find.TickManager.TicksGame + Rand.Range(6000, 9000);
         return null;
     }
 }

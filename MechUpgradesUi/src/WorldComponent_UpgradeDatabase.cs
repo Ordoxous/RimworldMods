@@ -40,11 +40,12 @@ public class WorldComponent_UpgradeDatabase : WorldComponent
 
     public AcceptanceReport TryDelete(UpgradePolicy policy)
     {
-        foreach (var pawn in PawnsFinder.All_AliveOrDead)
+        // Only living mechs block deletion. Dead ones are cleared below, as vanilla does for apparel policies
+        foreach (var pawn in PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive)
         {
             if (pawn.IsColonyMech && pawn.TryGetComp<CompUpgradableMechWithPolicy>(out var comp))
             {
-                if (comp.AssignedUpgradePolicy == policy)
+                if (comp.CurrentUpgradePolicy == policy)
                     return new AcceptanceReport("OutfitInUse".Translate((NamedArgument) (Thing) pawn));
             }
         }
@@ -53,7 +54,7 @@ public class WorldComponent_UpgradeDatabase : WorldComponent
         {
             if (pawn.IsColonyMech && pawn.TryGetComp<CompUpgradableMechWithPolicy>(out var comp))
             {
-                if (comp.AssignedUpgradePolicy == policy)
+                if (comp.CurrentUpgradePolicy == policy)
                     comp.CurrentUpgradePolicy = null;
             }
         }

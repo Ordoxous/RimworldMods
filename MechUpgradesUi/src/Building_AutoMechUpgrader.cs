@@ -24,10 +24,7 @@ public class Building_AutoMechUpgrader : Building_MechUpgrader
             .OrderBy(u => u.def.defName);
 
         // Not using MechUpgradeUtility.GetOperationsFromLists: it overwrites the given upgrader's saved upgrades list
-        var allowedOperations = currentUpgrades
-            .Where(u => !upgradesToKeep.Contains(u))
-            .Select(u => new MechUpgradeOperation(u, UpgradeOperationType.Remove))
-            .ToList();
+        var allowedOperations = new List<MechUpgradeOperation>();
 
         var availablePoints = MechUpgradeUtility.MaxUpgradePoints(pawn) - MechUpgradeUtility.CurrentPoints(upgradesToKeep);
 
@@ -46,6 +43,14 @@ public class Building_AutoMechUpgrader : Building_MechUpgrader
             availablePoints -= upgradePoints;
         }
 
+        // MU runs operations from the end of the list. Removals go last so they run first, otherwise
+        // removing an upgrade would also take a shared ability from the upgrade replacing it
+        allowedOperations.AddRange(
+            currentUpgrades
+                .Where(u => !upgradesToKeep.Contains(u))
+                .Select(u => new MechUpgradeOperation(u, UpgradeOperationType.Remove))
+        );
+
         return allowedOperations;
     }
 
@@ -54,8 +59,11 @@ public class Building_AutoMechUpgrader : Building_MechUpgrader
         if (!CanAcceptPawn(pawn))
             return;
 
+        // Every player-issued insert goes through an ordered job, the think tree's trips don't
+        var showDialog = MechUpgradesUiMod.Settings.ShowDialogOnManualInsert && pawn.CurJob is { playerForced: true };
+
         var mechComp = pawn.GetComp<CompUpgradableMechWithPolicy>();
-        if (mechComp != null)
+        if (!showDialog && mechComp?.EffectiveUpgradePolicy != null)
         {
             var upgradesToKeep = mechComp.UpgradesToKeep();
             var wantedOperations = WantedOperations(
