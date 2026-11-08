@@ -117,8 +117,11 @@ public class ReplaceBlueprintMaterials
                     {
                         var (def, materialDef) = entity;
 
+                        // Some groups, like carpets, differ by color rather than material
+                        var sharesMaterial = similarDefs.Count(other => other.materialDef == materialDef) > 1;
+
                         return new FloatMenuOption(
-                            materialDef.LabelAsStuff,
+                            sharesMaterial ? def.LabelCap : materialDef.LabelAsStuff,
                             () =>
                             {
                                 foreach (var selected in command.SelectedBlueprints().ToList()) {
@@ -127,8 +130,8 @@ public class ReplaceBlueprintMaterials
                                     Find.Selector.Select(newBlueprint, false, false);
                                 }
                             },
-                            materialDef.uiIcon,
-                            materialDef.uiIconColor
+                            sharesMaterial ? def.uiIcon : materialDef.uiIcon,
+                            sharesMaterial ? def.uiIconColor : materialDef.uiIconColor
                         );
                     }
                 ).ToList();
@@ -166,8 +169,15 @@ public class ReplaceBlueprintMaterials
                 .Select(stuff => new FloatMenuOption(
                         stuff.LabelAsStuff,
                         () => {
+                            if (stuff == currentStuff)
+                                return;
+
                             foreach (var selected in command.SelectedBlueprints())
+                            {
                                 selected.stuffToUse = stuff;
+                                // Anyone already carrying the old material needs a new job
+                                map.enrouteManager.InterruptEnroutePawns(selected, null);
+                            }
                         },
                         stuff.uiIcon,
                         stuff.uiIconColor
