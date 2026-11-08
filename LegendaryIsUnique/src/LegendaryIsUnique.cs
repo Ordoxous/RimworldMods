@@ -16,6 +16,9 @@ public class LegendaryIsUnique {
 	// Quality pre-rolled for the craft in progress, handed back to the game's own roll so they match
 	private static (Pawn Pawn, QualityCategory Quality)? _forcedQuality;
 
+	// Set when Vanilla Skills Expanded is active, so the pre-roll includes its quality bonuses
+	private static Func<Pawn, SkillDef, bool, Thing, QualityCategory> _generateVseQuality;
+
 	static LegendaryIsUnique()
 	{
 		var harmony = new Harmony(typeof(LegendaryIsUnique).Namespace);
@@ -33,10 +36,14 @@ public class LegendaryIsUnique {
 
 		if (ModsConfig.IsActive("vanillaexpanded.skills"))
 		{
+			var generateVseQuality = AccessTools.Method("VSE.Stats.QualityUtility:GenerateQuality");
+
 			harmony.Patch(
-				AccessTools.Method("VSE.Stats.QualityUtility:GenerateQuality"),
+				generateVseQuality,
 				prefix: new HarmonyMethod(Prefix_VES_QualityUtility_GenerateQuality)
 			);
+
+			_generateVseQuality = AccessTools.MethodDelegate<Func<Pawn, SkillDef, bool, Thing, QualityCategory>>(generateVseQuality);
 		}
 
 		foreach (var uniqueThingDef in DefDatabase<ThingDef>.AllDefs)
@@ -67,10 +74,12 @@ public class LegendaryIsUnique {
 			return;
 		}
 
-		var qualityToCreate = QualityUtility.GenerateQualityCreatedByPawn(worker, recipeDef.workSkill);
+		var qualityToCreate = _generateVseQuality != null
+			? _generateVseQuality(worker, recipeDef.workSkill, true, product)
+			: QualityUtility.GenerateQualityCreatedByPawn(worker, recipeDef.workSkill);
 		_forcedQuality = (worker, qualityToCreate);
 
-		if (qualityToCreate >= LegendaryIsUniqueMod.Settings.MinimumQuality)
+		if (qualityToCreate >= LegendaryIsUniqueMod.Settings.MinimumQuality && Rand.Chance(LegendaryIsUniqueMod.Settings.UniqueChance))
 		{
 			product = ThingMaker.MakeThing(uniqueThingDef, product.Stuff);
 		}

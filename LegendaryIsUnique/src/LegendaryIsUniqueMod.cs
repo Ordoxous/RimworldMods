@@ -8,11 +8,16 @@ public class LegendaryIsUniqueSettings : ModSettings
 {
 	private const QualityCategory DefaultMinimumQuality = QualityCategory.Legendary;
 
+	private const float DefaultUniqueChance = 1f;
+
 	public QualityCategory MinimumQuality = DefaultMinimumQuality;
+
+	public float UniqueChance = DefaultUniqueChance;
 
 	public override void ExposeData()
 	{
 		Scribe_Values.Look(ref MinimumQuality, nameof(MinimumQuality), DefaultMinimumQuality);
+		Scribe_Values.Look(ref UniqueChance, nameof(UniqueChance), DefaultUniqueChance);
 		base.ExposeData();
 	}
 }
@@ -43,7 +48,7 @@ public class LegendaryIsUniqueMod : Mod
 
 		listingStandard.Begin(inRect);
 
-		listingStandard.Label("Minimum quality for a crafted weapon to become unique:");
+		listingStandard.Label("Ordo_LegendaryIsUnique_MinimumQuality".Translate());
 		foreach (var quality in SelectableQualities)
 		{
 			if (listingStandard.RadioButton(quality.GetLabel().CapitalizeFirst(), Settings.MinimumQuality == quality))
@@ -51,6 +56,15 @@ public class LegendaryIsUniqueMod : Mod
 				Settings.MinimumQuality = quality;
 			}
 		}
+
+		listingStandard.Gap();
+		Settings.UniqueChance = listingStandard.SliderLabeled(
+			"Ordo_LegendaryIsUnique_UniqueChance".Translate(Settings.UniqueChance.ToStringPercent()),
+			Settings.UniqueChance,
+			0.05f,
+			1f
+		);
+		Settings.UniqueChance = GenMath.RoundTo(Settings.UniqueChance, 0.05f);
 
 		listingStandard.End();
 

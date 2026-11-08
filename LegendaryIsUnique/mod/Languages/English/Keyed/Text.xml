@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+	<Ordo_LegendaryIsUnique_MinimumQuality>Minimum quality for a crafted weapon to become unique:</Ordo_LegendaryIsUnique_MinimumQuality>
+	<Ordo_LegendaryIsUnique_UniqueChance>Chance for a qualifying weapon to become unique: {0}</Ordo_LegendaryIsUnique_UniqueChance>
+
+</LanguageData>
