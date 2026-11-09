@@ -70,7 +70,7 @@ public class PawnFlyer_Charge : PawnFlyer
 	{
 		foreach (var thing in cell.GetThingList(map))
 		{
-			if (thing is Pawn pawn && pawn != charger && pawn.HostileTo(charger) && !_tmpVictims.Contains(pawn))
+			if (thing is Pawn pawn && pawn != charger && pawn.IsEnemyOf(charger) && !_tmpVictims.Contains(pawn))
 			{
 				_tmpVictims.Add(pawn);
 			}

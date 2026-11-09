@@ -483,7 +483,7 @@
         <stateDef>Terror</stateDef>
       </li>
       <li Class="CompProperties_AbilityEffect">
-        <compClass>CompAbilityEffect_OnlyTargetHostiles</compClass>
+        <compClass>Ordo.SillyAnimalThings.CompAbilityEffect_OnlyTargetEnemies</compClass>
       </li>
       <li Class="CompProperties_AbilityAnimalRoar">
         <chanceFromHearingCurve>

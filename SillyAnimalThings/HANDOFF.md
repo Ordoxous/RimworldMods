@@ -21,7 +21,7 @@ All defNames use the `Ordo_` prefix.
 ## Current state
 
 - The tag system, CSV conversion, expanded memberships and the second batch of abilities (Howl, Poison Bite, Intimidate, Withdraw, Kick, Spit) are written. It builds with no warnings (`dotnet build SillyAnimalThings/SillyAnimalThings.csproj`).
-- **Nothing has been tested in game yet.** Checks so far are static: the build, XML parsing, every race and `Ordo_` reference resolving, every class named in XML existing, every texture path found in `Assets.zip` (Fire Burst's icon is Biotech's own), and `Animals.csv` matching `AnimalTags_SillyAnimals.xml` for the built tags.
+- **Tested in game on 2026-11-09**, except Fire Burst. See "In-game test results" below. Static checks also pass: the build, XML parsing, every race and `Ordo_` reference resolving, every class named in XML existing, every texture path found in `Assets.zip` (Fire Burst's icon is Biotech's own), and `Animals.csv` matching `AnimalTags_SillyAnimals.xml` for the built tags.
 - The tag system is pushed to `base/master`. The second batch of abilities is committed locally on `main`, but not pushed.
 
 ### Bugs fixed while doing step 1
@@ -142,17 +142,50 @@ Untagged for now (fine as plain animals): most livestock, Deer, Caribou, Chinchi
 - Duplicate: does the new hare spawn as a baby or an adult? Male/female only? Does a tamed pair produce a tamed hare?
 - Should the alphabeaver behaviour also include manhunters chewing through walls and doors (a pathing hook)? Not built.
 
+## In-game test results
+
+Run through RimBridgeServer with `tools/BridgeTools`, on the `sillyanimalthings` GABS profile (Harmony, Core, Odyssey). No errors were logged in any run.
+
+**Fixed: abilities did nothing for player-owned roamers.** `Pawn.ThreatDisabledBecauseNonAggressiveRoamer` makes a player-owned roamer (`race.roamMtbDays` set) non-hostile to everything until it has recently fought, so `Thing.HostileTo(Thing)` is false. Use `HostilityUtility.IsEnemyOf` in any ability that a player's animal casts and that needs to know who its enemies are; it also checks against the caster's faction.
+
+- **Charge** (Muffalo, Bison, Goat, Elk, Moose, Wild Boar) did no damage. A player muffalo now leaves an enemy cow at 80% with a bruise, knockback and stagger; friendly and wild cows at the landing spot aren't knocked back or staggered.
+- **Intimidate** (Goose) failed 14 rolls in a row at 40%. It now uses `CompAbilityEffect_OnlyTargetEnemies` instead of vanilla's `CompAbilityEffect_OnlyTargetHostiles`. Enemy cows pass that filter 100% of the time; the goose, friendly and wild cows 0%. 2 of 4 enemy cows entered `Terror` after two roars, and a manhunting goose still terrifies colonists.
+- `Projectile_WaterBlast` still uses `HostileTo` when `preventFriendlyFire` is set. No trunked animal is a roamer today, but a roamer added to that tag would hit this.
+
+| Ability | Commanded | AI | Evidence |
+|---|---|---|---|
+| Hidden Dragon | Pass | Pass | Invisible through the approach; removed by the first bite, with the cooldown still running |
+| Detonate | Pass | Pass | Commanded: caster gone, target burned. AI: chased with the cast job, then gone with burns on a pawn beside it (explosion itself not observed) |
+| Regenerate | Auto-cast pass | Not run | Cast below 60%, health rose from 51.5% to 61.5% |
+| Withdraw | Auto-cast pass | Not run | Cast below 75%; armor bonus not measured |
+| Howl | Pass | Pass | Caster and allies in range get `Ordo_Rallied`; stat bonus not measured |
+| Belly Slide | Pass | n/a | Moved 10 cells, cooldown started |
+| Charge | Pass | Pass | Walrus and muffalo commanded, walrus AI; damage across body sizes not compared |
+| Trunk Blast | Pass | Not run | Drafted target pushed 2 cells; putting out fires not tested |
+| Kick | Pass | Pass | Bruise, knockback, stagger; AI cooldown started |
+| Poison Bite | Pass | Partial | `ToxicBuildup` when commanded; AI started the cast job, landing not observed |
+| Spit | Pass | Not run | `Ordo_SpitInEyes` on target |
+| Intimidate | Pass | Pass | Player goose scares enemies only; manhunting goose and cobra put colonists in `Terror` |
+| Gnaw | Pass | Not run | Wooden wall lost exactly 80 HP; nutrition and hungry-wild behaviour not tested |
+| Trunk Throw | Partial | Not run | At a pawn: chunk consumed, projectile in flight, cooldown started. Damage and rendering not confirmed. At a cell: the cast didn't start, while the elephant was under attack, so unclear whether that's a bug |
+| Fire Burst | Not run | Not run | Needs Biotech, which this profile doesn't load |
+
+Things that look like bugs while testing but aren't:
+
+- `Ability.StartCooldown(0)` leaves `CanCast` false until the next tick.
+- Enemy-faction animals flee instead of fighting. Use a manhunter to test animal AI.
+- A location jump is refused when the caster spawned inside rock.
+
 ## Testing risks to check in game
 
-- Detonate: killing the boomalope mid-cast may log errors.
+- AI Charge from long range: a manhunting muffalo spawned about 16 cells from its target (range 11.9) walked in with `AttackMelee` and didn't charge within 200 ticks, while a walrus spawned 10 cells away did. `JobGiver_Manhunter` only checks abilities when it picks a job, and melee jobs last 420-900 ticks, so animals that start out of range may rarely charge. Cause not confirmed.
+
 - Thrown chunk projectile: it's drawn with the chunk's `graphic.MatSingle`; check it renders.
-- Dash and charge flyers: zero `heightFactor`, landing on a pawn's cell, and the knockback afterwards.
 - How often hostile elephants and walruses use their abilities, and whether hungry wild alphabeavers are too eager to eat buildings.
-- Hidden Dragon: confirm invisibility survives the cast and ends when the cat attacks.
 - Boomrat has both Detonate and Fire Burst. The AI picks the first castable ability, and Detonate triggers from 15 cells, so hostile boomrats may never fire burst. Fire burst also isn't protected from its own flames, so a boomrat may ignite itself (funny, but check).
 - Charge damage across body sizes (goat about 16, mastodon about 44).
 - Howl: allies get `Ordo_Rallied` and the caster's own call plays. A player-ordered cast goes through the same self-target path as vanilla's roars.
-- Intimidate: the player cast targets self like vanilla TerrorRoar; check it works, and whether `Terror` on colonists from wild geese is too harsh.
+- Intimidate: whether `Terror` on colonists from wild geese is too harsh. In testing, one manhunting goose and cobra put two of three colonists in `Terror` within seconds.
 - Withdraw: animals crawl rather than stop dead, by design. Check the armor bonus is felt.
 - Kick and Poison Bite: the AI walks to any hostile within 8 cells.
 - Tag startup: the training tab lists the new trainables on `trainability: None` animals (code says it should), and existing saves pick up the abilities.
