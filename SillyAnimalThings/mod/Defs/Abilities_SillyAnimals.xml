@@ -79,7 +79,6 @@
     <cooldownTicksRange>60</cooldownTicksRange>
     <aiCanUse>true</aiCanUse>
     <ai_IsIncendiary>true</ai_IsIncendiary>
-    <confirmationDialogText>{PAWN_labelShort} will die in the process. Are you sure?</confirmationDialogText>
     <verbProperties>
       <verbClass>Verb_CastAbilityTouch</verbClass>
       <drawAimPie>false</drawAimPie>
