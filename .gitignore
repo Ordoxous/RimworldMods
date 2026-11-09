@@ -4,3 +4,4 @@
 **/294100/
 *.DotSettings.user
 Directory.Build.local.props
+tools/BridgeTools/videos/

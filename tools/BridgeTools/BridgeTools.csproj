@@ -16,6 +16,11 @@
         </Reference>
     </ItemGroup>
 
+    <!-- The scenarios read the mod's types; the game loads the mod itself, so the DLL stays out of this output -->
+    <ItemGroup>
+        <ProjectReference Include="..\..\SillyAnimalThings\SillyAnimalThings.csproj" Private="false" />
+    </ItemGroup>
+
     <!-- Companions load from the game's BridgeTools folder, not Mods -->
     <Target Name="CopyToRimworld">
         <Copy SourceFiles="$(MSBuildProjectDirectory)\out\Assemblies\Ordo.BridgeTools.dll" DestinationFolder="$(RimWorldDirectory)\BridgeTools\Ordo" />

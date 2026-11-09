@@ -21,7 +21,7 @@ All defNames use the `Ordo_` prefix.
 ## Current state
 
 - The tag system, CSV conversion, expanded memberships and the second batch of abilities (Howl, Poison Bite, Intimidate, Withdraw, Kick, Spit) are written. It builds with no warnings (`dotnet build SillyAnimalThings/SillyAnimalThings.csproj`).
-- **Tested in game on 2026-11-09**, except Fire Burst. See "In-game test results" below. Static checks also pass: the build, XML parsing, every race and `Ordo_` reference resolving, every class named in XML existing, every texture path found in `Assets.zip` (Fire Burst's icon is Biotech's own), and `Animals.csv` matching `AnimalTags_SillyAnimals.xml` for the built tags.
+- **Tested in game on 2026-11-09**, and rerunnable with the scenario suite. See "In-game test results" below. Static checks also pass: the build, XML parsing, every race and `Ordo_` reference resolving, every class named in XML existing, every texture path found in `Assets.zip` (Fire Burst's icon is Biotech's own), and `Animals.csv` matching `AnimalTags_SillyAnimals.xml` for the built tags.
 - The tag system is pushed to `base/master`. The second batch of abilities is committed locally on `main`, but not pushed.
 
 ### Bugs fixed while doing step 1
@@ -37,7 +37,7 @@ These were in the committed first batch, found by reading game code:
 |---|---|---|---|
 | Trunk Blast | Trunked | `CompProperties_AbilitySprayLiquid`, 7 cells. The projectile puts out fires and knocks back and staggers pawns (but not pawns bigger than the caster). | `Projectile_WaterBlast.cs`, `KnockbackUtility.cs` |
 | Trunk Throw | Trunked | Destroys a stone or slag chunk within 2.9 cells and launches a projectile drawn as that chunk. The chunk is re-placed where it lands. The gizmo is disabled when no chunk is nearby. | `CompAbilityEffect_TrunkThrow.cs`, `Projectile_ThrownChunk.cs` |
-| Detonate | Volatile | Touch ability (walks to the target), then `pawn.Kill(null)`, which fires the race's death action (big explosion, small explosion, or tox cloud). Has a confirmation dialog. AI charges hostiles within 15 cells. | `CompAbilityEffect_Detonate.cs` |
+| Detonate | Volatile | Touch ability (walks to the target), then `pawn.Kill(null)`, which fires the race's death action (big explosion, small explosion, or tox cloud). AI charges hostiles within 15 cells. | `CompAbilityEffect_Detonate.cs` |
 | Gnaw | Woodchewer | Touch ability on a wooden building (Woody stuff, or WoodLog in its cost list). Deals 80 Bite damage and restores 25% food. | `CompAbilityEffect_Gnaw.cs` |
 | Hungry gnawing (behaviour) | Woodchewer | Harmony prefix on `JobGiver_GetFood.TryGiveJob`. A hungry, non-player animal with Gnaw ready targets a reachable wooden building within 12 cells. | `Behaviours/HungryGnawing.cs` |
 | Fire Burst | Incendiary (Biotech only) | Vanilla fire burst, radius 2.9. A comp subclass makes the AI cast it when a hostile is within the radius; vanilla only casts while the caster is being aimed at. | `CompAbilityEffect_FireBurstNearEnemy.cs` |
@@ -129,8 +129,8 @@ Untagged for now (fine as plain animals): most livestock, Deer, Caribou, Chinchi
 ### Suggested next steps
 
 1. ~~Implement the tag def, convert the CSVs, and expand the built abilities to their full tag memberships.~~ Done.
-2. ~~Build the cheap, high-value batch: Howl, Poison Bite, Intimidate, Withdraw, Kick, Spit.~~ Done, not yet tested.
-3. Test in game (see below). 15 abilities are now untested, so this should come before more abilities.
+2. ~~Build the cheap, high-value batch: Howl, Poison Bite, Intimidate, Withdraw, Kick, Spit.~~ Done.
+3. ~~Test in game.~~ Done, see below. Add scenarios for anything new.
 4. Spray Musk (once its effect is decided) and Leap.
 5. Bigger items by user preference. Fetch and Duplicate looked most popular.
 
@@ -144,7 +144,47 @@ Untagged for now (fine as plain animals): most livestock, Deer, Caribou, Chinchi
 
 ## In-game test results
 
-Run through RimBridgeServer with `tools/BridgeTools`, on the `sillyanimalthings` GABS profile (Harmony, Core, Odyssey). No errors were logged in any run.
+### Running the scenario suite
+
+`tools/BridgeTools/Scenarios` holds 37 scenarios, one per mechanism and per case that behaves differently, plus one that checks every tagged race got its abilities. Start the game through GABS, then call `ordo/run_scenarios`, with `filter` to run only the names containing it. Tests don't record anything; for videos, see the showcase below.
+
+- **Profiles:** all open straight into an `autostart` save at midday, in a 720p window. `sillyanimalthings` skips the 2 Fire Burst scenarios and `sillyanimalthings-biotech` runs all 37.
+- **Headless:** `sillyanimalthings-headless` and `sillyanimalthings-biotech-headless` add Waylith's `-Headless` flag, which means no window and no rendering. The suite takes 1.4-4 s, so use these unless you need to see the game. Screenshots don't work, and `games_stop` fails because there's no window to signal, so stop with `games_kill`. Headless runs don't exercise anything that draws, so use a windowed run for visual changes. `-nographics` and `-batchmode` do nothing.
+- **The test save:** a 33x33 map of flat soil with no pawns, things, roofs or fog, just big enough for one site, which every scenario shares. An empty colony gets the Stranger in Black rescue event, so both tools turn off the storyteller and remove all pawns before starting. That lasts until the save is next loaded.
+- **Remaking a save:** with no `autostart.rws` in the profile's `Saves`, call `ordo/start_test_colony`, `rimbridge/wait_for_long_event_idle`, `ordo/blank_map` and `ordo/set_hour`, then `rimworld/save_game` with `saveName` set to `autostart`.
+- **What fails a scenario:** a broken check, an exception, any error in the game log, or a dialog left open.
+- **Deploying:** stop the game, then `dotnet build tools/BridgeTools/BridgeTools.csproj -c Debug '-t:Build;CopyToRimworld'`. The suite doesn't deploy the mod, so deploy that too after changing it.
+- **The suite is known to catch bugs:** with four faults put in on purpose (the roamer bug, a violent Hidden Dragon verb, an error logged by strikes, and a Detonate dialog), exactly the scenarios that cover them failed.
+
+**Known flake:** `detonate_manhunter` and `combat_hidden_dragon_ambush` have each occasionally failed in a full run, with the manhunter not hurting the test colonist. Neither failed in 12 isolated repeats or the last 4 full runs. The cause isn't known: clothing, pacifism and non-combatant scoring were ruled out or didn't explain it, and drafting the real colonists may have helped. Both scenarios now report the pawns' state on failure, so read that next time it happens. `combat_hidden_dragon_ambush` later failed on "the colonist was hurt", with the tiger revealed but the colonist unhurt, which would fit a bite that missed, though that isn't confirmed. Explosions left running by cleanup also made the next stage's manhunters fail when both shared a site, which is now fixed, but it isn't known whether that explains the earlier `detonate_manhunter` failures.
+
+**Possible bug:** `strike_kick_player` failed once in a recorded full run. The video shows the cow flash and get knocked back, and the cooldown started, but the cow's health never dropped. It passed the 6 repeats straight after. The cause isn't known, and it could be a real kick that does no damage. The scenario now reports the cow's state on failure.
+
+### Recording the showcase
+
+`tools/BridgeTools/Showcase` records a staged clip of each ability at normal speed with sound, separate from the tests. They share only `tools/BridgeTools/Stage.cs`, which spawns things on a site and cleans up. The clips' checks only decide whether a take is worth keeping, and a clip gets up to 3 takes.
+
+1. Needs ffmpeg (`winget install Gyan.FFmpeg`), and build the audio recorder once: `dotnet build tools/ProcessAudioCapture/ProcessAudioCapture.csproj -c Release`.
+2. Start the `sillyanimalthings-showcase` profile through GABS. It's a copy of the Biotech one with a 1080p window, no music, and `runInBackground` on so that it keeps playing sound without focus. Don't minimize the window. The game's sound plays out loud while recording.
+3. Call `ordo/record_showcase` with `outputDirectory` set to the absolute path of `tools/BridgeTools/videos`, which is gitignored, and `audioCapturePath` set to the absolute path of `tools/ProcessAudioCapture/bin/Release/net10.0-windows/win-x64/ProcessAudioCapture.exe`. `filter` records only the matching clips. All 15 take about 95 s. Don't use a folder called `showcase`: Windows would treat it as the `Showcase` source folder.
+4. Run `tools/BridgeTools/Showcase/make_showcase.ps1`, which takes about 45 s. It cuts one captioned 60 fps MP4 per clip, plus `highlight_reel.mp4` when there's more than one, then deletes the recording unless given `-KeepRecording`.
+
+How it works:
+
+- **One continuous recording:** the tool starts ffmpeg and the audio recorder, then logs each clip's start and end times in `timeline.tsv`. Video frames are stamped with the real time, so the script can cut both tracks at the same moment. Detonate's sound measured 25 ms from its flash.
+- **Video:** ffmpeg's `gfxcapture` records the game window, cropped to the middle 1280x720. It only gets frames when the window changes, so ffmpeg can't stop while the game isn't drawing. Never block the main thread waiting for it: that once added a 15 s delay.
+- **Sound:** `ProcessAudioCapture` uses Windows' process loopback API, which records only the game, not the microphone or other programs. ffmpeg's only audio input here is the microphone, so don't use that. It's self-contained because the game can't find a per-user .NET install.
+- **Tick stepping:** don't film while stepping ticks. Pawns' drawn positions don't update while the game is paused between steps, so they appear to turn and flash without moving.
+
+Captions come from each ability's label and as much of its description as fits on a line, so they follow the mod's own text. The game UI is hidden through its screenshot mode. The Gnaw clip starts its wall worn down, because a real wall takes three bites with ten seconds between them.
+
+### Findings
+
+Run through RimBridgeServer with `tools/BridgeTools`. No errors were logged except from the faults put in on purpose.
+
+**Changed: Detonate has no confirmation dialog**, at the user's request.
+
+**Trunk Blast sprays around its target, not along the way.** The vanilla spray hits the target cell and the 6 cells around it, weighted to the far side, so it won't put out a fire between the elephant and its target.
 
 **Fixed: abilities did nothing for player-owned roamers.** `Pawn.ThreatDisabledBecauseNonAggressiveRoamer` makes a player-owned roamer (`race.roamMtbDays` set) non-hostile to everything until it has recently fought, so `Thing.HostileTo(Thing)` is false. Use `HostilityUtility.IsEnemyOf` in any ability that a player's animal casts and that needs to know who its enemies are; it also checks against the caster's faction.
 
@@ -155,26 +195,28 @@ Run through RimBridgeServer with `tools/BridgeTools`, on the `sillyanimalthings`
 | Ability | Commanded | AI | Evidence |
 |---|---|---|---|
 | Hidden Dragon | Pass | Pass | Invisible through the approach; removed by the first bite, with the cooldown still running |
-| Detonate | Pass | Pass | Commanded: caster gone, target burned. AI: chased with the cast job, then gone with burns on a pawn beside it (explosion itself not observed) |
-| Regenerate | Auto-cast pass | Not run | Cast below 60%, health rose from 51.5% to 61.5% |
-| Withdraw | Auto-cast pass | Not run | Cast below 75%; armor bonus not measured |
+| Detonate | Pass | Pass | Caster dies, and the blast hurts the target; see the known flake |
+| Regenerate | Auto-cast pass | Auto-cast pass | Cast below 60%, health rises; untrained player animals don't cast it |
+| Withdraw | Auto-cast pass | Auto-cast pass | Cast below 75%; armor bonus not measured |
 | Howl | Pass | Pass | Caster and allies in range get `Ordo_Rallied`; stat bonus not measured |
 | Belly Slide | Pass | n/a | Moved 10 cells, cooldown started |
 | Charge | Pass | Pass | Walrus and muffalo commanded, walrus AI; damage across body sizes not compared |
-| Trunk Blast | Pass | Not run | Drafted target pushed 2 cells; putting out fires not tested |
+| Trunk Blast | Pass | Not run | Target pushed back, fire in the spray put out |
 | Kick | Pass | Pass | Bruise, knockback, stagger; AI cooldown started |
-| Poison Bite | Pass | Partial | `ToxicBuildup` when commanded; AI started the cast job, landing not observed |
+| Poison Bite | Pass | Pass | `ToxicBuildup` when commanded; AI casts it and hurts its target |
 | Spit | Pass | Not run | `Ordo_SpitInEyes` on target |
 | Intimidate | Pass | Pass | Player goose scares enemies only; manhunting goose and cobra put colonists in `Terror` |
-| Gnaw | Pass | Not run | Wooden wall lost exactly 80 HP; nutrition and hungry-wild behaviour not tested |
-| Trunk Throw | Partial | Not run | At a pawn: chunk consumed, projectile in flight, cooldown started. Damage and rendering not confirmed. At a cell: the cast didn't start, while the elephant was under attack, so unclear whether that's a bug |
-| Fire Burst | Not run | Not run | Needs Biotech, which this profile doesn't load |
+| Gnaw | Pass | Pass | Damages wood and restores food; stone is refused; hungry wild beavers gnaw, a player's don't |
+| Trunk Throw | Pass | Not run | Hits pawns, lands at cells, and is disabled with no chunk nearby; how the projectile looks not confirmed |
+| Fire Burst | Pass | Pass | Cooldown starts when cast; the burning itself isn't checked |
 
 Things that look like bugs while testing but aren't:
 
 - `Ability.StartCooldown(0)` leaves `CanCast` false until the next tick.
 - Enemy-faction animals flee instead of fighting. Use a manhunter to test animal AI.
 - A location jump is refused when the caster spawned inside rock.
+- A cast from a stationary target can look like it missed, because explosions spread over several ticks and spray projectiles land one after another. Wait for the effect instead of checking straight away.
+- Trained, knocked-back targets that are bigger than the caster stagger but don't move.
 
 ## Testing risks to check in game
 

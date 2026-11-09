@@ -123,7 +123,13 @@ public sealed class PawnTools
 		string pawnId
 	)
 	{
-		var pawn = Resolve(pawnId);
+		return new { success = true, learned = TrainAll(Resolve(pawnId)) };
+	}
+
+	public static List<string> TrainAll(
+		Pawn pawn
+	)
+	{
 		var learned = new List<string>();
 		foreach (var def in DefDatabase<TrainableDef>.AllDefs)
 		{
@@ -134,7 +140,7 @@ public sealed class PawnTools
 			}
 		}
 
-		return new { success = true, learned };
+		return learned;
 	}
 
 	[Tool("ordo/make_manhunter", Description = "Send an animal into a permanent manhunter state")]
