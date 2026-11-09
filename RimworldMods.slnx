@@ -3,5 +3,6 @@
   <Project Path="LegendaryIsUnique/LegendaryIsUnique.csproj" />
   <Project Path="MechUpgradesUi\MechUpgradesUi.csproj" />
   <Project Path="SillyAnimalThings/SillyAnimalThings.csproj" />
+  <Project Path="tools/BridgeTools/BridgeTools.csproj" />
   <Project Path="Tweaks\Tweaks.csproj" />
 </Solution>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+        <AssemblyName>Ordo.BridgeTools</AssemblyName>
+        <RootNamespace>Ordo.BridgeTools</RootNamespace>
+        <RimWorldDirectory>$(SteamLibraryDirectory)\steamapps\common\RimWorld</RimWorldDirectory>
+    </PropertyGroup>
+
+    <!-- The host bridge supplies this at runtime, and NuGet doesn't carry the version it ships, so compile against its copy -->
+    <ItemGroup>
+        <Reference Include="RimBridgeServer.Sdk">
+            <HintPath>$(RimWorldDirectory)\Mods\RimBridgeServer\1.6\Assemblies\RimBridgeServer.Sdk.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+    </ItemGroup>
+
+    <!-- Companions load from the game's BridgeTools folder, not Mods -->
+    <Target Name="CopyToRimworld">
+        <Copy SourceFiles="$(MSBuildProjectDirectory)\out\Assemblies\Ordo.BridgeTools.dll" DestinationFolder="$(RimWorldDirectory)\BridgeTools\Ordo" />
+    </Target>
+
+</Project>
