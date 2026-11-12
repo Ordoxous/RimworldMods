@@ -152,7 +152,11 @@ public abstract class Stage
 		bool hold = false
 	)
 	{
-		var pawn = PawnGenerator.GeneratePawn(DefDatabase<PawnKindDef>.GetNamed(kind));
+		// Always an adult. Body size shrinks with youth, and knockback skips anything bigger than the caster, so a young caster
+		// would make whether a target moves come down to chance.
+		var kindDef = DefDatabase<PawnKindDef>.GetNamed(kind);
+		var adultAge = kindDef.RaceProps.lifeStageAges.Last().minAge + 0.5f;
+		var pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(kindDef, fixedBiologicalAge: adultAge, fixedChronologicalAge: adultAge));
 
 		// Generated pawns can arrive with old injuries, and health has to start at 100% to spot new ones
 		pawn.health.RemoveAllHediffs();
@@ -278,11 +282,15 @@ public abstract class Stage
 		return pawn.health.hediffSet.HasHediff(DefDatabase<HediffDef>.GetNamed(hediffDef));
 	}
 
+	// Any injury counts, not just a drop in summary health: a hit that takes off a minor part, such as a tail, leaves summary health
+	// at 100%. Spawned pawns start with no hediffs, so any injury is new.
 	public static bool Hurt(
 		Pawn pawn
 	)
 	{
-		return pawn.Dead || pawn.health.summaryHealth.SummaryHealthPercent < 1f;
+		return pawn.Dead
+		       || pawn.health.summaryHealth.SummaryHealthPercent < 1f
+		       || pawn.health.hediffSet.hediffs.Any(hediff => hediff is Hediff_Injury or Hediff_MissingPart);
 	}
 
 	public static bool Staggered(

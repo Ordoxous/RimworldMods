@@ -57,13 +57,15 @@ public static class SillyAnimalThingsShowcase
 		ShowcaseStage stage
 	)
 	{
+		// Deer, because knockback doesn't move anything bigger than the charger, and a cow is bigger than a walrus
 		var walrus = stage.Spawn("Walrus", -8, 0, PawnMode.Trained);
 		var enemies = new[]
 		{
-			stage.Spawn("Cow", 2, 1, PawnMode.Enemy, hold: true),
-			stage.Spawn("Cow", 3, 0, PawnMode.Enemy, hold: true),
-			stage.Spawn("Cow", 2, -1, PawnMode.Enemy, hold: true)
+			stage.Spawn("Deer", 2, 1, PawnMode.Enemy, hold: true),
+			stage.Spawn("Deer", 3, 0, PawnMode.Enemy, hold: true),
+			stage.Spawn("Deer", 2, -1, PawnMode.Enemy, hold: true)
 		};
+		var starts = enemies.Select(enemy => enemy.Position).ToList();
 		var landing = stage.Cell(2, 0);
 		await stage.Beat();
 		stage.Cast(walrus, "Ordo_Charge", landing);
@@ -71,6 +73,7 @@ public static class SillyAnimalThingsShowcase
 		await stage.Until("the walrus lands", () => walrus.Spawned && walrus.Position == landing, 300);
 		await stage.Step(1);
 		stage.Check("the walrus hit something", enemies.Any(Stage.Hurt));
+		stage.Check("the herd was knocked back", Enumerable.Range(0, enemies.Length).All(i => enemies[i].Position != starts[i]));
 		await stage.Linger();
 	}
 
@@ -224,9 +227,10 @@ public static class SillyAnimalThingsShowcase
 		var target = stage.Spawn("Cow", 0, 0, PawnMode.Enemy, hold: true);
 		var start = target.Position;
 
-		// The spray lands around the target, mostly on its far side
+		// The spray lands around the target, mostly on its far side. Every fire has to go out: the knockback shoves the cow
+		// to (1, 0), and a fire left next to it there sets it alight.
 		var fireCells = new List<IntVec3>();
-		foreach (var (x, z) in new[] { (1, 1), (1, -1), (2, 0) })
+		foreach (var (x, z) in new[] { (1, 1), (1, -1) })
 		{
 			stage.Place(ThingDefOf.WoodLog, x, z);
 			fireCells.Add(stage.Cell(x, z));
@@ -237,8 +241,9 @@ public static class SillyAnimalThingsShowcase
 		stage.Cast(elephant, "Ordo_TrunkBlast", target);
 
 		await stage.Until("the target is pushed back", () => target.Position != start, 200);
-		await stage.Until("a fire goes out", () => fireCells.Any(cell => cell.GetFirstThing<Fire>(stage.Map) == null), 120);
+		await stage.Until("the fires go out", () => fireCells.All(cell => cell.GetFirstThing<Fire>(stage.Map) == null), 120);
 		await stage.Linger();
+		stage.Check("the cow isn't burning", !target.IsBurning());
 	}
 
 	private static async Task TrunkThrow(

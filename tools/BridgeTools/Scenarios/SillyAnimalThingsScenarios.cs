@@ -49,52 +49,121 @@ public static class SillyAnimalThingsScenarios
 
 	private const string Withdrawn = "Ordo_Withdrawn";
 
+	// Suites: one per ability, plus "ai" for wild and manhunting casters, "player" for commanded and trained ones, "knockback",
+	// "visuals" for the effects that show what an ability did, and "setup" for the tags and training
 	public static readonly List<Scenario> All = new()
 	{
-		new("tags_grant_abilities", TagsGrantAbilities),
-		new("gizmo_needs_training", GizmoNeedsTraining),
+		new("tags_grant_abilities", "setup", TagsGrantAbilities),
+		new("gizmo_needs_training", "setup player", GizmoNeedsTraining),
 
-		new("dash_belly_slide", DashBellySlide),
-		new("dash_charge_player", context => ChargeAsPlayer(context, "Walrus")),
-		new("dash_charge_player_roamer", context => ChargeAsPlayer(context, "Muffalo")),
-		new("dash_charge_manhunter", context => CastsAtColonist(context, "Walrus", Charge, 8, hurtsColonist: true)),
+		new("dash_belly_slide", "belly_slide player", DashBellySlide),
+		new("dash_charge_player", "charge knockback player", context => ChargeAsPlayer(context, "Walrus")),
+		new("dash_charge_player_roamer", "charge knockback player", context => ChargeAsPlayer(context, "Muffalo")),
+		new("dash_charge_manhunter", "charge ai", context => CastsAtColonist(context, "Walrus", Charge, 8, hurtsColonist: true)),
 
-		new("strike_kick_player", StrikeKickPlayer),
-		new("strike_poison_bite_player", StrikePoisonBitePlayer),
-		new("strike_kick_manhunter", context => CastsAtColonist(context, "Horse", Kick, 4, hurtsColonist: true)),
-		new("strike_poison_bite_manhunter", context => CastsAtColonist(context, "Rat", PoisonBite, 4, hurtsColonist: true)),
+		new("strike_kick_player", "kick knockback visuals player", StrikeKickPlayer),
+		new("strike_poison_bite_player", "poison_bite player", StrikePoisonBitePlayer),
+		new("strike_kick_manhunter", "kick ai", context => CastsAtColonist(context, "Horse", Kick, 4, hurtsColonist: true)),
+		new("strike_poison_bite_manhunter", "poison_bite ai", context => CastsAtColonist(context, "Rat", PoisonBite, 4, hurtsColonist: true)),
 
-		new("roar_howl_player", RoarHowlPlayer),
-		new("roar_howl_manhunter", RoarHowlManhunter),
-		new("roar_intimidate_player", context => IntimidateAsPlayer(context, "Cobra")),
-		new("roar_intimidate_player_roamer", context => IntimidateAsPlayer(context, "Goose")),
-		new("roar_intimidate_manhunter", context => CastsAtColonist(context, "Goose", Intimidate, 5, hurtsColonist: false)),
+		new("roar_howl_player", "howl player", RoarHowlPlayer),
+		new("roar_howl_manhunter", "howl ai", RoarHowlManhunter),
+		new("roar_intimidate_player", "intimidate visuals player", context => IntimidateAsPlayer(context, "Cobra")),
+		new("roar_intimidate_player_roamer", "intimidate player", context => IntimidateAsPlayer(context, "Goose")),
+		new("roar_intimidate_manhunter", "intimidate ai", context => CastsAtColonist(context, "Goose", Intimidate, 5, hurtsColonist: false)),
 
-		new("hurt_regenerate_trained", context => AutoCastsWhenHurt(context, "Wolverine", PawnMode.Trained, 0.6f, Regenerating)),
-		new("hurt_regenerate_wild", context => AutoCastsWhenHurt(context, "Wolverine", PawnMode.Wild, 0.6f, Regenerating)),
-		new("hurt_regenerate_untrained", HurtRegenerateUntrained),
-		new("hurt_regenerate_heals", HurtRegenerateHeals),
-		new("hurt_withdraw_trained", context => AutoCastsWhenHurt(context, "Tortoise", PawnMode.Trained, 0.75f, Withdrawn)),
-		new("hurt_withdraw_wild", context => AutoCastsWhenHurt(context, "Tortoise", PawnMode.Wild, 0.75f, Withdrawn)),
+		new("hurt_regenerate_trained", "regenerate player", context => AutoCastsWhenHurt(context, "Wolverine", PawnMode.Trained, 0.6f, Regenerating)),
+		new("hurt_regenerate_wild", "regenerate ai", context => AutoCastsWhenHurt(context, "Wolverine", PawnMode.Wild, 0.6f, Regenerating)),
+		new("hurt_regenerate_untrained", "regenerate player", HurtRegenerateUntrained),
+		new("hurt_regenerate_heals", "regenerate", HurtRegenerateHeals),
+		new("hurt_withdraw_trained", "withdraw player", context => AutoCastsWhenHurt(context, "Tortoise", PawnMode.Trained, 0.75f, Withdrawn)),
+		new("hurt_withdraw_wild", "withdraw ai", context => AutoCastsWhenHurt(context, "Tortoise", PawnMode.Wild, 0.75f, Withdrawn)),
 
-		new("combat_hidden_dragon_player", CombatHiddenDragonPlayer),
-		new("combat_hidden_dragon_ambush", CombatHiddenDragonAmbush),
-		new("combat_hidden_dragon_too_close", CombatHiddenDragonTooClose),
+		new("combat_hidden_dragon_player", "hidden_dragon player", CombatHiddenDragonPlayer),
+		new("combat_hidden_dragon_ambush", "hidden_dragon ai", CombatHiddenDragonAmbush),
+		new("combat_hidden_dragon_too_close", "hidden_dragon ai", CombatHiddenDragonTooClose),
 
-		new("detonate_player", DetonatePlayer),
-		new("detonate_manhunter", DetonateManhunter),
-		new("gnaw_player", GnawPlayer),
-		new("gnaw_rejects_stone", GnawRejectsStone),
-		new("gnaw_hungry_wild", GnawHungryWild),
-		new("gnaw_hungry_player_ignores", GnawHungryPlayerIgnores),
-		new("trunk_blast", TrunkBlastPushesAndDouses),
-		new("trunk_throw_at_pawn", TrunkThrowAtPawn),
-		new("trunk_throw_at_cell", TrunkThrowAtCell),
-		new("trunk_throw_needs_chunk", TrunkThrowNeedsChunk),
-		new("spit", SpitBlinds),
-		new("fire_burst_player", FireBurstPlayer, FireBurst),
-		new("fire_burst_manhunter", context => CastsAtColonist(context, "LavaSnail", FireBurst, 2, hurtsColonist: false), FireBurst)
+		new("detonate_player", "detonate player", DetonatePlayer),
+		new("detonate_manhunter", "detonate ai", DetonateManhunter),
+		new("gnaw_player", "gnaw player", GnawPlayer),
+		new("gnaw_rejects_stone", "gnaw player", GnawRejectsStone),
+		new("gnaw_hungry_wild", "gnaw ai", GnawHungryWild),
+		new("gnaw_hungry_player_ignores", "gnaw player", GnawHungryPlayerIgnores),
+		new("trunk_blast", "trunk_blast knockback player", TrunkBlastPushesAndDouses),
+		new("trunk_throw_at_pawn", "trunk_throw visuals player", TrunkThrowAtPawn),
+		new("trunk_throw_at_cell", "trunk_throw player", TrunkThrowAtCell),
+		new("trunk_throw_needs_chunk", "trunk_throw player", TrunkThrowNeedsChunk),
+		new("spit", "spit visuals player", SpitBlinds),
+		new("fire_burst_player", "fire_burst player", FireBurstPlayer, FireBurst),
+		new("fire_burst_manhunter", "fire_burst ai", context => CastsAtColonist(context, "LavaSnail", FireBurst, 2, hurtsColonist: false), FireBurst),
+
+		new("visuals_belly_slide_flops", "belly_slide visuals", VisualsBellySlideFlops),
+		new("visuals_withdraw_shell", "withdraw visuals", VisualsWithdrawShell)
 	};
+
+	// The mote a debuff overlay is showing on the pawn, if any. The game doesn't list motes with the map's other things, so this
+	// asks the overlay comp.
+	private static Mote OverlayMote(
+		Pawn pawn,
+		string moteDef
+	)
+	{
+		return pawn.health.hediffSet.hediffs.OfType<HediffWithComps>()
+			.SelectMany(hediff => hediff.comps.OfType<HediffComp_Overlay>())
+			.Where(comp => comp.Props.moteDef.defName == moteDef)
+			.Select(comp => comp.LastMote)
+			.FirstOrDefault(mote => mote is { Destroyed: false });
+	}
+
+	private static bool HasMote(
+		Pawn pawn,
+		string moteDef
+	)
+	{
+		return OverlayMote(pawn, moteDef) != null;
+	}
+
+	// Lies flat while sliding and stands up again where it lands
+	private static async Task VisualsBellySlideFlops(
+		ScenarioContext context
+	)
+	{
+		var penguin = context.Spawn("Penguin", -5, 0, PawnMode.Trained);
+		var destination = context.Cell(5, 0);
+		context.Cast(penguin, BellySlide, destination);
+
+		var layDown = false;
+		await context.Until(
+			"the penguin is lying down mid-slide",
+			() =>
+			{
+				layDown = context.Map.listerThings.AllThings.OfType<PawnFlyer>().Any(flyer => flyer.FlyingPawn == penguin && flyer.FlyingPawn.jobs?.posture == PawnPosture.LayingOnGroundNormal);
+				return layDown;
+			},
+			100
+		);
+		await context.Until("the penguin lands", () => penguin.Spawned && penguin.Position == destination, 200);
+		await context.Step(1);
+		context.Check("the penguin stands up where it lands", penguin.GetPosture() == PawnPosture.Standing);
+	}
+
+	private static async Task VisualsWithdrawShell(
+		ScenarioContext context
+	)
+	{
+		var tortoise = context.Spawn("Tortoise", 0, 0, PawnMode.Trained);
+		context.HurtBelow(tortoise, 0.75f);
+
+		await context.Until("the tortoise withdraws", () => ScenarioContext.HasHediff(tortoise, Withdrawn), 120);
+		if (!await context.Until("the shell shows", () => HasMote(tortoise, "Ordo_Mote_Shell"), 10))
+		{
+			return;
+		}
+
+		var shell = OverlayMote(tortoise, "Ordo_Mote_Shell");
+		tortoise.health.RemoveHediff(tortoise.health.hediffSet.GetFirstHediffOfDef(DefDatabase<HediffDef>.GetNamed(Withdrawn)));
+		await context.Until("the shell fades when the tortoise comes out", () => shell.Destroyed, 60);
+	}
 
 	private static async Task TagsGrantAbilities(
 		ScenarioContext context
@@ -232,6 +301,12 @@ public static class SillyAnimalThingsScenarios
 		context.Check("the target is staggered", ScenarioContext.Staggered(target));
 		context.Check("the target is knocked back", target.Position != start);
 		context.Check("the kick is on cooldown", ScenarioContext.OnCooldown(horse, Kick));
+		context.Check("the target shows it's dazed", ScenarioContext.HasHediff(target, "Ordo_Dazed"));
+		await context.Until("the stun stars show", () => HasMote(target, "Mote_Stun"), 5);
+
+		// Lasts as long as the stagger, which is 120 ticks for a kick
+		await context.Step(130);
+		context.Check("the daze wears off", !ScenarioContext.HasHediff(target, "Ordo_Dazed"));
 	}
 
 	// A rat, because a cobra's natural bite is venomous too and would hide a failure
@@ -299,6 +374,20 @@ public static class SillyAnimalThingsScenarios
 		context.Check("at least one enemy is terrified", enemies.Any(ScenarioContext.Terrified));
 		context.Check("the friend isn't terrified", !ScenarioContext.Terrified(friend));
 		context.Check("the wild animal isn't terrified", !ScenarioContext.Terrified(wild));
+		context.Check(
+			"every terrified enemy shows it, and no one else does",
+			enemies.All(enemy => ScenarioContext.Terrified(enemy) == ScenarioContext.HasHediff(enemy, "Ordo_Terrified"))
+		);
+
+		// The halo goes when the terror does
+		var terrified = enemies.FirstOrDefault(ScenarioContext.Terrified);
+		if (terrified != null)
+		{
+			await context.Until("the halo shows", () => HasMote(terrified, "Ordo_Mote_TerrorHalo"), 60);
+			terrified.MentalState.RecoverFromState();
+			await context.Step(1);
+			context.Check("the halo goes when the terror ends", !ScenarioContext.HasHediff(terrified, "Ordo_Terrified"));
+		}
 	}
 
 	private static async Task AutoCastsWhenHurt(
@@ -381,11 +470,14 @@ public static class SillyAnimalThingsScenarios
 		ScenarioContext context
 	)
 	{
-		var boomalope = context.Spawn("Boomalope", 0, 0, PawnMode.Trained);
+		var boomalope = context.Spawn("Boomalope", -6, 0, PawnMode.Trained);
 		var target = context.Spawn("Cow", 4, 0, PawnMode.Enemy, hold: true);
 		context.Cast(boomalope, Detonate, target);
 
-		await context.Until("the boomalope bursts", () => boomalope.Dead, 400);
+		// It flies there like a rocket rather than running, and bursts where it lands
+		await context.Until("the boomalope takes off", () => context.Map.listerThings.AllThings.OfType<PawnFlyer_Rocket>().Any(flyer => flyer.FlyingPawn == boomalope), 120);
+		await context.Until("the boomalope bursts", () => boomalope.Dead, 200);
+		context.Check("it bursts at the target", boomalope.Corpse?.PositionHeld.InHorDistOf(target.Position, 1.5f) == true);
 		await context.Until("the blast reaches the target", () => ScenarioContext.Hurt(target), 120);
 	}
 
@@ -486,6 +578,11 @@ public static class SillyAnimalThingsScenarios
 		await context.Until("the chunk is picked up", () => chunk.Destroyed, 200);
 		await context.Until("the chunk hits the target", () => ScenarioContext.Hurt(target), 200);
 		context.Check("the throw is on cooldown", ScenarioContext.OnCooldown(elephant, TrunkThrow));
+
+		// In the target's own cell it would be drawn underneath the target
+		var landed = GenRadial.RadialDistinctThingsAround(target.Position, context.Map, 2.9f, true).FirstOrDefault(thing => thing.def == ThingDefOf.ChunkSlagSteel);
+		context.Check("the chunk lands near the target", landed != null);
+		context.Check("the chunk isn't hidden under the target", landed == null || landed.Position != target.Position);
 	}
 
 	private static async Task TrunkThrowAtCell(
@@ -524,6 +621,9 @@ public static class SillyAnimalThingsScenarios
 
 		await context.Until("the target is spat on", () => ScenarioContext.HasHediff(target, SpitInEyes), 200);
 		context.Check("the spit is on cooldown", ScenarioContext.OnCooldown(alpaca, Spit));
+		context.Check("the spit does no damage", !ScenarioContext.Hurt(target));
+
+		await context.Until("green drips show on the target", () => HasMote(target, "Mote_ToxicDamage"), 60);
 	}
 
 	private static async Task FireBurstPlayer(

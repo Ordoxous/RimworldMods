@@ -1,6 +1,6 @@
 # SillyAnimalThings handoff
 
-Last updated 2026-11-08 (second batch of abilities added).
+Last updated 2026-11-10 (visual effects review, debuff visuals, Dubs Performance Analyzer tab).
 
 ## What the mod is
 
@@ -20,7 +20,7 @@ All defNames use the `Ordo_` prefix.
 
 ## Current state
 
-- The tag system, CSV conversion, expanded memberships and the second batch of abilities (Howl, Poison Bite, Intimidate, Withdraw, Kick, Spit) are written. It builds with no warnings (`dotnet build SillyAnimalThings/SillyAnimalThings.csproj`).
+- The tag system, CSV conversion, expanded memberships and the second batch of abilities (Howl, Poison Bite, Intimidate, Withdraw, Kick, Spit) are written. It builds with no warnings (`dotnet build SillyAnimalThings/SillyAnimalThings.csproj -c Debug`; see "Building" below for why `-c Debug` matters).
 - **Tested in game on 2026-11-09**, and rerunnable with the scenario suite. See "In-game test results" below. Static checks also pass: the build, XML parsing, every race and `Ordo_` reference resolving, every class named in XML existing, every texture path found in `Assets.zip` (Fire Burst's icon is Biotech's own), and `Animals.csv` matching `AnimalTags_SillyAnimals.xml` for the built tags.
 - The tag system is pushed to `base/master`. The second batch of abilities is committed locally on `main`, but not pushed.
 
@@ -37,7 +37,7 @@ These were in the committed first batch, found by reading game code:
 |---|---|---|---|
 | Trunk Blast | Trunked | `CompProperties_AbilitySprayLiquid`, 7 cells. The projectile puts out fires and knocks back and staggers pawns (but not pawns bigger than the caster). | `Projectile_WaterBlast.cs`, `KnockbackUtility.cs` |
 | Trunk Throw | Trunked | Destroys a stone or slag chunk within 2.9 cells and launches a projectile drawn as that chunk. The chunk is re-placed where it lands. The gizmo is disabled when no chunk is nearby. | `CompAbilityEffect_TrunkThrow.cs`, `Projectile_ThrownChunk.cs` |
-| Detonate | Volatile | Touch ability (walks to the target), then `pawn.Kill(null)`, which fires the race's death action (big explosion, small explosion, or tox cloud). AI charges hostiles within 15 cells. | `CompAbilityEffect_Detonate.cs` |
+| Detonate | Volatile | A rocket leap, range 14.9: the dash verb with `PawnFlyer_Rocket`, which arcs high trailing fire, sparks and smoke, then calls `pawn.Kill(null)` where it lands. That fires the race's death action (big explosion, small explosion, or tox cloud). The kill is in the flyer because the jump verb applies ability comps at take-off; the comp only decides when the AI launches, at hostiles within 14.9 cells. | `PawnFlyer_Rocket.cs`, `CompAbilityEffect_Detonate.cs` |
 | Gnaw | Woodchewer | Touch ability on a wooden building (Woody stuff, or WoodLog in its cost list). Deals 80 Bite damage and restores 25% food. | `CompAbilityEffect_Gnaw.cs` |
 | Hungry gnawing (behaviour) | Woodchewer | Harmony prefix on `JobGiver_GetFood.TryGiveJob`. A hungry, non-player animal with Gnaw ready targets a reachable wooden building within 12 cells. | `Behaviours/HungryGnawing.cs` |
 | Fire Burst | Incendiary (Biotech only) | Vanilla fire burst, radius 2.9. A comp subclass makes the AI cast it when a hostile is within the radius; vanilla only casts while the caster is being aimed at. | `CompAbilityEffect_FireBurstNearEnemy.cs` |
@@ -144,21 +144,30 @@ Untagged for now (fine as plain animals): most livestock, Deer, Caribou, Chinchi
 
 ## In-game test results
 
+The workflow and tools below are shared by every mod in the repo. The `rimworld-mod-dev` skill (`.claude/skills/rimworld-mod-dev`) describes them for any mod; this section keeps what's specific to SillyAnimalThings.
+
 ### Running the scenario suite
 
-`tools/BridgeTools/Scenarios` holds 37 scenarios, one per mechanism and per case that behaves differently, plus one that checks every tagged race got its abilities. Start the game through GABS, then call `ordo/run_scenarios`, with `filter` to run only the names containing it. Tests don't record anything; for videos, see the showcase below.
+`tools/BridgeTools/Scenarios` holds 39 scenarios, one per mechanism and per case that behaves differently, plus one that checks every tagged race got its abilities. Start the game through GABS, then call `ordo/run_scenarios`. Tests don't record anything; for videos, see the showcase below.
 
-- **Profiles:** all open straight into an `autostart` save at midday, in a 720p window. `sillyanimalthings` skips the 2 Fire Burst scenarios and `sillyanimalthings-biotech` runs all 37.
+- **Suites:** every scenario is in suites: one per ability (`charge`, `detonate`, ...), plus `ai`, `player`, `knockback`, `visuals` and `setup`. Pass `suite` (space or comma separated) to test one feature, and `ordo/list_scenarios` lists them. `filter` still matches names.
+- **The game is the fixture:** keep one game running and run suites against it one after another; each scenario sets up its own site and cleans up after itself. Load XML changes with `ordo/hot_reload_defs` and most C# changes with `hot_reload.ps1` and `ordo/apply_update` (see "Reloading without restarting"). Restart for the rest, and for changes to the bridge tools.
+- **Check visuals with scenarios, not by eye:** the `visuals` suite checks that each overlay's mote appears and goes, through `HediffComp_Overlay.LastMote`. The game doesn't list motes with the map's other things. Use the showcase to judge how something looks once it's there.
+
+- **Profiles:** all open straight into an `autostart` save at midday, in a 720p window. `sillyanimalthings` skips the 2 Fire Burst scenarios and `sillyanimalthings-biotech` runs all 39. `sillyanimalthings-profiling` is for timing the mod; see "Dubs Performance Analyzer" below.
 - **Headless:** `sillyanimalthings-headless` and `sillyanimalthings-biotech-headless` add Waylith's `-Headless` flag, which means no window and no rendering. The suite takes 1.4-4 s, so use these unless you need to see the game. Screenshots don't work, and `games_stop` fails because there's no window to signal, so stop with `games_kill`. Headless runs don't exercise anything that draws, so use a windowed run for visual changes. `-nographics` and `-batchmode` do nothing.
 - **The test save:** a 33x33 map of flat soil with no pawns, things, roofs or fog, just big enough for one site, which every scenario shares. An empty colony gets the Stranger in Black rescue event, so both tools turn off the storyteller and remove all pawns before starting. That lasts until the save is next loaded.
 - **Remaking a save:** with no `autostart.rws` in the profile's `Saves`, call `ordo/start_test_colony`, `rimbridge/wait_for_long_event_idle`, `ordo/blank_map` and `ordo/set_hour`, then `rimworld/save_game` with `saveName` set to `autostart`.
 - **What fails a scenario:** a broken check, an exception, any error in the game log, or a dialog left open.
-- **Deploying:** stop the game, then `dotnet build tools/BridgeTools/BridgeTools.csproj -c Debug '-t:Build;CopyToRimworld'`. The suite doesn't deploy the mod, so deploy that too after changing it.
+- **Deploying:** stop the game, then build and copy each project as two separate commands, both with `-c Debug`: `dotnet build <project> -c Debug`, then `dotnet build <project> -c Debug -t:CopyToRimworld`. Do this for `SillyAnimalThings/SillyAnimalThings.csproj` and `tools/BridgeTools/BridgeTools.csproj`; the suite deploys neither.
+- **Building:** without `-c Debug`, the `Debug` property group in `Directory.Build.props` doesn't apply, because that file is read before the SDK sets the default configuration. The build then goes to `bin/Debug` instead of `out/Assemblies`, and `CopyToRimworld` deploys whatever DLL was in `out/` already, often an older one from one of Rider's background builds. The symptom is "Could not find a type named Ordo..." for anything new. To check a deploy, search the deployed DLL for a new class name.
 - **The suite is known to catch bugs:** with four faults put in on purpose (the roamer bug, a violent Hidden Dragon verb, an error logged by strikes, and a Detonate dialog), exactly the scenarios that cover them failed.
 
 **Known flake:** `detonate_manhunter` and `combat_hidden_dragon_ambush` have each occasionally failed in a full run, with the manhunter not hurting the test colonist. Neither failed in 12 isolated repeats or the last 4 full runs. The cause isn't known: clothing, pacifism and non-combatant scoring were ruled out or didn't explain it, and drafting the real colonists may have helped. Both scenarios now report the pawns' state on failure, so read that next time it happens. `combat_hidden_dragon_ambush` later failed on "the colonist was hurt", with the tiger revealed but the colonist unhurt, which would fit a bite that missed, though that isn't confirmed. Explosions left running by cleanup also made the next stage's manhunters fail when both shared a site, which is now fixed, but it isn't known whether that explains the earlier `detonate_manhunter` failures.
 
-**Possible bug:** `strike_kick_player` failed once in a recorded full run. The video shows the cow flash and get knocked back, and the cooldown started, but the cow's health never dropped. It passed the 6 repeats straight after. The cause isn't known, and it could be a real kick that does no damage. The scenario now reports the cow's state on failure.
+**Fixed flake: knockback depended on age.** Stages generated animals at random ages, and body size shrinks with youth, so a young caster was sometimes smaller than its target and knockback skipped it (it skips anything bigger than the caster). `Stage.Spawn` now always makes adults. This may also explain some of the flakes below.
+
+**Explained: `strike_kick_player` "never hurt".** A kick can take off a minor part, such as a tail, which leaves summary health at 100%, and `Stage.Hurt` only looked at summary health. It now also counts any injury or missing part. The kick was never doing no damage.
 
 ### Recording the showcase
 
@@ -218,11 +227,79 @@ Things that look like bugs while testing but aren't:
 - A cast from a stationary target can look like it missed, because explosions spread over several ticks and spray projectiles land one after another. Wait for the effect instead of checking straight away.
 - Trained, knocked-back targets that are bigger than the caster stagger but don't move.
 
+## Visual effects
+
+Reviewed against the showcase clips on 2026-11-10. Effects reuse the base game's flecks and motes; none need new art.
+
+| Ability | What shows | Where |
+|---|---|---|
+| Belly Slide, Charge | Dust trail along the whole dash | `PawnFlyer_Trail` (both flyers derive from it) |
+| Belly Slide | The penguin lies flat for the slide and stands up where it lands, by setting its posture during the flight | `PawnFlyer_Slide` |
+| Detonate | Fire, sparks and smoke along a high arc, then the race's own explosion | `PawnFlyer_Rocket` |
+| Withdraw | The shield belt's bubble, tinted like a shell, for as long as it's withdrawn | `Ordo_Mote_Shell` on `Ordo_Withdrawn` |
+| Kick, Charge, Trunk Blast | Base game's STUN overlay for as long as the knockback stagger lasts | `Ordo_Dazed` hediff, added by `KnockbackUtility` |
+| Spit | Green splash on impact, then green drips while half blind. No damage, so no red injury flash | `landedEffecter`, `Ordo_SpitInEyes` |
+| Intimidate | Small terror halo on each pawn it scares, gone when the terror ends | `CompAbilityEffect_GiveTerror`, `Ordo_Terrified`, `Ordo_Mote_TerrorHalo` |
+| Howl | A small ring on each ally it rallies, which also tells it apart from Intimidate (both share Odyssey's roar ring) | `Ordo_RallyRing` |
+| Regenerate | Healing cross each time it heals | `HediffComp_Regenerate` |
+| Gnaw | Wood chips, dust and wood-chewing sound while it winds up | `Ordo_Gnawing` warm-up effecter |
+| Trunk Throw | The chunk lands one cell back towards the thrower when it hits a pawn; in the pawn's own cell it was drawn underneath and couldn't be seen | `Projectile_ThrownChunk` |
+
+`HediffComp_Overlay` is the reusable piece for debuffs: give a hediff a mote, kept on the pawn or remade every `intervalTicks`, and optionally `whileMentalState` to end it with a mental state. The base game's motes grow several cells wide, which over a crowd fills the screen, so the mod has smaller copies (`Ordo_Mote_RallyRing`, `Ordo_Mote_TerrorHalo`).
+
+Still without a visual: **Poison Bite** after the bite (`ToxicBuildup` is the base game's hediff).
+
+Showcase staging fixes made in the same review: Charge targets deer (cows are bigger than a walrus, so they never moved), and Trunk Blast only lights fires next to the cow (one further away survived the spray and set the cow alight).
+
+## Dubs Performance Analyzer
+
+`mod/Analyzer.xml` gives the mod its own tab, under Modder > SillyAnimalThings, for players and for watching a live game. DPA reads it from the mod's root folder, and without DPA it does nothing. It names each method, because the installed 1.7 build of DPA only finds methods in 4 of the mod's 23 types when given `Types`, and doesn't read `NestedTypes`. DPA skips names it can't find without logging anything, so regenerate the list with `ordo/profiling_targets` after adding or renaming methods.
+
+**Profiling a test run:** start the `sillyanimalthings-profiling` GABS profile, then call `ordo/run_scenarios` with `profile: true`. The profile is the Biotech one plus DPA, with its own data folder, so the normal test profiles never load DPA. The runner patches every method `ordo/profiling_targets` lists into DPA through RimBridgeServer's `rimworld/dpa_*` tools. It resets DPA before each scenario and snapshots it after, because DPA only keeps the last 2000 ticks and a full run is about 3300. The result's `profile` section has per-method calls, total, average and worst time (with the scenario it happened in), and per-scenario totals. Things to know:
+
+- It needs a window, so it takes about 21 s instead of 4. Headless, DPA logs "Caught analyzer trying to begin a new update cycle before finishing the previous one", which fails the scenarios.
+- Only time inside game ticks is counted, so a scenario's own setup, such as dealing damage directly, doesn't show.
+- Times include whatever the method calls, and the first cast of an ability is much slower than later ones. Charge's landing took 94 ms the first time and 2-13 ms after.
+
+The first run on 2026-11-10 found nothing that costs anything every tick: the debuff overlays average 0.012 ms a call and the dash trail 0.007 ms. The rest is one-off work when an ability lands, all under 15 ms apart from first casts and Detonate's explosion (42 ms).
+
+## Reloading without restarting
+
+Both defs and C# code can be changed in a running game, headless or windowed. Checked on 2026-11-12, with the full suite passing on games changed both ways. Restart only for the changes listed under "Needs a restart".
+
+**Defs (XML): `ordo/hot_reload_defs`.** Deploy the changed XML (`-t:CopyToRimworld`), then call it; it takes about 1.5 s. It runs the same reload as dev mode's `Actions\Hot reload Defs`, and works headless where the debug action hangs:
+
+- A synchronous long event only runs once its loading screen has been drawn (`QueuedLongEvent.alreadyDisplayed`), and nothing is drawn headless. The tool marks each event as drawn by reflection. `ordo/long_events` shows the queue.
+- The reload rebuilds every def from XML, which drops the abilities and trainables the tags add in code. `SillyAnimalThings.cs` patches `PlayDataLoader.HotReloadDefs` to queue `AnimalTagUtility.ApplyAllTags` after it. `ExecuteWhenFinished` runs too early, before the reload has started, and `LoadAllPlayData`'s flag is `recovering`, not a hot reload flag.
+- `ordo/ability_def` reads an ability's live label, range and cooldown, to check a change took.
+
+**C# code: .NET hot reload, through `tools/HotReloadDelta`.** Waylith's runtime (`.NET 10.0.15-waylithclr`) accepts hot reload updates for the mod's Debug build with no setup: `MetadataUpdater.IsSupported` is true, and no `DOTNET_MODIFIABLE_ASSEMBLIES` or debugger is needed. `ordo/runtime_info` reports this. The game loads the mod from its file into the default load context.
+
+1. Deploy a build the normal way, start the game, and run `tools/HotReloadDelta/hot_reload.ps1 -Project SillyAnimalThings -Reset`. It saves the exact `csc` command line and snapshots `src`, which is the baseline the game has loaded.
+2. Edit the code, then run `hot_reload.ps1 -Project SillyAnimalThings`. It prints a folder; pass that to `ordo/apply_update` as `directory`. Making the delta takes about 4 s and applying it a few milliseconds.
+3. Repeat. Deltas chain, so the script snapshots the source each one applied, and the tool replays the chain to reach the game's current state.
+
+How it works: `HotReloadDelta` is what `dotnet watch` does on the build side. It compiles the baseline and current source with Roslyn using the build's own arguments, finds changed and new members, and emits the metadata, IL and PDB deltas with `EmitDifference`. Its baseline comes from the deployed DLL and its embedded PDB. `ordo/apply_update` calls `MetadataUpdater.ApplyUpdate` in the game.
+
+- **Applies:** changed method bodies, new methods, new fields, and new types (whose static initializer runs on first use).
+- **Needs a restart (the script says so and writes nothing):** removed methods, changed signatures, and new constructors or virtual methods on existing types. Removed types and fields are only noted, since they stay loaded harmlessly.
+- **Not rerun:** static constructors, such as the Harmony patching in `SillyAnimalThings`. A new or changed Harmony patch needs a restart.
+- **Lost on restart:** the deployed DLL on disk is unchanged, so after a restart, deploy a fresh build and `-Reset`.
+
+**Debugging in Rider: attach to the running game.** Checked on 2026-11-12 with a headless game. The game ships the .NET debugging files (`mscordaccore.dll`, `mscordbi.dll`) next to `coreclr.dll`, and the mod's Debug build embeds its PDB, so Rider maps breakpoints to the source with no setup.
+
+- Start the game through GABS; `games_status` gives its PID as `gamePid`. In Rider, use Run > Attach to Process and pick **.NET Debugger**, not ".NET and Native" or LLDB.
+- Breakpoints in mod code stop the game, with full locals, stepping, expressions that call methods, and the call stack down through the game's own code (`Ability.Activate`, `Verb.WarmupComplete`, `Pawn.Tick`). Rider reports "didn't find the associated module" until the mod's DLL loads, then binds the breakpoint.
+- While stopped, the game's main thread is paused, so bridge tool calls hang until you resume. A scenario run started before the stop carries on afterwards.
+- Stopping the debug session detaches; the game keeps running.
+- **It can't be combined with `ordo/apply_update`:** while a debugger is attached, the runtime refuses those updates ("Assembly updates cannot be applied while a debugger is attached"). Detach first, or try Rider's own hot reload, which goes through the debugger; that one isn't tested here.
+
+Other tools, not used: [Reloader](https://github.com/pardeike/Reloader) and [Rimworld-Doorstop](https://github.com/pardeike/Rimworld-Doorstop) need Unity's Mono runtime or Doorstop, which Waylith doesn't have. [Lib.QuickReload](https://www.nuget.org/packages/Lib.QuickReload) is deprecated, and [HotSwap](https://github.com/Zetrith/HotSwap) is archived. [EditCompileReload](https://github.com/Zetrith/EditCompileReload) would probably work, since it's plain .NET, but it rewrites the IL at build time and supports fewer kinds of change than the runtime's own hot reload. [RimWorldHotReload](https://github.com/xiao-e-yun/RimWorldHotReload) reloads textures and sounds too; its 1.7 support isn't stated.
+
 ## Testing risks to check in game
 
 - AI Charge from long range: a manhunting muffalo spawned about 16 cells from its target (range 11.9) walked in with `AttackMelee` and didn't charge within 200 ticks, while a walrus spawned 10 cells away did. `JobGiver_Manhunter` only checks abilities when it picks a job, and melee jobs last 420-900 ticks, so animals that start out of range may rarely charge. Cause not confirmed.
 
-- Thrown chunk projectile: it's drawn with the chunk's `graphic.MatSingle`; check it renders.
 - How often hostile elephants and walruses use their abilities, and whether hungry wild alphabeavers are too eager to eat buildings.
 - Boomrat has both Detonate and Fire Burst. The AI picks the first castable ability, and Detonate triggers from 15 cells, so hostile boomrats may never fire burst. Fire burst also isn't protected from its own flames, so a boomrat may ignite itself (funny, but check).
 - Charge damage across body sizes (goat about 16, mastodon about 44).

@@ -5,3 +5,4 @@
 *.DotSettings.user
 Directory.Build.local.props
 tools/BridgeTools/videos/
+tools/HotReloadDelta/state/

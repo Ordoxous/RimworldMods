@@ -45,13 +45,14 @@ public sealed class ShowcaseRunner
 	// What fits across a 1280-wide video at the caption's font size
 	private const int MaxCaptionLength = 130;
 
-	[Tool("ordo/record_showcase", Description = "Play a staged clip of each ability at normal speed while recording the game window and its sound, for make_showcase.ps1 to cut into captioned videos and a highlight reel. Needs the sillyanimalthings-showcase profile, with its window visible and not minimized. Removes every pawn on the map first and mutates the running game, so only use it on a test save and don't save afterwards. This isn't a test: use ordo/run_scenarios for that.")]
+	[Tool("ordo/record_showcase", Description = "Play a staged clip of each ability at normal speed while recording the game window and its sound, for make_showcase.ps1 to cut into captioned videos and a highlight reel. Records one mod's clips: pass mod when more than one running mod has some. Needs a showcase profile (such as sillyanimalthings-showcase), with its window visible and not minimized. Removes every pawn on the map first and mutates the running game, so only use it on a test save and don't save afterwards. This isn't a test: use ordo/run_scenarios for that.")]
 	public static async Task<object> RecordShowcase(
 		IRimBridgeContext bridge,
 		CancellationToken cancellationToken,
 		[ToolParameter(Description = "Absolute folder to record into. Replaces whatever was recorded there before.")] string outputDirectory,
 		[ToolParameter(Description = "Absolute path of the built ProcessAudioCapture.exe")] string audioCapturePath,
-		[ToolParameter(Description = "Only record clips whose name contains this")] string filter = null
+		[ToolParameter(Description = "Only record clips whose name contains this")] string filter = null,
+		[ToolParameter(Description = "The mod whose clips to record, by packageId, name, folder or assembly name")] string mod = null
 	)
 	{
 		if (Find.CurrentMap == null)
@@ -59,6 +60,13 @@ public sealed class ShowcaseRunner
 			return new { success = false, message = "No map is loaded" };
 		}
 
+		var (sets, error) = ModTarget.Running(ShowcaseSets.All, mod);
+		if (error != null || sets.Count > 1)
+		{
+			return new { success = false, message = error ?? $"Pass mod: more than one running mod has clips ({string.Join(", ", sets.Select(set => set.Mod.PackageId))})" };
+		}
+
+		var allClips = sets[0].Items;
 		var map = Find.CurrentMap;
 		StageSites.ClearOfVisitors(map);
 
@@ -71,7 +79,7 @@ public sealed class ShowcaseRunner
 		SetTheScene(map);
 		PrepareOutput(outputDirectory);
 
-		var clips = SillyAnimalThingsShowcase.All
+		var clips = allClips
 			.Where(clip => filter == null || clip.Name.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0)
 			.ToList();
 
@@ -116,7 +124,7 @@ public sealed class ShowcaseRunner
 				}
 
 				// Numbered so the reel plays in the order they're listed
-				var clipName = $"{SillyAnimalThingsShowcase.All.IndexOf(clip) + 1:D2}_{clip.Name}";
+				var clipName = $"{allClips.IndexOf(clip) + 1:D2}_{clip.Name}";
 				WriteCaption(Path.Combine(outputDirectory, "clips", clipName), ability, clip.AnimalKind);
 				timeline.AppendLine($"{clipName}\t{outcome.Start}\t{outcome.End}");
 				results.Add(new { clip.Name, status = "recorded", takes = outcome.Takes, seconds = (outcome.End - outcome.Start) / 1000.0 });

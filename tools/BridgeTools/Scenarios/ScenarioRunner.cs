@@ -18,30 +18,92 @@ public sealed class Scenario
 	// The scenario is skipped unless this ability is loaded, for abilities behind a DLC
 	public readonly string RequiresAbility;
 
+	// The features it covers, so that ordo/run_scenarios can run just the suite for one of them
+	public readonly string[] Suites;
+
 	public Scenario(
 		string name,
+		string suites,
 		Func<ScenarioContext, Task> run,
 		string requiresAbility = null
 	)
 	{
 		Name = name;
+		Suites = suites.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 		Run = run;
 		RequiresAbility = requiresAbility;
+	}
+
+	public bool InAnySuite(
+		IReadOnlyCollection<string> suites
+	)
+	{
+		return Suites.Any(suite => suites.Contains(suite, StringComparer.OrdinalIgnoreCase));
 	}
 }
 
 public sealed class ScenarioRunner
 {
-	[Tool("ordo/run_scenarios", Description = "Run the in-game scenarios against the current map, cleaning up after each one, and report pass, fail or skip per scenario. Removes every pawn on the map first and mutates the running game, so only use it on a test save and don't save afterwards.")]
+	[Tool("ordo/list_scenarios", Description = "List each running mod's scenarios and the suites each belongs to, for choosing what to pass ordo/run_scenarios as suite")]
+	public static object ListScenarios(
+		[ToolParameter(Description = "Only this mod's scenarios, by packageId, name, folder or assembly name")] string mod = null
+	)
+	{
+		var (sets, error) = ModTarget.Running(ScenarioSets.All, mod);
+		if (error != null)
+		{
+			return new { success = false, message = error };
+		}
+
+		return new
+		{
+			success = true,
+			mods = sets.Select(
+				set => new
+				{
+					mod = set.Mod.PackageId,
+					suites = set.Items
+						.SelectMany(scenario => scenario.Suites)
+						.Distinct()
+						.OrderBy(suite => suite)
+						.Select(suite => new { suite, scenarios = set.Items.Where(scenario => scenario.Suites.Contains(suite)).Select(scenario => scenario.Name) })
+				}
+			)
+		};
+	}
+
+	// One running game is the fixture for every run: each scenario sets up its own site and cleans it up, so runs can follow one
+	// another without restarting. Restart only to load a new build of the mod.
+	[Tool("ordo/run_scenarios", Description = "Run the in-game scenarios of every running mod (or of mod) against the current map, cleaning up after each one, and report pass, fail or skip per scenario. Pass suite to test one feature; ordo/list_scenarios lists the suites. Removes every pawn on the map first and mutates the running game, so only use it on a test save and don't save afterwards.")]
 	public static async Task<object> RunScenarios(
 		IRimBridgeContext bridge,
 		CancellationToken cancellationToken,
-		[ToolParameter(Description = "Only run scenarios whose name contains this")] string filter = null
+		[ToolParameter(Description = "Only run this mod's scenarios, by packageId, name, folder or assembly name")] string mod = null,
+		[ToolParameter(Description = "Only run scenarios in these suites, separated by spaces or commas, such as \"charge knockback\"")] string suite = null,
+		[ToolParameter(Description = "Only run scenarios whose name contains this")] string filter = null,
+		[ToolParameter(Description = "Time every method of the mods under test with Dubs Performance Analyzer and report the totals. Needs DPA loaded and a window: without rendering DPA logs an error, which fails the scenarios.")] bool profile = false
 	)
 	{
 		if (Find.CurrentMap == null)
 		{
 			return new { success = false, message = "No map is loaded" };
+		}
+
+		var (sets, setsError) = ModTarget.Running(ScenarioSets.All, mod);
+		if (setsError != null)
+		{
+			return new { success = false, message = setsError };
+		}
+
+		ScenarioProfiler profiler = null;
+		if (profile)
+		{
+			string error;
+			(profiler, error) = await ScenarioProfiler.Start(bridge, sets.Select(set => set.Mod));
+			if (profiler == null)
+			{
+				return new { success = false, message = error };
+			}
 		}
 
 		var map = Find.CurrentMap;
@@ -53,9 +115,15 @@ public sealed class ScenarioRunner
 			return new { success = false, message = $"No clear {StageSites.Radius * 2}-cell site" };
 		}
 
-		var scenarios = SillyAnimalThingsScenarios.All
+		var suites = suite?.Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);
+		var scenarios = sets.SelectMany(set => set.Items)
+			.Where(scenario => suites == null || scenario.InAnySuite(suites))
 			.Where(scenario => filter == null || scenario.Name.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0)
 			.ToList();
+		if (scenarios.Count == 0)
+		{
+			return new { success = false, message = "No scenario matches; ordo/list_scenarios lists the suites" };
+		}
 
 		var results = new List<object>();
 		var failed = 0;
@@ -70,7 +138,17 @@ public sealed class ScenarioRunner
 				continue;
 			}
 
+			if (profiler != null)
+			{
+				await profiler.BeforeScenario();
+			}
+
 			var failures = await RunOne(scenario, bridge, map, sites[nextSite++ % sites.Count], cancellationToken);
+			if (profiler != null)
+			{
+				await profiler.AfterScenario(scenario.Name);
+			}
+
 			if (failures.Count > 0)
 			{
 				failed++;
@@ -82,6 +160,11 @@ public sealed class ScenarioRunner
 			}
 		}
 
+		if (profiler != null)
+		{
+			await profiler.Stop();
+		}
+
 		return new
 		{
 			success = failed == 0,
@@ -90,7 +173,8 @@ public sealed class ScenarioRunner
 			failed,
 			skipped,
 			siteCount = sites.Count,
-			results
+			results,
+			profile = profiler?.Report()
 		};
 	}
 
