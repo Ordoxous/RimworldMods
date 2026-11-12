@@ -60,9 +60,11 @@
       <drawSize>0.7</drawSize>
     </graphicData>
     <projectile>
+      <!-- Never dealt: Projectile_ApplyHediff does no damage -->
       <damageDef>Blunt</damageDef>
-      <damageAmountBase>1</damageAmountBase>
+      <damageAmountBase>0</damageAmountBase>
       <speed>30</speed>
+      <landedEffecter>Impact_Toxic</landedEffecter>
     </projectile>
     <modExtensions>
       <li Class="Ordo.SillyAnimalThings.ProjectileHediffExtension">

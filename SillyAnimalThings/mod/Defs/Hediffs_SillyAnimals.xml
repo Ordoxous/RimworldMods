@@ -72,6 +72,9 @@
         <showRemainingTime>True</showRemainingTime>
       </li>
       <li Class="HediffCompProperties_DisappearsOnDeath" />
+      <li Class="Ordo.SillyAnimalThings.HediffCompProperties_Overlay">
+        <moteDef>Ordo_Mote_Shell</moteDef>
+      </li>
     </comps>
     <stages>
       <li>
@@ -98,6 +101,12 @@
         <showRemainingTime>True</showRemainingTime>
       </li>
       <li Class="HediffCompProperties_DisappearsOnDeath" />
+      <li Class="Ordo.SillyAnimalThings.HediffCompProperties_Overlay">
+        <moteDef>Mote_ToxicDamage</moteDef>
+        <intervalTicks>25</intervalTicks>
+        <scale>0.7</scale>
+        <color>(0.67, 0.75, 0.47)</color>
+      </li>
     </comps>
     <stages>
       <li>
@@ -109,6 +118,41 @@
         </capMods>
       </li>
     </stages>
+  </HediffDef>
+
+  <!-- Debuff visuals. These hediffs do nothing but show the stun stars or terror halo for as long as the effect lasts. -->
+
+  <!-- Added by knockback for as long as the stagger lasts -->
+  <HediffDef>
+    <defName>Ordo_Dazed</defName>
+    <label>dazed</label>
+    <description>Knocked off balance and slow to recover.</description>
+    <hediffClass>HediffWithComps</hediffClass>
+    <comps>
+      <li Class="HediffCompProperties_Disappears">
+        <disappearsAfterTicks>120~120</disappearsAfterTicks>
+      </li>
+      <li Class="HediffCompProperties_DisappearsOnDeath" />
+      <li Class="Ordo.SillyAnimalThings.HediffCompProperties_Overlay">
+        <moteDef>Mote_Stun</moteDef>
+      </li>
+    </comps>
+  </HediffDef>
+
+  <!-- Added by Intimidate alongside the Terror mental state, and gone when it ends -->
+  <HediffDef>
+    <defName>Ordo_Terrified</defName>
+    <label>terrified</label>
+    <description>Scared out of its wits.</description>
+    <hediffClass>HediffWithComps</hediffClass>
+    <comps>
+      <li Class="HediffCompProperties_DisappearsOnDeath" />
+      <li Class="Ordo.SillyAnimalThings.HediffCompProperties_Overlay">
+        <moteDef>Ordo_Mote_TerrorHalo</moteDef>
+        <intervalTicks>55</intervalTicks>
+        <whileMentalState>Terror</whileMentalState>
+      </li>
+    </comps>
   </HediffDef>
 
 </Defs>

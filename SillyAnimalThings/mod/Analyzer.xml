@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Gives the mod its own tab in Dubs Performance Analyzer, under Modder, which profiles every method listed here. DPA reads
+     this file from the mod's root folder; without DPA it does nothing.
+     Methods are named one by one: the 1.7 build of DPA only finds methods in a few types given as Types, and doesn't read
+     NestedTypes. It skips a name it can't find without logging anything, so after renaming or adding methods, regenerate this
+     list with the ordo/profiling_targets bridge tool. -->
+<Analyzer>
+  <SillyAnimalThings>
+    <Methods>
+      <li>Ordo.SillyAnimalThings.AutoCastExtension:EnemyDistanceAllowsCast</li>
+      <li>Ordo.SillyAnimalThings.CompAbilityEffect_ChargeTarget:AICanTargetNow</li>
+      <li>Ordo.SillyAnimalThings.CompAbilityEffect_Detonate:AICanTargetNow</li>
+      <li>Ordo.SillyAnimalThings.CompAbilityEffect_Detonate:Apply</li>
+      <li>Ordo.SillyAnimalThings.CompAbilityEffect_FireBurstNearEnemy:AICanTargetNow</li>
+      <li>Ordo.SillyAnimalThings.CompAbilityEffect_GiveTerror:Apply</li>
+      <li>Ordo.SillyAnimalThings.CompAbilityEffect_Gnaw:Apply</li>
+      <li>Ordo.SillyAnimalThings.CompAbilityEffect_Gnaw:IsWooden</li>
+      <li>Ordo.SillyAnimalThings.CompAbilityEffect_Gnaw:Valid</li>
+      <li>Ordo.SillyAnimalThings.CompAbilityEffect_OnlyTargetAllies:Valid</li>
+      <li>Ordo.SillyAnimalThings.CompAbilityEffect_OnlyTargetEnemies:AICanTargetNow</li>
+      <li>Ordo.SillyAnimalThings.CompAbilityEffect_OnlyTargetEnemies:Valid</li>
+      <li>Ordo.SillyAnimalThings.CompAbilityEffect_Strike:AICanTargetNow</li>
+      <li>Ordo.SillyAnimalThings.CompAbilityEffect_Strike:Apply</li>
+      <li>Ordo.SillyAnimalThings.CompAbilityEffect_TrunkThrow:AICanTargetNow</li>
+      <li>Ordo.SillyAnimalThings.CompAbilityEffect_TrunkThrow:Apply</li>
+      <li>Ordo.SillyAnimalThings.CompAbilityEffect_TrunkThrow:FindChunk</li>
+      <li>Ordo.SillyAnimalThings.CompAbilityEffect_TrunkThrow:GizmoDisabled</li>
+      <li>Ordo.SillyAnimalThings.CompAbilityEffect_TrunkThrow:Valid</li>
+      <li>Ordo.SillyAnimalThings.HediffComp_Overlay:CompPostTick</li>
+      <li>Ordo.SillyAnimalThings.HediffComp_Overlay:Make</li>
+      <li>Ordo.SillyAnimalThings.HediffComp_Regenerate:CompPostTick</li>
+      <li>Ordo.SillyAnimalThings.HediffComp_RemoveOnAttack:Notify_PawnUsedVerb</li>
+      <li>Ordo.SillyAnimalThings.HostilityUtility:IsEnemyOf</li>
+      <li>Ordo.SillyAnimalThings.HungryGnawing:Prefix_JobGiver_GetFood_TryGiveJob</li>
+      <li>Ordo.SillyAnimalThings.KnockbackUtility:Daze</li>
+      <li>Ordo.SillyAnimalThings.KnockbackUtility:KnockBack</li>
+      <li>Ordo.SillyAnimalThings.PawnFlyer_Charge:CollectVictims</li>
+      <li>Ordo.SillyAnimalThings.PawnFlyer_Charge:RespawnPawn</li>
+      <li>Ordo.SillyAnimalThings.PawnFlyer_Trail:Tick</li>
+      <li>Ordo.SillyAnimalThings.Projectile_ApplyHediff:Impact</li>
+      <li>Ordo.SillyAnimalThings.Projectile_ThrownChunk:BounceBack</li>
+      <li>Ordo.SillyAnimalThings.Projectile_ThrownChunk:Impact</li>
+      <li>Ordo.SillyAnimalThings.Projectile_WaterBlast:Impact</li>
+      <li>Ordo.SillyAnimalThings.SelfBuffAutoCast:CanAutoCast</li>
+      <li>Ordo.SillyAnimalThings.SelfBuffAutoCast:Postfix_Pawn_PostApplyDamage</li>
+      <li>Ordo.SillyAnimalThings.SelfBuffAutoCast:Prefix_JobGiver_AIFightEnemy_GetAbilityJob</li>
+      <li>Ordo.SillyAnimalThings.SillyAnimalThings:Postfix_Pawn_SpawnSetup</li>
+    </Methods>
+  </SillyAnimalThings>
+</Analyzer>

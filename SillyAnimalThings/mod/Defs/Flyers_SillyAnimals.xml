@@ -5,6 +5,7 @@
 
   <ThingDef ParentName="PawnFlyerBase">
     <defName>Ordo_PawnFlyer_Slide</defName>
+    <thingClass>Ordo.SillyAnimalThings.PawnFlyer_Slide</thingClass>
     <pawnFlyer>
       <flightDurationMin>0.3</flightDurationMin>
       <flightSpeed>20</flightSpeed>
@@ -19,6 +20,17 @@
       <flightDurationMin>0.3</flightDurationMin>
       <flightSpeed>16</flightSpeed>
       <heightFactor>0</heightFactor>
+    </pawnFlyer>
+  </ThingDef>
+
+  <!-- Detonate: a high arc, and the animal bursts where it lands -->
+  <ThingDef ParentName="PawnFlyerBase">
+    <defName>Ordo_PawnFlyer_Rocket</defName>
+    <thingClass>Ordo.SillyAnimalThings.PawnFlyer_Rocket</thingClass>
+    <pawnFlyer>
+      <flightDurationMin>0.6</flightDurationMin>
+      <flightSpeed>12</flightSpeed>
+      <heightFactor>1.5</heightFactor>
     </pawnFlyer>
   </ThingDef>
 

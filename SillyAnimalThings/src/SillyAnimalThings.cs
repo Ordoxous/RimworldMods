@@ -34,6 +34,33 @@ public static class SillyAnimalThings
 			AccessTools.Method(typeof(JobGiver_AIFightEnemy), nameof(JobGiver_AIFightEnemy.GetAbilityJob)),
 			prefix: new HarmonyMethod(SelfBuffAutoCast.Prefix_JobGiver_AIFightEnemy_GetAbilityJob)
 		);
+
+		// Dev mode's "Hot reload Defs" rebuilds every def from XML, which drops the abilities and trainables the tags add in code
+		var hotReloadDefs = AccessTools.Method(typeof(PlayDataLoader), "HotReloadDefs");
+		if (hotReloadDefs != null)
+		{
+			harmony.Patch(hotReloadDefs, postfix: new HarmonyMethod(Postfix_PlayDataLoader_HotReloadDefs));
+		}
+		else
+		{
+			Log.Warning("[SillyAnimalThings] Couldn't find PlayDataLoader.HotReloadDefs, so hot reloading defs will lose the animals' abilities");
+		}
+	}
+
+	// HotReloadDefs only queues the reload, so this queues the tags after it. ExecuteWhenFinished would run them straight away,
+	// because the reload hasn't started yet.
+	private static void Postfix_PlayDataLoader_HotReloadDefs()
+	{
+		LongEventHandler.QueueLongEvent(
+			() =>
+			{
+				AnimalTagUtility.ApplyAllTags();
+				Log.Message($"[SillyAnimalThings] Defs were hot reloaded, so the {DefDatabase<AnimalTagDef>.DefCount} animal tags were applied again");
+			},
+			"LoadingLongEvent",
+			false,
+			null
+		);
 	}
 
 	// Pawn kind abilities are only granted at generation, so animals that existed before the mod was added never get ours

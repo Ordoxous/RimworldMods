@@ -18,6 +18,10 @@ public class Projectile_ThrownChunk : Bullet
 	{
 		var map = Map;
 		var cell = Position;
+		if (hitThing is Pawn)
+		{
+			cell = BounceBack(cell);
+		}
 
 		base.Impact(hitThing, blockedByShield);
 
@@ -25,6 +29,17 @@ public class Projectile_ThrownChunk : Bullet
 		{
 			GenPlace.TryPlaceThing(ThingMaker.MakeThing(ChunkDef), cell, map, ThingPlaceMode.Near);
 		}
+	}
+
+	// A chunk dropped in the cell of the pawn it hit is drawn underneath that pawn and can't be seen, so it bounces one cell
+	// back the way it came
+	private IntVec3 BounceBack(
+		IntVec3 cell
+	)
+	{
+		var back = origin.ToIntVec3() - cell;
+		var bounced = cell + new IntVec3(Mathf.Clamp(back.x, -1, 1), 0, Mathf.Clamp(back.z, -1, 1));
+		return bounced.InBounds(Map) && bounced.Standable(Map) ? bounced : cell;
 	}
 
 	public override void ExposeData()

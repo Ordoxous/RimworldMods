@@ -14,24 +14,11 @@ public class CompProperties_AbilityDetonate : CompProperties_AbilityEffect
 	}
 }
 
-// Kills the caster so its race's death action (the boomalope's big explosion) goes off at the target
+// Decides when the AI launches. The burst itself happens where the animal lands, in PawnFlyer_Rocket, because the jump verb
+// applies ability comps at take-off.
 public class CompAbilityEffect_Detonate : CompAbilityEffect
 {
 	public new CompProperties_AbilityDetonate Props => (CompProperties_AbilityDetonate)props;
-
-	public override void Apply(
-		LocalTargetInfo target,
-		LocalTargetInfo dest
-	)
-	{
-		base.Apply(target, dest);
-
-		var pawn = parent.pawn;
-		if (!pawn.Dead)
-		{
-			pawn.Kill(null);
-		}
-	}
 
 	public override bool AICanTargetNow(
 		LocalTargetInfo target

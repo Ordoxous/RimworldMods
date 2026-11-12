@@ -14,6 +14,7 @@ public static class KnockbackUtility
 	)
 	{
 		pawn.stances?.stagger.StaggerFor(staggerTicks);
+		Daze(pawn, staggerTicks);
 
 		if (instigator is Pawn instigatorPawn && pawn.BodySize > instigatorPawn.BodySize)
 		{
@@ -36,5 +37,19 @@ public static class KnockbackUtility
 
 		pawn.Position = destination;
 		pawn.Notify_Teleported(endCurrentJob: true, resetTweenedPos: false);
+	}
+
+	// Stagger has no visual of its own, so this shows stun stars for as long as it lasts
+	private static void Daze(
+		Pawn pawn,
+		int ticks
+	)
+	{
+		var hediff = pawn.health.hediffSet.GetFirstHediffOfDef(SillyAnimalThingsDefOf.Ordo_Dazed)
+		             ?? pawn.health.AddHediff(SillyAnimalThingsDefOf.Ordo_Dazed);
+		if (hediff.TryGetComp<HediffComp_Disappears>() is { } disappears)
+		{
+			disappears.ticksToDisappear = Mathf.Max(disappears.ticksToDisappear, ticks);
+		}
 	}
 }

@@ -5,7 +5,7 @@ using Verse;
 namespace Ordo.SillyAnimalThings;
 
 // On landing, rams every hostile pawn at or next to the landing cell, knocking them away from where the charge started
-public class PawnFlyer_Charge : PawnFlyer
+public class PawnFlyer_Charge : PawnFlyer_Trail
 {
 	// A walrus (body size 2) hits for 25; the same ability is shared by goats and elephants
 	private const float ImpactDamageBase = 10f;

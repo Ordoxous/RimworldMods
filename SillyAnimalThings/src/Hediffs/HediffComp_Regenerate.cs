@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using RimWorld;
 using Verse;
 
 namespace Ordo.SillyAnimalThings;
@@ -36,6 +37,11 @@ public class HediffComp_Regenerate : HediffComp
 		foreach (var injury in _tmpInjuries)
 		{
 			injury.Heal(Props.healPerInterval);
+		}
+
+		if (_tmpInjuries.Count > 0 && Pawn.Spawned)
+		{
+			FleckMaker.ThrowMetaIcon(Pawn.Position, Pawn.Map, FleckDefOf.HealingCross);
 		}
 
 		_tmpInjuries.Clear();

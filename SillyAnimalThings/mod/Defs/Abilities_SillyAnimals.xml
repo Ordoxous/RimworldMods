@@ -71,21 +71,28 @@
 
   <!-- Volatile -->
 
-  <AbilityDef ParentName="AbilityTouchBase">
+  <AbilityDef>
     <defName>Ordo_Detonate</defName>
     <label>detonate</label>
-    <description>Run at a target and burst, releasing whatever volatile contents the body holds. The animal does not survive.</description>
+    <description>Ignite and launch into the air like a rocket, trailing fire, then burst where it lands, releasing whatever volatile contents the body holds. The animal does not survive.</description>
     <iconPath>UI/Commands/Detonate</iconPath>
     <cooldownTicksRange>60</cooldownTicksRange>
     <aiCanUse>true</aiCanUse>
     <ai_IsIncendiary>true</ai_IsIncendiary>
+    <displayGizmoWhileUndrafted>true</displayGizmoWhileUndrafted>
+    <disableGizmoWhileUndrafted>false</disableGizmoWhileUndrafted>
+    <jobDef>CastJump</jobDef>
     <verbProperties>
-      <verbClass>Verb_CastAbilityTouch</verbClass>
-      <drawAimPie>false</drawAimPie>
-      <range>-1</range>
+      <verbClass>Ordo.SillyAnimalThings.Verb_CastAbilityDash</verbClass>
+      <label>launch</label>
+      <forceNormalTimeSpeed>false</forceNormalTimeSpeed>
       <warmupTime>0.5</warmupTime>
+      <soundCast>Interact_Ignite</soundCast>
+      <range>14.9</range>
+      <requireLineOfSight>true</requireLineOfSight>
       <targetParams>
         <canTargetSelf>false</canTargetSelf>
+        <canTargetLocations>true</canTargetLocations>
         <canTargetPawns>true</canTargetPawns>
         <canTargetBuildings>true</canTargetBuildings>
       </targetParams>
@@ -96,9 +103,14 @@
         <aiCanCastWithoutTrainable>true</aiCanCastWithoutTrainable>
       </li>
       <li Class="Ordo.SillyAnimalThings.CompProperties_AbilityDetonate">
-        <aiMaxDistance>15</aiMaxDistance>
+        <aiMaxDistance>14.9</aiMaxDistance>
       </li>
     </comps>
+    <modExtensions>
+      <li Class="Ordo.SillyAnimalThings.DashExtension">
+        <flyerDef>Ordo_PawnFlyer_Rocket</flyerDef>
+      </li>
+    </modExtensions>
   </AbilityDef>
 
   <!-- Woodchewer -->
@@ -115,6 +127,7 @@
       <drawAimPie>false</drawAimPie>
       <range>-1</range>
       <warmupTime>2</warmupTime>
+      <warmupEffecter>Ordo_Gnawing</warmupEffecter>
       <targetParams>
         <canTargetSelf>false</canTargetSelf>
         <canTargetPawns>false</canTargetPawns>
@@ -390,6 +403,11 @@
         <replaceExisting>true</replaceExisting>
         <durationSecondsOverride>30~30</durationSecondsOverride>
       </li>
+      <!-- A small ring on each ally that heard it, which also tells it apart from Intimidate -->
+      <li Class="CompProperties_AbilityEffecterOnTarget">
+        <effecterDef>Ordo_RallyRing</effecterDef>
+        <maintainForTicks>20</maintainForTicks>
+      </li>
       <li Class="CompProperties_AbilityEffecterOnCaster">
         <effecterDef>WarTrumpet</effecterDef>
         <maintainTicks>20</maintainTicks>
@@ -478,7 +496,7 @@
         <aiCanCastWithoutTrainable>true</aiCanCastWithoutTrainable>
       </li>
       <li Class="CompProperties_AbilityGiveMentalState">
-        <compClass>CompAbilityEffect_GiveMentalState</compClass>
+        <compClass>Ordo.SillyAnimalThings.CompAbilityEffect_GiveTerror</compClass>
         <stateDef>Terror</stateDef>
       </li>
       <li Class="CompProperties_AbilityEffect">

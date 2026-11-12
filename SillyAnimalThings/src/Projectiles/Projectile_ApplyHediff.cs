@@ -8,8 +8,9 @@ public class ProjectileHediffExtension : DefModExtension
 	public HediffDef hediffDef;
 }
 
-// A bullet that also gives the flesh pawn it hits the hediff named by its ProjectileHediffExtension
-public class Projectile_ApplyHediff : Bullet
+// Gives the flesh pawn it hits the hediff named by its ProjectileHediffExtension, and does no damage, so the hit doesn't
+// flash as an injury. The def's landedEffecter shows the impact.
+public class Projectile_ApplyHediff : Projectile
 {
 	public override void Impact(
 		Thing hitThing,

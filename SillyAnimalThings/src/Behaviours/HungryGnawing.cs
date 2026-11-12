@@ -9,6 +9,10 @@ public static class SillyAnimalThingsDefOf
 {
 	public static AbilityDef Ordo_Gnaw;
 
+	public static HediffDef Ordo_Dazed;
+
+	public static HediffDef Ordo_Terrified;
+
 	static SillyAnimalThingsDefOf() => DefOfHelper.EnsureInitializedInCtor(typeof(SillyAnimalThingsDefOf));
 }
 
