@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using RimWorld;
 using Verse;
+using Verse.AI;
 
 namespace Ordo.BridgeTools.Showcase;
 
@@ -28,8 +29,154 @@ public static class SillyAnimalThingsShowcase
 		new("trunk_blast", "Ordo_TrunkBlast", "Elephant", TrunkBlast),
 		new("trunk_throw", "Ordo_TrunkThrow", "Elephant", TrunkThrow),
 		new("fire_burst", "Ordo_FireBurst", "LavaSnail", FireBurst),
-		new("detonate", "Ordo_Detonate", "Boomalope", Detonate)
+		new("detonate", "Ordo_Detonate", "Boomalope", Detonate),
+
+		// How the AI uses abilities by itself. Record just these with filter "ai_".
+		new("ai_hunt_hidden_dragon", "Ordo_HiddenDragon", "Tiger", HuntHiddenDragon,
+			"Predators use their abilities on prey: a hunting tiger vanishes before it closes in, then carries on the hunt"),
+		new("ai_hunt_poison_bite", "Ordo_PoisonBite", "Cobra", HuntPoisonBite,
+			"A hunting cobra stops to sink its venom into its prey, then goes back to the hunt"),
+		new("ai_fights_back", "Ordo_Kick", "Horse", FightsBack,
+			"Wild animals fight back with their abilities: punch a wild horse and it kicks you away"),
+		new("ai_trained_defends", "Ordo_Intimidate", "Bear_Grizzly", TrainedDefends,
+			"Trained animals use what they've learned by themselves: a grizzly attacked by a wolf pack roars them into terror"),
+		new("ai_charge_from_afar", "Ordo_Charge", "Muffalo", ChargeFromAfar,
+			"A charging animal looks again when its ability is ready: this manhunting muffalo charges as soon as it's in range"),
+		new("ai_intimidate_waits", "Ordo_Intimidate", "Goose", IntimidateWaits,
+			"A manhunting goose waits until its target is within range before it roars, instead of wasting it from afar"),
+		new("ai_fire_burst_first", "Ordo_FireBurst", "Boomrat", FireBurstFirst,
+			"Animals choose between their abilities: up close, a boomrat sprays fire before resorting to blowing itself up")
 	};
+
+	private static async Task HuntHiddenDragon(
+		ShowcaseStage stage
+	)
+	{
+		var tiger = stage.Spawn("Tiger", -9, 0, PawnMode.Wild);
+		var deer = stage.Spawn("Deer", 5, 0, PawnMode.Wild, hold: true);
+		await stage.Beat();
+		StartHunt(tiger, deer);
+
+		await stage.Until("the tiger vanishes", () => tiger.IsPsychologicallyInvisible(), 200);
+		await stage.Until("the tiger pounces", () => Stage.Hurt(deer), 600);
+		await stage.Linger();
+	}
+
+	private static async Task HuntPoisonBite(
+		ShowcaseStage stage
+	)
+	{
+		var cobra = stage.Spawn("Cobra", -6, 0, PawnMode.Wild);
+		var deer = stage.Spawn("Deer", 2, 0, PawnMode.Wild, hold: true);
+		await stage.Beat();
+		StartHunt(cobra, deer);
+
+		await stage.Until("the prey is poisoned", () => Stage.HasHediff(deer, "ToxicBuildup"), 400);
+		await stage.Until("the hunt carries on", () => cobra.CurJobDef == JobDefOf.PredatorHunt, 200);
+		await stage.Linger();
+	}
+
+	private static void StartHunt(
+		Pawn predator,
+		Pawn prey
+	)
+	{
+		var hunt = JobMaker.MakeJob(JobDefOf.PredatorHunt, prey);
+		hunt.killIncappedTarget = true;
+		predator.jobs.StartJob(hunt, JobCondition.InterruptForced);
+	}
+
+	// The colonist really does punch it. The threat is also set directly, because a punch alone makes a wild animal flee or
+	// turn manhunter at random.
+	private static async Task FightsBack(
+		ShowcaseStage stage
+	)
+	{
+		var horse = stage.Spawn("Horse", 0, 0, PawnMode.Wild);
+		var colonist = stage.Colonist(-3, 0, dressed: true);
+		await stage.Beat();
+
+		var punch = JobMaker.MakeJob(JobDefOf.AttackMelee, horse);
+		punch.playerForced = true;
+		punch.maxNumMeleeAttacks = 1;
+		colonist.jobs.StartJob(punch, JobCondition.InterruptForced);
+		await stage.Until("the colonist reaches the horse", () => colonist.Position.AdjacentTo8WayOrInside(horse.Position), 200);
+
+		horse.mindState.meleeThreat = colonist;
+		horse.mindState.lastMeleeThreatHarmTick = Find.TickManager.TicksGame;
+		horse.jobs.CheckForJobOverride();
+
+		await stage.Until("the horse kicks back", () => Stage.OnCooldown(horse, "Ordo_Kick"), 200);
+		await stage.Linger();
+	}
+
+	private static async Task TrainedDefends(
+		ShowcaseStage stage
+	)
+	{
+		var bear = stage.Spawn("Bear_Grizzly", 0, 0, PawnMode.Trained);
+		var wolves = new[]
+		{
+			stage.Spawn("Wolf_Timber", 2, 0, PawnMode.Enemy, hold: true),
+			stage.Spawn("Wolf_Timber", -2, 1, PawnMode.Enemy, hold: true),
+			stage.Spawn("Wolf_Timber", 1, -2, PawnMode.Enemy, hold: true),
+			stage.Spawn("Wolf_Timber", -1, 2, PawnMode.Enemy, hold: true),
+			stage.Spawn("Wolf_Timber", 2, 2, PawnMode.Enemy, hold: true),
+			stage.Spawn("Wolf_Timber", -2, -2, PawnMode.Enemy, hold: true)
+		};
+		await stage.Beat();
+
+		bear.mindState.meleeThreat = wolves[0];
+		bear.mindState.lastMeleeThreatHarmTick = Find.TickManager.TicksGame;
+		bear.jobs.CheckForJobOverride();
+
+		await stage.Until("the bear roars", () => Stage.OnCooldown(bear, "Ordo_Intimidate"), 200);
+		await stage.Step(1);
+		stage.Check("a wolf is terrified", wolves.Any(Stage.Terrified));
+		foreach (var wolf in wolves)
+		{
+			wolf.stances.stunner.StopStun();
+		}
+
+		await stage.Linger(180);
+	}
+
+	private static async Task ChargeFromAfar(
+		ShowcaseStage stage
+	)
+	{
+		stage.Colonist(8, 0, dressed: true);
+		var muffalo = stage.Spawn("Muffalo", -11, 0, PawnMode.Manhunter);
+
+		await stage.Until("the muffalo charges", () => Stage.OnCooldown(muffalo, "Ordo_Charge"), 400);
+		await stage.Until("the muffalo lands", () => muffalo.Spawned, 200);
+		await stage.Linger();
+	}
+
+	private static async Task IntimidateWaits(
+		ShowcaseStage stage
+	)
+	{
+		var colonist = stage.Colonist(8, 0, dressed: true);
+		var goose = stage.Spawn("Goose", -8, 0, PawnMode.Manhunter);
+
+		await stage.Until("the goose roars", () => Stage.OnCooldown(goose, "Ordo_Intimidate"), 600);
+		stage.Check("it roared in range", goose.Position.DistanceTo(colonist.Position) <= 10.5f);
+		await stage.Linger();
+	}
+
+	private static async Task FireBurstFirst(
+		ShowcaseStage stage
+	)
+	{
+		// Within Fire Burst's 2.9 cells: any further and Detonate is the only ability that reaches
+		stage.Colonist(2, 0, dressed: true);
+		var boomrat = stage.Spawn("Boomrat", 0, 0, PawnMode.Manhunter);
+
+		await stage.Until("the boomrat sprays fire", () => Stage.OnCooldown(boomrat, "Ordo_FireBurst") || boomrat.Dead, 300);
+		stage.Check("it sprayed fire rather than detonating", !boomrat.Dead && !Stage.OnCooldown(boomrat, "Ordo_Detonate"));
+		await stage.Linger(180);
+	}
 
 	private static async Task BellySlide(
 		ShowcaseStage stage

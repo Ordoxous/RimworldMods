@@ -19,14 +19,30 @@ public sealed class RuntimeTools
 {
 	private const BindingFlags AnyStatic = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
 
+	private const string TargetDescription = ModTarget.ParameterDescription + " BridgeTools targets these bridge tools themselves.";
+
+	// A mod's assembly, or this one: the bridge tools aren't a mod, but hot reload works on them the same way
+	private static (Assembly Assembly, string Error) FindTarget(
+		string mod
+	)
+	{
+		var self = typeof(RuntimeTools).Assembly;
+		if (mod != null && (string.Equals(mod.Trim(), "BridgeTools", StringComparison.OrdinalIgnoreCase) || string.Equals(mod.Trim(), self.GetName().Name, StringComparison.OrdinalIgnoreCase)))
+		{
+			return (self, null);
+		}
+
+		return ModTarget.FindAssembly(mod);
+	}
+
 	private const BindingFlags AnyInstance = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
 	[Tool("ordo/runtime_info", Description = "Report the .NET runtime, whether it allows hot reload, and how the game loaded a mod's assembly")]
 	public static object RuntimeInfo(
-		[ToolParameter(Description = ModTarget.ParameterDescription)] string mod = null
+		[ToolParameter(Description = TargetDescription)] string mod = null
 	)
 	{
-		var (assembly, error) = ModTarget.FindAssembly(mod);
+		var (assembly, error) = FindTarget(mod);
 		if (assembly == null)
 		{
 			return new { success = false, message = error };
@@ -128,13 +144,13 @@ public sealed class RuntimeTools
 
 	// The runtime half of .NET hot reload: applies metadata, IL and PDB deltas produced by Roslyn's EmitDifference to the mod's
 	// loaded assembly. With no paths it applies empty deltas, which only tests whether the runtime lets the mod be edited.
-	[Tool("ordo/apply_update", Description = "Apply a .NET hot reload delta made by tools/HotReloadDelta/hot_reload.ps1 to a mod's loaded assembly. Needs the mod's Debug build and no debugger attached.")]
+	[Tool("ordo/apply_update", Description = "Apply a .NET hot reload delta made by tools/HotReloadDelta/hot_reload.ps1 to a mod's loaded assembly, or to these bridge tools with mod BridgeTools. Needs a Debug build and no debugger attached. New tools, and changes to a tool's parameters, still need a restart.")]
 	public static object ApplyUpdate(
 		[ToolParameter(Description = "Folder holding delta.meta, delta.il and delta.pdb")] string directory = null,
 		[ToolParameter(Description = "Path to the metadata delta, instead of directory")] string metadataPath = null,
 		[ToolParameter(Description = "Path to the IL delta, instead of directory")] string ilPath = null,
 		[ToolParameter(Description = "Path to the PDB delta, instead of directory")] string pdbPath = null,
-		[ToolParameter(Description = ModTarget.ParameterDescription)] string mod = null
+		[ToolParameter(Description = TargetDescription)] string mod = null
 	)
 	{
 		if (directory != null)
@@ -144,7 +160,7 @@ public sealed class RuntimeTools
 			pdbPath = System.IO.Path.Combine(directory, "delta.pdb");
 		}
 
-		var (assembly, error) = ModTarget.FindAssembly(mod);
+		var (assembly, error) = FindTarget(mod);
 		if (assembly == null)
 		{
 			return new { success = false, message = error };

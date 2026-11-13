@@ -63,7 +63,7 @@ Practices that came from real flakes:
 - On failure, report the pawns' state (`Describe`) so a rare flake can be diagnosed from one run.
 - Check visual effects with scenarios (a mote appeared and went), not by eye. Motes aren't in the map's normal thing lists, so expose the last one from the mod (as `HediffComp_Overlay.LastMote` does).
 - Prove the suite catches bugs by planting faults on purpose and checking that exactly the expected scenarios fail.
-- Restart the game after changing the bridge tools; they aren't hot reloaded.
+- Bridge tool changes hot reload like a mod's (`hot_reload.ps1 -Project BridgeTools`, then `ordo/apply_update` with `mod: BridgeTools`). Restart for a new tool, changed tool parameters, or a new scenario or clip (see reload-and-debug.md).
 
 ## Pitfalls when driving the game
 

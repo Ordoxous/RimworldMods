@@ -82,6 +82,9 @@ foreach ($line in Get-Content $timeline)
 	$clipVideos += $output
 }
 
+# Every clip in the folder, not just the ones cut now, so a recording made with append joins the earlier clips. The number
+# in each name keeps them in the order the mod lists them.
+$clipVideos = @(Get-ChildItem $OutputDirectory -Filter '*.mp4' | Where-Object Name -Match '^\d\d_.+\.mp4$' | Sort-Object Name | ForEach-Object FullName)
 if ($clipVideos.Count -gt 1)
 {
 	$titleCard = Join-Path $OutputDirectory 'title_card.tmp.mp4'

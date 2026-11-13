@@ -12,7 +12,8 @@ using Verse;
 
 namespace Ordo.BridgeTools.Showcase;
 
-// A staged demonstration of one ability, captioned from the ability's own def
+// A staged demonstration of one ability, captioned from the ability's own def, or from the clip's own caption when it shows
+// how the AI uses it
 public sealed class ShowcaseClip
 {
 	public readonly string Name;
@@ -23,17 +24,22 @@ public sealed class ShowcaseClip
 
 	public readonly Func<ShowcaseStage, Task> Run;
 
+	// Replaces the ability's description, for clips about when an animal uses it rather than what it does
+	public readonly string Caption;
+
 	public ShowcaseClip(
 		string name,
 		string abilityDef,
 		string animalKind,
-		Func<ShowcaseStage, Task> run
+		Func<ShowcaseStage, Task> run,
+		string caption = null
 	)
 	{
 		Name = name;
 		AbilityDef = abilityDef;
 		AnimalKind = animalKind;
 		Run = run;
+		Caption = caption;
 	}
 }
 
@@ -49,12 +55,18 @@ public sealed class ShowcaseRunner
 	public static async Task<object> RecordShowcase(
 		IRimBridgeContext bridge,
 		CancellationToken cancellationToken,
-		[ToolParameter(Description = "Absolute folder to record into. Replaces whatever was recorded there before.")] string outputDirectory,
+		[ToolParameter(Description = "Absolute folder to record into. Replaces whatever was recorded there before, unless append is set.")] string outputDirectory,
 		[ToolParameter(Description = "Absolute path of the built ProcessAudioCapture.exe")] string audioCapturePath,
 		[ToolParameter(Description = "Only record clips whose name contains this")] string filter = null,
-		[ToolParameter(Description = "The mod whose clips to record, by packageId, name, folder or assembly name")] string mod = null
+		[ToolParameter(Description = "The mod whose clips to record, by packageId, name, folder or assembly name")] string mod = null,
+		[ToolParameter(Description = "Keep the folder's other clip videos and replace only the clips recorded now, so make_showcase.ps1 builds the reel from all of them. Refused while an earlier recording there hasn't been cut yet.")] bool append = false
 	)
 	{
+		if (append && File.Exists(Path.Combine(outputDirectory, "timeline.tsv")))
+		{
+			return new { success = false, message = $"{outputDirectory} holds a recording that hasn't been cut yet: run make_showcase.ps1 on it first, or record without append" };
+		}
+
 		if (Find.CurrentMap == null)
 		{
 			return new { success = false, message = "No map is loaded" };
@@ -77,7 +89,7 @@ public sealed class ShowcaseRunner
 		}
 
 		SetTheScene(map);
-		PrepareOutput(outputDirectory);
+		PrepareOutput(outputDirectory, append);
 
 		var clips = allClips
 			.Where(clip => filter == null || clip.Name.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0)
@@ -125,7 +137,7 @@ public sealed class ShowcaseRunner
 
 				// Numbered so the reel plays in the order they're listed
 				var clipName = $"{allClips.IndexOf(clip) + 1:D2}_{clip.Name}";
-				WriteCaption(Path.Combine(outputDirectory, "clips", clipName), ability, clip.AnimalKind);
+				WriteCaption(Path.Combine(outputDirectory, "clips", clipName), ability, clip.AnimalKind, clip.Caption);
 				timeline.AppendLine($"{clipName}\t{outcome.Start}\t{outcome.End}");
 				results.Add(new { clip.Name, status = "recorded", takes = outcome.Takes, seconds = (outcome.End - outcome.Start) / 1000.0 });
 			}
@@ -141,14 +153,20 @@ public sealed class ShowcaseRunner
 		return new { success = unfinished == 0 && recordingProblem == null, recordingProblem, results };
 	}
 
+	// When appending, the earlier videos stay. make_showcase.ps1 overwrites a clip's video only if it was recorded again
+	// successfully, so a clip that fails to re-record keeps its old one.
 	private static void PrepareOutput(
-		string outputDirectory
+		string outputDirectory,
+		bool append
 	)
 	{
 		Directory.CreateDirectory(outputDirectory);
-		foreach (var file in Directory.GetFiles(outputDirectory, "*.mp4"))
+		if (!append)
 		{
-			File.Delete(file);
+			foreach (var file in Directory.GetFiles(outputDirectory, "*.mp4"))
+			{
+				File.Delete(file);
+			}
 		}
 
 		var clipsDirectory = Path.Combine(outputDirectory, "clips");
@@ -204,7 +222,8 @@ public sealed class ShowcaseRunner
 	private static void WriteCaption(
 		string clipDirectory,
 		AbilityDef ability,
-		string animalKind
+		string animalKind,
+		string captionOverride
 	)
 	{
 		var title = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(ability.label);
@@ -212,7 +231,7 @@ public sealed class ShowcaseRunner
 		var animalName = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(animal);
 
 		var caption = "";
-		foreach (var sentence in ability.description.Split(". "))
+		foreach (var sentence in (captionOverride ?? ability.description).Split(". "))
 		{
 			var longer = caption.Length == 0 ? sentence : $"{caption}. {sentence}";
 			if (caption.Length > 0 && longer.Length > MaxCaptionLength)

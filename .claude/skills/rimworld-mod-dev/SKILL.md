@@ -27,7 +27,7 @@ A mod's `HANDOFF.md`, if it has one, holds that mod's design, state and test res
    Do the same for `tools/BridgeTools/BridgeTools.csproj` when the tools changed. `dotnet` may not be on `PATH`; it's at `~/.dotnet/dotnet.exe`.
 2. **Start the game** through the `gabs` MCP server (`games_start`, game id `rimworld`, with the mod's profile), then `games_connect`. Profiles open straight into a blank 33x33 test map. Prefer a `-headless` profile unless you need to see the game. See [live-testing.md](references/live-testing.md).
 3. **Test** with `ordo/run_scenarios` (pass `suite` or `filter` to narrow it, and `mod` if several mods are loaded). Call bridge tools with `games_call_tool`; find them with `games_tool_names` (brief) and `games_tool_detail`.
-4. **Change and retest without restarting**: XML via deploy + `ordo/hot_reload_defs`; C# via `tools/HotReloadDelta/hot_reload.ps1` + `ordo/apply_update`. See [reload-and-debug.md](references/reload-and-debug.md). Restart for Harmony patches, changed signatures and bridge tool changes.
+4. **Change and retest without restarting**: XML via deploy + `ordo/hot_reload_defs`; C# via `tools/HotReloadDelta/hot_reload.ps1` + `ordo/apply_update`. See [reload-and-debug.md](references/reload-and-debug.md). The bridge tools hot reload the same way (`-Project BridgeTools`, `mod: BridgeTools`). Restart for Harmony patches, changed signatures, new bridge tools or tool parameters, and new scenarios or clips.
 5. **Stop** with `games_stop`, or `games_kill` for a headless game.
 
 The running game is the fixture: keep one running and run suites one after another. Each scenario sets up its own site and cleans up.
