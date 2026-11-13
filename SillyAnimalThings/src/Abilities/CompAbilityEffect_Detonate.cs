@@ -5,7 +5,7 @@ namespace Ordo.SillyAnimalThings;
 
 public class CompProperties_AbilityDetonate : CompProperties_AbilityEffect
 {
-	// How far away a hostile can be before a wild or enemy caster decides to charge it
+	// How far away an enemy can be before the AI launches at it
 	public float aiMaxDistance = 15f;
 
 	public CompProperties_AbilityDetonate()
@@ -25,13 +25,13 @@ public class CompAbilityEffect_Detonate : CompAbilityEffect
 	)
 	{
 		var pawn = parent.pawn;
-		if (pawn.Faction == Faction.OfPlayer || target.Pawn is not { } targetPawn)
+		if (target.Pawn is not { } targetPawn)
 		{
 			return false;
 		}
 
 		return !targetPawn.Downed
-		       && targetPawn.HostileTo(pawn)
+		       && targetPawn.IsEnemyOf(pawn)
 		       && targetPawn.Position.InHorDistOf(pawn.Position, Props.aiMaxDistance);
 	}
 }

@@ -7,10 +7,24 @@
 <Analyzer>
   <SillyAnimalThings>
     <Methods>
+      <li>Ordo.SillyAnimalThings.AnimalAbilityAI:GetOffensiveJob</li>
+      <li>Ordo.SillyAnimalThings.AnimalAbilityAI:HasOurAbilities</li>
+      <li>Ordo.SillyAnimalThings.AnimalAbilityAI:IsOurs</li>
+      <li>Ordo.SillyAnimalThings.AnimalAbilityAI:MayAutoCast</li>
+      <li>Ordo.SillyAnimalThings.AnimalAbilityAI:ShortenChase</li>
+      <li>Ordo.SillyAnimalThings.AnimalAbilityAI:TryGetAbilityJob</li>
+      <li>Ordo.SillyAnimalThings.AnimalAbilityAI:UsedDuringChase</li>
+      <li>Ordo.SillyAnimalThings.AnimalCombatPatches:Postfix_CompAbilityEffect_RequiresTrainable_AICanTargetNow</li>
+      <li>Ordo.SillyAnimalThings.AnimalCombatPatches:Postfix_JobDriver_PredatorHunt_CheckWarnPlayerInterval</li>
+      <li>Ordo.SillyAnimalThings.AnimalCombatPatches:Postfix_JobGiver_AIFightEnemy_MeleeAttackJob</li>
+      <li>Ordo.SillyAnimalThings.AnimalCombatPatches:Postfix_JobGiver_Manhunter_TryGiveJob</li>
+      <li>Ordo.SillyAnimalThings.AnimalCombatPatches:Postfix_JobGiver_ReactToCloseMeleeThreat_TryGiveJob</li>
+      <li>Ordo.SillyAnimalThings.AnimalCombatPatches:Prefix_JobGiver_AIFightEnemy_GetAbilityJob</li>
+      <li>Ordo.SillyAnimalThings.AnimalTagDef:ConfigErrors</li>
+      <li>Ordo.SillyAnimalThings.AnimalTagUtility:ApplyAllTags</li>
       <li>Ordo.SillyAnimalThings.AutoCastExtension:EnemyDistanceAllowsCast</li>
       <li>Ordo.SillyAnimalThings.CompAbilityEffect_ChargeTarget:AICanTargetNow</li>
       <li>Ordo.SillyAnimalThings.CompAbilityEffect_Detonate:AICanTargetNow</li>
-      <li>Ordo.SillyAnimalThings.CompAbilityEffect_Detonate:Apply</li>
       <li>Ordo.SillyAnimalThings.CompAbilityEffect_FireBurstNearEnemy:AICanTargetNow</li>
       <li>Ordo.SillyAnimalThings.CompAbilityEffect_GiveTerror:Apply</li>
       <li>Ordo.SillyAnimalThings.CompAbilityEffect_Gnaw:Apply</li>
@@ -19,6 +33,7 @@
       <li>Ordo.SillyAnimalThings.CompAbilityEffect_OnlyTargetAllies:Valid</li>
       <li>Ordo.SillyAnimalThings.CompAbilityEffect_OnlyTargetEnemies:AICanTargetNow</li>
       <li>Ordo.SillyAnimalThings.CompAbilityEffect_OnlyTargetEnemies:Valid</li>
+      <li>Ordo.SillyAnimalThings.CompAbilityEffect_SprayLiquidSparingAllies:AICanTargetNow</li>
       <li>Ordo.SillyAnimalThings.CompAbilityEffect_Strike:AICanTargetNow</li>
       <li>Ordo.SillyAnimalThings.CompAbilityEffect_Strike:Apply</li>
       <li>Ordo.SillyAnimalThings.CompAbilityEffect_TrunkThrow:AICanTargetNow</li>
@@ -29,22 +44,33 @@
       <li>Ordo.SillyAnimalThings.HediffComp_Overlay:CompPostTick</li>
       <li>Ordo.SillyAnimalThings.HediffComp_Overlay:Make</li>
       <li>Ordo.SillyAnimalThings.HediffComp_Regenerate:CompPostTick</li>
+      <li>Ordo.SillyAnimalThings.HediffComp_RemoveOnAttack:CompExposeData</li>
       <li>Ordo.SillyAnimalThings.HediffComp_RemoveOnAttack:Notify_PawnUsedVerb</li>
+      <li>Ordo.SillyAnimalThings.HostilityUtility:IsAllyOf</li>
       <li>Ordo.SillyAnimalThings.HostilityUtility:IsEnemyOf</li>
+      <li>Ordo.SillyAnimalThings.HostilityUtility:RememberFoe</li>
       <li>Ordo.SillyAnimalThings.HungryGnawing:Prefix_JobGiver_GetFood_TryGiveJob</li>
       <li>Ordo.SillyAnimalThings.KnockbackUtility:Daze</li>
       <li>Ordo.SillyAnimalThings.KnockbackUtility:KnockBack</li>
       <li>Ordo.SillyAnimalThings.PawnFlyer_Charge:CollectVictims</li>
       <li>Ordo.SillyAnimalThings.PawnFlyer_Charge:RespawnPawn</li>
+      <li>Ordo.SillyAnimalThings.PawnFlyer_Rocket:RespawnPawn</li>
+      <li>Ordo.SillyAnimalThings.PawnFlyer_Rocket:Trail</li>
+      <li>Ordo.SillyAnimalThings.PawnFlyer_Slide:RespawnPawn</li>
+      <li>Ordo.SillyAnimalThings.PawnFlyer_Slide:Tick</li>
       <li>Ordo.SillyAnimalThings.PawnFlyer_Trail:Tick</li>
+      <li>Ordo.SillyAnimalThings.PawnFlyer_Trail:Trail</li>
       <li>Ordo.SillyAnimalThings.Projectile_ApplyHediff:Impact</li>
       <li>Ordo.SillyAnimalThings.Projectile_ThrownChunk:BounceBack</li>
+      <li>Ordo.SillyAnimalThings.Projectile_ThrownChunk:ExposeData</li>
       <li>Ordo.SillyAnimalThings.Projectile_ThrownChunk:Impact</li>
       <li>Ordo.SillyAnimalThings.Projectile_WaterBlast:Impact</li>
+      <li>Ordo.SillyAnimalThings.SelfBuffAutoCast:AllyInRadius</li>
       <li>Ordo.SillyAnimalThings.SelfBuffAutoCast:CanAutoCast</li>
+      <li>Ordo.SillyAnimalThings.SelfBuffAutoCast:GetCombatSelfBuffJob</li>
       <li>Ordo.SillyAnimalThings.SelfBuffAutoCast:Postfix_Pawn_PostApplyDamage</li>
-      <li>Ordo.SillyAnimalThings.SelfBuffAutoCast:Prefix_JobGiver_AIFightEnemy_GetAbilityJob</li>
       <li>Ordo.SillyAnimalThings.SillyAnimalThings:Postfix_Pawn_SpawnSetup</li>
+      <li>Ordo.SillyAnimalThings.SillyAnimalThings:Postfix_PlayDataLoader_HotReloadDefs</li>
     </Methods>
   </SillyAnimalThings>
 </Analyzer>

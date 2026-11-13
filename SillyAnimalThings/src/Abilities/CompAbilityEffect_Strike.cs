@@ -16,7 +16,7 @@ public class CompProperties_AbilityStrike : CompProperties_AbilityEffect
 	// Above zero, the strike also staggers the target for this long and knocks it back
 	public int knockbackStaggerTicks;
 
-	// How far away a hostile can be before a wild or enemy caster goes after it
+	// How far away an enemy can be before the AI goes after it
 	public float aiMaxDistance = 8f;
 
 	public CompProperties_AbilityStrike()
@@ -57,13 +57,13 @@ public class CompAbilityEffect_Strike : CompAbilityEffect
 	)
 	{
 		var pawn = parent.pawn;
-		if (pawn.Faction == Faction.OfPlayer || target.Pawn is not { } targetPawn)
+		if (target.Pawn is not { } targetPawn)
 		{
 			return false;
 		}
 
 		return !targetPawn.Downed
-		       && targetPawn.HostileTo(pawn)
+		       && targetPawn.IsEnemyOf(pawn)
 		       && targetPawn.Position.InHorDistOf(pawn.Position, Props.aiMaxDistance);
 	}
 }

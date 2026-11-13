@@ -32,7 +32,32 @@ public static class SillyAnimalThings
 
 		harmony.Patch(
 			AccessTools.Method(typeof(JobGiver_AIFightEnemy), nameof(JobGiver_AIFightEnemy.GetAbilityJob)),
-			prefix: new HarmonyMethod(SelfBuffAutoCast.Prefix_JobGiver_AIFightEnemy_GetAbilityJob)
+			prefix: new HarmonyMethod(AnimalCombatPatches.Prefix_JobGiver_AIFightEnemy_GetAbilityJob)
+		);
+
+		harmony.Patch(
+			AccessTools.Method(typeof(CompAbilityEffect_RequiresTrainable), nameof(CompAbilityEffect_RequiresTrainable.AICanTargetNow)),
+			postfix: new HarmonyMethod(AnimalCombatPatches.Postfix_CompAbilityEffect_RequiresTrainable_AICanTargetNow)
+		);
+
+		harmony.Patch(
+			AccessTools.Method(typeof(JobGiver_ReactToCloseMeleeThreat), "TryGiveJob"),
+			postfix: new HarmonyMethod(AnimalCombatPatches.Postfix_JobGiver_ReactToCloseMeleeThreat_TryGiveJob)
+		);
+
+		harmony.Patch(
+			AccessTools.Method(typeof(JobGiver_Manhunter), "TryGiveJob"),
+			postfix: new HarmonyMethod(AnimalCombatPatches.Postfix_JobGiver_Manhunter_TryGiveJob)
+		);
+
+		harmony.Patch(
+			AccessTools.Method(typeof(JobGiver_AIFightEnemy), "MeleeAttackJob"),
+			postfix: new HarmonyMethod(AnimalCombatPatches.Postfix_JobGiver_AIFightEnemy_MeleeAttackJob)
+		);
+
+		harmony.Patch(
+			AccessTools.Method(typeof(JobDriver_PredatorHunt), "CheckWarnPlayerInterval"),
+			postfix: new HarmonyMethod(AnimalCombatPatches.Postfix_JobDriver_PredatorHunt_CheckWarnPlayerInterval)
 		);
 
 		// Dev mode's "Hot reload Defs" rebuilds every def from XML, which drops the abilities and trainables the tags add in code

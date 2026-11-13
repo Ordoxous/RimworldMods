@@ -39,7 +39,7 @@ public class Projectile_WaterBlast : Projectile
 
 				thing.GetAttachment(ThingDefOf.Fire)?.Destroy();
 
-				if (thing is Pawn pawn && pawn != launcher && (!preventFriendlyFire || pawn.HostileTo(launcher)))
+				if (thing is Pawn pawn && pawn != launcher && (!preventFriendlyFire || launcher is not Pawn caster || pawn.IsEnemyOf(caster)))
 				{
 					KnockbackUtility.KnockBack(pawn, launcherCell, launcher, StaggerTicks);
 				}

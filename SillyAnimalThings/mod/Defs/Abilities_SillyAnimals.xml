@@ -30,6 +30,7 @@
         <aiCanCastWithoutTrainable>true</aiCanCastWithoutTrainable>
       </li>
       <li Class="CompProperties_AbilitySprayLiquid">
+        <compClass>Ordo.SillyAnimalThings.CompAbilityEffect_SprayLiquidSparingAllies</compClass>
         <projectileDef>Ordo_Proj_WaterBlast</projectileDef>
         <numCellsToHit>7</numCellsToHit>
       </li>
@@ -110,6 +111,11 @@
       <li Class="Ordo.SillyAnimalThings.DashExtension">
         <flyerDef>Ordo_PawnFlyer_Rocket</flyerDef>
       </li>
+      <!-- Last resort, since the animal dies, and never by itself for the player -->
+      <li Class="Ordo.SillyAnimalThings.AbilityAIExtension">
+        <priority>-1</priority>
+        <playerAutoCast>false</playerAutoCast>
+      </li>
     </modExtensions>
   </AbilityDef>
 
@@ -180,6 +186,12 @@
         <radius>2.9</radius>
       </li>
     </comps>
+    <modExtensions>
+      <!-- Burning fuel would set the colony alight -->
+      <li Class="Ordo.SillyAnimalThings.AbilityAIExtension">
+        <playerAutoCast>false</playerAutoCast>
+      </li>
+    </modExtensions>
   </AbilityDef>
 
   <!-- Slider -->
@@ -346,6 +358,7 @@
     <modExtensions>
       <li Class="Ordo.SillyAnimalThings.AutoCastExtension">
         <castWhenEnemyFartherThan>6.9</castWhenEnemyFartherThan>
+        <castWhenEnemyWithin>39.9</castWhenEnemyWithin>
       </li>
     </modExtensions>
   </AbilityDef>
@@ -416,6 +429,7 @@
     <modExtensions>
       <li Class="Ordo.SillyAnimalThings.AutoCastExtension">
         <castWhenEnemyWithin>19.9</castWhenEnemyWithin>
+        <needsAllyInRadius>true</needsAllyInRadius>
       </li>
     </modExtensions>
   </AbilityDef>
@@ -515,6 +529,12 @@
         <maintainTicks>20</maintainTicks>
       </li>
     </comps>
+    <modExtensions>
+      <!-- Terror would send the prey running -->
+      <li Class="Ordo.SillyAnimalThings.AbilityAIExtension">
+        <useWhileHunting>false</useWhileHunting>
+      </li>
+    </modExtensions>
   </AbilityDef>
 
   <!-- Shelled: cast automatically by SelfBuffAutoCast when hurt -->

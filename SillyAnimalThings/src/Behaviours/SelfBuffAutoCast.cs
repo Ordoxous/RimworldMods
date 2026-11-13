@@ -15,6 +15,9 @@ public class AutoCastExtension : DefModExtension
 
 	public float castWhenEnemyWithin = -1f;
 
+	// Only cast when an ally is within the ability's effect radius, for buffs that are wasted on the caster alone
+	public bool needsAllyInRadius;
+
 	public bool CastsInCombat => castWhenEnemyFartherThan > 0f || castWhenEnemyWithin > 0f;
 
 	public bool EnemyDistanceAllowsCast(
@@ -35,21 +38,14 @@ public static class SelfBuffAutoCast
 		Ability ability
 	)
 	{
-		if (!ability.CanCast)
-		{
-			return false;
-		}
-
-		// Player animals only use it once trained, the same as the other trainable abilities
-		var trainable = ability.def.comps?.Find(comp => comp is CompProperties_AbilityRequiresTrainable) as CompProperties_AbilityRequiresTrainable;
-		return pawn.Faction != Faction.OfPlayer || trainable == null || pawn.training?.HasLearned(trainable.trainableDef) == true;
+		return ability.CanCast && AnimalAbilityAI.MayAutoCast(pawn, ability.def);
 	}
 
 	public static void Postfix_Pawn_PostApplyDamage(
 		Pawn __instance
 	)
 	{
-		if (__instance.Dead || !__instance.Spawned || __instance.abilities == null)
+		if (__instance.Dead || __instance.Downed || !__instance.Spawned || __instance.abilities == null)
 		{
 			return;
 		}
@@ -66,29 +62,43 @@ public static class SelfBuffAutoCast
 		}
 	}
 
-	public static bool Prefix_JobGiver_AIFightEnemy_GetAbilityJob(
+	public static Job GetCombatSelfBuffJob(
 		Pawn pawn,
-		Thing enemyTarget,
-		ref Job __result
+		Thing enemy,
+		bool hunting
 	)
 	{
-		if (pawn.abilities == null)
-		{
-			return true;
-		}
-
 		foreach (var ability in pawn.abilities.abilities)
 		{
 			var autoCast = ability.def.GetModExtension<AutoCastExtension>();
-			if (autoCast is { CastsInCombat: true }
-			    && autoCast.EnemyDistanceAllowsCast(pawn, enemyTarget)
-			    && CanAutoCast(pawn, ability))
+			if (autoCast is not { CastsInCombat: true }
+			    || (hunting && ability.def.GetModExtension<AbilityAIExtension>() is { useWhileHunting: false })
+			    || !autoCast.EnemyDistanceAllowsCast(pawn, enemy)
+			    || !CanAutoCast(pawn, ability)
+			    || (autoCast.needsAllyInRadius && !AllyInRadius(pawn, ability.def.EffectRadius)))
 			{
-				__result = ability.GetJob(pawn, pawn);
-				return false;
+				continue;
+			}
+
+			return ability.GetJob(pawn, pawn);
+		}
+
+		return null;
+	}
+
+	private static bool AllyInRadius(
+		Pawn pawn,
+		float radius
+	)
+	{
+		foreach (var other in pawn.Map.mapPawns.AllPawnsSpawned)
+		{
+			if (!other.Downed && other.Position.InHorDistOf(pawn.Position, radius) && other.IsAllyOf(pawn))
+			{
+				return true;
 			}
 		}
 
-		return true;
+		return false;
 	}
 }

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Ordo.SillyAnimalThings;
 using RimWorld;
 using Verse;
+using Verse.AI;
 
 namespace Ordo.BridgeTools.Scenarios;
 
@@ -96,6 +97,18 @@ public static class SillyAnimalThingsScenarios
 		new("spit", "spit visuals player", SpitBlinds),
 		new("fire_burst_player", "fire_burst player", FireBurstPlayer, FireBurst),
 		new("fire_burst_manhunter", "fire_burst ai", context => CastsAtColonist(context, "LavaSnail", FireBurst, 2, hurtsColonist: false), FireBurst),
+
+		// Where animals use abilities by themselves: fighting back, hunting, defending, and choosing between abilities
+		new("ai_kick_wild_fights_back", "kick ai", context => FightsBack(context, "Horse", PawnMode.Wild, Kick, casts: true)),
+		new("ai_poison_bite_trained_fights_back", "poison_bite ai player", context => FightsBack(context, "Rat", PawnMode.Trained, PoisonBite, casts: true)),
+		new("ai_poison_bite_untrained_doesnt", "poison_bite ai player", context => FightsBack(context, "Rat", PawnMode.Tamed, PoisonBite, casts: false)),
+		new("ai_detonate_trained_doesnt", "detonate ai player", context => FightsBack(context, "Boomrat", PawnMode.Trained, Detonate, casts: false)),
+		new("ai_hunt_hidden_dragon", "hidden_dragon ai", context => HuntUses(context, "Tiger", HiddenDragon, 12)),
+		new("ai_hunt_poison_bite", "poison_bite ai", context => HuntUses(context, "Cobra", PoisonBite, 4)),
+		new("ai_intimidate_waits_for_range", "intimidate ai", IntimidateWaitsForRange),
+		new("ai_charge_from_afar", "charge ai", ChargeFromAfar),
+		new("ai_howl_needs_allies", "howl ai", HowlNeedsAllies),
+		new("ai_fire_burst_before_detonate", "fire_burst detonate ai", FireBurstBeforeDetonate, FireBurst),
 
 		new("visuals_belly_slide_flops", "belly_slide visuals", VisualsBellySlideFlops),
 		new("visuals_withdraw_shell", "withdraw visuals", VisualsWithdrawShell)
@@ -634,5 +647,117 @@ public static class SillyAnimalThingsScenarios
 		context.Cast(snail, FireBurst);
 
 		await context.Until("the burst goes off", () => ScenarioContext.OnCooldown(snail, FireBurst), 300);
+	}
+
+	// Something hits the animal in melee. A wild animal fights back against a colonist, who it isn't hostile to; a player's
+	// animal against an enemy. Set directly, because real damage makes wild animals flee or turn manhunter at random.
+	// Player casters must not be roamers (pen animals such as horses): the game has those ignore attackers they haven't engaged.
+	private static async Task FightsBack(
+		ScenarioContext context,
+		string kind,
+		PawnMode mode,
+		string ability,
+		bool casts
+	)
+	{
+		var animal = context.Spawn(kind, 0, 0, mode);
+		var attacker = mode == PawnMode.Wild ? context.Colonist(1, 0) : context.Spawn("Cow", 1, 0, PawnMode.Enemy, hold: true);
+		animal.mindState.meleeThreat = attacker;
+		animal.mindState.lastMeleeThreatHarmTick = Find.TickManager.TicksGame;
+		animal.jobs.CheckForJobOverride();
+
+		if (casts)
+		{
+			if (!await context.Until($"the {kind} uses {ability} on its attacker", () => ScenarioContext.OnCooldown(animal, ability), 200))
+			{
+				context.Fail(ScenarioContext.Describe(animal));
+			}
+
+			context.Check("it's fighting back, not manhunting", animal.MentalStateDef == null);
+			return;
+		}
+
+		// It must still fight, or the check below would pass without the AI ever considering the ability
+		await context.Until($"the {kind} fights back in melee", () => animal.CurJobDef == JobDefOf.AttackMelee, 60);
+		await context.Step(200);
+		context.Check($"the {kind} doesn't use {ability} by itself", !animal.Dead && !ScenarioContext.OnCooldown(animal, ability));
+	}
+
+	// Vanilla's hunt never uses abilities, so this checks the predator stops for one and then carries on hunting
+	private static async Task HuntUses(
+		ScenarioContext context,
+		string kind,
+		string ability,
+		int distance
+	)
+	{
+		var predator = context.Spawn(kind, 0, 0, PawnMode.Wild);
+		var prey = context.Spawn("Deer", distance, 0, PawnMode.Wild, hold: true);
+		var hunt = JobMaker.MakeJob(JobDefOf.PredatorHunt, prey);
+		hunt.killIncappedTarget = true;
+		predator.jobs.StartJob(hunt, JobCondition.InterruptForced);
+
+		if (!await context.Until($"the {kind} uses {ability} while hunting", () => ScenarioContext.OnCooldown(predator, ability), 300))
+		{
+			context.Fail(ScenarioContext.Describe(predator));
+			return;
+		}
+
+		await context.Until("the hunt carries on", () => predator.CurJobDef == JobDefOf.PredatorHunt, 300);
+	}
+
+	// Before, a manhunter that picked a target out of range roared at nobody straight away
+	private static async Task IntimidateWaitsForRange(
+		ScenarioContext context
+	)
+	{
+		var colonist = context.Colonist(7, 0);
+		var goose = context.Spawn("Goose", -7, 0, PawnMode.Manhunter);
+
+		await context.Until("the goose roars", () => ScenarioContext.OnCooldown(goose, Intimidate), 600);
+		var distance = goose.Position.DistanceTo(colonist.Position);
+		context.Check($"it roars within range (was {distance:F1} cells away)", distance <= 10.5f);
+	}
+
+	// Before, a manhunter that started out of range chased in melee for 420-900 ticks without looking at its abilities
+	private static async Task ChargeFromAfar(
+		ScenarioContext context
+	)
+	{
+		context.Colonist(8, 0);
+		var muffalo = context.Spawn("Muffalo", -8, 0, PawnMode.Manhunter);
+
+		if (!await context.Until("the muffalo charges once in range", () => ScenarioContext.OnCooldown(muffalo, Charge), 300))
+		{
+			context.Fail(ScenarioContext.Describe(muffalo));
+		}
+	}
+
+	private static async Task HowlNeedsAllies(
+		ScenarioContext context
+	)
+	{
+		context.Colonist(10, 0);
+		var wolf = context.Spawn("Wolf_Timber", 0, 0, PawnMode.Manhunter);
+
+		await context.Step(150);
+		context.Check("a lone wolf doesn't howl to nobody", !ScenarioContext.OnCooldown(wolf, Howl));
+	}
+
+	// Detonate also qualifies at this range, and used to win because it comes first in the boomrat's list
+	private static async Task FireBurstBeforeDetonate(
+		ScenarioContext context
+	)
+	{
+		context.Colonist(2, 0);
+		var boomrat = context.Spawn("Boomrat", 0, 0, PawnMode.Manhunter);
+
+		if (!await context.Until("the boomrat fire bursts", () => ScenarioContext.OnCooldown(boomrat, FireBurst) || boomrat.Dead, 300) || boomrat.Dead)
+		{
+			context.Fail(ScenarioContext.Describe(boomrat));
+			return;
+		}
+
+		context.Check("it didn't detonate first", !ScenarioContext.OnCooldown(boomrat, Detonate));
 	}
 }

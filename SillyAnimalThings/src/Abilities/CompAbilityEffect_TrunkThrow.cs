@@ -82,7 +82,7 @@ public class CompAbilityEffect_TrunkThrow : CompAbilityEffect
 		LocalTargetInfo target
 	)
 	{
-		return target.Pawn != null && FindChunk() != null;
+		return target.Pawn is { Downed: false } targetPawn && targetPawn.IsEnemyOf(parent.pawn) && FindChunk() != null;
 	}
 
 	private Thing FindChunk()

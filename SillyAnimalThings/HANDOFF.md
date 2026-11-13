@@ -1,6 +1,6 @@
 # SillyAnimalThings handoff
 
-Last updated 2026-11-10 (visual effects review, debuff visuals, Dubs Performance Analyzer tab).
+Last updated 2026-11-13 (animal AI: abilities used wherever animals fight; see "How the AI uses abilities").
 
 ## What the mod is
 
@@ -8,8 +8,8 @@ Gives animals silly abilities. It uses the same pattern as Odyssey's war trumpet
 
 - `AnimalTagDef`s give abilities to races: at startup each tag's abilities go into `PawnKindDef.abilities` for every kind of each member race.
 - Each ability is gated by a special `TrainableDef` through `CompProperties_AbilityRequiresTrainable`. The tag adds that trainable to `race.specialTrainables`, read from the comp. Don't use `TrainableDef.enablesAbility`: it's `[Obsolete]` and nothing in the game reads it.
-- Wild, manhunting and enemy animals cast the ability themselves (`aiCanUse` + `aiCanCastWithoutTrainable`).
-- Tamed animals only get the gizmo once trained, and from then on only cast it when commanded. Regenerate and Hidden Dragon are the exceptions: they also auto-cast for trained player animals (see `SelfBuffAutoCast`).
+- Wild, manhunting and enemy animals use the ability by themselves (`aiCanUse` + `aiCanCastWithoutTrainable`).
+- Tamed animals only get the gizmo once trained. From then on they also use it by themselves when they fight, except Detonate and Fire Burst, which would hurt the colony. Untrained tamed animals never do. See "How the AI uses abilities".
 
 Dependencies:
 
@@ -55,7 +55,7 @@ These were in the committed first batch, found by reading game code:
 Other files:
 
 - `SillyAnimalThings.cs` is the Harmony bootstrap. It also has a `Pawn.SpawnSetup` postfix that grants missing `Ordo_` kind abilities to animals that existed before the mod was added, because vanilla only grants kind abilities at generation.
-- `SelfBuffAutoCast.cs` holds `AutoCastExtension`, a per-ability mod extension with `castBelowHealth`, `castWhenEnemyFartherThan` and `castWhenEnemyWithin`. Add it to any self-targeted ability instead of adding code.
+- `SelfBuffAutoCast.cs` holds `AutoCastExtension`, a per-ability mod extension with `castBelowHealth`, `castWhenEnemyFartherThan` and `castWhenEnemyWithin`, and `needsAllyInRadius`. Add it to any self-targeted ability instead of adding code.
 - `AnimalTagDef.cs` holds the def and `AnimalTagUtility.ApplyAllTags`, called first in the bootstrap. Members are listed in `Defs/AnimalTags_SillyAnimals.xml` by race defName, which doesn't always match the CSV name (Scimitar Cat is `Cat_Scimitar`). Add a tag there once its ability exists.
 - All icons are borrowed vanilla textures and need real art.
 
@@ -148,13 +148,13 @@ The workflow and tools below are shared by every mod in the repo. The `rimworld-
 
 ### Running the scenario suite
 
-`tools/BridgeTools/Scenarios` holds 39 scenarios, one per mechanism and per case that behaves differently, plus one that checks every tagged race got its abilities. Start the game through GABS, then call `ordo/run_scenarios`. Tests don't record anything; for videos, see the showcase below.
+`tools/BridgeTools/Scenarios` holds 49 scenarios, one per mechanism and per case that behaves differently, plus one that checks every tagged race got its abilities. Start the game through GABS, then call `ordo/run_scenarios`. Tests don't record anything; for videos, see the showcase below.
 
 - **Suites:** every scenario is in suites: one per ability (`charge`, `detonate`, ...), plus `ai`, `player`, `knockback`, `visuals` and `setup`. Pass `suite` (space or comma separated) to test one feature, and `ordo/list_scenarios` lists them. `filter` still matches names.
 - **The game is the fixture:** keep one game running and run suites against it one after another; each scenario sets up its own site and cleans up after itself. Load XML changes with `ordo/hot_reload_defs` and most C# changes with `hot_reload.ps1` and `ordo/apply_update` (see "Reloading without restarting"). Restart for the rest, and for changes to the bridge tools.
 - **Check visuals with scenarios, not by eye:** the `visuals` suite checks that each overlay's mote appears and goes, through `HediffComp_Overlay.LastMote`. The game doesn't list motes with the map's other things. Use the showcase to judge how something looks once it's there.
 
-- **Profiles:** all open straight into an `autostart` save at midday, in a 720p window. `sillyanimalthings` skips the 2 Fire Burst scenarios and `sillyanimalthings-biotech` runs all 39. `sillyanimalthings-profiling` is for timing the mod; see "Dubs Performance Analyzer" below.
+- **Profiles:** all open straight into an `autostart` save at midday, in a 720p window. `sillyanimalthings` skips the 3 Fire Burst scenarios and `sillyanimalthings-biotech` runs all 49. `sillyanimalthings-profiling` is for timing the mod; see "Dubs Performance Analyzer" below.
 - **Headless:** `sillyanimalthings-headless` and `sillyanimalthings-biotech-headless` add Waylith's `-Headless` flag, which means no window and no rendering. The suite takes 1.4-4 s, so use these unless you need to see the game. Screenshots don't work, and `games_stop` fails because there's no window to signal, so stop with `games_kill`. Headless runs don't exercise anything that draws, so use a windowed run for visual changes. `-nographics` and `-batchmode` do nothing.
 - **The test save:** a 33x33 map of flat soil with no pawns, things, roofs or fog, just big enough for one site, which every scenario shares. An empty colony gets the Stranger in Black rescue event, so both tools turn off the storyteller and remove all pawns before starting. That lasts until the save is next loaded.
 - **Remaking a save:** with no `autostart.rws` in the profile's `Saves`, call `ordo/start_test_colony`, `rimbridge/wait_for_long_event_idle`, `ordo/blank_map` and `ordo/set_hour`, then `rimworld/save_game` with `saveName` set to `autostart`.
@@ -227,6 +227,29 @@ Things that look like bugs while testing but aren't:
 - A cast from a stationary target can look like it missed, because explosions spread over several ticks and spray projectiles land one after another. Wait for the effect instead of checking straight away.
 - Trained, knocked-back targets that are bigger than the caster stagger but don't move.
 
+## How the AI uses abilities
+
+Reviewed and reworked on 2026-11-13. Every way an animal fights now goes through `AnimalAbilityAI.TryGetAbilityJob` (`Behaviours/AnimalAbilityAI.cs`), with the hooks in `Behaviours/AnimalCombatPatches.cs`:
+
+| Situation | Vanilla hook | Before |
+|---|---|---|
+| Manhunting, in a raid, or guarding its master | Prefix replacing `JobGiver_AIFightEnemy.GetAbilityJob` for animals with an `Ordo_` ability | Vanilla picked the first castable ability in list order |
+| Fighting back against whoever hits it in melee | Postfix on `JobGiver_ReactToCloseMeleeThreat.TryGiveJob` | Plain melee only |
+| A predator hunting prey | Postfix on `JobDriver_PredatorHunt.CheckWarnPlayerInterval`, which runs while it chases. Every 30 ticks it may pause the hunt for an ability (`resumeCurJobAfterwards`), and the hunt resumes after | Vanilla's hunt never uses abilities |
+| Chasing in melee with a ranged or combat ability ready, or about to be | Postfixes on `JobGiver_Manhunter.TryGiveJob` and `JobGiver_AIFightEnemy.MeleeAttackJob` shorten the job to when it's ready + 90 ticks | Melee jobs lasted 420-900 ticks, so animals that started out of range rarely used them |
+
+How the choice is made:
+
+- **Self-buffs first** (`AutoCastExtension` with combat conditions), then offensive abilities by `AbilityAIExtension.priority`, highest first, then vanilla's order: an ability that can hit the foe, then an AOE target, then self.
+- **`AbilityAIExtension`** (in `AnimalAbilityAI.cs`) is per ability: `priority` (Detonate is -1, so a boomrat fire bursts first), `useWhileHunting` (off for Intimidate, since terror sends prey running) and `playerAutoCast` (off for Detonate and Fire Burst).
+- **Player animals:** vanilla's `CompAbilityEffect_RequiresTrainable.AICanTargetNow` lets *untrained* animals cast by themselves and stops trained ones. A postfix reverses that for `Ordo_` abilities: player animals use what they're trained in. The comps no longer refuse player casters.
+- **Foes that aren't hostile:** a wild animal isn't hostile to a colonist hitting it, or to its prey. `HostilityUtility.IsEnemyOf` also counts the caster's `meleeThreat`, and the foe the AI last picked for it (remembered for 900 ticks), so abilities land on them. Use `IsEnemyOf` and `IsAllyOf` in any new ability.
+- **Intimidate** only counts enemies within its range. Before, a manhunter that picked a far-off target found no one to aim at and cast it on itself: a goose roared from 14 cells and wasted the 3-hour cooldown.
+- **Howl** needs an ally in its radius (`needsAllyInRadius`). **Hidden Dragon** casts only with the enemy 6.9-39.9 cells away. Self-buffs from damage aren't cast while downed.
+- **Trunk Blast** (`CompAbilityEffect_SprayLiquidSparingAllies`) won't spray where an ally stands. That includes a wild elephant's own herd, which vanilla's faction check misses.
+
+The `ai_*` scenarios cover each case. Run against the build before this change, the 8 that check for a cast failed and the 2 that check nothing is cast passed. Player scenarios use non-roamers (rats, boomrats), for the reason under "Testing risks".
+
 ## Visual effects
 
 Reviewed against the showcase clips on 2026-11-10. Effects reuse the base game's flecks and motes; none need new art.
@@ -298,15 +321,15 @@ Other tools, not used: [Reloader](https://github.com/pardeike/Reloader) and [Rim
 
 ## Testing risks to check in game
 
-- AI Charge from long range: a manhunting muffalo spawned about 16 cells from its target (range 11.9) walked in with `AttackMelee` and didn't charge within 200 ticks, while a walrus spawned 10 cells away did. `JobGiver_Manhunter` only checks abilities when it picks a job, and melee jobs last 420-900 ticks, so animals that start out of range may rarely charge. Cause not confirmed.
-
 - How often hostile elephants and walruses use their abilities, and whether hungry wild alphabeavers are too eager to eat buildings.
-- Boomrat has both Detonate and Fire Burst. The AI picks the first castable ability, and Detonate triggers from 15 cells, so hostile boomrats may never fire burst. Fire burst also isn't protected from its own flames, so a boomrat may ignite itself (funny, but check).
+- Boomrat: Fire Burst now goes before Detonate within 2.9 cells. Fire burst isn't protected from its own flames, so a boomrat may ignite itself (funny, but check).
 - Charge damage across body sizes (goat about 16, mastodon about 44).
 - Howl: allies get `Ordo_Rallied` and the caster's own call plays. A player-ordered cast goes through the same self-target path as vanilla's roars.
 - Intimidate: whether `Terror` on colonists from wild geese is too harsh. In testing, one manhunting goose and cobra put two of three colonists in `Terror` within seconds.
 - Withdraw: animals crawl rather than stop dead, by design. Check the armor bonus is felt.
-- Kick and Poison Bite: the AI walks to any hostile within 8 cells.
+- Kick and Poison Bite: the AI walks to any enemy within 8 cells.
+- Wild animals now fight back with their abilities, and predators use them on prey. Check this doesn't make hunting elephants or walruses, or wild cobras, too punishing.
+- A player's pen animals (horses, cows, muffalo and other roamers) don't fight back unless they started the fight: vanilla disables threats between them and anything they haven't engaged. So trained ones rarely use abilities by themselves; whether guarding a master gets round this isn't tested. Not changed.
 - Tag startup: the training tab lists the new trainables on `trainability: None` animals (code says it should), and existing saves pick up the abilities.
 
 ## Environment notes and gotchas

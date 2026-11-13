@@ -14,7 +14,7 @@ public class CompProperties_AbilityChargeTarget : CompProperties_AbilityEffect
 	}
 }
 
-// Only lets wild or enemy casters charge at hostile pawns that aren't already in melee range
+// Only lets the AI charge at enemies that aren't already in melee range
 public class CompAbilityEffect_ChargeTarget : CompAbilityEffect
 {
 	public new CompProperties_AbilityChargeTarget Props => (CompProperties_AbilityChargeTarget)props;
@@ -24,13 +24,13 @@ public class CompAbilityEffect_ChargeTarget : CompAbilityEffect
 	)
 	{
 		var pawn = parent.pawn;
-		if (pawn.Faction == Faction.OfPlayer || target.Pawn is not { } targetPawn)
+		if (target.Pawn is not { } targetPawn)
 		{
 			return false;
 		}
 
 		return !targetPawn.Downed
-		       && targetPawn.HostileTo(pawn)
+		       && targetPawn.IsEnemyOf(pawn)
 		       && !targetPawn.Position.InHorDistOf(pawn.Position, Props.aiMinDistance);
 	}
 }

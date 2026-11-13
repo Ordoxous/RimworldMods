@@ -3,7 +3,7 @@ using Verse;
 
 namespace Ordo.SillyAnimalThings;
 
-// The reverse of vanilla's CompAbilityEffect_OnlyTargetHostiles, for area buffs
+// The reverse of vanilla's CompAbilityEffect_OnlyTargetHostiles, for area buffs. The caster counts as its own ally.
 public class CompAbilityEffect_OnlyTargetAllies : CompAbilityEffect
 {
 	public override bool Valid(
@@ -12,14 +12,6 @@ public class CompAbilityEffect_OnlyTargetAllies : CompAbilityEffect
 	)
 	{
 		var pawn = parent.pawn;
-		if (pawn == null || target.Pawn is not { } targetPawn || targetPawn.HostileTo(pawn))
-		{
-			return false;
-		}
-
-		// Wild animals have no faction, so their allies are their own kind
-		return pawn.Faction != null
-			? targetPawn.Faction == pawn.Faction
-			: targetPawn.Faction == null && targetPawn.def == pawn.def;
+		return pawn != null && target.Pawn is { } targetPawn && (targetPawn == pawn || targetPawn.IsAllyOf(pawn));
 	}
 }
