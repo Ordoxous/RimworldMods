@@ -27,9 +27,9 @@ The mod doesn't use Harmony. All its changes to MU and the game are XML patches 
 | `JobGiver_OptimizeUpgrades.cs` | Every few hours (the interval setting, ±20%), sends the mech to whichever reachable auto upgrader can do the most operations for it. It reuses `mindState.nextApparelOptimizeTick`, and sets it before deciding, so a trip that fails partway can't be retried in a tight loop |
 | `Building_AutoMechUpgrader.cs` | `WantedOperations` picks additions from the upgrades in the upgrader's linked, active storages, through `UpgradePlanner`. Removals go after the additions because MU runs operations from the end of the list; otherwise removing an upgrade would also take a shared ability from the upgrade replacing it. `TryAcceptPawn` applies the operations without MU's dialog, except for a player-ordered insert with the "show dialog on manual insert" setting on. A trip of the mech's own with nothing left to do doesn't go in. The inspect text adds how many storages are linked and how many upgrades they hold |
 | `Dialog_ManageUpgradePolicies.cs` | The policy editor, a vanilla `Dialog_ManagePolicies`, 1000 px wide. It opens on the mech's policy, or on the default one. Above the filter: "Show upgrades for" (narrows the list to one mech type and picks the preview's mech type) and "Load upgrade set...", which replaces the policy's filter with one of MU's saved upgrade sets (`UpgradePolicy.LoadFrom`). The filter hides MU's tier filters and the hit points and quality settings, because a policy is checked by def and they'd do nothing. On the right, a preview of what a mech of the chosen type with no upgrades would get, and what's skipped and why. Its point limit comes from the mech the dialog was opened for, or any colony mech of that type; with none, it's ignored |
-| `UpgradeStatus.cs` | What a mech's next trip would change: removals, additions from the best stocked auto upgrader on its map, and wanted upgrades nothing has in stock. Cached for a second per mech, since the Mechs tab asks every frame |
-| `UpgradePolicyMenu.cs` | The policy choices (no policy, each policy, "Edit...") shared by the Mechs tab column and the gizmo |
-| `PawnColumnWorker_*.cs` | The Mechs tab columns: the policy picker (with "Manage Upgrade Policies" in its header); used and total upgrade points, with a marker when the next trip would change something and a tooltip listing the upgrades and the pending changes (click to open the mech's upgrades tab); and the mech's current job report |
+| `UpgradeStatus.cs` | What a policy (the mech's own, or any other) would do to a mech: removals, additions from the best stocked auto upgrader on its map, and wanted upgrades nothing has in stock. `Lines` gives every allowed upgrade the mech's type can have, and every installed one, a state: installed, adding, wanted (not in stock), skipped (with the reason) or removing. `Describe` turns that into the tooltips. Cached for a second per mech and policy, since the Mechs tab asks every frame |
+| `UpgradePolicyMenu.cs` | The policy choices (no policy, each policy, "Edit...") shared by the Mechs tab column and the gizmo. Each policy option's tooltip describes what that policy would do to the mech, so policies can be compared before picking one |
+| `PawnColumnWorker_*.cs` | The Mechs tab columns: the policy picker (with "Manage Upgrade Policies" in its header, and a tooltip listing each upgrade's state under the mech's policy); used and total upgrade points, with a marker when the next trip would change something and a tooltip listing the upgrades and the pending changes (click to open the mech's upgrades tab); and the mech's current job report |
 | `MechUpgradesUiMod.cs` | Settings: use the default policy for unassigned mechs (default off), show the dialog on manual insert (on), and the check interval in hours (3, from 1 to 24) |
 
 A player-ordered insert is recognised by `pawn.CurJob.playerForced`. MU's gizmo and float menu option both go through `Building_Enterable.SelectPawn`, which takes an ordered job. The think tree's trips don't.
@@ -69,7 +69,7 @@ How the scenarios are built:
 - **Only one scenario relies on MU doing the work:** `ai_end_to_end`, as agreed with the user. It covers the mech going in with no dialog, the item leaving storage, waiting out the fabrication time (2500 ticks per upgrade point), the swap, and the removed upgrade going back into storage.
 - **Storage can only be tested as unlinked:** MU's storages have no power comp, so a linked storage is always active. Only "unlinked" can be tested, not "inactive".
 
-**To look at the UI**, start the windowed `mechupgradesui` profile and call `ordo/stage_mechupgradesui`. It leaves a site standing: an auto upgrader with a stocked storage, a mechanitor, a lifter on a "Lifter loadout" policy that wants a change, and a lifter with no policy. It adds a policy to the world, so don't save afterwards. The same site is the starting point for the showcase.
+**To look at the UI**, start the windowed `mechupgradesui` profile and call `ordo/stage_mechupgradesui`. It leaves a site standing: an auto upgrader with a stocked storage, a mechanitor, a lifter on a "Lifter loadout" policy that wants a change, and a lifter with no policy. It adds a policy to the world, so don't save afterwards. The showcase stages its own sites; see below.
 
 **Results on 2026-11-13:**
 
@@ -98,6 +98,12 @@ Every behaviour scenario was seen to fail with a fault planted by hot reload, in
 
 ## History
 
+- **2026-11-13, policy tooltips and a showcase.**
+  - Hovering over a policy lists each upgrade and its state for that mech: installed, added on the next trip, wanted but not in stock, skipped (with the reason), or removed on the next trip. This works on the Mechs tab's policy cell, on each policy in the policy menus (so you can compare before picking), and on the policy gizmo.
+  - The upgrades column's tooltip uses the same list.
+  - `ui_upgrades_status` checks the states, including under a policy the mech doesn't have.
+  - Three showcase clips were recorded, after generalising the showcase tools to clips that aren't about an ability.
+
 - **2026-11-13, UI improvements.**
   - The policy dialog:
     - MU's tier filters and the hit points slider are hidden. They were shown, and did nothing.
@@ -113,14 +119,25 @@ Every behaviour scenario was seen to fail with a fault planted by hot reload, in
 
 - **2026-11-13, fixed: an autonomous trip with nothing left to do waited behind MU's dialog.** If the stock was gone by the time the mech arrived (another mech took it, or someone hauled it away), `TryAcceptPawn` fell back to MU's `base.TryAcceptPawn`. That put the mech in and opened the configure dialog, so it sat in the upgrader until someone answered. Now a trip that isn't player-ordered and has nothing to do doesn't go in. A player-ordered insert with nothing to do still opens MU's dialog. Covered by `ai_stock_gone_on_arrival`, which failed before the fix.
 
+## Showcase
+
+Three clips in `tools/BridgeTools/Showcase/MechUpgradesUiShowcase.cs`, all with the UI on screen:
+
+| Clip | Frame | What it shows |
+|---|---|---|
+| `policy_dialog` | Middle | The dialog opened from a lifter. Upgrades are ticked one by one: the double cargo cell, then the small cargo cell (skipped in the preview as conflicting), then the mini-burner. The dialog pauses the game, so the clip waits with `ShowcaseStage.Hold` (real time) |
+| `mechs_tab` | Window | The Mechs tab with two lifters. The second is given the policy, and its pending-change marker appears |
+| `upgrade_trip` | Window | A lifter with a mini-burner and a policy allowing only the double cargo cell, which is in stock. It walks to the upgrader, and comes out with the cargo cell, while MU's upgrades tab shows the change. Each operation's fabrication time is cut to 60 ticks, and the caption says so |
+
+To record: start `mechupgradesui-showcase` and call `ordo/record_showcase` with `mod: Ordo.MechUpgradesUi` and an `outputDirectory` such as `tools/BridgeTools/videos/mechupgradesui`. Then run `make_showcase.ps1 -OutputDirectory <that folder> -ModName 'Mech Upgrade Policies'`. Recording takes about 40 s.
+
+- The showcase profile's save is a copy of the `mechupgradesui` one. Its original, copied from SillyAnimalThings, is kept as `autostart.rws.old-sillyanimalthings`.
+- Mouse tooltips can't be filmed, because there's no cursor to hover with.
+- Last recorded on 2026-11-13. A frame from each clip was checked.
+
 ## Next steps
 
-- **A showcase.** Suggested clips:
-  1. The policy dialog: a policy allowing two upgrades, assigned to a mech in the Mechs tab. This needs the UI visible.
-  2. The trip: a lifter with a policy walks to the auto upgrader and comes out upgraded, with the storage emptied. Shorten the fabrication time for the clip by setting `fabricationTicksLeft`, and say so in the clip's comment.
-  3. Replacing: a mech with an unwanted upgrade comes out with it swapped for a wanted one.
-
-  The `mechupgradesui-showcase` profile is ready, and `MechUpgradesUiScenarios.Demo` (behind `ordo/stage_mechupgradesui`) stages the site. The clips need `ShowcaseClip` and `ShowcaseRunner` generalised beyond animal abilities: a caption that isn't an ability's, and a per-clip option to keep the UI. The BlueprintMaterials work needs the same changes; see `tools/HANDOFF.md`.
+- **Ranking upgrades:** let players order upgrades by priority, instead of defName order, for when a mech can't fit everything its policy allows. This changes how the mod picks upgrades, so it needs agreeing first.
 
 ## Notes
 

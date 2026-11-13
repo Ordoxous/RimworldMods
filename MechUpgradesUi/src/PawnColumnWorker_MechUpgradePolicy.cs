@@ -40,14 +40,16 @@ public class PawnColumnWorker_MechUpgradePolicy : PawnColumnWorker
             dragLabel: currentLabel,
             paintable: true
         );
+
+        TooltipHandler.TipRegion(left, new TipSignal(() => UpgradeStatus.Describe(comp, null), UpgradePolicyMenu.TipId(comp, -1)));
     }
 
     private static IEnumerable<Widgets.DropdownMenuElement<UpgradePolicy>> MenuGenerator(CompUpgradableMechWithPolicy comp) =>
         UpgradePolicyMenu
             .Options(policy => comp.CurrentUpgradePolicy = policy, comp)
-            .Select(o => new Widgets.DropdownMenuElement<UpgradePolicy>
+            .Select((o, i) => new Widgets.DropdownMenuElement<UpgradePolicy>
             {
-                option = new FloatMenuOption(o.Label, o.Action),
+                option = o.ToFloatMenuOption(UpgradePolicyMenu.TipId(comp, i)),
                 payload = o.Policy
             });
 

@@ -40,11 +40,13 @@
 	<MU_Upgrades_Ui_Status_Installed>Upgrades ({0} / {1} points):</MU_Upgrades_Ui_Status_Installed>
 	<MU_Upgrades_Ui_Status_None>none</MU_Upgrades_Ui_Status_None>
 	<MU_Upgrades_Ui_Status_Unmanaged>No upgrade policy: its upgrades are left alone.</MU_Upgrades_Ui_Status_Unmanaged>
-	<MU_Upgrades_Ui_Status_Policy>Upgrade policy: {0}</MU_Upgrades_Ui_Status_Policy>
-	<MU_Upgrades_Ui_Status_Removes>Next trip removes: {0}</MU_Upgrades_Ui_Status_Removes>
-	<MU_Upgrades_Ui_Status_Adds>Next trip adds: {0}</MU_Upgrades_Ui_Status_Adds>
-	<MU_Upgrades_Ui_Status_Unstocked>Wanted, but not in any auto upgrader's linked storages: {0}</MU_Upgrades_Ui_Status_Unstocked>
-	<MU_Upgrades_Ui_Status_UpToDate>Matches its policy.</MU_Upgrades_Ui_Status_UpToDate>
+	<MU_Upgrades_Ui_Status_Header>{0}, for {1}:</MU_Upgrades_Ui_Status_Header>
+	<MU_Upgrades_Ui_Status_PointsAfter>Upgrade points after its next trip: {0} / {1}</MU_Upgrades_Ui_Status_PointsAfter>
+	<MU_Upgrades_Ui_State_Installed>installed</MU_Upgrades_Ui_State_Installed>
+	<MU_Upgrades_Ui_State_Adding>added on its next trip</MU_Upgrades_Ui_State_Adding>
+	<MU_Upgrades_Ui_State_Wanted>wanted, but none in an auto upgrader's storages</MU_Upgrades_Ui_State_Wanted>
+	<MU_Upgrades_Ui_State_Skipped>skipped</MU_Upgrades_Ui_State_Skipped>
+	<MU_Upgrades_Ui_State_Removing>removed on its next trip</MU_Upgrades_Ui_State_Removing>
 	<MU_Upgrades_Ui_Status_Click>Click to open its upgrades tab.</MU_Upgrades_Ui_Status_Click>
 
 	<!-- The auto upgrader -->

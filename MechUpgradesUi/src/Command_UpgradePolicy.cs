@@ -28,10 +28,13 @@ public class Command_UpgradePolicy : Command
         base.ProcessInput(ev);
         var options = UpgradePolicyMenu
             .Options(AssignToSelected, _comp)
-            .Select(o => new FloatMenuOption(o.Label, o.Action))
+            .Select((o, i) => o.ToFloatMenuOption(UpgradePolicyMenu.TipId(_comp, i)))
             .ToList();
         Find.WindowStack.Add(new FloatMenu(options));
     }
+
+    // What the current policy does to this mech's upgrades. Worked out when shown, since gizmos are made every frame.
+    public override string Desc => $"{defaultDesc}\n\n{UpgradeStatus.Describe(_comp, null)}";
 
     // The menu already covers every selected mech, so the other mechs' buttons mustn't open their own
     public override bool InheritInteractionsFrom(Gizmo other) => false;

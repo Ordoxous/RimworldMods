@@ -9,7 +9,7 @@ Give `BlueprintMaterials` and `MechUpgradesUi` what `SillyAnimalThings` has: GAB
 ## Read first
 
 1. The `rimworld-mod-dev` skill (`.claude/skills/rimworld-mod-dev/SKILL.md`), then its `new-mod-setup.md`, `live-testing.md` and `showcase.md` references. `new-mod-setup.md` is the checklist this task follows.
-2. `BlueprintMaterials/HANDOFF.md` and `MechUpgradesUi/README.md`: what each mod does, what to test, how to demo it, and the traps found while writing this. MechUpgradesUi's suite is done (22 scenarios); its showcase isn't.
+2. `BlueprintMaterials/HANDOFF.md` and `MechUpgradesUi/README.md`: what each mod does, what to test, how to demo it, and the traps found while writing this. MechUpgradesUi is done: 22 scenarios and 3 showcase clips. Its showcase is the model for clips that aren't abilities.
 3. `tools/BridgeTools/Scenarios/SillyAnimalThingsScenarios.cs` and `tools/BridgeTools/Showcase/SillyAnimalThingsShowcase.cs`, as the models.
 
 ## Suggested order
@@ -28,10 +28,10 @@ These changes are for everyone, not one mod:
 
 | Area | Now | Needed |
 |---|---|---|
-| `ScenarioSets.All`, `ShowcaseSets.All` | SillyAnimalThings only | A line per mod: `("Ordo.BlueprintMaterials", ...)` and `("Ordo.MechUpgradesUi", ...)` |
-| `BridgeTools.csproj` | References SillyAnimalThings | `ProjectReference`s to both mods with `Private="false"`. Scenarios that use MU's types may also need a `Reference` to `MechanoidUpgrades.dll`, copied from `MechUpgradesUi.csproj` with its 1.6 fallback and `Private="False"`. Whether the project reference passes MU on hasn't been checked; try the build first |
-| `ShowcaseClip` | Requires an `AbilityDef` and an animal kind. The title is "Ability \| Animal", and a clip is skipped when its ability isn't loaded | A title and caption that don't need an ability (the optional `caption` is a start), and a general "is this clip available" check |
-| `ShowcaseRunner` | Turns on screenshot mode (no UI) for every clip | A per-clip option to keep the UI, for gizmos, menus and dialogs. The crop is the middle 1280x720 of a 1080p window, so the UI must be on screen within it |
+| `ScenarioSets.All`, `ShowcaseSets.All` | SillyAnimalThings and MechUpgradesUi | A line for `("Ordo.BlueprintMaterials", ...)` |
+| `BridgeTools.csproj` | References SillyAnimalThings and MechUpgradesUi, plus `MechanoidUpgrades.dll` with its 1.6 fallback | A `ProjectReference` to BlueprintMaterials with `Private="false"` |
+| `ShowcaseClip` | Done: `ShowcaseClip.Feature(name, title, caption, run, showUi, frame)` makes a clip with its own title and caption. Ability clips are unchanged | Use it for BlueprintMaterials' clips |
+| `ShowcaseRunner` | Done: `showUi` keeps the UI for a clip. `ShowcaseFrame.Window` shows the whole window scaled down, with the caption at the top, for gizmos and the inspect pane. `ShowcaseStage.Hold` waits in real time while a dialog pauses the game | See `showcase.md` in the skill. SillyAnimalThings' clips haven't been re-recorded since the recording changed to the whole window, with `make_showcase.ps1` cropping it to the same middle 1280x720 |
 | `Stage` | Animal helpers: `Spawn` fixes adult age and has animal modes. `Colonist` is drafted and unarmed | Helpers for blueprints, selection (clear it in `CleanUp`), invoking a gizmo and picking from the resulting float menu, controlled mechs with a mechanitor, and powered buildings. General ones in `Stage.cs`, mod-specific ones in the mod's scenario file |
 | `Scenario.RequiresAbility` | Skips a scenario whose ability def isn't loaded | Probably not needed: both mods' dependencies are hard. Add a general guard only if something optional turns up |
 | Profiles in `~/.gabs/config.json` | SillyAnimalThings only | The new ones, each with a `description`. GABS reads its config at start, so it may need restarting before it sees new profiles; ask the user if so |

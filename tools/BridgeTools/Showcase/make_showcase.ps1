@@ -41,15 +41,29 @@ $failed = 0
 $clipVideos = @()
 foreach ($line in Get-Content $timeline)
 {
-	$name, $startMs, $endMs = $line -split "`t"
+	$name, $startMs, $endMs, $frame = $line -split "`t"
 	$start = [double]::Parse($startMs, $invariant) / 1000
 	$duration = [double]::Parse($endMs, $invariant) / 1000 - $start
 	$fadeOutStart = Seconds ($duration - $fadeSeconds)
 
+	# The recording is the whole window. Most clips show its middle at full size; "window" clips show all of it, scaled down
+	# A "window" clip has its caption at the top, since the main tabs and the inspect pane are at the bottom
+	if ($frame -eq 'window')
+	{
+		$framing = 'scale=1280:720:force_original_aspect_ratio=decrease:flags=lanczos,pad=1280:720:(ow-iw)/2:(oh-ih)/2'
+		$captionTop = 0
+	}
+	else
+	{
+		$framing = 'crop=1280:720'
+		$captionTop = 720 - 92
+	}
+
 	$videoFilter = @(
-		"drawbox=x=0:y=ih-92:w=iw:h=92:color=black@0.6:t=fill"
-		"drawtext=fontfile='$boldFont':textfile=title.txt:expansion=none:fontsize=30:fontcolor=white:x=28:y=h-84"
-		"drawtext=fontfile='$font':textfile=caption.txt:expansion=none:fontsize=20:fontcolor=white:x=28:y=h-42"
+		$framing
+		"drawbox=x=0:y=${captionTop}:w=iw:h=92:color=black@0.6:t=fill"
+		"drawtext=fontfile='$boldFont':textfile=title.txt:expansion=none:fontsize=30:fontcolor=white:x=28:y=$($captionTop + 8)"
+		"drawtext=fontfile='$font':textfile=caption.txt:expansion=none:fontsize=20:fontcolor=white:x=28:y=$($captionTop + 50)"
 		"fade=t=in:d=$fadeSeconds"
 		"fade=t=out:st=${fadeOutStart}:d=$fadeSeconds"
 	) -join ','

@@ -37,19 +37,20 @@ public class CompUpgradableMechWithPolicy : CompUpgradableMechanoid
             ? Find.World.GetComponent<WorldComponent_UpgradeDatabase>().DefaultPolicy()
             : null);
 
-    public List<MechUpgrade> UpgradesToKeep()
+    /// <summary>The installed upgrades a policy allows: the effective policy, unless another is given.</summary>
+    public List<MechUpgrade> UpgradesToKeep(UpgradePolicy policy = null)
     {
-        var filter = EffectiveUpgradePolicy.Filter;
+        var filter = (policy ?? EffectiveUpgradePolicy).Filter;
         return upgrades
             .Where(u => filter.Allows(u.def.linkedThingDef))
             .ToList();
     }
 
-    public List<MechUpgradeDef> WantedUpgrades(List<MechUpgrade> upgradesToKeep)
+    public List<MechUpgradeDef> WantedUpgrades(List<MechUpgrade> upgradesToKeep, UpgradePolicy policy = null)
     {
         // Check against the upgrades that will remain, so an upgrade can replace an unwanted one in the same trip.
         // The point budget is handled by Building_AutoMechUpgrader.WantedOperations.
-        return EffectiveUpgradePolicy.AllowedUpgradeDefs
+        return (policy ?? EffectiveUpgradePolicy).AllowedUpgradeDefs
             .Where(d => d.CanAdd(Mech.def, upgradesToKeep))
             .ToList();
     }

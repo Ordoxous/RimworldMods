@@ -656,10 +656,32 @@ public static class MechUpgradesUiScenarios
 		context.Check($"with nothing in stock, {b.defName} is still to be removed: [{Names(status.Removals)}]", status.Removals.SequenceEqual(new[] { installed }));
 		context.Check($"and {a.defName} is wanted but not in stock: adds=[{Names(status.Additions)}] unstocked=[{string.Join(",", status.Unstocked.Select(def => def.defName))}]", status.Additions.Count == 0 && status.Unstocked.SequenceEqual(new[] { a }));
 		context.Check("which is a change", status.HasChanges);
+		context.Check($"its line says wanted: {Lines(status)}", State(status, a) == UpgradeState.Wanted);
 
 		Stock(site.Storage, new[] { a });
 		status = UpgradeStatus.Compute(site.Comp);
 		context.Check($"with {a.defName} in stock, the next trip adds it: [{Names(status.Additions)}]", status.Additions.Select(upgrade => upgrade.def).SequenceEqual(new[] { a }) && status.Unstocked.Count == 0);
+		context.Check($"the lines say adding and removing: {Lines(status)}", State(status, a) == UpgradeState.Adding && State(status, b) == UpgradeState.Removing);
+		context.Check($"points after the trip: {status.PointsAfter}", status.PointsAfter == a.upgradePoints);
+
+		// The policy menus describe policies the mech doesn't have
+		var keepsB = Database.TryCreate();
+		keepsB.Filter.SetDisallowAll();
+		keepsB.Filter.SetAllow(b.linkedThingDef, true);
+		var other = UpgradeStatus.Compute(site.Comp, keepsB);
+		context.Check($"under a policy allowing {b.defName}, it's installed and nothing changes: {Lines(other)}", State(other, b) == UpgradeState.Installed && State(other, a) == null && !other.HasChanges);
+
+		var conflicting = Compatible(site.Mech).FirstOrDefault(def => def != a && def.exclusionTags.Intersect(a.exclusionTags).Any());
+		if (conflicting != null)
+		{
+			var both = Database.TryCreate();
+			both.Filter.SetDisallowAll();
+			both.Filter.SetAllow(a.linkedThingDef, true);
+			both.Filter.SetAllow(conflicting.linkedThingDef, true);
+			var withConflict = UpgradeStatus.Compute(site.Comp, both);
+			var skippedLine = withConflict.Lines.FirstOrDefault(line => line.Def == conflicting);
+			context.Check($"{conflicting.defName}, which conflicts with {a.defName}, is skipped with a reason: {Lines(withConflict)}", skippedLine.State == UpgradeState.Skipped && !skippedLine.Reason.NullOrEmpty());
+		}
 
 		var tooltip = UpgradeStatus.Tooltip(site.Comp);
 		context.Check($"the tooltip names the policy and both upgrades: {tooltip}", new[] { site.Comp.CurrentUpgradePolicy.label, a.label, b.label }.All(label => tooltip.IndexOf(label, StringComparison.OrdinalIgnoreCase) >= 0));
@@ -672,6 +694,21 @@ public static class MechUpgradesUiScenarios
 		}
 
 		return Task.CompletedTask;
+	}
+
+	private static UpgradeState? State(
+		UpgradeStatus status,
+		MechUpgradeDef def
+	)
+	{
+		return status.Lines.Where(line => line.Def == def).Select(line => (UpgradeState?)line.State).FirstOrDefault();
+	}
+
+	private static string Lines(
+		UpgradeStatus status
+	)
+	{
+		return string.Join(", ", status.Lines.Select(line => $"{line.Def.defName}={line.State}{(line.Reason.NullOrEmpty() ? "" : $" ({line.Reason})")}"));
 	}
 
 	private static Task UpgraderInspect(
@@ -753,7 +790,7 @@ public static class MechUpgradesUiScenarios
 	}
 
 	// Upgrades that come as items and that MU lets the mech have, in a fixed order
-	private static IEnumerable<MechUpgradeDef> Compatible(
+	internal static IEnumerable<MechUpgradeDef> Compatible(
 		Pawn mech
 	)
 	{
@@ -764,7 +801,7 @@ public static class MechUpgradesUiScenarios
 	}
 
 	// Two upgrades the mech can have together, that each fit on their own
-	private static (MechUpgradeDef, MechUpgradeDef) TwoCompatible(
+	internal static (MechUpgradeDef, MechUpgradeDef) TwoCompatible(
 		Stage context,
 		Pawn mech
 	)
@@ -783,7 +820,7 @@ public static class MechUpgradesUiScenarios
 		return (null, null);
 	}
 
-	private static void Stock(
+	internal static void Stock(
 		Thing storage,
 		IEnumerable<MechUpgradeDef> upgrades
 	)

@@ -12,12 +12,24 @@ using Verse;
 
 namespace Ordo.BridgeTools.Showcase;
 
-// A staged demonstration of one ability, captioned from the ability's own def, or from the clip's own caption when it shows
-// how the AI uses it
+// How much of the 1080p window a clip's video shows
+public enum ShowcaseFrame
+{
+	// The middle 1280 by 720 pixels at full size: the map around the stage, and a centred dialog
+	Middle,
+
+	// The whole window scaled down to 1280 by 720, for clips that need the UI at the window's edges, such as main tabs and
+	// the inspect pane
+	Window
+}
+
+// A staged demonstration. An ability clip is captioned from the ability's own def, or from the clip's own caption when it shows
+// how the AI uses it. A feature clip, for anything that isn't an ability, brings its own title and caption.
 public sealed class ShowcaseClip
 {
 	public readonly string Name;
 
+	// Null for a feature clip
 	public readonly string AbilityDef;
 
 	public readonly string AnimalKind;
@@ -26,6 +38,14 @@ public sealed class ShowcaseClip
 
 	// Replaces the ability's description, for clips about when an animal uses it rather than what it does
 	public readonly string Caption;
+
+	// A feature clip's title. Ability clips are titled from the ability and the animal.
+	public readonly string Title;
+
+	// Keep the game's UI on screen, for clips that show it. The UI is hidden otherwise.
+	public readonly bool ShowUi;
+
+	public readonly ShowcaseFrame Frame;
 
 	public ShowcaseClip(
 		string name,
@@ -40,6 +60,36 @@ public sealed class ShowcaseClip
 		AnimalKind = animalKind;
 		Run = run;
 		Caption = caption;
+	}
+
+	private ShowcaseClip(
+		string name,
+		string title,
+		string caption,
+		Func<ShowcaseStage, Task> run,
+		bool showUi,
+		ShowcaseFrame frame
+	)
+	{
+		Name = name;
+		Title = title;
+		Caption = caption;
+		Run = run;
+		ShowUi = showUi;
+		Frame = frame;
+	}
+
+	// A clip of something other than an ability, such as a dialog or a building at work
+	public static ShowcaseClip Feature(
+		string name,
+		string title,
+		string caption,
+		Func<ShowcaseStage, Task> run,
+		bool showUi = false,
+		ShowcaseFrame frame = ShowcaseFrame.Middle
+	)
+	{
+		return new ShowcaseClip(name, title, caption, run, showUi, frame);
 	}
 }
 
@@ -120,14 +170,33 @@ public sealed class ShowcaseRunner
 			await recording.WaitForVideo(bridge, cancellationToken);
 			foreach (var clip in clips)
 			{
-				var ability = DefDatabase<AbilityDef>.GetNamedSilentFail(clip.AbilityDef);
-				if (ability == null)
+				var ability = clip.AbilityDef == null ? null : DefDatabase<AbilityDef>.GetNamedSilentFail(clip.AbilityDef);
+				if (clip.AbilityDef != null && ability == null)
 				{
 					results.Add(new { clip.Name, status = "skip", reason = $"{clip.AbilityDef} isn't loaded" });
 					continue;
 				}
 
-				var outcome = await PerformUntilItWorks(clip, bridge, map, sites, () => nextSite++, cancellationToken);
+				(int Takes, long Start, long End, List<string> Failures) outcome;
+				var adaptiveTraining = Prefs.AdaptiveTrainingEnabled;
+				screenshotMode.active = !clip.ShowUi;
+				try
+				{
+					// The learning helper's lessons would sit over the shot, and so would messages about the last clip's cleanup
+					if (clip.ShowUi)
+					{
+						Prefs.AdaptiveTrainingEnabled = false;
+						Messages.Clear();
+					}
+
+					outcome = await PerformUntilItWorks(clip, bridge, map, sites, () => nextSite++, cancellationToken);
+				}
+				finally
+				{
+					screenshotMode.active = true;
+					Prefs.AdaptiveTrainingEnabled = adaptiveTraining;
+				}
+
 				if (outcome.Failures.Count > 0)
 				{
 					unfinished++;
@@ -137,8 +206,11 @@ public sealed class ShowcaseRunner
 
 				// Numbered so the reel plays in the order they're listed
 				var clipName = $"{allClips.IndexOf(clip) + 1:D2}_{clip.Name}";
-				WriteCaption(Path.Combine(outputDirectory, "clips", clipName), ability, clip.AnimalKind, clip.Caption);
-				timeline.AppendLine($"{clipName}\t{outcome.Start}\t{outcome.End}");
+				var (title, caption) = ability != null
+					? AbilityCaption(ability, clip.AnimalKind, clip.Caption)
+					: (clip.Title, clip.Caption);
+				WriteCaption(Path.Combine(outputDirectory, "clips", clipName), title, caption);
+				timeline.AppendLine($"{clipName}\t{outcome.Start}\t{outcome.End}\t{(clip.Frame == ShowcaseFrame.Window ? "window" : "middle")}");
 				results.Add(new { clip.Name, status = "recorded", takes = outcome.Takes, seconds = (outcome.End - outcome.Start) / 1000.0 });
 			}
 		}
@@ -218,9 +290,8 @@ public sealed class ShowcaseRunner
 		}
 	}
 
-	// As much of the ability's description as fits on a line, so the video says what the mod says
-	private static void WriteCaption(
-		string clipDirectory,
+	// The ability's description, so the video says what the mod says
+	private static (string Title, string Caption) AbilityCaption(
 		AbilityDef ability,
 		string animalKind,
 		string captionOverride
@@ -229,9 +300,18 @@ public sealed class ShowcaseRunner
 		var title = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(ability.label);
 		var animal = DefDatabase<PawnKindDef>.GetNamed(animalKind).race.label;
 		var animalName = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(animal);
+		return ($"{title}  |  {animalName}", captionOverride ?? ability.description);
+	}
 
+	// As much of the caption as fits on a line, in whole sentences
+	private static void WriteCaption(
+		string clipDirectory,
+		string title,
+		string fullCaption
+	)
+	{
 		var caption = "";
-		foreach (var sentence in (captionOverride ?? ability.description).Split(". "))
+		foreach (var sentence in fullCaption.Split(". "))
 		{
 			var longer = caption.Length == 0 ? sentence : $"{caption}. {sentence}";
 			if (caption.Length > 0 && longer.Length > MaxCaptionLength)
@@ -243,7 +323,7 @@ public sealed class ShowcaseRunner
 		}
 
 		Directory.CreateDirectory(clipDirectory);
-		File.WriteAllText(Path.Combine(clipDirectory, "title.txt"), $"{title}  |  {animalName}");
+		File.WriteAllText(Path.Combine(clipDirectory, "title.txt"), title);
 		File.WriteAllText(Path.Combine(clipDirectory, "caption.txt"), caption.TrimEnd('.') + ".");
 	}
 }
@@ -290,6 +370,23 @@ public sealed class ShowcaseStage : Stage
 		Find.TickManager.CurTimeSpeed = TimeSpeed.Normal;
 		var target = Find.TickManager.TicksGame + ticks;
 		while (Find.TickManager.TicksGame < target)
+		{
+			await Bridge.Game.NextFrameAsync(CancellationToken);
+		}
+	}
+
+	// Waits in real time rather than game time, for clips where a dialog pauses the game
+	public async Task Hold(
+		float seconds
+	)
+	{
+		if (StartedAt == 0)
+		{
+			StartedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+		}
+
+		var clock = System.Diagnostics.Stopwatch.StartNew();
+		while (clock.Elapsed.TotalSeconds < seconds)
 		{
 			await Bridge.Game.NextFrameAsync(CancellationToken);
 		}
@@ -349,8 +446,9 @@ public sealed class ShowcaseRecording
 
 		var videoPath = Path.Combine(outputDirectory, "capture.mkv");
 
-		// Stamps each frame with the time, so make_showcase.ps1 can line it up with the sound and the clips' times
-		var capture = "gfxcapture=window_exe=RimWorld\\.exe:capture_cursor=0:max_framerate=60,hwdownload,format=bgra,crop=1280:720,settb=1/1000,setpts=RTCTIME/1000";
+		// The whole window: make_showcase.ps1 crops or scales each clip to its frame. Stamps each frame with the time, so the
+		// script can line it up with the sound and the clips' times.
+		var capture = "gfxcapture=window_exe=RimWorld\\.exe:capture_cursor=0:max_framerate=60,hwdownload,format=bgra,settb=1/1000,setpts=RTCTIME/1000";
 		var video = StartProcess(FindFfmpeg(), $"-hide_banner -loglevel error -y -f lavfi -i \"{capture}\" -copyts -fps_mode passthrough -c:v libx264 -preset ultrafast -crf 14 -pix_fmt yuv420p \"{videoPath}\"");
 		video.ErrorDataReceived += (_, _) => { };
 		video.BeginErrorReadLine();
