@@ -15,7 +15,7 @@ Each mod is a folder at the repo root (`SillyAnimalThings`, `Tweaks`, `MechUpgra
 | `tools/HotReloadDelta` | Makes .NET hot reload deltas for a running game (`hot_reload.ps1 -Project <Mod>`) |
 | `tools/ProcessAudioCapture` | Records only the game's sound, for the showcase |
 
-A mod's `HANDOFF.md`, if it has one, holds that mod's design, state and test results. Read it before working on the mod and update it after.
+Each mod's `README.md` is its developer documentation: design, how to test it, test results, history and open questions. Read it before working on the mod and update it after. The repo's own `README.md` lists the mods and the layout. A mod still being set up may have a `HANDOFF.md` instead, until its work is done and folded into a README.
 
 ## The everyday loop
 

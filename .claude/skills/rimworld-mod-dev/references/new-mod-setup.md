@@ -46,4 +46,4 @@ These need no setup per mod:
 
 ## 5. Write it down
 
-Give the mod a `HANDOFF.md` covering what it is, its current state, how to test it (profiles and suites), its in-game test results and its open questions. Update it as you go.
+Give the mod a `README.md` for developers, like the other mods': what it is, its dependencies, how it works, how to test it (profiles and suites), its in-game test results, its history and its open questions. Add it to the mods table in the repo's `README.md`. Update both as you go.

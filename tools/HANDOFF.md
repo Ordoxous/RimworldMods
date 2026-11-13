@@ -1,6 +1,6 @@
 # Task: tests and showcases for MechUpgradesUi and BlueprintMaterials
 
-Written 2026-11-13 for the next agent. Delete this file once the task is done and its lasting content is in the two mods' `HANDOFF.md` files and the `rimworld-mod-dev` skill.
+Written 2026-11-13 for the next agent. Delete this file once the task is done and its lasting content is in the two mods' `README.md` files and the `rimworld-mod-dev` skill.
 
 ## The goal
 
@@ -9,7 +9,7 @@ Give `BlueprintMaterials` and `MechUpgradesUi` what `SillyAnimalThings` has: GAB
 ## Read first
 
 1. The `rimworld-mod-dev` skill (`.claude/skills/rimworld-mod-dev/SKILL.md`), then its `new-mod-setup.md`, `live-testing.md` and `showcase.md` references. `new-mod-setup.md` is the checklist this task follows.
-2. `BlueprintMaterials/HANDOFF.md` and `MechUpgradesUi/HANDOFF.md`: what each mod does, what to test, how to demo it, and the traps found while writing this.
+2. `BlueprintMaterials/HANDOFF.md` and `MechUpgradesUi/README.md`: what each mod does, what to test, how to demo it, and the traps found while writing this. MechUpgradesUi's suite is done (15 scenarios); its showcase isn't.
 3. `tools/BridgeTools/Scenarios/SillyAnimalThingsScenarios.cs` and `tools/BridgeTools/Showcase/SillyAnimalThingsShowcase.cs`, as the models.
 
 ## Suggested order
@@ -20,7 +20,7 @@ Give `BlueprintMaterials` and `MechUpgradesUi` what `SillyAnimalThings` has: GAB
 2. **MechUpgradesUi.**
    1. Profiles with Biotech and MU: `brrainz.harmony`, `ludeon.rimworld`, `ludeon.rimworld.biotech`, `brrainz.rimbridgeserver`, `gogatio.mechanoidupgrades`, `ordo.mechupgradesui`. MU is a Workshop mod, so the Steam client must be running for it to load.
    2. Get a controlled mech, a powered upgrader and a linked storage working by hand with bridge tools before writing scenarios.
-3. Update each mod's `HANDOFF.md` with how to test it and the results, as SillyAnimalThings' does. Update the skill wherever you generalised something.
+3. Each mod's developer docs now live in its `README.md`, which replaces its handoff. When BlueprintMaterials is done, turn its `HANDOFF.md` into a `README.md` shaped like the other mods' (how it works, testing and results, history, next steps), delete the handoff, and update its row in the repo `README.md`. Update the skill wherever you generalised something.
 
 ## Shared work
 
