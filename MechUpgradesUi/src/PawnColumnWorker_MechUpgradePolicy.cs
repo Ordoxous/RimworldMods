@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -29,13 +29,7 @@ public class PawnColumnWorker_MechUpgradePolicy : PawnColumnWorker
         if (comp == null) return;
 
         var left = rect.ContractedBy(0.0f, 2f);
-
-        var upgradeDatabase = Find.World.GetComponent<WorldComponent_UpgradeDatabase>();
-        var policies = upgradeDatabase.GetPolicies();
-        string noPolicyLabel = MechUpgradesUiMod.Settings.UseDefaultPolicyForUnassigned
-            ? "MU_Upgrades_Ui_Policy_Default".Translate(upgradeDatabase.DefaultPolicy().label)
-            : "MU_Upgrades_Ui_Policy_None".Translate();
-        var currentLabel = comp.CurrentUpgradePolicy?.label ?? noPolicyLabel;
+        var currentLabel = UpgradePolicyMenu.LabelFor(comp);
 
         Widgets.Dropdown(
             left,
@@ -46,33 +40,16 @@ public class PawnColumnWorker_MechUpgradePolicy : PawnColumnWorker
             dragLabel: currentLabel,
             paintable: true
         );
-        return;
-
-        IEnumerable<Widgets.DropdownMenuElement<UpgradePolicy>> MenuGenerator(CompUpgradableMechWithPolicy currComp)
-        {
-            // Must stay ahead of the edit option: painting picks the first option matching the payload, and both are null
-            yield return new Widgets.DropdownMenuElement<UpgradePolicy>
-            {
-                option = new FloatMenuOption(noPolicyLabel, () => currComp.CurrentUpgradePolicy = null), payload = null
-            };
-
-            foreach (var policy in policies)
-            {
-                yield return new Widgets.DropdownMenuElement<UpgradePolicy>
-                {
-                    option = new FloatMenuOption(policy.label, () => currComp.CurrentUpgradePolicy = policy), payload = policy
-                };
-            }
-
-            yield return new Widgets.DropdownMenuElement<UpgradePolicy>
-            {
-                option = new FloatMenuOption(
-                    $"{"AssignTabEdit".Translate()}...",
-                    (Action) (() => Find.WindowStack.Add(new Dialog_ManageUpgradePolicies(currComp.CurrentUpgradePolicy, currComp)))
-                )
-            };
-        }
     }
+
+    private static IEnumerable<Widgets.DropdownMenuElement<UpgradePolicy>> MenuGenerator(CompUpgradableMechWithPolicy comp) =>
+        UpgradePolicyMenu
+            .Options(policy => comp.CurrentUpgradePolicy = policy, comp)
+            .Select(o => new Widgets.DropdownMenuElement<UpgradePolicy>
+            {
+                option = new FloatMenuOption(o.Label, o.Action),
+                payload = o.Policy
+            });
 
     public override int GetMinWidth(PawnTable table)
     {

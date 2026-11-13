@@ -48,7 +48,15 @@ public static class MechUpgradesUiScenarios
 		new("ai_stock_gone_on_arrival", "ai", StockGoneOnArrival),
 
 		new("player_insert_dialog", "player settings", context => ManualInsert(context, showDialog: true)),
-		new("player_insert_no_dialog", "player settings", context => ManualInsert(context, showDialog: false))
+		new("player_insert_no_dialog", "player settings", context => ManualInsert(context, showDialog: false)),
+
+		new("ui_policy_dialog", "ui", PolicyDialog),
+		new("ui_preview_matches_operations", "ui", PreviewMatchesOperations),
+		new("ui_preview_skips", "ui", PreviewSkips),
+		new("ui_load_upgrade_set", "ui", LoadUpgradeSet),
+		new("ui_mech_gizmos", "ui settings", MechGizmos),
+		new("ui_upgrades_status", "ui", UpgradesStatus),
+		new("ui_upgrader_inspect", "ui", UpgraderInspect)
 	};
 
 	private static Task PatchesApplied(
@@ -465,6 +473,270 @@ public static class MechUpgradesUiScenarios
 				}
 			}
 		);
+	}
+
+	// The dialog is only constructed, not opened: what's checked is what it starts on and what it hides
+	private static Task PolicyDialog(
+		ScenarioContext context
+	)
+	{
+		var site = Site.Set(context);
+		var before = Database.GetPolicies().ToList();
+		try
+		{
+			var fromHeader = new Dialog_ManageUpgradePolicies(null, null);
+			context.Check("opened from the column header, it starts on the default policy", fromHeader.SelectedPolicy != null && fromHeader.SelectedPolicy == Database.DefaultPolicy());
+
+			var other = Database.TryCreate();
+			site.Comp.CurrentUpgradePolicy = other;
+			var fromMech = new Dialog_ManageUpgradePolicies(site.Comp.CurrentUpgradePolicy, site.Comp);
+			context.Check("opened from a mech, it starts on the mech's policy", fromMech.SelectedPolicy == other);
+			site.Comp.CurrentUpgradePolicy = null;
+
+			var hidden = Dialog_ManageUpgradePolicies.HiddenSpecialFilters;
+			var upgrades = ThingCategoryDef.Named("MU_Upgrades").ThisAndChildCategoryDefs.ToList();
+			var tierFilters = DefDatabase<SpecialThingFilterDef>.AllDefs.Where(filter => upgrades.Contains(filter.parentCategory)).ToList();
+			context.Check($"MU has special filters on upgrades to hide: [{string.Join(",", tierFilters.Select(filter => filter.defName))}]", tierFilters.Count > 0);
+			context.Check($"every special filter on upgrades is hidden: [{string.Join(",", hidden.Select(filter => filter.defName))}]", tierFilters.All(hidden.Contains));
+			context.Check("no other special filter is hidden", hidden.All(tierFilters.Contains));
+		}
+		finally
+		{
+			site.Comp.CurrentUpgradePolicy = null;
+			Restore(Database, before);
+		}
+
+		return Task.CompletedTask;
+	}
+
+	// With everything the policy allows in stock, the preview must pick what the upgrader would
+	private static Task PreviewMatchesOperations(
+		ScenarioContext context
+	)
+	{
+		var site = Site.Set(context);
+		var max = MechUpgradeUtility.MaxUpgradePoints(site.Mech);
+		Stock(site.Storage, Compatible(site.Mech));
+
+		// The storage may not take them all, so allow only what it holds
+		var allowed = site.StorageComp.Upgrades.Select(upgrade => upgrade.def).Distinct().ToArray();
+		using var policy = new TempPolicy(site, allowed);
+
+		var preview = Dialog_ManageUpgradePolicies.Preview(site.Comp.CurrentUpgradePolicy, site.Mech.def, max, new List<SkippedUpgrade>())
+			.Select(upgrade => upgrade.def.defName)
+			.ToList();
+		var added = Operations(site)
+			.Where(operation => operation.type == UpgradeOperationType.Add)
+			.Select(operation => operation.upgrade.def.defName)
+			.ToList();
+		context.Check($"the preview [{string.Join(",", preview)}] is what the upgrader adds [{string.Join(",", added)}]", preview.Count > 0 && preview.SequenceEqual(added));
+		return Task.CompletedTask;
+	}
+
+	private static Task PreviewSkips(
+		ScenarioContext context
+	)
+	{
+		var site = Site.Set(context);
+		var compatible = Compatible(site.Mech).ToList();
+		var pair = compatible
+			.SelectMany(a => compatible.Where(b => string.CompareOrdinal(a.defName, b.defName) < 0 && a.exclusionTags.Intersect(b.exclusionTags).Any()).Select(b => (a, b)))
+			.FirstOrDefault();
+		if (pair.a == null)
+		{
+			context.Fail($"no two upgrades for {MechKind} share an exclusion tag");
+			return Task.CompletedTask;
+		}
+
+		using var policy = new TempPolicy(site, pair.a, pair.b);
+		var upgradePolicy = site.Comp.CurrentUpgradePolicy;
+
+		var skipped = new List<SkippedUpgrade>();
+		var gets = Dialog_ManageUpgradePolicies.Preview(upgradePolicy, site.Mech.def, null, skipped);
+		context.Check($"with no point limit, it gets the first of {pair.a.defName} and {pair.b.defName}, which share a tag: [{Names(gets)}]", gets.Count == 1 && gets[0].def == pair.a);
+		context.Check($"the second is skipped with a reason: [{string.Join(",", skipped.Select(skip => $"{skip.Upgrade.def.defName}: {skip.Reason}"))}]", skipped.Count == 1 && skipped[0].Upgrade.def == pair.b && !skipped[0].Reason.NullOrEmpty());
+
+		skipped.Clear();
+		gets = Dialog_ManageUpgradePolicies.Preview(upgradePolicy, site.Mech.def, 0, skipped);
+		var noPoints = "MU_Upgrades_Ui_Skip_NoPoints".Translate().ToString();
+		context.Check($"with no points, it gets nothing: [{Names(gets)}]", gets.Count == 0);
+		context.Check($"and both are skipped for points: [{string.Join(",", skipped.Select(skip => skip.Reason))}]", skipped.Count == 2 && skipped.All(skip => skip.Reason == noPoints));
+
+		// Upgrades the mech type can't have at all aren't listed, as they're meant for other mechs
+		var wrongMech = DefDatabase<MechUpgradeDef>.AllDefs.FirstOrDefault(def => def.linkedThingDef != null && UpgradePlanner.UpgradeDefOf(def.linkedThingDef) == def && !def.CanAdd(site.Mech.def).Accepted);
+		if (wrongMech != null)
+		{
+			upgradePolicy.Filter.SetAllow(wrongMech.linkedThingDef, true);
+			skipped.Clear();
+			gets = Dialog_ManageUpgradePolicies.Preview(upgradePolicy, site.Mech.def, null, skipped);
+			context.Check($"{wrongMech.defName}, which a {MechKind} can't have, isn't listed", gets.All(upgrade => upgrade.def != wrongMech) && skipped.All(skip => skip.Upgrade.def != wrongMech));
+		}
+
+		return Task.CompletedTask;
+	}
+
+	private static Task LoadUpgradeSet(
+		ScenarioContext context
+	)
+	{
+		var site = Site.Set(context);
+		var (a, b) = TwoCompatible(context, site.Mech);
+		if (a == null)
+		{
+			return Task.CompletedTask;
+		}
+
+		var other = Compatible(site.Mech).First(def => def != a && def != b);
+		using var policy = new TempPolicy(site, other);
+		var upgradePolicy = site.Comp.CurrentUpgradePolicy;
+		upgradePolicy.LoadFrom(new UpgradeSet { name = "scenario", upgrades = new List<MechUpgradeDef> { a, b, null } });
+		var allowed = upgradePolicy.AllowedUpgradeDefs.ToList();
+		context.Check($"the policy allows exactly {a.defName} and {b.defName}: [{string.Join(",", allowed.Select(def => def.defName))}]", allowed.Count == 2 && allowed.Contains(a) && allowed.Contains(b));
+		return Task.CompletedTask;
+	}
+
+	private static async Task MechGizmos(
+		ScenarioContext context
+	)
+	{
+		var site = Site.Set(context);
+		await WithSettings(
+			useDefaultForUnassigned: false,
+			showDialogOnManualInsert: null,
+			() =>
+			{
+				var gizmos = site.Comp.CompGetGizmosExtra().ToList();
+				context.Check("a controlled mech has the policy gizmo", gizmos.OfType<Command_UpgradePolicy>().Count() == 1);
+				context.Check("with no policy, there's no check-now gizmo", CheckNow(gizmos) == null);
+
+				var (a, _) = TwoCompatible(context, site.Mech);
+				if (a == null)
+				{
+					return Task.CompletedTask;
+				}
+
+				using var policy = new TempPolicy(site, a);
+				gizmos = site.Comp.CompGetGizmosExtra().ToList();
+				var label = gizmos.OfType<Command_UpgradePolicy>().FirstOrDefault()?.Label;
+				context.Check($"the policy gizmo names the policy: {label}", label != null && label.Contains(site.Comp.CurrentUpgradePolicy.label));
+
+				var checkNow = CheckNow(gizmos);
+				context.Check("with a policy, there's a check-now gizmo", checkNow != null);
+				site.Mech.mindState.nextApparelOptimizeTick = Find.TickManager.TicksGame + GenDate.TicksPerDay;
+				checkNow?.action();
+				context.Check($"check now makes the check due: next={site.Mech.mindState.nextApparelOptimizeTick}, now={Find.TickManager.TicksGame}", site.Mech.mindState.nextApparelOptimizeTick <= Find.TickManager.TicksGame);
+				return Task.CompletedTask;
+			}
+		);
+
+		static Command_Action CheckNow(
+			List<Gizmo> gizmos
+		)
+		{
+			var label = "MU_Upgrades_Ui_Gizmo_CheckNow".Translate().ToString();
+			return gizmos.OfType<Command_Action>().FirstOrDefault(gizmo => gizmo.defaultLabel == label);
+		}
+	}
+
+	private static Task UpgradesStatus(
+		ScenarioContext context
+	)
+	{
+		var site = Site.Set(context);
+		var (a, b) = TwoCompatible(context, site.Mech);
+		if (a == null)
+		{
+			return Task.CompletedTask;
+		}
+
+		var installed = site.Comp.AddUpgrade(b);
+		using var policy = new TempPolicy(site, a);
+
+		var status = UpgradeStatus.Compute(site.Comp);
+		context.Check($"with nothing in stock, {b.defName} is still to be removed: [{Names(status.Removals)}]", status.Removals.SequenceEqual(new[] { installed }));
+		context.Check($"and {a.defName} is wanted but not in stock: adds=[{Names(status.Additions)}] unstocked=[{string.Join(",", status.Unstocked.Select(def => def.defName))}]", status.Additions.Count == 0 && status.Unstocked.SequenceEqual(new[] { a }));
+		context.Check("which is a change", status.HasChanges);
+
+		Stock(site.Storage, new[] { a });
+		status = UpgradeStatus.Compute(site.Comp);
+		context.Check($"with {a.defName} in stock, the next trip adds it: [{Names(status.Additions)}]", status.Additions.Select(upgrade => upgrade.def).SequenceEqual(new[] { a }) && status.Unstocked.Count == 0);
+
+		var tooltip = UpgradeStatus.Tooltip(site.Comp);
+		context.Check($"the tooltip names the policy and both upgrades: {tooltip}", new[] { site.Comp.CurrentUpgradePolicy.label, a.label, b.label }.All(label => tooltip.IndexOf(label, StringComparison.OrdinalIgnoreCase) >= 0));
+
+		site.Comp.CurrentUpgradePolicy = null;
+		var settings = MechUpgradesUiMod.Settings;
+		if (!settings.UseDefaultPolicyForUnassigned)
+		{
+			context.Check("with no policy, nothing changes", !UpgradeStatus.Compute(site.Comp).HasChanges);
+		}
+
+		return Task.CompletedTask;
+	}
+
+	private static Task UpgraderInspect(
+		ScenarioContext context
+	)
+	{
+		var site = Site.Set(context);
+		var (a, b) = TwoCompatible(context, site.Mech);
+		if (a == null)
+		{
+			return Task.CompletedTask;
+		}
+
+		Stock(site.Storage, new[] { a, b });
+		var text = site.Upgrader.GetInspectString();
+		var expected = "MU_Upgrades_Ui_Upgrader_Stock".Translate(1, 2).ToString();
+		context.Check($"the upgrader reports one linked storage holding two upgrades: {text}", text.Contains(expected));
+		return Task.CompletedTask;
+	}
+
+	// A site left standing for looking at the UI, and later for the showcase: one lifter with a policy that wants a change and
+	// stock to make it, and one with no policy
+	internal static object Demo(
+		ScenarioContext context
+	)
+	{
+		var site = Site.Set(context);
+		var second = context.ControlledMech(MechKind, site.Mechanitor, -4, -6);
+		var (a, b) = TwoCompatible(context, site.Mech);
+		var compatible = Compatible(site.Mech).ToList();
+		var pair = compatible
+			.SelectMany(x => compatible.Where(y => string.CompareOrdinal(x.defName, y.defName) < 0 && x.exclusionTags.Intersect(y.exclusionTags).Any()).Select(y => (x, y)))
+			.FirstOrDefault();
+		if (a == null || pair.x == null)
+		{
+			return new { success = false, failures = context.Failures };
+		}
+
+		site.Comp.AddUpgrade(b);
+		var policy = Database.TryCreate();
+		policy.label = "Lifter loadout";
+		policy.Filter.SetDisallowAll();
+		foreach (var def in new[] { a, pair.x, pair.y }.Distinct())
+		{
+			policy.Filter.SetAllow(def.linkedThingDef, true);
+		}
+
+		Stock(site.Storage, new[] { a, pair.x }.Distinct());
+		site.Comp.CurrentUpgradePolicy = policy;
+
+		// Not due for a day, so the status can be looked at before the trip
+		site.Mech.mindState.nextApparelOptimizeTick = Find.TickManager.TicksGame + GenDate.TicksPerDay;
+		second.mindState.nextApparelOptimizeTick = Find.TickManager.TicksGame + GenDate.TicksPerDay;
+		return new
+		{
+			success = context.Failures.Count == 0,
+			failures = context.Failures,
+			withPolicy = site.Mech.GetUniqueLoadID(),
+			withoutPolicy = second.GetUniqueLoadID(),
+			upgrader = site.Upgrader.GetUniqueLoadID(),
+			policy = policy.label,
+			installed = b.defName,
+			stocked = new[] { a.defName, pair.x.defName }.Distinct(),
+			allowed = new[] { a.defName, pair.x.defName, pair.y.defName }.Distinct()
+		};
 	}
 
 	private static WorldComponent_UpgradeDatabase Database => Find.World.GetComponent<WorldComponent_UpgradeDatabase>();

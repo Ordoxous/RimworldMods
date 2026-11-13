@@ -15,33 +15,16 @@ public class Building_AutoMechUpgrader : Building_MechUpgrader
         List<MechUpgradeDef> wantedUpgrades
     )
     {
-        var compAffectedByFacilities = this.TryGetComp<CompAffectedByFacilities>();
-        var availableUpgrades = compAffectedByFacilities.LinkedFacilitiesListForReading
-            .Where(compAffectedByFacilities.IsFacilityActive)
-            .Select(s => s.TryGetComp<CompUpgradesStorage>())
-            .SelectMany(s => s.Upgrades)
-            .Where(u => wantedUpgrades.Contains(u.def))
-            .OrderBy(u => u.def.defName);
-
         // Not using MechUpgradeUtility.GetOperationsFromLists: it overwrites the given upgrader's saved upgrades list
-        var allowedOperations = new List<MechUpgradeOperation>();
-
-        var availablePoints = MechUpgradeUtility.MaxUpgradePoints(pawn) - MechUpgradeUtility.CurrentPoints(upgradesToKeep);
-
-        // Check each addition against everything the mech will end up with, so duplicates and
-        // conflicting exclusion tags between candidates are rejected the same way MU does
-        var resultingUpgrades = new List<MechUpgrade>(upgradesToKeep);
-
-        foreach (var upgrade in availableUpgrades)
-        {
-            var upgradePoints = upgrade.def.upgradePoints;
-            if (availablePoints - upgradePoints < 0 || !upgrade.def.CanAdd(pawn.def, resultingUpgrades))
-                continue;
-
-            allowedOperations.Add(new MechUpgradeOperation(upgrade, UpgradeOperationType.Add));
-            resultingUpgrades.Add(upgrade);
-            availablePoints -= upgradePoints;
-        }
+        var allowedOperations = UpgradePlanner
+            .PickAdditions(
+                pawn.def,
+                MechUpgradeUtility.MaxUpgradePoints(pawn) - MechUpgradeUtility.CurrentPoints(upgradesToKeep),
+                upgradesToKeep,
+                StockedUpgrades().Where(u => wantedUpgrades.Contains(u.def))
+            )
+            .Select(u => new MechUpgradeOperation(u, UpgradeOperationType.Add))
+            .ToList();
 
         // MU runs operations from the end of the list. Removals go last so they run first, otherwise
         // removing an upgrade would also take a shared ability from the upgrade replacing it
@@ -52,6 +35,27 @@ public class Building_AutoMechUpgrader : Building_MechUpgrader
         );
 
         return allowedOperations;
+    }
+
+    /// <summary>The storages linked to this upgrader that are active, so their upgrades can be fitted.</summary>
+    public IEnumerable<CompUpgradesStorage> ActiveStorages()
+    {
+        var compAffectedByFacilities = this.TryGetComp<CompAffectedByFacilities>();
+        return compAffectedByFacilities.LinkedFacilitiesListForReading
+            .Where(compAffectedByFacilities.IsFacilityActive)
+            .Select(s => s.TryGetComp<CompUpgradesStorage>())
+            .Where(s => s != null);
+    }
+
+    /// <summary>Every upgrade in this upgrader's active linked storages.</summary>
+    public IEnumerable<MechUpgrade> StockedUpgrades() => ActiveStorages().SelectMany(s => s.Upgrades);
+
+    public override string GetInspectString()
+    {
+        var storages = ActiveStorages().ToList();
+        string line = "MU_Upgrades_Ui_Upgrader_Stock".Translate(storages.Count, storages.Sum(s => s.Upgrades.Count));
+        var text = base.GetInspectString();
+        return text.NullOrEmpty() ? line : $"{text}\n{line}";
     }
 
     public override void TryAcceptPawn(Pawn pawn)

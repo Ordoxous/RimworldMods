@@ -3,9 +3,9 @@
 
 	<MU_Upgrades_Ui_Policy_Title>Mech Upgrade Policies</MU_Upgrades_Ui_Policy_Title>
 	<MU_Upgrades_Ui_Policy_Tip>Manage policies for automatic mech upgrades.</MU_Upgrades_Ui_Policy_Tip>
-	<MU_Upgrades_Ui_Policy_Mech_Selector>Select a mech to filter the upgrades below.</MU_Upgrades_Ui_Policy_Mech_Selector>
-	<MU_Upgrades_Ui_Policy_Mech_Type>Mech Type: {0}</MU_Upgrades_Ui_Policy_Mech_Type>
-	<MU_Upgrades_Ui_Policy_Mech_All>All</MU_Upgrades_Ui_Policy_Mech_All>
+	<MU_Upgrades_Ui_Policy_Mech_Selector>Only list the upgrades a type of mech can have, and preview what this policy gives it. This doesn't change the policy: a policy applies to every mech it's assigned to.</MU_Upgrades_Ui_Policy_Mech_Selector>
+	<MU_Upgrades_Ui_Policy_ShowFor>Show upgrades for: {0}</MU_Upgrades_Ui_Policy_ShowFor>
+	<MU_Upgrades_Ui_Policy_Mech_All>all mechs</MU_Upgrades_Ui_Policy_Mech_All>
 	<MU_Upgrades_Ui_Policy_None>None (manual)</MU_Upgrades_Ui_Policy_None>
 	<MU_Upgrades_Ui_Policy_Default>Default ({0})</MU_Upgrades_Ui_Policy_Default>
 	<MU_Upgrades_Ui_Settings_UseDefault>Use the default policy for mechs without one</MU_Upgrades_Ui_Settings_UseDefault>
@@ -15,5 +15,39 @@
 	<MU_Upgrades_Ui_Settings_Interval>Policy check interval: about {0} hours</MU_Upgrades_Ui_Settings_Interval>
 	<MU_Upgrades_Ui_Settings_Interval_Tip>How often, in in-game hours, a mech checks whether its policy wants changes. Each check varies by up to 20%. Assigning a policy triggers a check right away.</MU_Upgrades_Ui_Settings_Interval_Tip>
 	<MU_Upgrades_Ui_Manage_Policies>Manage Upgrade Policies</MU_Upgrades_Ui_Manage_Policies>
+
+	<!-- The policy dialog -->
+	<MU_Upgrades_Ui_Policy_LoadSet>Load upgrade set...</MU_Upgrades_Ui_Policy_LoadSet>
+	<MU_Upgrades_Ui_Policy_LoadSet_Tip>Make this policy allow exactly the upgrades in one of your saved upgrade sets. Upgrade sets are saved from the mech upgrader's configure dialog.</MU_Upgrades_Ui_Policy_LoadSet_Tip>
+	<MU_Upgrades_Ui_Policy_LoadSet_Confirm>Replace what {0} allows with the {2} upgrades in "{1}"?</MU_Upgrades_Ui_Policy_LoadSet_Confirm>
+	<MU_Upgrades_Ui_Preview_Title>Preview</MU_Upgrades_Ui_Preview_Title>
+	<MU_Upgrades_Ui_Preview_ChooseMech>Choose a mech type with "Show upgrades for" to see what this policy gives it.</MU_Upgrades_Ui_Preview_ChooseMech>
+	<MU_Upgrades_Ui_Preview_Points>A {0} gets {1} of its {2} upgrade points:</MU_Upgrades_Ui_Preview_Points>
+	<MU_Upgrades_Ui_Preview_PointsUnknown>A {0} gets upgrades worth {1} points. There's no {0} in the colony to read its upgrade points from, so the point limit is ignored.</MU_Upgrades_Ui_Preview_PointsUnknown>
+	<MU_Upgrades_Ui_Preview_Gets>Gets</MU_Upgrades_Ui_Preview_Gets>
+	<MU_Upgrades_Ui_Preview_Skipped>Skipped</MU_Upgrades_Ui_Preview_Skipped>
+	<MU_Upgrades_Ui_Preview_Nothing>Nothing</MU_Upgrades_Ui_Preview_Nothing>
+	<MU_Upgrades_Ui_Preview_Footer>For a mech with no upgrades, with every allowed upgrade in stock. Upgrades are picked in name order. A mech keeps the allowed upgrades it already has, and only gets upgrades that are in its auto upgrader's linked storages.</MU_Upgrades_Ui_Preview_Footer>
+	<MU_Upgrades_Ui_Skip_NoPoints>Not enough upgrade points left</MU_Upgrades_Ui_Skip_NoPoints>
+
+	<!-- The mech's gizmos -->
+	<MU_Upgrades_Ui_Gizmo_Policy>Policy: {0}</MU_Upgrades_Ui_Gizmo_Policy>
+	<MU_Upgrades_Ui_Gizmo_Policy_Desc>Choose the upgrade policy for the selected mechs. A mech with a policy goes to an auto mech upgrader by itself, to fit the upgrades its policy allows and have the rest removed.</MU_Upgrades_Ui_Gizmo_Policy_Desc>
+	<MU_Upgrades_Ui_Gizmo_CheckNow>Check upgrades</MU_Upgrades_Ui_Gizmo_CheckNow>
+	<MU_Upgrades_Ui_Gizmo_CheckNow_Desc>Check this mech's upgrades against its policy now, instead of at its next regular check. If its policy wants changes that an auto mech upgrader can make, the mech goes there when it's free.</MU_Upgrades_Ui_Gizmo_CheckNow_Desc>
+
+	<!-- The Mechs tab's upgrades column -->
+	<MU_Upgrades_Ui_Status_Installed>Upgrades ({0} / {1} points):</MU_Upgrades_Ui_Status_Installed>
+	<MU_Upgrades_Ui_Status_None>none</MU_Upgrades_Ui_Status_None>
+	<MU_Upgrades_Ui_Status_Unmanaged>No upgrade policy: its upgrades are left alone.</MU_Upgrades_Ui_Status_Unmanaged>
+	<MU_Upgrades_Ui_Status_Policy>Upgrade policy: {0}</MU_Upgrades_Ui_Status_Policy>
+	<MU_Upgrades_Ui_Status_Removes>Next trip removes: {0}</MU_Upgrades_Ui_Status_Removes>
+	<MU_Upgrades_Ui_Status_Adds>Next trip adds: {0}</MU_Upgrades_Ui_Status_Adds>
+	<MU_Upgrades_Ui_Status_Unstocked>Wanted, but not in any auto upgrader's linked storages: {0}</MU_Upgrades_Ui_Status_Unstocked>
+	<MU_Upgrades_Ui_Status_UpToDate>Matches its policy.</MU_Upgrades_Ui_Status_UpToDate>
+	<MU_Upgrades_Ui_Status_Click>Click to open its upgrades tab.</MU_Upgrades_Ui_Status_Click>
+
+	<!-- The auto upgrader -->
+	<MU_Upgrades_Ui_Upgrader_Stock>Linked storages: {0}. Upgrades in stock: {1}</MU_Upgrades_Ui_Upgrader_Stock>
 
 </LanguageData>

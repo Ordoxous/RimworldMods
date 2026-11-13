@@ -40,7 +40,20 @@ public class PawnColumnWorker_MechUpgrades : PawnColumnWorker
         Widgets.Label(rect, $"{currPoints} / {maxPoints}");
         Text.Anchor = TextAnchor.UpperLeft;
         Text.Font = GameFont.Small;
+
+        // The next trip would change something
+        if (UpgradeStatus.For(comp).HasChanges)
+        {
+            var iconRect = new Rect(fillableBar.xMax - PendingIconSize - 2f, fillableBar.center.y - PendingIconSize / 2f, PendingIconSize, PendingIconSize);
+            GUI.DrawTexture(iconRect, PendingIcon.Texture);
+        }
+
+        TooltipHandler.TipRegion(rect, new TipSignal(() => UpgradeStatus.Tooltip(comp), pawn.thingIDNumber ^ 0x4D55));
     }
+
+    private const float PendingIconSize = 16f;
+
+    private static readonly CachedTexture PendingIcon = new("UI/Gizmos/MU_ChangeUpgrades");
 
     public override int GetMinWidth(PawnTable table) => Mathf.Max(base.GetMinWidth(table), 100);
 

@@ -2,6 +2,7 @@
 using System.Linq;
 using MU;
 using Verse;
+using RimWorld;
 
 namespace Ordo.MechUpgradesUi;
 
@@ -48,11 +49,37 @@ public class CompUpgradableMechWithPolicy : CompUpgradableMechanoid
     {
         // Check against the upgrades that will remain, so an upgrade can replace an unwanted one in the same trip.
         // The point budget is handled by Building_AutoMechUpgrader.WantedOperations.
-        return EffectiveUpgradePolicy.Filter.AllowedThingDefs
-            .Select(t => t.comps.OfType<CompProperties_MechUpgrade>().First().upgradeDef)
+        return EffectiveUpgradePolicy.AllowedUpgradeDefs
             .Where(d => d.CanAdd(Mech.def, upgradesToKeep))
             .ToList();
     }
+
+    private static readonly CachedTexture CheckNowIcon = new("UI/Gizmos/MU_InsertMechanoid");
+
+    public override IEnumerable<Gizmo> CompGetGizmosExtra()
+    {
+        foreach (var gizmo in base.CompGetGizmosExtra())
+            yield return gizmo;
+
+        if (!Mech.IsColonyMechPlayerControlled)
+            yield break;
+
+        yield return new Command_UpgradePolicy(this);
+
+        if (EffectiveUpgradePolicy != null)
+        {
+            yield return new Command_Action
+            {
+                defaultLabel = "MU_Upgrades_Ui_Gizmo_CheckNow".Translate(),
+                defaultDesc = "MU_Upgrades_Ui_Gizmo_CheckNow_Desc".Translate(),
+                icon = CheckNowIcon.Texture,
+                action = CheckNow
+            };
+        }
+    }
+
+    /// <summary>Makes the mech's next policy check due now, as assigning a policy does.</summary>
+    public void CheckNow() => Mech.mindState?.Notify_OutfitChanged();
 
     public override void PostExposeData()
     {

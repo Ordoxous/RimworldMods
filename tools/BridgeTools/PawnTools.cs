@@ -131,6 +131,13 @@ public sealed class PawnTools
 	)
 	{
 		var learned = new List<string>();
+
+		// Mechs and other pawns that can't be trained have no training tracker
+		if (pawn.training == null)
+		{
+			return learned;
+		}
+
 		foreach (var def in DefDatabase<TrainableDef>.AllDefs)
 		{
 			if (pawn.training.CanAssignToTrain(def).Accepted)

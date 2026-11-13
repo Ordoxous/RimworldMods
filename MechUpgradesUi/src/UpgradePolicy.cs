@@ -1,4 +1,7 @@
-﻿using RimWorld;
+﻿using System.Collections.Generic;
+using System.Linq;
+using MU;
+using RimWorld;
 using Verse;
 
 namespace Ordo.MechUpgradesUi;
@@ -16,6 +19,22 @@ public class UpgradePolicy : Policy
     }
 
     public override string LoadKey => nameof (UpgradePolicy);
+
+    /// <summary>The upgrades this policy allows.</summary>
+    public IEnumerable<MechUpgradeDef> AllowedUpgradeDefs =>
+        Filter.AllowedThingDefs
+            .Select(UpgradePlanner.UpgradeDefOf)
+            .Where(d => d != null);
+
+    /// <summary>Makes this policy allow exactly the upgrades in one of MU's saved upgrade sets.</summary>
+    public void LoadFrom(UpgradeSet set)
+    {
+        Filter.SetDisallowAll();
+        foreach (var def in set.upgrades.Where(d => d?.linkedThingDef != null))
+        {
+            Filter.SetAllow(def.linkedThingDef, true);
+        }
+    }
 
     public override void CopyFrom(Policy other)
     {
