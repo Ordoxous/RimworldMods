@@ -13,7 +13,7 @@ Each GABS profile is a set of launch arguments under `games.rimworld.profiles` i
 
 - **Dev mode must be on**, because the game only honours an `autostart` save in dev mode. Profiles open straight into `Saves/autostart.rws`.
 - **`-Headless`** (a Waylith flag) runs with no window or rendering. Suites take seconds. Screenshots and recording don't work, nothing that draws is exercised, and `games_stop` fails because there's no window to signal, so stop with `games_kill`. A headless profile can share its windowed twin's data folder. `-nographics` and `-batchmode` do nothing on Waylith.
-- Existing profiles: `sillyanimalthings`, `sillyanimalthings-biotech`, their `-headless` twins, `sillyanimalthings-profiling` (adds DPA) and `sillyanimalthings-showcase` (1080p, no music, runs in the background). To add profiles for another mod, see [new-mod-setup.md](new-mod-setup.md).
+- Existing profiles: `sillyanimalthings`, `sillyanimalthings-biotech`, their `-headless` twins, `sillyanimalthings-profiling` (adds DPA) and `sillyanimalthings-showcase` (1080p, no music, runs in the background). `mechupgradesui`, its `-headless` twin and `mechupgradesui-showcase` load Biotech and Mechanoid Upgrades, a Workshop mod that needs the Steam client running. To add profiles for another mod, see [new-mod-setup.md](new-mod-setup.md).
 - Windows: a minimized window stops rendering, so the suite still passes but screenshots time out. Fullscreen windows minimize themselves on losing focus. Keep test windows at 720p, windowed.
 - While Windows is locked, a windowed profile stalls at "Loading game from file autostart" with idle CPU and nothing listening, so `games_connect` times out. Screenshot the desktop with .NET `CopyFromScreen` to check for the lock screen, then use a headless profile or wait for the user.
 - `games_start` sometimes fails with "Access is denied" renaming `runtime.json`. That leaves a 30 s "starting" lease with no game running: wait and retry.
@@ -44,7 +44,7 @@ Useful built-in tools: `rimworld/*` debug actions, gizmos, tick stepping and scr
 
 ## The scenario suite
 
-`ordo/run_scenarios` runs the scenarios of every running mod listed in `tools/BridgeTools/Scenarios/ScenarioSets.cs`, or of `mod`. A scenario **fails** on a broken check, an exception, any error logged to the game log, or a dialog left open. Errors are counted by `LogMessage.repeats`, because the log merges repeated entries.
+`ordo/run_scenarios` runs the scenarios of every running mod listed in `tools/BridgeTools/Scenarios/ScenarioSets.cs`, or of `mod`. A scenario **fails** on a broken check, an exception, any error logged to the game log, or any dialog or float menu it opened and left open, whether a message box or a mod's own window: any new window on the dialog layer counts. Errors are counted by `LogMessage.repeats`, because the log merges repeated entries.
 
 ### Writing scenarios
 
@@ -55,6 +55,7 @@ A scenario gets a `ScenarioContext` (a `Stage` in `tools/BridgeTools/Stage.cs`):
 - `Spawn(kind, x, z, PawnMode.Wild | Tamed | Trained | Manhunter | Enemy)`, `Colonist(x, z)`, `Place(thingDef, x, z)` relative to the site's origin. Spawned pawns are always adults with no old injuries, because age changes body size, which changes results. `Enemy` animals flee, so stun them to use them as targets.
 - `Cast(pawn, abilityDef, target)`, `Step(ticks)`, `await Until("description", () => condition, maxTicks)`, `Check("what went wrong", passed)`, `Fail(message)`.
 - Helpers: `HasHediff`, `Hurt` (counts any injury or missing part, not only summary health), `HurtBelow`, `OnCooldown`, `Staggered`, `Terrified`, `Describe(pawn)` for failure messages.
+- Buildings and mechs: `Build(thingDef, x, z, rotation, powered)` (player-owned; spawn what facilities serve before the facilities, since they link as they spawn), `Power(building, on)` (forces power on a building with no power net, which keeps it: no generator needed), `Mechanitor(x, z)` (a drafted colonist with a mechlink, added before spawning so there's no letter) and `ControlledMech(kind, mechanitor, x, z)` (a player mech the mechanitor oversees, full of energy, so it's player-controlled and uses the colony mech think tree). `Until` takes an optional `stepSize` for long waits such as fabrication.
 - Cleanup is automatic: it waits for flyers to land, then destroys what the stage spawned and any fire, projectiles, corpses, explosions, items and filth on the site.
 
 Practices that came from real flakes:
@@ -62,7 +63,8 @@ Practices that came from real flakes:
 - Wait for effects with `Until` instead of checking straight away: explosions spread over several ticks, and spray projectiles land one after another.
 - On failure, report the pawns' state (`Describe`) so a rare flake can be diagnosed from one run.
 - Check visual effects with scenarios (a mote appeared and went), not by eye. Motes aren't in the map's normal thing lists, so expose the last one from the mod (as `HediffComp_Overlay.LastMote` does).
-- Prove the suite catches bugs by planting faults on purpose and checking that exactly the expected scenarios fail.
+- Prove the suite catches bugs by planting faults on purpose and checking that exactly the expected scenarios fail. Hot reload makes this quick: plant a batch of faults that hit different scenarios, make a delta, apply it and run, then revert the source and apply the reverting delta.
+- A "nothing happens" check through the think tree can pass for the wrong reason. Vanilla's `EnterBuilding` job ends at once when the building refuses the pawn, so a job giver that wrongly offered the trip still showed no trip. Call the job giver's `TryGiveJob` directly as well.
 - Bridge tool changes hot reload like a mod's (`hot_reload.ps1 -Project BridgeTools`, then `ordo/apply_update` with `mod: BridgeTools`). Restart for a new tool, changed tool parameters, or a new scenario or clip (see reload-and-debug.md).
 
 ## Pitfalls when driving the game

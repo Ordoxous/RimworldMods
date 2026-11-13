@@ -16,7 +16,7 @@ Copy an existing profile's data folder and change its mod list. The game must be
    Make another pair for each DLC combination that changes what's tested. GABS reads its config at startup, so a new profile may need GABS (the MCP server) restarting before `games_start` can see it.
 4. Start the profile and check the mod list with `ordo/runtime_info` (for a mod with code) or by checking the log for errors.
 
-If the copied save fails to load with the new mod list, make a fresh one; see "The test save" in [live-testing.md](live-testing.md).
+If the copied save doesn't load with the new mod list, make a fresh one; see "The test save" in [live-testing.md](live-testing.md). A save from another mod list may not fail loudly: for MechUpgradesUi it stopped at the main menu with nothing in the log. Making the save from the main menu there worked.
 
 ## 2. Scenarios
 
@@ -27,7 +27,7 @@ If the copied save fails to load with the new mod list, make a fresh one; see "T
 
 Scenarios for a mod that isn't loaded never run, so one BridgeTools build serves every profile.
 
-`Stage` and the scenario helpers came from an animal-abilities mod. They cover spawning pawns, things and colonists, casting, stepping ticks and checking health and hediffs. For a different kind of mod, such as UI, work types or buildings, add general helpers to `Stage.cs` and mod-specific ones to the mod's scenario file. `Scenario.RequiresAbility` skips a scenario when an ability def isn't loaded (for DLC content); add a similar guard if you need one for another kind of def.
+`Stage` and the scenario helpers came from an animal-abilities mod. They cover spawning pawns, things and colonists, casting, stepping ticks and checking health and hediffs. MechUpgradesUi added buildings, power, mechanitors and controlled mechs (see live-testing.md). For a different kind of mod, such as UI, work types or buildings, add general helpers to `Stage.cs` and mod-specific ones to the mod's scenario file. `Scenario.RequiresAbility` skips a scenario when an ability def isn't loaded (for DLC content); add a similar guard if you need one for another kind of def.
 
 ## 3. Showcase (optional)
 

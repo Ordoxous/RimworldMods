@@ -19,6 +19,16 @@
     <!-- The scenarios read the mod's types; the game loads the mod itself, so the DLL stays out of this output -->
     <ItemGroup>
         <ProjectReference Include="..\..\SillyAnimalThings\SillyAnimalThings.csproj" Private="false" />
+        <ProjectReference Include="..\..\MechUpgradesUi\MechUpgradesUi.csproj" Private="false" />
+    </ItemGroup>
+
+    <!-- MechUpgradesUi's scenarios read Mechanoid Upgrades' types. It has no 1.7 folder yet, so fall back as MechUpgradesUi.csproj does -->
+    <ItemGroup>
+        <Reference Include="MechanoidUpgrades">
+            <HintPath Condition="Exists('$(WorkshopDirectory)\3365118555\$(RimworldVersion)\Assemblies\MechanoidUpgrades.dll')">$(WorkshopDirectory)\3365118555\$(RimworldVersion)\Assemblies\MechanoidUpgrades.dll</HintPath>
+            <HintPath Condition="!Exists('$(WorkshopDirectory)\3365118555\$(RimworldVersion)\Assemblies\MechanoidUpgrades.dll')">$(WorkshopDirectory)\3365118555\$(RimworldFallbackVersion)\Assemblies\MechanoidUpgrades.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
     </ItemGroup>
 
     <!-- Companions load from the game's BridgeTools folder, not Mods -->

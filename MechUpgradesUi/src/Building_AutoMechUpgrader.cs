@@ -60,7 +60,8 @@ public class Building_AutoMechUpgrader : Building_MechUpgrader
             return;
 
         // Every player-issued insert goes through an ordered job, the think tree's trips don't
-        var showDialog = MechUpgradesUiMod.Settings.ShowDialogOnManualInsert && pawn.CurJob is { playerForced: true };
+        var playerOrdered = pawn.CurJob is { playerForced: true };
+        var showDialog = MechUpgradesUiMod.Settings.ShowDialogOnManualInsert && playerOrdered;
 
         var mechComp = pawn.GetComp<CompUpgradableMechWithPolicy>();
         if (!showDialog && mechComp?.EffectiveUpgradePolicy != null)
@@ -79,6 +80,11 @@ public class Building_AutoMechUpgrader : Building_MechUpgrader
                 return;
             }
         }
+
+        // A trip of the mech's own has nothing left to do, for example because another mech took the stock first. Going in would
+        // leave it waiting behind MU's dialog for someone to answer
+        if (!playerOrdered)
+            return;
 
         base.TryAcceptPawn(pawn);
     }

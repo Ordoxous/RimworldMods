@@ -1,6 +1,6 @@
 # MechUpgradesUi handoff
 
-Last updated 2026-11-13. It has no tests or showcase yet: adding them is the current task (see `tools/HANDOFF.md` for the brief and the shared work).
+Last updated 2026-11-13. It has an in-game scenario suite (15 scenarios, all passing). A showcase is still to do (see `tools/HANDOFF.md`).
 
 ## What the mod is
 
@@ -21,36 +21,51 @@ Dependencies: Biotech and MU (`GoGaTio.MechanoidUpgrades`, Steam Workshop 336511
 
 Style: 4 spaces, as in the existing files.
 
-## What to test
+## Testing
 
-The scenario file is `tools/BridgeTools/Scenarios/MechUpgradesUiScenarios.cs` (not yet written). This mod's logic is mostly pure decisions over MU's data, so most scenarios can call the methods directly. Keep a few that go end to end through the think tree.
+Profiles (in `~/.gabs/config.json`): `mechupgradesui`, `mechupgradesui-headless` and `mechupgradesui-showcase`. They load Harmony, Core, Biotech, RimBridgeServer, MU and this mod. MU is a Workshop mod, so **the Steam client must be running**. The data folders are `~/.gabs/rimworld/mechupgradesui` (shared by the windowed and headless profiles) and `mechupgradesui-showcase`. The `mechupgradesui` save was made fresh for this mod list. The SillyAnimalThings save it was copied from stopped silently at the main menu, with no error logged.
 
-| Scenario | Check |
+Run with `ordo/run_scenarios` (`mod: Ordo.MechUpgradesUi` if anything else is loaded). Scenarios are in `tools/BridgeTools/Scenarios/MechUpgradesUiScenarios.cs`.
+
+| Suite | Scenarios | What they check |
+|---|---|---|
+| `setup` | `patches_applied` | The mech comp swap, the upgrader's class and label, the three Mechs tab columns, and the think tree node |
+| `policy` | `policy_database`, `policy_keep_and_want` | Create, default, `SetDefaultPolicy`, delete refused for a living mech and clearing a dead one's; `UpgradesToKeep` drops a disallowed upgrade and `WantedUpgrades` wants an allowed one in the same trip |
+| `operations` | `operations_point_budget`, `operations_exclusions`, `operations_removals_run_first`, `operations_linked_storage_only` | `WantedOperations` called directly |
+| `ai` | `ai_no_policy_no_trip`, `ai_unpowered_no_trip`, `ai_default_for_unassigned`, `ai_interval`, `ai_end_to_end`, `ai_stock_gone_on_arrival` | Trips through the think tree, plus `JobGiver_OptimizeUpgrades` called directly where the think tree can't show the decision |
+| `player` | `player_insert_dialog`, `player_insert_no_dialog` | A player-ordered insert (`upgrader.OrderForceTarget(mech)`, as MU's gizmo and float menu do) with the dialog setting on and off |
+| `settings` | the scenarios that change a setting | They restore it in a `finally` |
+
+How the scenarios work:
+
+- **The site:** a powered auto upgrader facing south at the origin, a storage 4 cells east (or 14, out of its 11.9-cell link range), a drafted mechanitor, and a lifter they oversee with its generated upgrades removed. The `Stage` helpers are `Build(..., powered: true)`, `Mechanitor` and `ControlledMech`. Power is forced on, because a building on no power net keeps whatever state it's given. The lifter has 4 upgrade points.
+- **Upgrades are picked at runtime** from MU's defs that come as items and that `CanAdd` accepts for the lifter, in defName order. `TwoCompatible` gives two that fit together; on the current MU these are `MU_CargoCell_Double` (wanted) and `MU_ChemfuelMiniBurner` (unwanted). The exclusion scenario finds two that share a tag (`MU_CargoCell_Double` and `MU_CargoCell_Small`).
+- **Policies** made by a scenario are removed afterwards, and the policy list is restored, because the world keeps them.
+- `ai_end_to_end` is the one scenario that relies on MU doing the work, as agreed with the user. It covers the mech going in with no dialog, the item leaving storage, waiting out the fabrication time, the swap, and the removed upgrade going back into storage. The suite steps about 10,000 ticks.
+- MU's storages have no power comp, so a linked storage is always active. Only "unlinked" can be tested, not "inactive".
+
+Results on 2026-11-13: 15/15 on `mechupgradesui-headless` (about 3.5 s, three runs in a row) and on the windowed `mechupgradesui` (67 s). SillyAnimalThings still passes 49/49 on `sillyanimalthings-biotech-headless` with the shared changes.
+
+Every behaviour scenario was seen to fail with a fault planted by hot reload, in three batches. Each batch failed exactly the scenarios it targeted:
+
+| Fault | Failed |
 |---|---|
-| Patches applied | A player mech's comp is `CompUpgradableMechWithPolicy`; `MU_MechUpgrader` spawns as `Building_AutoMechUpgrader`; the `Mechs` `PawnTableDef` has the three columns; the `Mechanoid` think tree contains `JobGiver_OptimizeUpgrades` |
-| Policy database | Create, default is first, `SetDefaultPolicy` moves one to the front, delete is refused while a living mech uses it and clears dead mechs' references |
-| Keep and want | With a filter allowing A and not B, a mech with B: `UpgradesToKeep` drops B, `WantedUpgrades` includes A |
-| Point budget | More wanted upgrades than points: `WantedOperations` adds only what fits, preferring nothing in particular (it sorts by defName) |
-| Exclusions | Two wanted upgrades that MU says conflict: only one is added |
-| Removals run first | Operations list ends with the removals (MU runs from the end) |
-| Only active linked storage | Upgrades in an unlinked or unpowered storage aren't offered |
-| No policy, no trip | Unassigned mech with the default setting: no job, upgrades untouched |
-| Default-for-unassigned setting | Turn it on: the unassigned mech now goes. Restore the setting in cleanup; settings persist to the profile's config |
-| Interval | After one check, no new trip until `nextApparelOptimizeTick` |
-| End to end | Mech with a policy walks to the upgrader, goes in without a dialog, and comes out with the upgrade installed and the storage item consumed |
-| Manual insert dialog | A player-ordered (`playerForced`) insert with the setting on opens MU's dialog instead. Close it in the scenario |
+| No point budget check | `operations_point_budget` |
+| `CanAdd` checked against the kept upgrades only, not the ones being added | `operations_exclusions` |
+| Removals inserted first | `operations_removals_run_first` |
+| Every storage on the map offered, linked or not | `operations_linked_storage_only` |
+| `UpgradesToKeep` keeps everything | `policy_keep_and_want`, `operations_removals_run_first`, `ai_end_to_end` |
+| `TryDelete` ignores living mechs | `policy_database` |
+| Default policy always used / never used | `ai_no_policy_no_trip` / `ai_default_for_unassigned` |
+| `nextApparelOptimizeTick` never set | `ai_interval` |
+| Job giver skips `CanAcceptPawn` (power) | `ai_unpowered_no_trip` |
+| Dialog never / always shown | `player_insert_dialog` / `player_insert_no_dialog`, `ai_end_to_end` |
 
-Set-up needs that `Stage` doesn't have yet, so check each in game first:
+`patches_applied` only checks wiring and wasn't faulted. `ai_unpowered_no_trip` at first passed with its fault, because vanilla's enter job drops a trip to an unpowered building at once, so no trip is seen. It now also asks the job giver directly.
 
-- **A controlled colony mech.** Biotech mechs need an overseer, a mechanitor colonist (with a mechlink), and must be in command range. The think tree node this mod hooks into only runs for player-controlled mechs. Look at how the game's dev actions spawn a controlled mech. `Stage.Spawn` is written for animals (it fixes an adult age and has animal-only modes), so add a mech helper.
-- **Mech energy.** A mech low on energy goes to recharge first, which outranks this job.
-- **Power.** `MU_MechUpgrader` is a 3x3 building with a 150 W `CompPowerTrader`, a `CompFlickable`, and `CompAffectedByFacilities` linking to `MU_UpgradesStorage` or `MU_LargeUpgradesStorage`. The storages need to be linked (placed close enough) and active. Find a dependable way to power them on the blank test map: a generator and conduits, or forcing `PowerOn` if the game doesn't immediately undo it.
-- **Upgrade items.** MU's upgrades are items with `CompMechUpgrade`, put into a storage's `CompUpgradesStorage.innerContainer`. MU's defs are in its `1.6\Defs\MechUpgradeDefs` and `ThingDefs_Items`. Decompile `MechanoidUpgrades.dll` (see the skill's build-deploy reference) to read `CompUpgradesStorage`, `MechUpgradeDef.CanAdd`, `MechUpgradeUtility` and `Building_MechUpgrader`.
-- **Research.** MU's buildings require research. Spawning them directly ignores research, but check that the upgrader's own logic doesn't check it too.
-- **Fabrication time.** Each operation takes 2500 ticks per upgrade point (`fabricationTicksLeft`). Stepping that many ticks is fast headless. In a showcase clip, shorten it by setting `fabricationTicksLeft` and say so in the clip's comment.
-- **Settings.** `MechUpgradesUiMod.Settings` is static and saved to the profile's config. Restore anything a scenario changes in a `finally`.
+### Bug fixed
 
-The test save is a 33x33 blank map; a site is 32 cells across. An upgrader, two storages and a mechanitor fit.
+- **An autonomous trip with nothing left to do waited behind MU's dialog.** If the stock was gone by the time the mech arrived (another mech took it, or someone hauled it away), `TryAcceptPawn` fell back to MU's `base.TryAcceptPawn`. That put the mech in and opened the configure dialog, so it sat in the upgrader until someone answered. Now a trip that isn't player-ordered and has nothing to do doesn't go in. A player-ordered insert with nothing to do still opens MU's dialog, as before. Covered by `ai_stock_gone_on_arrival`, which failed before the fix.
 
 ## Showcase
 
@@ -64,4 +79,9 @@ Both need the showcase generalised beyond abilities; see `tools/HANDOFF.md`.
 
 ## Open questions for the user
 
-- Should MU's own behaviour be tested where this mod relies on it (for example, that an operation really installs the upgrade), or only this mod's decisions? The brief assumes one end-to-end scenario is enough.
+None. The user confirmed that one end-to-end scenario is enough to cover MU's own behaviour.
+
+## Notes for later
+
+- `ApplyOperations` takes the item out of storage with `innerContainer.Remove`, so it doesn't destroy it. The upgrade object moves to the mech, which is what MU's own dialog does too.
+- An upgrade whose def has no `linkedThingDef` is never kept, because the filter can't allow it. MU's `DoOperation` then just drops it. I haven't checked whether MU has any such defs that a player mech can get.

@@ -228,6 +228,81 @@ public abstract class Stage
 		return thing;
 	}
 
+	// A player-owned building, facing the given way. Facilities link to what's in range as they spawn, so place the building
+	// they serve first.
+	public Building Build(
+		ThingDef def,
+		int x,
+		int z,
+		Rot4 rotation = default,
+		bool powered = false
+	)
+	{
+		var building = (Building)ThingMaker.MakeThing(def, def.MadeFromStuff ? GenStuff.DefaultStuffFor(def) : null);
+		building.SetFaction(Faction.OfPlayer);
+		GenSpawn.Spawn(building, Cell(x, z), Map, rotation);
+		_spawned.Add(building);
+		if (powered)
+		{
+			Power(building, true);
+		}
+
+		return building;
+	}
+
+	// A building on no power net keeps whatever power state it's given, so there's no need for a generator and conduits
+	public static void Power(
+		Thing building,
+		bool on
+	)
+	{
+		var power = building.TryGetComp<CompPowerTrader>()
+		            ?? throw new InvalidOperationException($"{building.def.defName} takes no power");
+		power.PowerOn = on;
+	}
+
+	// A drafted colonist with a mechlink, to oversee mechs. Drafted so they stay put: mechs stay controlled wherever their
+	// overseer is, and only drafted orders need command range.
+	public Pawn Mechanitor(
+		int x,
+		int z
+	)
+	{
+		var pawn = PawnGenerator.GeneratePawn(PawnKindDefOf.Colonist, Faction.OfPlayer);
+		pawn.health.RemoveAllHediffs();
+
+		// Installed before spawning, which skips the "mechlink installed" letter
+		pawn.health.AddHediff(HediffDefOf.MechlinkImplant, pawn.health.hediffSet.GetBrain());
+		GenSpawn.Spawn(pawn, Cell(x, z), Map);
+		_spawned.Add(pawn);
+		pawn.drafter.Drafted = true;
+		return pawn;
+	}
+
+	// A player mech overseen by the mechanitor, so it's player-controlled and thinks with the colony mech think tree. Full of
+	// energy, so it doesn't go to recharge first.
+	public Pawn ControlledMech(
+		string kind,
+		Pawn mechanitor,
+		int x,
+		int z
+	)
+	{
+		var kindDef = DefDatabase<PawnKindDef>.GetNamed(kind);
+		var mech = PawnGenerator.GeneratePawn(new PawnGenerationRequest(kindDef, Faction.OfPlayer));
+		mech.health.RemoveAllHediffs();
+		GenSpawn.Spawn(mech, Cell(x, z), Map);
+		_spawned.Add(mech);
+		mechanitor.relations.AddDirectRelation(PawnRelationDefOf.Overseer, mech);
+		if (mech.needs?.energy is { } energy)
+		{
+			energy.CurLevelPercentage = 1f;
+		}
+
+		Check($"{mech.LabelShort} is controlled by {mechanitor.LabelShort}", mech.IsColonyMechPlayerControlled);
+		return mech;
+	}
+
 	public static Ability Ability(
 		Pawn pawn,
 		string defName
@@ -336,17 +411,18 @@ public abstract class Stage
 	public async Task<bool> Until(
 		string description,
 		Func<bool> condition,
-		int maxTicks
+		int maxTicks,
+		int stepSize = StepSize
 	)
 	{
-		for (var elapsed = 0; elapsed < maxTicks; elapsed += StepSize)
+		for (var elapsed = 0; elapsed < maxTicks; elapsed += stepSize)
 		{
 			if (condition())
 			{
 				return true;
 			}
 
-			await Step(StepSize);
+			await Step(stepSize);
 		}
 
 		if (condition())

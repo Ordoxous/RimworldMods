@@ -236,7 +236,10 @@ public sealed class ScenarioContext : Stage
 		CancellationToken cancellationToken
 	) : base(bridge, map, origin, cancellationToken)
 	{
+		_windowsBefore = Find.WindowStack.Windows.ToList();
 	}
+
+	private readonly List<Window> _windowsBefore;
 
 	public override Task Step(
 		int ticks
@@ -247,11 +250,24 @@ public sealed class ScenarioContext : Stage
 
 	public override Task CleanUp()
 	{
-		// A dialog nobody answered would pause the game and stop the cast it's guarding
-		if (Find.WindowStack.WindowOfType<Dialog_MessageBox>() is { } dialog)
+		// A dialog nobody answered would pause the game and stop the cast it's guarding, and a float menu or a mod's own dialog
+		// would carry over into the next scenario. Every window is on the dialog layer unless it says otherwise.
+		foreach (var window in Find.WindowStack.Windows.Where(window => !_windowsBefore.Contains(window)).ToList())
 		{
-			Fail($"left a dialog open: {dialog.text}");
-			dialog.Close();
+			if (window is Dialog_MessageBox messageBox)
+			{
+				Fail($"left a dialog open: {messageBox.text}");
+			}
+			else if (window is FloatMenu || window.layer == WindowLayer.Dialog)
+			{
+				Fail($"left a {window.GetType().Name} open");
+			}
+			else
+			{
+				continue;
+			}
+
+			window.Close(false);
 		}
 
 		return base.CleanUp();
