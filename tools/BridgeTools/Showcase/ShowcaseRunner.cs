@@ -420,6 +420,41 @@ public sealed class ShowcaseStage : Stage
 		set.Invoke(null, new object[] { "screen", "showcase", "Showcase cursor", position, null, HoverMs, false });
 	}
 
+	// The bar of main buttons along the bottom of the screen, which the gizmo grid sits on
+	private const float MainButtonsHeight = 35f;
+
+	/// <summary>
+	/// The middle of a gizmo's button in the grid for the current selection, in UI coordinates, for Hover. Measured on
+	/// RimWorld 1.7: one row, starting right of the inspect pane, buttons in the order of Stage.SelectionGizmos. Null, with a
+	/// failure, if the gizmo isn't in the grid or the grid would wrap onto a second row.
+	/// </summary>
+	public UnityEngine.Vector2? GizmoCenter(
+		Func<Gizmo, bool> match
+	)
+	{
+		const float maxWidth = 200f;
+		var spacing = GizmoGridDrawer.GizmoSpacing;
+		var x = InspectPaneUtility.PaneWidthFor(Find.WindowStack.WindowOfType<IInspectPane>()) + spacing.y;
+		foreach (var gizmo in SelectionGizmos())
+		{
+			var width = gizmo.GetWidth(maxWidth);
+			if (match(gizmo))
+			{
+				if (x + width > UI.screenWidth)
+				{
+					break;
+				}
+
+				return new UnityEngine.Vector2(x + width / 2f, UI.screenHeight - MainButtonsHeight - spacing.y - Gizmo.Height / 2f);
+			}
+
+			x += width + spacing.x;
+		}
+
+		Fail("the gizmo isn't in the first row of the gizmo grid");
+		return null;
+	}
+
 	public static void ClearHover()
 	{
 		VirtualPointer?.GetMethod("ClearPersistentPointer")?.Invoke(null, null);

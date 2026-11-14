@@ -214,10 +214,12 @@ public abstract class Stage
 		ThingDef def,
 		int x,
 		int z,
-		ThingDef stuff = null
+		ThingDef stuff = null,
+		int stackCount = 1
 	)
 	{
 		var thing = ThingMaker.MakeThing(def, stuff);
+		thing.stackCount = Math.Min(stackCount, def.stackLimit);
 		if (def.CanHaveFaction)
 		{
 			thing.SetFaction(Faction.OfPlayer);
@@ -226,6 +228,150 @@ public abstract class Stage
 		GenSpawn.Spawn(thing, Cell(x, z), Map);
 		_spawned.Add(thing);
 		return thing;
+	}
+
+	// A colonist who can do the given work and does nothing else, undrafted so they go and do it. Generated colonists can be
+	// incapable of a work type, so this keeps generating until one is capable.
+	public Pawn Worker(
+		int x,
+		int z,
+		params WorkTypeDef[] work
+	)
+	{
+		for (var attempt = 0; attempt < 20; attempt++)
+		{
+			var pawn = PawnGenerator.GeneratePawn(PawnKindDefOf.Colonist, Faction.OfPlayer);
+			if (work.Any(pawn.WorkTypeIsDisabled))
+			{
+				pawn.Discard(true);
+				continue;
+			}
+
+			pawn.health.RemoveAllHediffs();
+			pawn.equipment?.DestroyAllEquipment();
+			GenSpawn.Spawn(pawn, Cell(x, z), Map);
+			_spawned.Add(pawn);
+			pawn.workSettings.EnableAndInitialize();
+			foreach (var workType in DefDatabase<WorkTypeDef>.AllDefsListForReading)
+			{
+				pawn.workSettings.SetPriority(workType, work.Contains(workType) ? 1 : 0);
+			}
+
+			return pawn;
+		}
+
+		throw new InvalidOperationException($"No colonist capable of {string.Join(", ", work.Select(workType => workType.defName))} in 20 tries");
+	}
+
+	// A blueprint the player placed, as the Architect places it. Floors take no stuff.
+	public Blueprint_Build Blueprint(
+		BuildableDef def,
+		int x,
+		int z,
+		ThingDef stuff = null,
+		Rot4 rotation = default
+	)
+	{
+		var blueprint = GenConstruct.PlaceBlueprintForBuild(def, Cell(x, z), Map, rotation, Faction.OfPlayer, stuff);
+		_spawned.Add(blueprint);
+		return blueprint;
+	}
+
+	// Replaces the selection, as clicking and shift-clicking would. CleanUp clears it again.
+	public static void Select(
+		params Thing[] things
+	)
+	{
+		Find.Selector.ClearSelection();
+		foreach (var thing in things)
+		{
+			Find.Selector.Select(thing, playSound: false, forceDesignatorDeselect: false);
+		}
+	}
+
+	// The gizmo grid's buttons for the current selection, in the grid's order: the selection's own gizmos and the reverse
+	// designators (such as Cancel) that apply to it, by Order. Gizmos that group with one another show as one button, the first.
+	public static List<Gizmo> SelectionGizmos()
+	{
+		var shown = new List<Gizmo>();
+		foreach (var selectable in Find.Selector.SelectedObjects.OfType<ISelectable>())
+		{
+			var reverse = selectable is Thing thing
+				? Find.ReverseDesignatorDatabase.AllDesignators.Select(designator => (Gizmo)designator.CreateReverseDesignationGizmo(thing)).Where(gizmo => gizmo != null)
+				: Enumerable.Empty<Gizmo>();
+			foreach (var gizmo in reverse.Concat(selectable.GetGizmos()).Where(gizmo => gizmo.Visible))
+			{
+				// A command that isn't groupable says so in GroupsWith
+				if (!shown.Any(other => other.GroupsWith(gizmo)))
+				{
+					shown.Add(gizmo);
+				}
+			}
+		}
+
+		// Stable, as the grid's sort is
+		return shown.OrderBy(gizmo => gizmo.Order).ToList();
+	}
+
+	// Clicks a gizmo that opens a float menu and returns the menu, or fails if it's disabled or opens none. Close the menu, or
+	// pick from it with Choose: the runner fails a scenario that leaves one open.
+	public FloatMenu OpenMenu(
+		Command_Action command
+	)
+	{
+		if (command.Disabled)
+		{
+			Fail($"{command.Label} is disabled: {command.disabledReason}");
+			return null;
+		}
+
+		var before = Find.WindowStack.Windows.OfType<FloatMenu>().ToList();
+		command.action();
+		var menu = Find.WindowStack.Windows.OfType<FloatMenu>().LastOrDefault(window => !before.Contains(window));
+		if (menu == null)
+		{
+			Fail($"{command.Label} opened no float menu");
+		}
+
+		return menu;
+	}
+
+	public static List<string> MenuLabels(
+		FloatMenu menu
+	)
+	{
+		return menu?.options.Select(option => option.Label).ToList() ?? new List<string>();
+	}
+
+	// Picks an option by label as a click would, then closes the menu
+	public void Choose(
+		FloatMenu menu,
+		string label
+	)
+	{
+		if (menu == null)
+		{
+			return;
+		}
+
+		var option = menu.options.Find(candidate => candidate.Label == label);
+		if (option == null)
+		{
+			Fail($"no menu option \"{label}\" in [{string.Join(", ", MenuLabels(menu))}]");
+		}
+		else if (option.Disabled)
+		{
+			Fail($"menu option \"{label}\" is disabled");
+		}
+		else
+		{
+			option.Chosen(false, menu);
+		}
+
+		if (Find.WindowStack.IsOpen(menu))
+		{
+			menu.Close(false);
+		}
 	}
 
 	// A player-owned building, facing the given way. Facilities link to what's in range as they spawn, so place the building
@@ -455,6 +601,8 @@ public abstract class Stage
 	// Passes time directly, so waiting for things to land isn't part of what a stage records
 	public virtual async Task CleanUp()
 	{
+		Find.Selector.ClearSelection();
+
 		var rect = CellRect.CenteredOn(Origin, StageSites.Radius + 4).ClipInsideMap(Map);
 		for (var elapsed = 0; elapsed < FlyerWaitTicks && Map.listerThings.AllThings.Any(thing => thing is PawnFlyer); elapsed += StepSize)
 		{
@@ -479,7 +627,8 @@ public abstract class Stage
 		foreach (var thing in rect.Cells.SelectMany(cell => cell.GetThingList(Map).ToList()).Distinct().ToList())
 		{
 			// An explosion takes several ticks to spread, and would otherwise reach whatever the next stage puts here
-			if (thing is Fire or Projectile or Corpse or Explosion || thing.def.category is ThingCategory.Item or ThingCategory.Filth)
+			// Blueprints can be replaced by new ones, and frames are what a delivered blueprint becomes, so neither is in what was spawned
+			if (thing is Fire or Projectile or Corpse or Explosion or RimWorld.Blueprint or Frame || thing.def.category is ThingCategory.Item or ThingCategory.Filth)
 			{
 				thing.Destroy();
 			}
