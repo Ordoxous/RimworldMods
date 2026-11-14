@@ -13,6 +13,7 @@ public static class ScenarioSets
 	{
 		("Ordo.SillyAnimalThings", () => SillyAnimalThingsScenarios.All),
 		("Ordo.MechUpgradesUi", () => MechUpgradesUiScenarios.All),
-		("Ordo.BlueprintMaterials", () => BlueprintMaterialsScenarios.All)
+		("Ordo.BlueprintMaterials", () => BlueprintMaterialsScenarios.All),
+		("Ordo.LegendaryIsUnique", () => LegendaryIsUniqueScenarios.All)
 	};
 }

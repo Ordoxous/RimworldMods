@@ -8,7 +8,7 @@ Ordoxous' RimWorld 1.7 mods, plus the tooling used to test them in a running gam
 |---|---|---|---|---|---|
 | [SillyAnimalThings](SillyAnimalThings/README.md) | SillyAnimalThings | `Ordo.SillyAnimalThings` | Gives animals abilities, granted by tags and gated by training, that the AI uses when animals fight | Harmony, Odyssey (Biotech optional) | 49 scenarios, 22 showcase clips |
 | [MechUpgradesUi](MechUpgradesUi/README.md) | Mech Upgrade Policies | `Ordo.MechUpgradesUi` | Apparel-style upgrade policies for Mechanoid Upgrades: mechs fetch allowed upgrades and drop unwanted ones by themselves | Biotech, Mechanoid Upgrades | 34 scenarios, 4 showcase clips |
-| [LegendaryIsUnique](LegendaryIsUnique/README.md) | LegendaryIsUnique | `Ordo.LegendaryIsUnique` | A Legendary craft of a weapon that has an Odyssey unique variant makes the unique version | Harmony, Odyssey | None yet |
+| [LegendaryIsUnique](LegendaryIsUnique/README.md) | LegendaryIsUnique | `Ordo.LegendaryIsUnique` | A Legendary craft of a weapon that has an Odyssey unique variant makes the unique version | Harmony, Odyssey (VSE optional) | 7 scenarios |
 | [Tweaks](Tweaks/README.md) | Tweaks | `Ordo.Tweaks` | Small, individually switchable changes to the base game and other mods | Harmony, Biotech, WVC Work Modes, XML Extensions | None yet |
 | [BlueprintMaterials](BlueprintMaterials/README.md) | BlueprintMaterials | `Ordo.BlueprintMaterials` | A Select Material gizmo on blueprints: change a placed blueprint's material, or a floor to another in its group, without cancelling it | Harmony | 11 scenarios, 2 showcase clips |
 

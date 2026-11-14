@@ -27,7 +27,7 @@ If the copied save doesn't load with the new mod list, make a fresh one; see "Th
 
 Scenarios for a mod that isn't loaded never run, so one BridgeTools build serves every profile.
 
-`Stage` and the scenario helpers came from an animal-abilities mod. They cover spawning pawns, things and colonists, casting, stepping ticks and checking health and hediffs. MechUpgradesUi added buildings, power, mechanitors and controlled mechs (see live-testing.md). For a different kind of mod, such as UI, work types or buildings, add general helpers to `Stage.cs` and mod-specific ones to the mod's scenario file. `Scenario.RequiresAbility` skips a scenario when an ability def isn't loaded (for DLC content); add a similar guard if you need one for another kind of def.
+`Stage` and the scenario helpers came from an animal-abilities mod. They cover spawning pawns, things and colonists, casting, stepping ticks and checking health and hediffs. MechUpgradesUi added buildings, power, mechanitors and controlled mechs (see live-testing.md). For a different kind of mod, such as UI, work types or buildings, add general helpers to `Stage.cs` and mod-specific ones to the mod's scenario file. `requiresAbility` skips a scenario when an ability def isn't loaded (for DLC content), and `requiresMod` when a mod isn't active (for optional integrations, such as LegendaryIsUnique's VSE path). Give an optional integration its own profile pair.
 
 ## 3. Showcase (optional)
 
