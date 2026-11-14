@@ -56,7 +56,12 @@ public static class MechUpgradesUiScenarios
 		new("ui_load_upgrade_set", "ui", LoadUpgradeSet),
 		new("ui_mech_gizmos", "ui settings", MechGizmos),
 		new("ui_upgrades_status", "ui", UpgradesStatus),
-		new("ui_upgrader_inspect", "ui", UpgraderInspect)
+		new("ui_upgrader_inspect", "ui", UpgraderInspect),
+		new("ui_upgrader_no_storage", "ui", UpgraderNoStorage),
+		new("ui_status_unusable_upgrader", "ui settings", UnusableUpgrader),
+		new("ui_alert_not_in_stock", "ui settings", NotInStockAlert),
+		new("ui_dialog_defaults", "ui", DialogDefaults),
+		new("ui_use_default_confirmation", "ui", UseDefaultConfirmation)
 	};
 
 	private static Task PatchesApplied(
@@ -622,6 +627,13 @@ public static class MechUpgradesUiScenarios
 
 				var checkNow = CheckNow(gizmos);
 				context.Check("with a policy, there's a check-now gizmo", checkNow != null);
+				var notInStock = "MU_Upgrades_Ui_Gizmo_CheckNow_NotInStock".Translate().ToString();
+				context.Check($"with {a.defName} not in stock, it's disabled and says so: {checkNow?.disabledReason}", checkNow is { Disabled: true } && checkNow.disabledReason == notInStock);
+
+				Stock(site.Storage, new[] { a });
+				UpgradeStatus.Invalidate();
+				var enabled = CheckNow(site.Comp.CompGetGizmosExtra().ToList());
+				context.Check($"with it in stock, it's enabled: {enabled?.disabledReason}", enabled is { Disabled: false });
 				site.Mech.mindState.nextApparelOptimizeTick = Find.TickManager.TicksGame + GenDate.TicksPerDay;
 				checkNow?.action();
 				context.Check($"check now makes the check due: next={site.Mech.mindState.nextApparelOptimizeTick}, now={Find.TickManager.TicksGame}", site.Mech.mindState.nextApparelOptimizeTick <= Find.TickManager.TicksGame);
@@ -726,6 +738,193 @@ public static class MechUpgradesUiScenarios
 		var text = site.Upgrader.GetInspectString();
 		var expected = "MU_Upgrades_Ui_Upgrader_Stock".Translate(1, 2).ToString();
 		context.Check($"the upgrader reports one linked storage holding two upgrades: {text}", text.Contains(expected));
+		return Task.CompletedTask;
+	}
+
+	private static Task UpgraderNoStorage(
+		ScenarioContext context
+	)
+	{
+		var site = Site.Set(context, linkedStorage: false);
+		var text = site.Upgrader.GetInspectString();
+		var expected = "MU_Upgrades_Ui_Upgrader_NoStorage".Translate().ToString();
+		context.Check($"an upgrader with no linked storage says so: {text}", text.Contains(expected));
+		return Task.CompletedTask;
+	}
+
+	// The status mustn't promise a trip to an upgrader the mech won't go to, and says why
+	private static Task UnusableUpgrader(
+		ScenarioContext context
+	)
+	{
+		var site = Site.Set(context);
+		var (a, _) = TwoCompatible(context, site.Mech);
+		if (a == null)
+		{
+			return Task.CompletedTask;
+		}
+
+		Stock(site.Storage, new[] { a });
+		using var policy = new TempPolicy(site, a);
+		var settings = MechUpgradesUiMod.Settings;
+		var showBlocked = settings.ShowBlockedAlert;
+		try
+		{
+			settings.ShowBlockedAlert = true;
+			var usable = UpgradeStatus.Compute(site.Comp);
+			context.Check($"powered, the next trip adds {a.defName} there: [{Names(usable.Additions)}]", usable.HasChanges && usable.Upgrader == site.Upgrader && usable.Blocker == null);
+
+			// Not forbidding: vanilla's CaresAboutForbidden is false for colony mechs that need a mechanitor, so a forbidden
+			// upgrader is still used, by the job giver and the status alike
+			foreach (var (fault, apply, undo) in new (string, Action, Action)[]
+			         {
+				         ("unpowered", () => Stage.Power(site.Upgrader, false), () => Stage.Power(site.Upgrader, true))
+			         })
+			{
+				apply();
+				try
+				{
+					UpgradeStatus.Invalidate();
+					var status = UpgradeStatus.Compute(site.Comp);
+					context.Check($"{fault}: nothing is added, and it isn't a change: {Lines(status)}", status.Additions.Count == 0 && !status.HasChanges && State(status, a) == UpgradeState.Wanted);
+					context.Check($"{fault}: the blocker names why: {status.Blocker}", status.Blocker != null && status.Blocker.Contains("MU_Upgrades_Ui_Upgrader_NoPower".Translate().ToString()));
+
+					var checkNow = site.Comp.CompGetGizmosExtra().OfType<Command_Action>().FirstOrDefault(gizmo => gizmo.defaultLabel == "MU_Upgrades_Ui_Gizmo_CheckNow".Translate().ToString());
+					context.Check($"{fault}: check now is disabled with the blocker: {checkNow?.disabledReason}", checkNow is { Disabled: true } && checkNow.disabledReason == status.Blocker);
+
+					var blocked = new Alert_UpgradePolicyBlocked();
+					var report = blocked.GetReport();
+					context.Check($"{fault}: the blocked alert names the mech", report.active && report.AllCulprits.Any(target => target.Thing == site.Mech));
+					var notInStock = new Alert_UpgradesNotInStock();
+					notInStock.GetReport();
+					context.Check($"{fault}: and the not-in-stock alert leaves it to the blocked one", !notInStock.WantedBy.Values.Any(mechs => mechs.Contains(site.Mech)));
+				}
+				finally
+				{
+					undo();
+				}
+			}
+
+			UpgradeStatus.Invalidate();
+			settings.ShowBlockedAlert = false;
+			Stage.Power(site.Upgrader, false);
+			context.Check("with the blocked alert turned off, it's not shown", !new Alert_UpgradePolicyBlocked().GetReport().active);
+			Stage.Power(site.Upgrader, true);
+		}
+		finally
+		{
+			settings.ShowBlockedAlert = showBlocked;
+			UpgradeStatus.Invalidate();
+		}
+
+		return Task.CompletedTask;
+	}
+
+	private static Task NotInStockAlert(
+		ScenarioContext context
+	)
+	{
+		var site = Site.Set(context);
+		var (a, _) = TwoCompatible(context, site.Mech);
+		if (a == null)
+		{
+			return Task.CompletedTask;
+		}
+
+		using var policy = new TempPolicy(site, a);
+		var settings = MechUpgradesUiMod.Settings;
+		var showNotInStock = settings.ShowNotInStockAlert;
+		try
+		{
+			settings.ShowNotInStockAlert = true;
+			var alert = new Alert_UpgradesNotInStock();
+			var report = alert.GetReport();
+			context.Check($"with {a.defName} not in stock, the alert names the mech", report.active && report.AllCulprits.Any(target => target.Thing == site.Mech));
+			context.Check($"and lists {a.defName} as wanted by it", alert.WantedBy.TryGetValue(a, out var mechs) && mechs.Contains(site.Mech));
+			var explanation = alert.GetExplanation().ToString();
+			context.Check($"the explanation names the upgrade and the mech: {explanation}", explanation.Contains(a.LabelCap) && explanation.Contains(site.Mech.LabelShort));
+
+			Stock(site.Storage, new[] { a });
+			UpgradeStatus.Invalidate();
+			alert.GetReport();
+			context.Check("in stock, it's no longer listed", !alert.WantedBy.ContainsKey(a) || !alert.WantedBy[a].Contains(site.Mech));
+
+			settings.ShowNotInStockAlert = false;
+			context.Check("turned off, the alert isn't shown", !alert.GetReport().active);
+		}
+		finally
+		{
+			settings.ShowNotInStockAlert = showNotInStock;
+			UpgradeStatus.Invalidate();
+		}
+
+		return Task.CompletedTask;
+	}
+
+	private static Task DialogDefaults(
+		ScenarioContext context
+	)
+	{
+		var site = Site.Set(context);
+		var before = Database.GetPolicies().ToList();
+		try
+		{
+			var fromMech = new Dialog_ManageUpgradePolicies(null, site.Comp);
+			context.Check($"opened from a mech, it shows that mech's type: {fromMech.MechDef?.defName}", fromMech.MechDef == site.Mech.def);
+
+			var policy = Database.TryCreate();
+			site.Comp.CurrentUpgradePolicy = policy;
+			var mechDef = Dialog_ManageUpgradePolicies.DefaultMechDef(policy);
+			context.Check($"for a policy only the lifter follows, it defaults to lifters: {mechDef?.defName}", mechDef == site.Mech.def);
+
+			var usedBy = Dialog_ManageUpgradePolicies.UsedBy(policy);
+			context.Check($"used by names one lifter: {usedBy}", usedBy == "MU_Upgrades_Ui_Policy_UsedBy".Translate(1, site.Mech.def.LabelCap).ToString());
+
+			site.Comp.CurrentUpgradePolicy = null;
+			var unused = Dialog_ManageUpgradePolicies.UsedBy(policy);
+			context.Check($"with no mech on it, it says so: {unused}", unused.StartsWith("MU_Upgrades_Ui_Policy_UsedByNone".Translate().ToString()));
+		}
+		finally
+		{
+			site.Comp.CurrentUpgradePolicy = null;
+			Restore(Database, before);
+		}
+
+		return Task.CompletedTask;
+	}
+
+	private static Task UseDefaultConfirmation(
+		ScenarioContext context
+	)
+	{
+		var site = Site.Set(context);
+		var (a, b) = TwoCompatible(context, site.Mech);
+		if (a == null)
+		{
+			return Task.CompletedTask;
+		}
+
+		var before = Database.GetPolicies().ToList();
+		try
+		{
+			site.Comp.AddUpgrade(b);
+			var allowsA = Database.TryCreate();
+			allowsA.Filter.SetDisallowAll();
+			allowsA.Filter.SetAllow(a.linkedThingDef, true);
+			Database.SetDefaultPolicy(allowsA);
+
+			var text = MechUpgradesUiMod.UseDefaultConfirmation();
+			context.Check($"the warning names the unassigned mech that would lose {b.defName}: {text}", text.Contains(site.Mech.LabelShort) && text.Contains(allowsA.label));
+
+			allowsA.Filter.SetAllow(b.linkedThingDef, true);
+			text = MechUpgradesUiMod.UseDefaultConfirmation();
+			context.Check($"once the default allows it, the mech isn't named: {text}", !text.Contains(site.Mech.LabelShort));
+		}
+		finally
+		{
+			Restore(Database, before);
+		}
+
 		return Task.CompletedTask;
 	}
 

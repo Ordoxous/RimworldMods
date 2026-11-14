@@ -23,16 +23,22 @@
   </loadAfter>
   <packageId>Ordo.MechUpgradesUi</packageId>
   <description>
-    Allows defining automatic upgrade policies for mech upgrades from [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3365118555]Mechanoid Upgrades[/url].
+    Upgrade policies for [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3365118555]Mechanoid Upgrades[/url], set up the way you set apparel policies for colonists.
 
-    You can specify policies the same way you would apparel for a colonist.
+    Give a mech a policy, and it goes to an auto mech upgrader by itself. There it fills its upgrade points with the upgrades the policy allows, from the upgrader's linked storages, and has the upgrades the policy doesn't allow removed. Every mech upgrader becomes an auto mech upgrader; you can still use it by hand as before.
 
-    The mechs with that policy will then try to fill their upgrade points from the auto mech upgraders (Replace your existing one with one of these).
+    [h2]Features[/h2]
+    [list]
+    [*]A policy editor with a live preview: what a mech type gets from the policy, what's skipped and why, and what changes for the mech you opened it from. Load a policy from one of your saved upgrade sets.
+    [*]Assign policies from the Mechs tab or from the mech's own buttons, which work on several mechs at once.
+    [*]Hover over a policy to see each upgrade's state for that mech: installed, added or removed on its next trip, wanted but not in stock, or skipped.
+    [*]Markers on the Mechs tab for mechs with changes waiting, wanted upgrades not in stock, or no usable upgrader.
+    [*]Alerts listing the upgrades your policies want and you don't have, and mechs that can't reach an upgrader.
+    [*]The upgrader shows its stock, and which mechs are on their way or waiting.
+    [/list]
 
-    When a mech has unwanted upgrades (Per the policy), the auto upgrade will try to remove them.
+    Mechs without a policy are left alone, so existing upgrades are safe until you assign one. You can change this, how often mechs check their policy, and the alerts, in the mod settings.
 
-    Mechs without a policy are left alone, so existing upgrades are safe until you assign one. You can change this, and how often mechs check their policy, in the mod settings.
-    
     Source available on [url=https://github.com/Ordoxous/RimworldMods/tree/master/MechUpgradesUi]GitHub[/url].
   </description>
 </ModMetaData>

@@ -27,6 +27,7 @@ public class CompUpgradableMechWithPolicy : CompUpgradableMechanoid
         {
             _currentUpgradePolicy = value;
             Mech.mindState?.Notify_OutfitChanged();
+            UpgradeStatus.Invalidate();
         }
     }
 
@@ -57,6 +58,13 @@ public class CompUpgradableMechWithPolicy : CompUpgradableMechanoid
 
     private static readonly CachedTexture CheckNowIcon = new("UI/Gizmos/MU_InsertMechanoid");
 
+    /// <summary>The player's controlled mechs on a map, or on every map.</summary>
+    public static IEnumerable<CompUpgradableMechWithPolicy> PlayerMechs(Map map = null) =>
+        (map != null ? map.mapPawns.SpawnedColonyMechs : Find.Maps.SelectMany(m => m.mapPawns.SpawnedColonyMechs))
+        .Where(p => p.IsColonyMechPlayerControlled)
+        .Select(p => p.GetComp<CompUpgradableMechWithPolicy>())
+        .Where(c => c != null);
+
     public override IEnumerable<Gizmo> CompGetGizmosExtra()
     {
         foreach (var gizmo in base.CompGetGizmosExtra())
@@ -69,13 +77,25 @@ public class CompUpgradableMechWithPolicy : CompUpgradableMechanoid
 
         if (EffectiveUpgradePolicy != null)
         {
-            yield return new Command_Action
+            var checkNow = new Command_Action
             {
                 defaultLabel = "MU_Upgrades_Ui_Gizmo_CheckNow".Translate(),
                 defaultDesc = "MU_Upgrades_Ui_Gizmo_CheckNow_Desc".Translate(),
                 icon = CheckNowIcon.Texture,
                 action = CheckNow
             };
+
+            // A check would find nothing it can do, so say why instead
+            var status = UpgradeStatus.For(this);
+            if (!status.HasChanges)
+            {
+                checkNow.Disable(status.Blocker
+                                 ?? (status.HasShortage
+                                     ? "MU_Upgrades_Ui_Gizmo_CheckNow_NotInStock".Translate()
+                                     : "MU_Upgrades_Ui_Gizmo_CheckNow_UpToDate".Translate()));
+            }
+
+            yield return checkNow;
         }
     }
 

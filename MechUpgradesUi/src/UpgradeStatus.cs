@@ -44,17 +44,26 @@ public sealed class UpgradeStatus
 
     private static readonly Dictionary<(Pawn, UpgradePolicy), (float time, UpgradeStatus status)> Cache = new();
 
-    private static readonly Color AddingColor = new(0.45f, 0.9f, 0.45f);
+    public static readonly Color AddingColor = new(0.45f, 0.9f, 0.45f);
 
-    private static readonly Color WantedColor = new(0.95f, 0.8f, 0.35f);
+    public static readonly Color WantedColor = new(0.95f, 0.8f, 0.35f);
 
-    private static readonly Color RemovingColor = new(0.95f, 0.45f, 0.4f);
+    public static readonly Color RemovingColor = new(0.95f, 0.45f, 0.4f);
 
     /// <summary>Installed upgrades the policy doesn't allow. They go on the next trip.</summary>
     public List<MechUpgrade> Removals = [];
 
-    /// <summary>What the next trip would fit, from the best stocked auto upgrader on the mech's map.</summary>
+    /// <summary>What the next trip would fit, from the best stocked auto upgrader the mech can use.</summary>
     public List<MechUpgrade> Additions = [];
+
+    /// <summary>The upgrader the next trip would go to: the usable one that can fit the most. Null if none is usable.</summary>
+    [CanBeNull] public Building_AutoMechUpgrader Upgrader;
+
+    /// <summary>
+    /// Why the policy's changes can't be made: there's something to remove or fit, and no auto upgrader the mech can use. Null
+    /// when nothing stands in the way.
+    /// </summary>
+    [CanBeNull] public string Blocker;
 
     /// <summary>Upgrades the policy would pick if they were in stock, and aren't.</summary>
     public List<MechUpgradeDef> Unstocked = [];
@@ -67,7 +76,11 @@ public sealed class UpgradeStatus
 
     public int MaxPoints;
 
-    public bool HasChanges => Removals.Count > 0 || Additions.Count > 0;
+    /// <summary>The next trip would change something, and there's an upgrader to make it at.</summary>
+    public bool HasChanges => Blocker == null && (Removals.Count > 0 || Additions.Count > 0);
+
+    /// <summary>The policy wants upgrades that no usable auto upgrader has in stock.</summary>
+    public bool HasShortage => Unstocked.Count > 0;
 
     /// <summary>
     /// The status under a policy (the mech's effective one by default), worked out at most once a second per mech and policy,
@@ -89,6 +102,9 @@ public sealed class UpgradeStatus
         return status;
     }
 
+    /// <summary>Forgets every cached status, after something that changes them all at once, such as assigning a policy.</summary>
+    public static void Invalidate() => Cache.Clear();
+
     /// <summary>The status under a policy: the mech's effective one by default. With no policy, nothing changes.</summary>
     public static UpgradeStatus Compute(CompUpgradableMechWithPolicy comp, [CanBeNull] UpgradePolicy policy = null)
     {
@@ -108,14 +124,14 @@ public sealed class UpgradeStatus
 
         status.Removals = comp.upgrades.Where(u => !keep.Contains(u)).ToList();
 
-        var map = mech.MapHeld;
-        if (map != null)
-        {
-            status.Additions = map.listerBuildings
-                .AllColonistBuildingsOfType<Building_AutoMechUpgrader>()
-                .Select(b => UpgradePlanner.PickAdditions(mech.def, freePoints, keep, b.StockedUpgrades().Where(u => wanted.Contains(u.def))))
-                .MaxByWithFallback(added => added.Count) ?? [];
-        }
+        // Only the upgraders the job giver would consider: an unpowered or unreachable one won't be visited
+        var unusable = new List<string>();
+        var usable = Building_AutoMechUpgrader.UsableBy(mech, unusable);
+        var best = usable
+            .Select(b => (upgrader: b, added: UpgradePlanner.PickAdditions(mech.def, freePoints, keep, b.StockedUpgrades().Where(u => wanted.Contains(u.def)))))
+            .MaxByWithFallback(x => x.added.Count);
+        status.Upgrader = best.upgrader;
+        status.Additions = best.added ?? [];
 
         // What the policy would fit with everything in stock, and why the rest wouldn't fit
         var skipped = new List<SkippedUpgrade>();
@@ -126,6 +142,13 @@ public sealed class UpgradeStatus
             .ToList();
 
         status.PointsAfter = MechUpgradeUtility.CurrentPoints(keep) + MechUpgradeUtility.CurrentPoints(status.Additions);
+
+        if (usable.Count == 0 && (status.Removals.Count > 0 || status.Unstocked.Count > 0))
+        {
+            status.Blocker = unusable.Count == 0
+                ? "MU_Upgrades_Ui_Blocked_NoUpgrader".Translate().Resolve()
+                : "MU_Upgrades_Ui_Blocked_Unusable".Translate(unusable.Distinct().ToCommaList()).Resolve();
+        }
 
         // Allowed upgrades the mech's type can't have at all are left out: they're there for other mechs
         foreach (var def in policy.AllowedUpgradeDefs.Where(d => d.CanAdd(mech.def).Accepted).OrderBy(d => d.label))
@@ -167,6 +190,8 @@ public sealed class UpgradeStatus
         }
 
         text.AppendLine("MU_Upgrades_Ui_Status_Header".Translate(policy.label, comp.Mech.LabelShort).Resolve().AsTipTitle());
+        if (status.Blocker != null)
+            text.AppendLine(status.Blocker.Colorize(RemovingColor));
         AppendLines(text, status.Lines);
         text.AppendLine();
         text.Append("MU_Upgrades_Ui_Status_PointsAfter".Translate(status.PointsAfter, status.MaxPoints));
@@ -192,7 +217,7 @@ public sealed class UpgradeStatus
         }
     }
 
-    private static string StateLabel(UpgradeLine line) =>
+    public static string StateLabel(UpgradeLine line) =>
         line.State switch
         {
             UpgradeState.Installed => "MU_Upgrades_Ui_State_Installed".Translate().Resolve(),

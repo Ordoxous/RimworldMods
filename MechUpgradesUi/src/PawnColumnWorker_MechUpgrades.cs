@@ -41,11 +41,19 @@ public class PawnColumnWorker_MechUpgrades : PawnColumnWorker
         Text.Anchor = TextAnchor.UpperLeft;
         Text.Font = GameFont.Small;
 
-        // The next trip would change something
-        if (UpgradeStatus.For(comp).HasChanges)
+        // White: the next trip would change something. Red: it can't, for want of a usable upgrader. Yellow: upgrades are
+        // wanted that nothing has in stock
+        var status = UpgradeStatus.For(comp);
+        Color? marker = status.HasChanges ? Color.white
+            : status.Blocker != null ? UpgradeStatus.RemovingColor
+            : status.HasShortage ? UpgradeStatus.WantedColor
+            : null;
+        if (marker.HasValue)
         {
             var iconRect = new Rect(fillableBar.xMax - PendingIconSize - 2f, fillableBar.center.y - PendingIconSize / 2f, PendingIconSize, PendingIconSize);
+            GUI.color = marker.Value;
             GUI.DrawTexture(iconRect, PendingIcon.Texture);
+            GUI.color = Color.white;
         }
 
         TooltipHandler.TipRegion(rect, new TipSignal(() => UpgradeStatus.Tooltip(comp), pawn.thingIDNumber ^ 0x4D55));

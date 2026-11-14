@@ -89,7 +89,49 @@ public class Dialog_ManageUpgradePolicies(
 
     [CanBeNull] private readonly Pawn _openedFor = upgradableMechanoid?.Mech;
 
-    [CanBeNull] private ThingDef _mechDef = upgradableMechanoid?.Mech.def;
+    [CanBeNull] private readonly CompUpgradableMechWithPolicy _openedForComp = upgradableMechanoid as CompUpgradableMechWithPolicy;
+
+    [CanBeNull] private ThingDef _mechDef = upgradableMechanoid?.Mech.def ?? DefaultMechDef(currentPolicy ?? Database.DefaultPolicy());
+
+    /// <summary>The mech type the upgrade list and preview are for. Null for all mechs.</summary>
+    [CanBeNull] public ThingDef MechDef => _mechDef;
+
+    /// <summary>
+    /// The mech type to start on when the dialog wasn't opened from a mech: the commonest type following the policy, otherwise
+    /// the colony's commonest type. Null with no mechs.
+    /// </summary>
+    [CanBeNull]
+    public static ThingDef DefaultMechDef(UpgradePolicy policy)
+    {
+        var mechs = CompUpgradableMechWithPolicy.PlayerMechs().ToList();
+        var following = mechs.Where(c => c.EffectiveUpgradePolicy == policy).ToList();
+        return CommonestFirst(following.Count > 0 ? following : mechs).FirstOrDefault()?.Key;
+    }
+
+    /// <summary>Which mechs follow a policy, by type, as one line: "Used by 3: Lifter ×2, Constructoid."</summary>
+    public static string UsedBy(UpgradePolicy policy)
+    {
+        var mechs = CompUpgradableMechWithPolicy.PlayerMechs().ToList();
+        var assigned = mechs.Where(c => c.CurrentUpgradePolicy == policy).ToList();
+        string text = assigned.Count == 0
+            ? "MU_Upgrades_Ui_Policy_UsedByNone".Translate()
+            : "MU_Upgrades_Ui_Policy_UsedBy".Translate(
+                assigned.Count,
+                CommonestFirst(assigned).Select(g => g.Count() > 1 ? $"{g.Key.LabelCap} ×{g.Count()}" : g.Key.LabelCap.ToString()).ToCommaList()
+            );
+
+        if (MechUpgradesUiMod.Settings.UseDefaultPolicyForUnassigned && policy == Database.DefaultPolicy())
+        {
+            var unassigned = mechs.Count(c => c.CurrentUpgradePolicy == null);
+            if (unassigned > 0)
+                text += " " + "MU_Upgrades_Ui_Policy_UsedByDefault".Translate(unassigned);
+        }
+
+        return text;
+    }
+
+    private static IEnumerable<IGrouping<ThingDef, CompUpgradableMechWithPolicy>> CommonestFirst(IEnumerable<CompUpgradableMechWithPolicy> mechs) =>
+        mechs.GroupBy(c => c.Mech.def).OrderByDescending(g => g.Count()).ThenBy(g => g.Key.label);
 
     private Vector2 _previewScroll;
 
@@ -128,12 +170,21 @@ public class Dialog_ManageUpgradePolicies(
             option = new FloatMenuOption("MU_Upgrades_Ui_Policy_Mech_All".Translate().CapitalizeFirst(), () => dialog._mechDef = null)
         };
 
-        foreach (var x in upgradableMechRaces.Value)
+        // The colony's own mech types first, commonest first, with how many there are
+        var counts = CompUpgradableMechWithPolicy.PlayerMechs()
+            .GroupBy(c => c.Mech.def)
+            .ToDictionary(g => g.Key, g => g.Count());
+        int Count(ThingDef def) => counts.TryGetValue(def, out var n) ? n : 0;
+
+        foreach (var x in upgradableMechRaces.Value.OrderByDescending(Count))
+        {
+            var label = Count(x) > 0 ? $"{x.LabelCap} ({Count(x)})" : x.LabelCap.ToString();
             yield return new Widgets.DropdownMenuElement<ThingDef>
             {
                 payload = x,
-                option = new FloatMenuOption(x.LabelCap, () => dialog._mechDef = x, x)
+                option = new FloatMenuOption(label, () => dialog._mechDef = x, x)
             };
+        }
     }
 
     public override void DoContentsRect(Rect rect)
@@ -228,6 +279,14 @@ public class Dialog_ManageUpgradePolicies(
 
         inner.yMin += 34f;
 
+        using (new TextBlock(GameFont.Small, TextAnchor.UpperLeft, Color.gray))
+        {
+            var usedBy = UsedBy(SelectedPolicy);
+            var usedByHeight = Text.CalcHeight(usedBy, inner.width);
+            Widgets.Label(inner with { height = usedByHeight }, usedBy);
+            inner.yMin += usedByHeight + 6f;
+        }
+
         if (_mechDef == null)
         {
             using (new TextBlock(GameFont.Small, TextAnchor.UpperLeft, Color.gray))
@@ -237,19 +296,6 @@ public class Dialog_ManageUpgradePolicies(
 
             return;
         }
-
-        var mech = PreviewMech();
-        int? maxPoints = mech != null ? MechUpgradeUtility.MaxUpgradePoints(mech) : null;
-        var skipped = new List<SkippedUpgrade>();
-        var gets = Preview(SelectedPolicy, _mechDef, maxPoints, skipped);
-        var used = MechUpgradeUtility.CurrentPoints(gets);
-
-        string summary = maxPoints.HasValue
-            ? "MU_Upgrades_Ui_Preview_Points".Translate(_mechDef.LabelCap, used, maxPoints.Value)
-            : "MU_Upgrades_Ui_Preview_PointsUnknown".Translate(_mechDef.LabelCap, used);
-        var summaryHeight = Text.CalcHeight(summary, inner.width);
-        Widgets.Label(inner with { height = summaryHeight }, summary);
-        inner.yMin += summaryHeight + 6f;
 
         const string footerKey = "MU_Upgrades_Ui_Preview_Footer";
         float footerHeight;
@@ -263,19 +309,11 @@ public class Dialog_ManageUpgradePolicies(
         Widgets.BeginScrollView(listRect, ref _previewScroll, viewRect);
         var y = 0f;
 
-        y = DoHeading(viewRect, y, "MU_Upgrades_Ui_Preview_Gets".Translate());
-        if (gets.Count == 0)
-            y = DoNothing(viewRect, y);
-        foreach (var upgrade in gets)
-            y = DoUpgradeRow(viewRect, y, upgrade, null);
+        // The mech the dialog was opened for, as it stands, while its type is the one shown
+        if (_openedForComp != null && _openedFor is { Dead: false } && _openedFor.def == _mechDef)
+            y = DoThisMech(viewRect, y, _openedForComp) + 12f;
 
-        if (skipped.Count > 0)
-        {
-            y += 8f;
-            y = DoHeading(viewRect, y, "MU_Upgrades_Ui_Preview_Skipped".Translate());
-            foreach (var skip in skipped)
-                y = DoUpgradeRow(viewRect, y, skip.Upgrade, skip.Reason);
-        }
+        y = DoNewMech(viewRect, y);
 
         if (Event.current.type == EventType.Layout)
             _previewHeight = y;
@@ -287,11 +325,76 @@ public class Dialog_ManageUpgradePolicies(
         }
     }
 
-    private static float DoHeading(Rect viewRect, float y, string label)
+    // What the selected policy would do to this mech, from what it has now and what's in stock
+    private float DoThisMech(Rect viewRect, float y, CompUpgradableMechWithPolicy comp)
     {
-        Widgets.Label(new Rect(0f, y, viewRect.width, 24f), label);
+        // Worked out every frame, so ticking an upgrade shows at once. The dialog pauses the game
+        var status = UpgradeStatus.Compute(comp, SelectedPolicy);
+        y = DoHeading(viewRect, y, "MU_Upgrades_Ui_Preview_ThisMech".Translate(comp.Mech.LabelShort));
+
+        if (status.Blocker != null)
+            y = DoWrapped(viewRect, y, status.Blocker.Colorize(UpgradeStatus.RemovingColor));
+
+        if (status.Lines.Count == 0)
+            y = DoNothing(viewRect, y);
+        foreach (var line in status.Lines)
+            y = DoUpgradeRow(viewRect, y, UpgradePlanner.Sample(line.Def), UpgradeStatus.StateLabel(line), line.State == UpgradeState.Skipped);
+
+        return DoWrapped(viewRect, y + 2f, "MU_Upgrades_Ui_Status_PointsAfter".Translate(status.PointsAfter, status.MaxPoints));
+    }
+
+    // What the selected policy gives a mech of the chosen type that has no upgrades yet, with everything in stock
+    private float DoNewMech(Rect viewRect, float y)
+    {
+        var mech = PreviewMech();
+        int? maxPoints = mech != null ? MechUpgradeUtility.MaxUpgradePoints(mech) : null;
+        var skipped = new List<SkippedUpgrade>();
+        var gets = Preview(SelectedPolicy, _mechDef, maxPoints, skipped);
+        var used = MechUpgradeUtility.CurrentPoints(gets);
+
+        y = DoHeading(viewRect, y, "MU_Upgrades_Ui_Preview_NewMech".Translate(_mechDef.label));
+        string summary = maxPoints.HasValue
+            ? "MU_Upgrades_Ui_Preview_Points".Translate(_mechDef.LabelCap, used, maxPoints.Value)
+            : "MU_Upgrades_Ui_Preview_PointsUnknown".Translate(_mechDef.LabelCap, used);
+        y = DoWrapped(viewRect, y, summary) + 4f;
+
+        y = DoHeading(viewRect, y, "MU_Upgrades_Ui_Preview_Gets".Translate(), sub: true);
+        if (gets.Count == 0)
+            y = DoNothing(viewRect, y);
+        foreach (var upgrade in gets)
+            y = DoUpgradeRow(viewRect, y, upgrade, null, false);
+
+        if (skipped.Count > 0)
+        {
+            y += 8f;
+            y = DoHeading(viewRect, y, "MU_Upgrades_Ui_Preview_Skipped".Translate(), sub: true);
+            foreach (var skip in skipped)
+                y = DoUpgradeRow(viewRect, y, skip.Upgrade, skip.Reason, true);
+        }
+
+        return y;
+    }
+
+    // A section heading, or with sub a grey one inside a section
+    private static float DoHeading(Rect viewRect, float y, string label, bool sub = false)
+    {
+        using (new TextBlock(GameFont.Small, TextAnchor.UpperLeft, sub ? Color.gray : Color.white))
+        {
+            Widgets.Label(new Rect(0f, y, viewRect.width, 24f), label);
+        }
+
         Widgets.DrawLineHorizontal(0f, y + 23f, viewRect.width, Widgets.SeparatorLineColor);
         return y + 26f;
+    }
+
+    private static float DoWrapped(Rect viewRect, float y, string text)
+    {
+        using (new TextBlock(GameFont.Small, TextAnchor.UpperLeft, Color.white))
+        {
+            var height = Text.CalcHeight(text, viewRect.width);
+            Widgets.Label(new Rect(0f, y, viewRect.width, height), text);
+            return y + height + 2f;
+        }
     }
 
     private static float DoNothing(Rect viewRect, float y)
@@ -304,15 +407,15 @@ public class Dialog_ManageUpgradePolicies(
         return y + RowHeight;
     }
 
-    // A skipped upgrade is greyed, with the reason under its name
-    private static float DoUpgradeRow(Rect viewRect, float y, MechUpgrade upgrade, [CanBeNull] string skipReason)
+    // An upgrade, with an optional line under its name: why it's skipped, or its state. A greyed row won't be fitted
+    private static float DoUpgradeRow(Rect viewRect, float y, MechUpgrade upgrade, [CanBeNull] string subtitle, bool greyed)
     {
-        var height = skipReason == null ? RowHeight : SkippedRowHeight;
+        var height = subtitle == null ? RowHeight : SkippedRowHeight;
         var row = new Rect(0f, y, viewRect.width, height);
         if (Mouse.IsOver(row))
             Widgets.DrawHighlight(row);
 
-        var color = skipReason == null ? Color.white : Color.gray;
+        var color = greyed ? Color.gray : Color.white;
         var def = upgrade.def;
 
         var iconRect = new Rect(row.x + 2f, row.y + 2f, 24f, 24f);
@@ -340,19 +443,20 @@ public class Dialog_ManageUpgradePolicies(
             Widgets.LabelEllipses(labelRect, def.LabelCap);
         }
 
-        if (skipReason != null)
+        if (subtitle != null)
         {
-            using (new TextBlock(GameFont.Tiny, TextAnchor.UpperLeft, Color.gray))
+            // A state label carries its own colour, which a grey tint would muddy
+            using (new TextBlock(GameFont.Tiny, TextAnchor.UpperLeft, greyed ? Color.gray : Color.white))
             {
-                Widgets.LabelEllipses(new Rect(labelRect.x, row.y + RowHeight - 6f, row.width - labelRect.x, 20f), skipReason);
+                Widgets.LabelEllipses(new Rect(labelRect.x, row.y + RowHeight - 6f, row.width - labelRect.x, 20f), subtitle);
             }
         }
 
         if (Mouse.IsOver(row) && !Mouse.IsOver(infoRect))
         {
             var tip = MechUpgradeUtility.DescWithStats(upgrade);
-            if (skipReason != null)
-                tip = $"{skipReason.Colorize(ColoredText.WarningColor)}\n\n{tip}";
+            if (subtitle != null)
+                tip = $"{(greyed ? subtitle.Colorize(ColoredText.WarningColor) : subtitle)}\n\n{tip}";
             TooltipHandler.TipRegion(row, tip);
         }
 
