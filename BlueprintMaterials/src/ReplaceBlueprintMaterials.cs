@@ -194,7 +194,10 @@ public class ReplaceBlueprintMaterials
 
 public class Command_Action_AlternativeMaterial : Command_Action {
 
-    private static readonly CachedTexture ChangeStyleTex = new("UI/Gizmos/ChangeStyle");
+    // The mod's own, so the gizmo looks the same with or without Ideology, whose style icon it once borrowed
+    private static readonly CachedTexture ChangeMaterialTex = new("UI/Gizmos/Ordo_BlueprintMaterials_ChangeMaterial");
+
+    private const float ChangeMaterialIconSize = 24f;
 
     private readonly ThingDef _blueprintDef;
     private readonly ThingDef _currentMaterial;
@@ -234,14 +237,8 @@ public class Command_Action_AlternativeMaterial : Command_Action {
         var baseGizmo = base.GizmoOnGUI(topLeft, maxWidth, parms);
         Designator_Dropdown.DrawExtraOptionsIcon(topLeft, GetWidth(maxWidth));
 
-        Widgets.DrawTextureFitted(
-            new Rect(topLeft.x, topLeft.y, GetWidth(maxWidth), 75f),
-            ChangeStyleTex.Texture,
-            iconDrawScale * 0.5f,
-            iconProportions,
-            iconTexCoords,
-            iconAngle
-        );
+        // In the top-left corner, clear of the material's icon and of the dropdown triangle at the top right
+        GUI.DrawTexture(new Rect(topLeft.x + 3f, topLeft.y + 3f, ChangeMaterialIconSize, ChangeMaterialIconSize), ChangeMaterialTex.Texture);
 
         return baseGizmo;
     }

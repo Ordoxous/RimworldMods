@@ -12,6 +12,7 @@ public static class ScenarioSets
 	public static readonly (string PackageId, Func<List<Scenario>> Scenarios)[] All =
 	{
 		("Ordo.SillyAnimalThings", () => SillyAnimalThingsScenarios.All),
-		("Ordo.MechUpgradesUi", () => MechUpgradesUiScenarios.All)
+		("Ordo.MechUpgradesUi", () => MechUpgradesUiScenarios.All),
+		("Ordo.BlueprintMaterials", () => BlueprintMaterialsScenarios.All)
 	};
 }

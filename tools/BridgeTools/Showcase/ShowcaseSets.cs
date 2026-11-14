@@ -10,6 +10,7 @@ public static class ShowcaseSets
 	public static readonly (string PackageId, Func<List<ShowcaseClip>> Clips)[] All =
 	{
 		("Ordo.SillyAnimalThings", () => SillyAnimalThingsShowcase.All),
-		("Ordo.MechUpgradesUi", () => MechUpgradesUiShowcase.All)
+		("Ordo.MechUpgradesUi", () => MechUpgradesUiShowcase.All),
+		("Ordo.BlueprintMaterials", () => BlueprintMaterialsShowcase.All)
 	};
 }
