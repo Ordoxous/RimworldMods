@@ -131,19 +131,20 @@ Every behaviour scenario was seen to fail with a fault planted by hot reload, in
 
 ## Showcase
 
-Three clips in `tools/BridgeTools/Showcase/MechUpgradesUiShowcase.cs`, all with the UI on screen:
+Four clips in `tools/BridgeTools/Showcase/MechUpgradesUiShowcase.cs`, all with the UI on screen:
 
 | Clip | Frame | What it shows |
 |---|---|---|
-| `policy_dialog` | Middle | The dialog opened from a lifter. Upgrades are ticked one by one: the double cargo cell, then the small cargo cell (skipped in the preview as conflicting), then the mini-burner. The dialog pauses the game, so the clip waits with `ShowcaseStage.Hold` (real time) |
+| `policy_dialog` | Middle | The dialog opened from a lifter. Upgrades are ticked one by one: the double cargo cell, then the small cargo cell (skipped in the preview as conflicting), then the mini-burner. A powered upgrader with both in stock stands behind the dialog, so the lifter's own section shows them being added. The dialog pauses the game, so the clip waits with `ShowcaseStage.Hold` (real time) |
 | `mechs_tab` | Window | The Mechs tab with two lifters. The second is given the policy, and its pending-change marker appears |
+| `policy_tooltips` | Window | RimBridge's virtual cursor (`ShowcaseStage.Hover`) over the first lifter's policy cell, then its upgrades cell: the tooltips list the double cargo cell added, the small cargo cell skipped as conflicting, and the mini-burner removed. Then the second lifter's policy menu opens at the cursor, and each option's tooltip is shown in turn: no policy, "Lifter loadout", and "Burner kit", which wants a mini-burner nobody has in stock |
 | `upgrade_trip` | Window | A lifter with a mini-burner and a policy allowing only the double cargo cell, which is in stock. It walks to the upgrader, and comes out with the cargo cell, while MU's upgrades tab shows the change. Each operation's fabrication time is cut to 60 ticks, and the caption says so |
 
-To record: start `mechupgradesui-showcase` and call `ordo/record_showcase` with `mod: Ordo.MechUpgradesUi` and an `outputDirectory` such as `tools/BridgeTools/videos/mechupgradesui`. Then run `make_showcase.ps1 -OutputDirectory <that folder> -ModName 'Mech Upgrade Policies'`. Recording takes about 40 s.
+To record: start `mechupgradesui-showcase` and call `ordo/record_showcase` with `mod: Ordo.MechUpgradesUi` and an `outputDirectory` such as `tools/BridgeTools/videos/mechupgradesui`. Then run `make_showcase.ps1 -OutputDirectory <that folder> -ModName 'Mech Upgrade Policies'`. Recording takes about a minute.
 
 - The showcase profile's save is a copy of the `mechupgradesui` one. Its original, copied from SillyAnimalThings, is kept as `autostart.rws.old-sillyanimalthings`.
-- Mouse tooltips can't be filmed, because there's no cursor to hover with.
-- Last recorded on 2026-11-13. A frame from each clip was checked.
+- Tooltips are filmed with RimBridge's virtual cursor; see `policy_tooltips`.
+- Last recorded on 2026-11-14. Frames from each clip were checked, including each tooltip in `policy_tooltips`. RimBridge draws a large white arrow as its cursor marker, which shows in that clip.
 
 ## Next steps
 

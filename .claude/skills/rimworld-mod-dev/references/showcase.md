@@ -12,7 +12,7 @@
    - `filter` to record only matching clips, `append` to keep the folder's other clips (see below), and `mod` when more than one running mod has clips.
 4. Run `tools/BridgeTools/Showcase/make_showcase.ps1`. Pass `-OutputDirectory` if you recorded somewhere other than `videos`, and `-ModName` for the reel's title card (it defaults to Silly Animal Things). It cuts one captioned MP4 per clip, plus `highlight_reel.mp4` when there's more than one, then deletes the recording unless given `-KeepRecording`.
 
-For SillyAnimalThings, all 15 clips take about 95 s to record and 45 s to cut. MechUpgradesUi's 3 clips take about 40 s to record (`videos/mechupgradesui`).
+For SillyAnimalThings, all 15 clips take about 95 s to record and 45 s to cut. MechUpgradesUi's 4 clips take about a minute to record (`videos/mechupgradesui`).
 
 ## Clips that aren't abilities
 
@@ -24,7 +24,7 @@ For SillyAnimalThings, all 15 clips take about 95 s to record and 45 s to cut. M
   - `ShowcaseFrame.Window` shows the whole window scaled down to 1280x720, with the caption at the top instead of the bottom. Use it for anything at the window's edges: main tabs, the inspect pane and gizmos.
 - **`ShowcaseStage.Hold(seconds)`** waits in real time. A dialog with `forcePause` pauses the game, so `Step`, `Beat` and `Linger` would never finish while one is open.
 - **Clean up what the clip opened:** close its dialogs and main tabs, clear the selection, and remove anything it added to the world (such as policies) in a `finally`. `Stage.CleanUp` only removes what was spawned.
-- **Mouse tooltips can't be filmed.** There's no cursor to hover with.
+- **Tooltips:** `stage.Hover(position)` moves RimBridge's virtual cursor to a point in UI coordinates (top-left origin), so tooltips, mouseover highlights and float menus opening at the cursor all behave as for a player. The real mouse doesn't disturb it, and it's cleared after every clip. RimBridge keeps the pointer internal (`RimBridgeVirtualPointer`), so it's reached by reflection, and the clip fails with a message if a RimBridge update renames it. Finding where to hover is up to the clip: MechUpgradesUi's `policy_tooltips` works out Mechs tab cells from `PawnTable`'s private layout, and float menu options from their `RequiredHeight`. Give a tooltip about 4 s: it appears after a short delay, and viewers need time to read it.
 
 ## How it works, and what not to break
 

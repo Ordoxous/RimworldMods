@@ -195,6 +195,7 @@ public sealed class ShowcaseRunner
 				{
 					screenshotMode.active = true;
 					Prefs.AdaptiveTrainingEnabled = adaptiveTraining;
+					ShowcaseStage.ClearHover();
 				}
 
 				if (outcome.Failures.Count > 0)
@@ -390,6 +391,38 @@ public sealed class ShowcaseStage : Stage
 		{
 			await Bridge.Game.NextFrameAsync(CancellationToken);
 		}
+	}
+
+	// RimBridge's virtual cursor, which mouseover UI (tooltips, highlights, float menus opening at the cursor) takes as the
+	// mouse. Internal to RimBridgeServer, so it's reached by reflection; null if a RimBridge update renamed it
+	private static readonly Type VirtualPointer = AppDomain.CurrentDomain.GetAssemblies()
+		.Select(assembly => assembly.GetType("RimBridgeServer.RimBridgeVirtualPointer", false))
+		.FirstOrDefault(type => type != null);
+
+	// The longest RimBridge allows. Hover again or clear it before then
+	private const int HoverMs = 60000;
+
+	/// <summary>
+	/// Puts the virtual cursor at a point in UI coordinates (top-left origin), so tooltips there show as they would for a
+	/// player. The real mouse doesn't move it, so it holds while recording. Cleared after every clip.
+	/// </summary>
+	public void Hover(
+		UnityEngine.Vector2 position
+	)
+	{
+		var set = VirtualPointer?.GetMethod("SetPersistentPointer");
+		if (set == null)
+		{
+			Fail("RimBridge's virtual cursor wasn't found, so tooltips can't be shown");
+			return;
+		}
+
+		set.Invoke(null, new object[] { "screen", "showcase", "Showcase cursor", position, null, HoverMs, false });
+	}
+
+	public static void ClearHover()
+	{
+		VirtualPointer?.GetMethod("ClearPersistentPointer")?.Invoke(null, null);
 	}
 
 	// Long enough to see who's in the shot before anything happens
