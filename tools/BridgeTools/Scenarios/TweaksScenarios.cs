@@ -25,7 +25,7 @@ public static class TweaksScenarios
 	// Every def a tweak adds or patches, and the mod's own names, for finding the load errors a tweak caused
 	private static readonly string[] Touched =
 	{
-		"Ordo.Tweaks", "Ordo_Tools", "Ordo_HaulMechForRepair", "HaulMechForRepair", "StandardRecharger", "TableMachining", "SubcoreEncoder",
+		"Ordo.Tweaks", "Ordo_Tools", "Ordo_HaulMechForRepair", "HaulMechForRepair", "Ordo_HaulMechToShutdownZone", "StandardRecharger", "TableMachining", "SubcoreEncoder",
 		"LargeMechGestator", "MU_BasicUpgradesAssembler", "MU_AdvancedUpgradesAssembler", "MU_MechUpgrader", "Mech_Lifter",
 		"VR_Construct_Lifter", "Mech_Constructoid", "VR_Construct_Constructoid", "FSFMerge", "FSFDeliver", "WorkType_Improving",
 		"VSE_Critical", "AMT_Handwear_BlacksmithGloves", "VFE_PortableWoodFiredGenerator", "VFE_PortableChemfuelPoweredGenerator",
@@ -61,6 +61,12 @@ public static class TweaksScenarios
 		new("armor_numbers_off", "armor settings", ArmorNumbersOff),
 		new("haul_downed_mech_to_shutdown_zone", "haul_mechs", HaulDownedMech),
 		new("haul_downed_mech_off", "haul_mechs settings", HaulDownedMechOff),
+		new("haul_downed_mech_charger_free", "haul_mechs", HaulDownedMechChargerFree),
+		new("haul_downed_mech_full_charger_free", "haul_mechs", HaulDownedMechFullChargerFree),
+		new("haul_unpowered_mech_no_charger", "haul_mechs", HaulUnpoweredMechNoCharger),
+		new("haul_unpowered_mech_near_charger", "haul_mechs", HaulUnpoweredMechNearCharger),
+		new("haul_unpowered_mech_charger_free", "haul_mechs", HaulUnpoweredMechChargerFree),
+		new("haul_unpowered_mech_off", "haul_mechs settings", HaulUnpoweredMechOff),
 		new("tools_category", "tools", context => ToolsCategory(context, requireTools: false)),
 		new("tools_category_power_tools", "tools", context => ToolsCategory(context, requireTools: true), requiresMod: "setosa.power.tools"),
 		new("hemogen_below_cap_queues", "hemogen", context => Hemogen(context, packs: 0, limit: true, expectBill: true), requiresMod: "biotechpatch.1trickPwnyta"),
@@ -145,7 +151,7 @@ public static class TweaksScenarios
 	{
 		var expected = new Dictionary<string, string>
 		{
-			["ArmorIndicators"] = "true", ["HaulDownedMechs"] = "true", ["ToolsCategory"] = "true",
+			["ArmorIndicators"] = "true", ["HaulDownedMechs"] = "true", ["HaulUnpoweredMechs"] = "true", ["ToolsCategory"] = "true",
 			["LimitHemogenFarming"] = "true", ["HemogenPackCap"] = "30"
 		};
 		foreach (var (key, value) in expected)
@@ -606,6 +612,215 @@ public static class TweaksScenarios
 				var hauler = context.Worker(-6, 0, WorkTypeDefOf.Hauling);
 				var giver = DefDatabase<WorkGiverDef>.GetNamed("Ordo_HaulMechForRepair").Worker;
 				context.Check("with the setting off, the work giver skips", giver.ShouldSkip(hauler));
+				await context.Step(600);
+				context.Check($"the mech stayed where it was: {mech.PositionHeld}, hauler {Stage.Describe(hauler)}", mech.Spawned && mech.Position == start);
+			});
+		}
+		finally
+		{
+			zone.Delete();
+		}
+	}
+
+	// A light-mech charger on a power net: a charged battery nearby, which it connects to by itself
+	private static async Task<Building_MechCharger> FreeCharger(
+		ScenarioContext context,
+		Pawn mech,
+		int x,
+		int z
+	)
+	{
+		var charger = (Building_MechCharger)context.Build(ThingDef.Named("BasicRecharger"), x, z);
+		var battery = context.Build(ThingDef.Named("Battery"), x + 2, z);
+		battery.GetComp<CompPowerBattery>().SetStoredEnergyPct(1f);
+		await context.Until($"the charger is powered: net {charger.PowerComp.PowerNet != null}", () => charger.CanPawnChargeCurrently(mech), 300, 30);
+		return charger;
+	}
+
+	private static WorkGiver_Scanner DownedGiver => (WorkGiver_Scanner)DefDatabase<WorkGiverDef>.GetNamed("Ordo_HaulMechForRepair").Worker;
+
+	// Vanilla's HaulMechsToCharger takes a downed mech below its recharge limit to a free charger, so the downed-mech tweak leaves
+	// it alone instead of carrying it away to the zone
+	private static async Task HaulDownedMechChargerFree(
+		ScenarioContext context
+	)
+	{
+		var mech = DownedMech(context, 0, 0);
+		mech.needs.energy.CurLevelPercentage = 0.1f;
+		var charger = await FreeCharger(context, mech, 6, 6);
+		var cells = CellRect.CenteredOn(context.Cell(10, 0), 1).Cells.ToList();
+		var zone = ShutdownZone(context, cells);
+		try
+		{
+			var hauler = context.Worker(-6, 0, WorkTypeDefOf.Hauling);
+			context.Check("the tweak has no job for it while a charger is free", !DownedGiver.HasJobOnThing(hauler, mech));
+			var tweak = false;
+			var vanilla = false;
+			await context.Until($"the hauler takes the mech to the charger: hauler {Stage.Describe(hauler)}; mech {Stage.Describe(mech)} at {mech.PositionHeld}", () =>
+			{
+				tweak |= hauler.CurJobDef?.defName == "HaulMechForRepair";
+				vanilla |= hauler.CurJobDef == JobDefOf.HaulMechToCharger;
+				return mech.Spawned && hauler.carryTracker.CarriedThing == null && (mech.Position == charger.InteractionCell || cells.Contains(mech.Position));
+			}, 2500);
+			context.Check("the tweak's job never ran", !tweak);
+			context.Check("vanilla's HaulMechToCharger carried it", vanilla);
+			context.Check($"the mech is at the charger, not in the zone: {mech.Position}, charger at {charger.InteractionCell}", mech.Position == charger.InteractionCell);
+		}
+		finally
+		{
+			zone.Delete();
+		}
+	}
+
+	// At full energy a downed mech isn't vanilla's to take to a charger, so the tweak still carries it to the zone
+	private static async Task HaulDownedMechFullChargerFree(
+		ScenarioContext context
+	)
+	{
+		var mech = DownedMech(context, 0, 0);
+		await FreeCharger(context, mech, 6, 6);
+		var cells = CellRect.CenteredOn(context.Cell(10, 0), 1).Cells.ToList();
+		var zone = ShutdownZone(context, cells);
+		try
+		{
+			var hauler = context.Worker(-6, 0, WorkTypeDefOf.Hauling);
+			var hauled = false;
+			await context.Until($"the hauler takes the mech to the zone: hauler {Stage.Describe(hauler)}; mech at {mech.PositionHeld}", () =>
+			{
+				hauled |= hauler.CurJobDef?.defName == "HaulMechForRepair";
+				return mech.Spawned && cells.Contains(mech.Position);
+			}, 2500);
+			context.Check("it was the tweak's job that moved it", hauled);
+		}
+		finally
+		{
+			zone.Delete();
+		}
+	}
+
+	private static WorkGiver_Scanner UnpoweredGiver => (WorkGiver_Scanner)DefDatabase<WorkGiverDef>.GetNamed("Ordo_HaulMechToShutdownZone").Worker;
+
+	// A light mech (a lifter) out of power: its energy need puts it into self-shutdown on its next interval
+	private static async Task<Pawn> UnpoweredMech(
+		ScenarioContext context,
+		int x,
+		int z
+	)
+	{
+		var mechanitor = context.Mechanitor(-12, 6);
+		var mech = context.ControlledMech("Mech_Lifter", mechanitor, x, z);
+		mech.needs.energy.CurLevel = 0f;
+		await context.Until($"the mech shuts down for lack of power: {Stage.Describe(mech)}", () => mech.needs.energy.IsLowEnergySelfShutdown, 900, 30);
+		context.Check($"it's not downed: {Stage.Describe(mech)}", !mech.Downed);
+		return mech;
+	}
+
+	// The hauler carries it to the zone with the tweak's job, and it shuts down there. Once in the zone, it isn't hauled again.
+	private static async Task<bool> HauledToZone(
+		ScenarioContext context,
+		Pawn mech,
+		Pawn hauler,
+		ICollection<IntVec3> cells
+	)
+	{
+		var hauled = false;
+		var arrived = await context.Until($"the hauler takes the mech to the zone: hauler {Stage.Describe(hauler)}; mech at {mech.PositionHeld}", () =>
+		{
+			hauled |= hauler.CurJobDef?.defName == "Ordo_HaulMechToShutdownZone";
+			return mech.Spawned && cells.Contains(mech.Position) && hauler.carryTracker.CarriedThing == null;
+		}, 2500);
+		context.Check("it was the tweak's job that moved it", hauled);
+		await context.Until($"it shuts down again where it was put: {Stage.Describe(mech)}", () => mech.needs.energy.IsLowEnergySelfShutdown, 300, 30);
+		context.Check($"it's still in the zone: {mech.Position}", cells.Contains(mech.Position));
+		context.Check("in the zone, it isn't hauled again", !UnpoweredGiver.HasJobOnThing(hauler, mech));
+		return arrived;
+	}
+
+	private static async Task HaulUnpoweredMechNoCharger(
+		ScenarioContext context
+	)
+	{
+		var mech = await UnpoweredMech(context, 0, 0);
+		var cells = CellRect.CenteredOn(context.Cell(10, 0), 1).Cells.ToList();
+		var zone = ShutdownZone(context, cells);
+		try
+		{
+			var hauler = context.Worker(-6, 0, WorkTypeDefOf.Hauling);
+			await HauledToZone(context, mech, hauler, cells);
+		}
+		finally
+		{
+			zone.Delete();
+		}
+	}
+
+	// A charger with no power net can't charge anything, so vanilla has nowhere to take the mech. The tweak picks the zone cell
+	// nearest that charger.
+	private static async Task HaulUnpoweredMechNearCharger(
+		ScenarioContext context
+	)
+	{
+		var mech = await UnpoweredMech(context, 0, -6);
+		var charger = (Building_MechCharger)context.Build(ThingDef.Named("BasicRecharger"), 10, 6);
+		context.Check("the charger can't charge the mech", !charger.CanPawnChargeCurrently(mech));
+		var cells = Enumerable.Range(-8, 18).Select(x => context.Cell(x, 2)).ToList();
+		var zone = ShutdownZone(context, cells);
+		try
+		{
+			var nearest = cells.OrderBy(cell => cell.DistanceToSquared(charger.InteractionCell)).First();
+			var hauler = context.Worker(-6, -6, WorkTypeDefOf.Hauling);
+			if (await HauledToZone(context, mech, hauler, cells))
+			{
+				context.Check($"it was put on the zone cell nearest the charger: {mech.Position}, nearest {nearest}, charger at {charger.InteractionCell}", mech.Position == nearest);
+			}
+		}
+		finally
+		{
+			zone.Delete();
+		}
+	}
+
+	// A charged battery puts the charger on a power net, so vanilla's HaulMechsToCharger takes the mech to it, and the tweak stays
+	// out of the way, zone or not.
+	private static async Task HaulUnpoweredMechChargerFree(
+		ScenarioContext context
+	)
+	{
+		var mech = await UnpoweredMech(context, 0, 0);
+		await FreeCharger(context, mech, 6, 6);
+		var cells = CellRect.CenteredOn(context.Cell(10, 0), 1).Cells.ToList();
+		var zone = ShutdownZone(context, cells);
+		try
+		{
+			var hauler = context.Worker(-6, 0, WorkTypeDefOf.Hauling);
+			context.Check("the tweak has no job while a charger is free", !UnpoweredGiver.HasJobOnThing(hauler, mech));
+			var tweak = false;
+			await context.Until($"the hauler takes the mech to the charger: hauler {Stage.Describe(hauler)}; mech {Stage.Describe(mech)}", () =>
+			{
+				tweak |= hauler.CurJobDef?.defName == "Ordo_HaulMechToShutdownZone";
+				return mech.CurJobDef == JobDefOf.MechCharge;
+			}, 2500);
+			context.Check("the tweak's job never ran", !tweak);
+		}
+		finally
+		{
+			zone.Delete();
+		}
+	}
+
+	private static async Task HaulUnpoweredMechOff(
+		ScenarioContext context
+	)
+	{
+		var mech = await UnpoweredMech(context, 0, 0);
+		var start = mech.Position;
+		var zone = ShutdownZone(context, CellRect.CenteredOn(context.Cell(10, 0), 1).Cells);
+		try
+		{
+			await WithSetting("HaulUnpoweredMechs", "false", async () =>
+			{
+				var hauler = context.Worker(-6, 0, WorkTypeDefOf.Hauling);
+				context.Check("with the setting off, the work giver skips", UnpoweredGiver.ShouldSkip(hauler));
 				await context.Step(600);
 				context.Check($"the mech stayed where it was: {mech.PositionHeld}, hauler {Stage.Describe(hauler)}", mech.Spawned && mech.Position == start);
 			});

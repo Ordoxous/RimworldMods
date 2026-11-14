@@ -11,6 +11,7 @@ namespace Ordo.Tweaks;
 public static class TweaksDefOf
 {
     public static JobDef HaulMechForRepair;
+    public static JobDef Ordo_HaulMechToShutdownZone;
 
     static TweaksDefOf() => DefOfHelper.EnsureInitializedInCtor(typeof(TweaksDefOf));
 }
@@ -70,6 +71,7 @@ public class WorkGiver_HaulMechForRepair : WorkGiver_Scanner
             || targetPawn.IsForbidden(pawn)
             || !pawn.CanReserve((LocalTargetInfo) targetPawn, ignoreOtherReservations: forced)
             || ShutdownUtility.MechInShutdownZone(targetPawn, targetPawn.Position, MechanoidWorkType.Work)
+            || UnpoweredMechHauling.VanillaTakesToCharger(targetPawn, pawn, forced)
         )
         {
             return false;

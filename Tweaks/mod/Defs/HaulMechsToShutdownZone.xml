@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+  <!-- Only takes mechs vanilla's HaulMechsToCharger finds no charger for, so the two never compete -->
+  <WorkGiverDef>
+    <defName>Ordo_HaulMechToShutdownZone</defName>
+    <label>haul unpowered mechs to shutdown zones</label>
+    <giverClass>Ordo.Tweaks.WorkGiver_HaulMechToShutdownZone</giverClass>
+    <workType>Hauling</workType>
+    <verb>haul</verb>
+    <gerund>hauling</gerund>
+    <priorityInType>89</priorityInType>
+    <requiredCapacities>
+      <li>Manipulation</li>
+    </requiredCapacities>
+    <canBeDoneByMechs>true</canBeDoneByMechs>
+  </WorkGiverDef>
+
+  <JobDef>
+    <defName>Ordo_HaulMechToShutdownZone</defName>
+    <driverClass>Ordo.Tweaks.JobDriver_HaulMechToShutdownZone</driverClass>
+    <reportString>hauling TargetA to a shutdown zone</reportString>
+  </JobDef>
+
+</Defs>

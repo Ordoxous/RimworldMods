@@ -10,6 +10,7 @@ internal static class TweaksSettings
 
     public static bool ArmorIndicators => GetBool("ArmorIndicators", true);
     public static bool HaulDownedMechs => GetBool("HaulDownedMechs", true);
+    public static bool HaulUnpoweredMechs => GetBool("HaulUnpoweredMechs", true);
     public static bool LimitHemogenFarming => GetBool("LimitHemogenFarming", true);
     public static int HemogenPackCap => Mathf.RoundToInt(GetFloat("HemogenPackCap", 30f));
     public static bool ToolsCategory => GetBool("ToolsCategory", true);
