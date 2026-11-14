@@ -33,13 +33,14 @@
 	<MU_Upgrades_Ui_Policy_UsedByDefault>{0} more without a policy follow it as the default.</MU_Upgrades_Ui_Policy_UsedByDefault>
 	<MU_Upgrades_Ui_Preview_ThisMech>{0} under this policy</MU_Upgrades_Ui_Preview_ThisMech>
 	<MU_Upgrades_Ui_Preview_NewMech>A new {0} with no upgrades</MU_Upgrades_Ui_Preview_NewMech>
-	<MU_Upgrades_Ui_Preview_ChooseMech>Choose a mech type with "Show upgrades for" to see what this policy gives it.</MU_Upgrades_Ui_Preview_ChooseMech>
+	<MU_Upgrades_Ui_Policy_Replace>Replace lower-ranked upgrades</MU_Upgrades_Ui_Policy_Replace>
+	<MU_Upgrades_Ui_Policy_Replace_Tip>When on, a mech has an allowed upgrade removed to make room for a higher-ranked one that's in stock. When off, a mech keeps every allowed upgrade it has, and the ranking only decides what fills its free points and which of two conflicting upgrades it gets.</MU_Upgrades_Ui_Policy_Replace_Tip>
+	<MU_Upgrades_Ui_Preview_Ranked>Ranked, highest first (drag to change)</MU_Upgrades_Ui_Preview_Ranked>
+	<MU_Upgrades_Ui_Preview_RankedAll>Ranking for every mech type (drag to change)</MU_Upgrades_Ui_Preview_RankedAll>
 	<MU_Upgrades_Ui_Preview_Points>A {0} gets {1} of its {2} upgrade points:</MU_Upgrades_Ui_Preview_Points>
 	<MU_Upgrades_Ui_Preview_PointsUnknown>A {0} gets upgrades worth {1} points. There's no {0} in the colony to read its upgrade points from, so the point limit is ignored.</MU_Upgrades_Ui_Preview_PointsUnknown>
-	<MU_Upgrades_Ui_Preview_Gets>Gets</MU_Upgrades_Ui_Preview_Gets>
-	<MU_Upgrades_Ui_Preview_Skipped>Skipped</MU_Upgrades_Ui_Preview_Skipped>
 	<MU_Upgrades_Ui_Preview_Nothing>Nothing</MU_Upgrades_Ui_Preview_Nothing>
-	<MU_Upgrades_Ui_Preview_Footer>For a mech with no upgrades, with every allowed upgrade in stock. Upgrades are picked in name order. A mech keeps the allowed upgrades it already has, and only gets upgrades that are in its auto upgrader's linked storages.</MU_Upgrades_Ui_Preview_Footer>
+	<MU_Upgrades_Ui_Preview_Footer>Picked from the top of the ranking down. The ranked list assumes every allowed upgrade is in stock.</MU_Upgrades_Ui_Preview_Footer>
 	<MU_Upgrades_Ui_Skip_NoPoints>Not enough upgrade points left</MU_Upgrades_Ui_Skip_NoPoints>
 
 	<!-- The mech's gizmos -->
@@ -61,6 +62,7 @@
 	<MU_Upgrades_Ui_State_Wanted>wanted, but no usable auto upgrader has one in stock</MU_Upgrades_Ui_State_Wanted>
 	<MU_Upgrades_Ui_State_Skipped>skipped</MU_Upgrades_Ui_State_Skipped>
 	<MU_Upgrades_Ui_State_Removing>removed on its next trip</MU_Upgrades_Ui_State_Removing>
+	<MU_Upgrades_Ui_State_Replacing>replaced on its next trip by a higher-ranked upgrade</MU_Upgrades_Ui_State_Replacing>
 	<MU_Upgrades_Ui_Status_Click>Click to open its upgrades tab.</MU_Upgrades_Ui_Status_Click>
 
 	<!-- The auto upgrader -->

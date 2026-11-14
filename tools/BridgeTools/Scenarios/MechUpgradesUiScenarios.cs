@@ -61,7 +61,15 @@ public static class MechUpgradesUiScenarios
 		new("ui_status_unusable_upgrader", "ui settings", UnusableUpgrader),
 		new("ui_alert_not_in_stock", "ui settings", NotInStockAlert),
 		new("ui_dialog_defaults", "ui", DialogDefaults),
-		new("ui_use_default_confirmation", "ui", UseDefaultConfirmation)
+		new("ui_use_default_confirmation", "ui", UseDefaultConfirmation),
+
+		new("ranking_conflicts", "ranking", RankingConflicts),
+		new("ranking_points", "ranking", RankingPoints),
+		new("ranking_unranked_last", "ranking", RankingUnrankedLast),
+		new("ranking_move", "ranking", RankingMove),
+		new("ranking_saved_and_copied", "ranking", RankingSavedAndCopied),
+		new("ranking_replace", "ranking", RankingReplace),
+		new("ranking_replace_not_for_points", "ranking", RankingReplaceNotForPoints)
 	};
 
 	private static Task PatchesApplied(
@@ -132,11 +140,12 @@ public static class MechUpgradesUiScenarios
 
 		var installed = site.Comp.AddUpgrade(b);
 		using var policy = new TempPolicy(site, a);
-		var keep = site.Comp.UpgradesToKeep();
-		var want = site.Comp.WantedUpgrades(keep);
-		context.Check($"{b.defName} isn't kept: keep=[{Names(keep)}]", !keep.Contains(installed));
-		context.Check($"{a.defName} is wanted: want=[{string.Join(",", want.Select(def => def.defName))}]", want.Contains(a));
-		context.Check($"{b.defName} isn't wanted", !want.Contains(b));
+
+		// Both in stock, so only the policy decides
+		var plan = UpgradePlanner.Plan(site.Mech.def, MechUpgradeUtility.MaxUpgradePoints(site.Mech), site.Comp.upgrades, site.Comp.CurrentUpgradePolicy, new[] { a, b }.Select(UpgradePlanner.Sample));
+		context.Check($"{b.defName} isn't kept: keep=[{Names(plan.Keep)}] remove=[{Names(plan.Remove)}]", !plan.Keep.Contains(installed) && plan.Remove.Contains(installed));
+		context.Check($"{a.defName} is added: add=[{Names(plan.Add)}]", plan.Add.Any(upgrade => upgrade.def == a));
+		context.Check($"{b.defName} isn't added", plan.Add.All(upgrade => upgrade.def != b));
 		return Task.CompletedTask;
 	}
 
@@ -928,6 +937,238 @@ public static class MechUpgradesUiScenarios
 		return Task.CompletedTask;
 	}
 
+	// Two upgrades that share an exclusion tag, so only one can be fitted, in defName order: by default the first wins
+	private static (MechUpgradeDef first, MechUpgradeDef second) ConflictingPair(
+		ScenarioContext context,
+		Pawn mech
+	)
+	{
+		var compatible = Compatible(mech).ToList();
+		var pair = compatible
+			.SelectMany(a => compatible.Where(b => string.CompareOrdinal(a.defName, b.defName) < 0 && a.exclusionTags.Intersect(b.exclusionTags).Any()).Select(b => (a, b)))
+			.FirstOrDefault(pair => pair.a.upgradePoints + pair.b.upgradePoints <= MechUpgradeUtility.MaxUpgradePoints(mech));
+		if (pair.a == null)
+		{
+			context.Fail($"no two upgrades for {MechKind} share an exclusion tag and fit together");
+		}
+
+		return pair;
+	}
+
+	private static Task RankingConflicts(
+		ScenarioContext context
+	)
+	{
+		var site = Site.Set(context);
+		var (first, second) = ConflictingPair(context, site.Mech);
+		if (first == null)
+		{
+			return Task.CompletedTask;
+		}
+
+		Stock(site.Storage, new[] { first, second });
+		using var temp = new TempPolicy(site, first, second);
+		var policy = site.Comp.CurrentUpgradePolicy;
+		context.Check($"unranked, {first.defName} wins by name: [{Describe(Operations(site))}]", Added(Operations(site)).SequenceEqual(new[] { first }));
+
+		policy.Ranking = new List<MechUpgradeDef> { second };
+		context.Check($"ranked first, {second.defName} wins: [{Describe(Operations(site))}]", Added(Operations(site)).SequenceEqual(new[] { second }));
+
+		var skipped = new List<SkippedUpgrade>();
+		var preview = Dialog_ManageUpgradePolicies.Preview(policy, site.Mech.def, MechUpgradeUtility.MaxUpgradePoints(site.Mech), skipped);
+		context.Check($"the preview agrees: gets=[{Names(preview)}] skipped=[{Names(skipped.Select(skip => skip.Upgrade))}]", preview.Select(upgrade => upgrade.def).SequenceEqual(new[] { second }) && skipped.Any(skip => skip.Upgrade.def == first));
+		return Task.CompletedTask;
+	}
+
+	// With room for only one of two, the higher-ranked one is fitted
+	private static Task RankingPoints(
+		ScenarioContext context
+	)
+	{
+		var site = Site.Set(context);
+		var (a, b) = TwoCompatible(context, site.Mech);
+		if (a == null)
+		{
+			return Task.CompletedTask;
+		}
+
+		using var temp = new TempPolicy(site, a, b);
+		var policy = site.Comp.CurrentUpgradePolicy;
+		var room = Math.Max(a.upgradePoints, b.upgradePoints);
+		var stock = new[] { a, b }.Select(UpgradePlanner.Sample).ToList();
+		foreach (var top in new[] { a, b })
+		{
+			policy.Ranking = new List<MechUpgradeDef> { top };
+			var plan = UpgradePlanner.Plan(site.Mech.def, room, new List<MechUpgrade>(), policy, stock);
+			context.Check($"with {room} points and {top.defName} ranked first, only it is fitted: add=[{Names(plan.Add)}]", plan.Add.Select(upgrade => upgrade.def).SequenceEqual(new[] { top }));
+			var noPoints = "MU_Upgrades_Ui_Skip_NoPoints".Translate().ToString();
+			context.Check($"and the other is skipped for points: [{string.Join(", ", plan.Skipped.Select(skip => $"{skip.Upgrade.def.defName}: {skip.Reason}"))}]", plan.Skipped.Any(skip => skip.Upgrade.def != top && skip.Reason == noPoints));
+		}
+
+		return Task.CompletedTask;
+	}
+
+	private static Task RankingUnrankedLast(
+		ScenarioContext context
+	)
+	{
+		var site = Site.Set(context);
+		var defs = Compatible(site.Mech).Take(3).ToList();
+		if (defs.Count < 3)
+		{
+			context.Fail($"fewer than three upgrades for {MechKind}");
+			return Task.CompletedTask;
+		}
+
+		var policy = new UpgradePolicy { Ranking = new List<MechUpgradeDef> { defs[2] } };
+		var order = policy.InRankOrder(defs).ToList();
+		context.Check($"the ranked one first, then the rest by name: [{string.Join(",", order.Select(def => def.defName))}]", order.SequenceEqual(new[] { defs[2], defs[0], defs[1] }));
+		return Task.CompletedTask;
+	}
+
+	// Dragging in the dialog calls Move with the list as shown, and a slot to insert at
+	private static Task RankingMove(
+		ScenarioContext context
+	)
+	{
+		var site = Site.Set(context);
+		var defs = Compatible(site.Mech).Take(4).ToList();
+		if (defs.Count < 4)
+		{
+			context.Fail($"fewer than four upgrades for {MechKind}");
+			return Task.CompletedTask;
+		}
+
+		// The fourth is ranked first but not allowed, as if unticked after ranking: it must keep its place
+		var (p, q, r, hidden) = (defs[0], defs[1], defs[2], defs[3]);
+		var policy = new UpgradePolicy { Ranking = new List<MechUpgradeDef> { hidden } };
+		foreach (var def in new[] { p, q, r })
+		{
+			policy.Filter.SetAllow(def.linkedThingDef, true);
+		}
+
+		string Order() => string.Join(",", policy.InRankOrder(new[] { p, q, r }).Select(def => def.defName));
+		var shown = policy.InRankOrder(policy.AllowedUpgradeDefs).ToList();
+		context.Check($"starts in name order: {Order()}", shown.SequenceEqual(new[] { p, q, r }));
+
+		policy.Move(shown, 2, 0);
+		context.Check($"the last dragged to the top: {Order()}", policy.InRankOrder(new[] { p, q, r }).SequenceEqual(new[] { r, p, q }));
+
+		policy.Move(policy.InRankOrder(policy.AllowedUpgradeDefs).ToList(), 0, 3);
+		context.Check($"and back to the bottom: {Order()}", policy.InRankOrder(new[] { p, q, r }).SequenceEqual(new[] { p, q, r }));
+		context.Check($"the unshown upgrade kept its place: [{string.Join(",", policy.Ranking.Select(def => def.defName))}]", policy.Ranking.FirstOrDefault() == hidden);
+		return Task.CompletedTask;
+	}
+
+	private static Task RankingSavedAndCopied(
+		ScenarioContext context
+	)
+	{
+		var site = Site.Set(context);
+		var defs = Compatible(site.Mech).Take(2).ToList();
+		var policy = new UpgradePolicy(9999, "Ranked") { Ranking = new List<MechUpgradeDef> { defs[1], defs[0] }, ReplaceLowerRanked = true };
+
+		var copy = new UpgradePolicy(9998, "Copy");
+		copy.CopyFrom(policy);
+		context.Check($"a copy keeps the ranking and the replace setting: [{string.Join(",", copy.Ranking.Select(def => def.defName))}] replace={copy.ReplaceLowerRanked}", copy.Ranking.SequenceEqual(policy.Ranking) && copy.ReplaceLowerRanked && copy.Ranking != policy.Ranking);
+
+		var path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "ordo_ranking_test.xml");
+		try
+		{
+			Scribe.saver.InitSaving(path, "test");
+			Scribe_Deep.Look(ref policy, "policy");
+			Scribe.saver.FinalizeSaving();
+
+			UpgradePolicy loaded = null;
+			Scribe.loader.InitLoading(path);
+			Scribe_Deep.Look(ref loaded, "policy");
+			Scribe.loader.FinalizeLoading();
+			context.Check($"saved and loaded: [{string.Join(",", loaded?.Ranking.Select(def => def.defName) ?? Enumerable.Empty<string>())}] replace={loaded?.ReplaceLowerRanked}", loaded != null && loaded.Ranking.SequenceEqual(policy.Ranking) && loaded.ReplaceLowerRanked);
+		}
+		finally
+		{
+			System.IO.File.Delete(path);
+		}
+
+		// An older save has no ranking
+		var old = new UpgradePolicy();
+		context.Check("a new policy starts unranked and keeps what it has", old.Ranking != null && old.Ranking.Count == 0 && !old.ReplaceLowerRanked);
+		return Task.CompletedTask;
+	}
+
+	// The mech has the lower-ranked of two conflicting upgrades, and the higher-ranked one is in stock
+	private static Task RankingReplace(
+		ScenarioContext context
+	)
+	{
+		var site = Site.Set(context);
+		var (first, second) = ConflictingPair(context, site.Mech);
+		if (first == null)
+		{
+			return Task.CompletedTask;
+		}
+
+		var installed = site.Comp.AddUpgrade(first);
+		using var temp = new TempPolicy(site, first, second);
+		var policy = site.Comp.CurrentUpgradePolicy;
+		policy.Ranking = new List<MechUpgradeDef> { second, first };
+		context.Check($"with {second.defName} not in stock, nothing changes: [{Describe(Operations(site))}]", Operations(site).Count == 0);
+
+		Stock(site.Storage, new[] { second });
+		context.Check($"replacing off: the mech keeps {first.defName}: [{Describe(Operations(site))}]", Operations(site).Count == 0);
+
+		policy.ReplaceLowerRanked = true;
+		var operations = Operations(site);
+		context.Check($"replacing on: {second.defName} added and {first.defName} removed, removal last: [{Describe(operations)}]", Added(operations).SequenceEqual(new[] { second }) && operations.LastOrDefault()?.type == UpgradeOperationType.Remove && operations.LastOrDefault()?.upgrade == installed);
+
+		UpgradeStatus.Invalidate();
+		var status = UpgradeStatus.Compute(site.Comp);
+		context.Check($"the status says replaced and adding: {Lines(status)}", State(status, first) == UpgradeState.Replacing && State(status, second) == UpgradeState.Adding);
+
+		// Carry it out by hand: the removed one goes to storage, so the next plan sees it in stock and must not swap back
+		site.Comp.RemoveUpgrade(installed);
+		var fitted = Added(operations).Count == 1 ? operations.First(operation => operation.type == UpgradeOperationType.Add).upgrade : null;
+		if (fitted != null)
+		{
+			site.StorageComp.innerContainer.Remove(site.StorageComp.innerContainer.First(thing => thing.TryGetComp<CompMechUpgrade>()?.upgrade == fitted));
+			site.Comp.AddUpgrade(second);
+		}
+
+		Stock(site.Storage, new[] { first });
+		context.Check($"afterwards, with {first.defName} in stock, it stays as it is: [{Describe(Operations(site))}]", Operations(site).Count == 0);
+		return Task.CompletedTask;
+	}
+
+	// Replacing only happens for something better in stock: a mech over its points with nothing better keeps everything
+	private static Task RankingReplaceNotForPoints(
+		ScenarioContext context
+	)
+	{
+		var site = Site.Set(context);
+		var (a, b) = TwoCompatible(context, site.Mech);
+		if (a == null)
+		{
+			return Task.CompletedTask;
+		}
+
+		var installedA = site.Comp.AddUpgrade(a);
+		var installedB = site.Comp.AddUpgrade(b);
+		using var temp = new TempPolicy(site, a, b);
+		var policy = site.Comp.CurrentUpgradePolicy;
+		policy.ReplaceLowerRanked = true;
+
+		var plan = UpgradePlanner.Plan(site.Mech.def, 0, site.Comp.upgrades, policy, new List<MechUpgrade>());
+		context.Check($"with no points and nothing in stock, it keeps both: keep=[{Names(plan.Keep)}] remove=[{Names(plan.Remove)}]", plan.Keep.Contains(installedA) && plan.Keep.Contains(installedB) && plan.Remove.Count == 0);
+		return Task.CompletedTask;
+	}
+
+	private static List<MechUpgradeDef> Added(
+		List<MechUpgradeOperation> operations
+	)
+	{
+		return operations.Where(operation => operation.type == UpgradeOperationType.Add).Select(operation => operation.upgrade.def).ToList();
+	}
+
 	// A site left standing for looking at the UI, and later for the showcase: one lifter with a policy that wants a change and
 	// stock to make it, and one with no policy
 	internal static object Demo(
@@ -1035,8 +1276,7 @@ public static class MechUpgradesUiScenarios
 		Site site
 	)
 	{
-		var keep = site.Comp.UpgradesToKeep();
-		return site.Upgrader.WantedOperations(site.Mech, site.Comp.upgrades, keep, site.Comp.WantedUpgrades(keep));
+		return site.Upgrader.WantedOperations(site.Mech, site.Comp.upgrades, site.Comp.EffectiveUpgradePolicy);
 	}
 
 	private static void Due(

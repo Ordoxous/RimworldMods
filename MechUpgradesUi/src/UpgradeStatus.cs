@@ -24,7 +24,10 @@ public enum UpgradeState
     Skipped,
 
     /// <summary>Installed and not allowed, so the next trip removes it.</summary>
-    Removing
+    Removing,
+
+    /// <summary>Installed and allowed, but the next trip removes it to make room for a higher-ranked upgrade.</summary>
+    Replacing
 }
 
 /// <summary>An upgrade's state, with the reason when it's skipped.</summary>
@@ -118,30 +121,34 @@ public sealed class UpgradeStatus
             return status;
         }
 
-        var keep = comp.UpgradesToKeep(policy);
-        var wanted = comp.WantedUpgrades(keep, policy);
-        var freePoints = status.MaxPoints - MechUpgradeUtility.CurrentPoints(keep);
+        var installed = comp.upgrades;
 
-        status.Removals = comp.upgrades.Where(u => !keep.Contains(u)).ToList();
-
-        // Only the upgraders the job giver would consider: an unpowered or unreachable one won't be visited
+        // Only the upgraders the job giver would consider: an unpowered or unreachable one won't be visited. The next trip
+        // goes to whichever can add the most
         var unusable = new List<string>();
         var usable = Building_AutoMechUpgrader.UsableBy(mech, unusable);
         var best = usable
-            .Select(b => (upgrader: b, added: UpgradePlanner.PickAdditions(mech.def, freePoints, keep, b.StockedUpgrades().Where(u => wanted.Contains(u.def)))))
-            .MaxByWithFallback(x => x.added.Count);
+            .Select(b => (upgrader: b, plan: UpgradePlanner.Plan(mech.def, status.MaxPoints, installed, policy, b.StockedUpgrades())))
+            .MaxByWithFallback(x => x.plan.Add.Count);
+        var plan = best.plan ?? UpgradePlanner.Plan(mech.def, status.MaxPoints, installed, policy, []);
         status.Upgrader = best.upgrader;
-        status.Additions = best.added ?? [];
+        status.Additions = plan.Add;
+        status.Removals = plan.Remove;
 
-        // What the policy would fit with everything in stock, and why the rest wouldn't fit
-        var skipped = new List<SkippedUpgrade>();
-        status.Unstocked = UpgradePlanner
-            .PickAdditions(mech.def, freePoints, keep, wanted.Select(UpgradePlanner.Sample), skipped)
+        // What the policy would do with everything in stock, and why the rest wouldn't fit
+        var ideal = UpgradePlanner.Plan(
+            mech.def,
+            status.MaxPoints,
+            installed,
+            policy,
+            policy.AllowedUpgradeDefs.Where(d => d.CanAdd(mech.def).Accepted).Select(UpgradePlanner.Sample)
+        );
+        status.Unstocked = ideal.Add
             .Select(u => u.def)
             .Where(d => status.Additions.All(a => a.def != d))
             .ToList();
 
-        status.PointsAfter = MechUpgradeUtility.CurrentPoints(keep) + MechUpgradeUtility.CurrentPoints(status.Additions);
+        status.PointsAfter = MechUpgradeUtility.CurrentPoints(plan.Keep) + MechUpgradeUtility.CurrentPoints(status.Additions);
 
         if (usable.Count == 0 && (status.Removals.Count > 0 || status.Unstocked.Count > 0))
         {
@@ -150,26 +157,30 @@ public sealed class UpgradeStatus
                 : "MU_Upgrades_Ui_Blocked_Unusable".Translate(unusable.Distinct().ToCommaList()).Resolve();
         }
 
-        // Allowed upgrades the mech's type can't have at all are left out: they're there for other mechs
-        foreach (var def in policy.AllowedUpgradeDefs.Where(d => d.CanAdd(mech.def).Accepted).OrderBy(d => d.label))
+        // In the policy's rank order. Allowed upgrades the mech's type can't have at all are left out: they're there for other
+        // mechs. An installed upgrade being replaced is listed with the removals
+        foreach (var def in policy.InRankOrder(policy.AllowedUpgradeDefs.Where(d => d.CanAdd(mech.def).Accepted)))
         {
-            if (keep.Any(u => u.def == def))
+            if (plan.Keep.Any(u => u.def == def))
                 status.Lines.Add(new UpgradeLine(def, UpgradeState.Installed, null));
+            else if (installed.Any(u => u.def == def))
+                continue;
             else if (status.Additions.Any(u => u.def == def))
                 status.Lines.Add(new UpgradeLine(def, UpgradeState.Adding, null));
             else if (status.Unstocked.Contains(def))
                 status.Lines.Add(new UpgradeLine(def, UpgradeState.Wanted, null));
             else
             {
-                // Either it clashes with an upgrade the mech keeps, so it was never wanted, or the plan passed over it
-                var reason = wanted.Contains(def)
-                    ? skipped.FirstOrDefault(s => s.Upgrade.def == def).Reason
-                    : def.CanAdd(mech.def, keep).Reason;
+                var reason = ideal.Skipped.FirstOrDefault(s => s.Upgrade.def == def).Reason ?? def.CanAdd(mech.def, plan.Keep).Reason;
                 status.Lines.Add(new UpgradeLine(def, UpgradeState.Skipped, reason));
             }
         }
 
-        status.Lines.AddRange(status.Removals.Select(u => new UpgradeLine(u.def, UpgradeState.Removing, null)));
+        status.Lines.AddRange(status.Removals.Select(u => new UpgradeLine(
+            u.def,
+            plan.Replaced.Contains(u) ? UpgradeState.Replacing : UpgradeState.Removing,
+            null
+        )));
         return status;
     }
 
@@ -224,6 +235,7 @@ public sealed class UpgradeStatus
             UpgradeState.Adding => "MU_Upgrades_Ui_State_Adding".Translate().Resolve().Colorize(AddingColor),
             UpgradeState.Wanted => "MU_Upgrades_Ui_State_Wanted".Translate().Resolve().Colorize(WantedColor),
             UpgradeState.Removing => "MU_Upgrades_Ui_State_Removing".Translate().Resolve().Colorize(RemovingColor),
+            UpgradeState.Replacing => "MU_Upgrades_Ui_State_Replacing".Translate().Resolve().Colorize(RemovingColor),
             _ => ("MU_Upgrades_Ui_State_Skipped".Translate().Resolve()
                   + (line.Reason.NullOrEmpty() ? "" : $" ({line.Reason})")).Colorize(ColoredText.SubtleGrayColor)
         };

@@ -9,7 +9,7 @@ Give `BlueprintMaterials` and `MechUpgradesUi` what `SillyAnimalThings` has: GAB
 ## Read first
 
 1. The `rimworld-mod-dev` skill (`.claude/skills/rimworld-mod-dev/SKILL.md`), then its `new-mod-setup.md`, `live-testing.md` and `showcase.md` references. `new-mod-setup.md` is the checklist this task follows.
-2. `BlueprintMaterials/HANDOFF.md` and `MechUpgradesUi/README.md`: what each mod does, what to test, how to demo it, and the traps found while writing this. MechUpgradesUi is done: 27 scenarios and 4 showcase clips. Its showcase is the model for clips that aren't abilities.
+2. `BlueprintMaterials/HANDOFF.md` and `MechUpgradesUi/README.md`: what each mod does, what to test, how to demo it, and the traps found while writing this. MechUpgradesUi is done: 34 scenarios and 4 showcase clips. Its showcase is the model for clips that aren't abilities.
 3. `tools/BridgeTools/Scenarios/SillyAnimalThingsScenarios.cs` and `tools/BridgeTools/Showcase/SillyAnimalThingsShowcase.cs`, as the models.
 
 ## Suggested order

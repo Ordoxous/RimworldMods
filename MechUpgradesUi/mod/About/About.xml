@@ -30,6 +30,7 @@
     [h2]Features[/h2]
     [list]
     [*]A policy editor with a live preview: what a mech type gets from the policy, what's skipped and why, and what changes for the mech you opened it from. Load a policy from one of your saved upgrade sets.
+    [*]Rank upgrades by dragging them, to choose what a mech gets when it can't fit everything, and optionally have mechs swap lower-ranked upgrades for better ones as they come into stock.
     [*]Assign policies from the Mechs tab or from the mech's own buttons, which work on several mechs at once.
     [*]Hover over a policy to see each upgrade's state for that mech: installed, added or removed on its next trip, wanted but not in stock, or skipped.
     [*]Markers on the Mechs tab for mechs with changes waiting, wanted upgrades not in stock, or no usable upgrader.

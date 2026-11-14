@@ -31,16 +31,10 @@ public class JobGiver_OptimizeUpgrades : ThinkNode_JobGiver
         if (upgraders.Count == 0)
             return null;
 
-        var currentUpgrades = mechComp.upgrades;
-        var upgradesToKeep = mechComp.UpgradesToKeep();
-        var wantedUpgrades = mechComp.WantedUpgrades(upgradesToKeep);
-
-        if (wantedUpgrades.Empty() && upgradesToKeep.Count == currentUpgrades.Count)
-            return null;
-
+        var policy = mechComp.EffectiveUpgradePolicy;
         var operationsByUpgrader = upgraders.ToDictionary(
             upgrader => upgrader,
-            upgrader => upgrader.WantedOperations(pawn, currentUpgrades, upgradesToKeep, wantedUpgrades)
+            upgrader => upgrader.WantedOperations(pawn, mechComp.upgrades, policy)
         );
 
         if (operationsByUpgrader.TryMaxBy(e => e.Value.Count, out var mostOperations))

@@ -264,8 +264,13 @@ public class Dialog_ManageUpgradePolicies(
         var candidates = policy.AllowedUpgradeDefs
             .Where(d => d.CanAdd(mechDef).Accepted)
             .Select(UpgradePlanner.Sample);
-        return UpgradePlanner.PickAdditions(mechDef, maxPoints, [], candidates, skipped);
+        var plan = UpgradePlanner.Plan(mechDef, maxPoints, [], policy, candidates);
+        skipped?.AddRange(plan.Skipped);
+        return plan.Add;
     }
+
+    // The ranked list's reorder group, made on repaint and used by every event until the next one
+    private int _rankGroup = -1;
 
     private void DoPreview(Rect rect)
     {
@@ -287,15 +292,18 @@ public class Dialog_ManageUpgradePolicies(
             inner.yMin += usedByHeight + 6f;
         }
 
-        if (_mechDef == null)
+        // Changes how this policy picks, so the statuses shown elsewhere are stale
+        var replaceRect = inner with { height = 24f };
+        var replace = SelectedPolicy.ReplaceLowerRanked;
+        Widgets.CheckboxLabeled(replaceRect, "MU_Upgrades_Ui_Policy_Replace".Translate(), ref replace);
+        TooltipHandler.TipRegionByKey(replaceRect, "MU_Upgrades_Ui_Policy_Replace_Tip");
+        if (replace != SelectedPolicy.ReplaceLowerRanked)
         {
-            using (new TextBlock(GameFont.Small, TextAnchor.UpperLeft, Color.gray))
-            {
-                Widgets.Label(inner, "MU_Upgrades_Ui_Preview_ChooseMech".Translate());
-            }
-
-            return;
+            SelectedPolicy.ReplaceLowerRanked = replace;
+            UpgradeStatus.Invalidate();
         }
+
+        inner.yMin += 30f;
 
         const string footerKey = "MU_Upgrades_Ui_Preview_Footer";
         float footerHeight;
@@ -309,11 +317,18 @@ public class Dialog_ManageUpgradePolicies(
         Widgets.BeginScrollView(listRect, ref _previewScroll, viewRect);
         var y = 0f;
 
-        // The mech the dialog was opened for, as it stands, while its type is the one shown
-        if (_openedForComp != null && _openedFor is { Dead: false } && _openedFor.def == _mechDef)
-            y = DoThisMech(viewRect, y, _openedForComp) + 12f;
+        if (_mechDef == null)
+        {
+            y = DoRankingForAll(viewRect, y);
+        }
+        else
+        {
+            // The mech the dialog was opened for, as it stands, while its type is the one shown
+            if (_openedForComp != null && _openedFor is { Dead: false } && _openedFor.def == _mechDef)
+                y = DoThisMech(viewRect, y, _openedForComp) + 12f;
 
-        y = DoNewMech(viewRect, y);
+            y = DoNewMech(viewRect, y);
+        }
 
         if (Event.current.type == EventType.Layout)
             _previewHeight = y;
@@ -358,18 +373,51 @@ public class Dialog_ManageUpgradePolicies(
             : "MU_Upgrades_Ui_Preview_PointsUnknown".Translate(_mechDef.LabelCap, used);
         y = DoWrapped(viewRect, y, summary) + 4f;
 
-        y = DoHeading(viewRect, y, "MU_Upgrades_Ui_Preview_Gets".Translate(), sub: true);
-        if (gets.Count == 0)
-            y = DoNothing(viewRect, y);
-        foreach (var upgrade in gets)
-            y = DoUpgradeRow(viewRect, y, upgrade, null, false);
-
-        if (skipped.Count > 0)
+        // Every allowed upgrade it can have, in rank order: the ones it gets plainly, the rest greyed with why
+        var ranked = SelectedPolicy.InRankOrder(SelectedPolicy.AllowedUpgradeDefs.Where(d => d.CanAdd(_mechDef).Accepted)).ToList();
+        y = DoHeading(viewRect, y, "MU_Upgrades_Ui_Preview_Ranked".Translate(), sub: true);
+        return DoRankedList(viewRect, y, ranked, def =>
         {
-            y += 8f;
-            y = DoHeading(viewRect, y, "MU_Upgrades_Ui_Preview_Skipped".Translate(), sub: true);
-            foreach (var skip in skipped)
-                y = DoUpgradeRow(viewRect, y, skip.Upgrade, skip.Reason, true);
+            if (gets.Any(u => u.def == def))
+                return (null, false);
+            return (skipped.FirstOrDefault(s => s.Upgrade.def == def).Reason ?? "MU_Upgrades_Ui_State_Skipped".Translate(), true);
+        });
+    }
+
+    // With no mech type chosen: the whole ranking, without what any one type would get
+    private float DoRankingForAll(Rect viewRect, float y)
+    {
+        var ranked = SelectedPolicy.InRankOrder(SelectedPolicy.AllowedUpgradeDefs).ToList();
+        y = DoHeading(viewRect, y, "MU_Upgrades_Ui_Preview_RankedAll".Translate());
+        return DoRankedList(viewRect, y, ranked, _ => (null, false));
+    }
+
+    // Upgrades in rank order, dragged to rerank. Each row's subtitle and greying come from mark
+    private float DoRankedList(Rect viewRect, float y, List<MechUpgradeDef> ranked, Func<MechUpgradeDef, (string subtitle, bool greyed)> mark)
+    {
+        if (ranked.Count == 0)
+            return DoNothing(viewRect, y);
+
+        if (Event.current.type == EventType.Repaint)
+        {
+            var policy = SelectedPolicy;
+            _rankGroup = ReorderableWidget.NewGroup(
+                (from, to) =>
+                {
+                    policy.Move(ranked, from, to);
+                    UpgradeStatus.Invalidate();
+                },
+                ReorderableDirection.Vertical,
+                new Rect(0f, 0f, viewRect.width, viewRect.height)
+            );
+        }
+
+        foreach (var def in ranked)
+        {
+            var (subtitle, greyed) = mark(def);
+            var row = new Rect(0f, y, viewRect.width, subtitle == null ? RowHeight : SkippedRowHeight);
+            ReorderableWidget.Reorderable(_rankGroup, row);
+            y = DoUpgradeRow(viewRect, y, UpgradePlanner.Sample(def), subtitle, greyed, draggable: true);
         }
 
         return y;
@@ -407,8 +455,9 @@ public class Dialog_ManageUpgradePolicies(
         return y + RowHeight;
     }
 
-    // An upgrade, with an optional line under its name: why it's skipped, or its state. A greyed row won't be fitted
-    private static float DoUpgradeRow(Rect viewRect, float y, MechUpgrade upgrade, [CanBeNull] string subtitle, bool greyed)
+    // An upgrade, with an optional line under its name: why it's skipped, or its state. A greyed row won't be fitted. A
+    // draggable one has a drag handle on the left
+    private static float DoUpgradeRow(Rect viewRect, float y, MechUpgrade upgrade, [CanBeNull] string subtitle, bool greyed, bool draggable = false)
     {
         var height = subtitle == null ? RowHeight : SkippedRowHeight;
         var row = new Rect(0f, y, viewRect.width, height);
@@ -418,7 +467,16 @@ public class Dialog_ManageUpgradePolicies(
         var color = greyed ? Color.gray : Color.white;
         var def = upgrade.def;
 
-        var iconRect = new Rect(row.x + 2f, row.y + 2f, 24f, 24f);
+        var left = row.x + 2f;
+        if (draggable)
+        {
+            GUI.color = new Color(1f, 1f, 1f, 0.5f);
+            GUI.DrawTexture(new Rect(left, row.y + 6f, 16f, 16f), TexButton.DragHash);
+            GUI.color = Color.white;
+            left += 20f;
+        }
+
+        var iconRect = new Rect(left, row.y + 2f, 24f, 24f);
         // The item's icon: MU's own uiIcon field is typed against a Unity assembly the build can't resolve
         var icon = def.linkedThingDef?.uiIcon;
         if (icon != null)

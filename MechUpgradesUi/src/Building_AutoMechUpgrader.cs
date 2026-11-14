@@ -10,33 +10,23 @@ namespace Ordo.MechUpgradesUi;
 
 public class Building_AutoMechUpgrader : Building_MechUpgrader
 {
+    /// <summary>What the policy would have this upgrader do to the mech, from its stock: the plan as MU operations.</summary>
     public List<MechUpgradeOperation> WantedOperations(
         Pawn pawn,
         List<MechUpgrade> currentUpgrades,
-        List<MechUpgrade> upgradesToKeep,
-        List<MechUpgradeDef> wantedUpgrades
+        UpgradePolicy policy
     )
     {
         // Not using MechUpgradeUtility.GetOperationsFromLists: it overwrites the given upgrader's saved upgrades list
-        var allowedOperations = UpgradePlanner
-            .PickAdditions(
-                pawn.def,
-                MechUpgradeUtility.MaxUpgradePoints(pawn) - MechUpgradeUtility.CurrentPoints(upgradesToKeep),
-                upgradesToKeep,
-                StockedUpgrades().Where(u => wantedUpgrades.Contains(u.def))
-            )
+        var plan = UpgradePlanner.Plan(pawn.def, MechUpgradeUtility.MaxUpgradePoints(pawn), currentUpgrades, policy, StockedUpgrades());
+        var operations = plan.Add
             .Select(u => new MechUpgradeOperation(u, UpgradeOperationType.Add))
             .ToList();
 
         // MU runs operations from the end of the list. Removals go last so they run first, otherwise
         // removing an upgrade would also take a shared ability from the upgrade replacing it
-        allowedOperations.AddRange(
-            currentUpgrades
-                .Where(u => !upgradesToKeep.Contains(u))
-                .Select(u => new MechUpgradeOperation(u, UpgradeOperationType.Remove))
-        );
-
-        return allowedOperations;
+        operations.AddRange(plan.Remove.Select(u => new MechUpgradeOperation(u, UpgradeOperationType.Remove)));
+        return operations;
     }
 
     /// <summary>The storages linked to this upgrader that are active, so their upgrades can be fitted.</summary>
@@ -134,13 +124,7 @@ public class Building_AutoMechUpgrader : Building_MechUpgrader
         var mechComp = pawn.GetComp<CompUpgradableMechWithPolicy>();
         if (!showDialog && mechComp?.EffectiveUpgradePolicy != null)
         {
-            var upgradesToKeep = mechComp.UpgradesToKeep();
-            var wantedOperations = WantedOperations(
-                pawn,
-                mechComp.upgrades,
-                upgradesToKeep,
-                mechComp.WantedUpgrades(upgradesToKeep)
-            );
+            var wantedOperations = WantedOperations(pawn, mechComp.upgrades, mechComp.EffectiveUpgradePolicy);
 
             if (wantedOperations.Count > 0)
             {

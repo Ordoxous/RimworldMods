@@ -38,24 +38,6 @@ public class CompUpgradableMechWithPolicy : CompUpgradableMechanoid
             ? Find.World.GetComponent<WorldComponent_UpgradeDatabase>().DefaultPolicy()
             : null);
 
-    /// <summary>The installed upgrades a policy allows: the effective policy, unless another is given.</summary>
-    public List<MechUpgrade> UpgradesToKeep(UpgradePolicy policy = null)
-    {
-        var filter = (policy ?? EffectiveUpgradePolicy).Filter;
-        return upgrades
-            .Where(u => filter.Allows(u.def.linkedThingDef))
-            .ToList();
-    }
-
-    public List<MechUpgradeDef> WantedUpgrades(List<MechUpgrade> upgradesToKeep, UpgradePolicy policy = null)
-    {
-        // Check against the upgrades that will remain, so an upgrade can replace an unwanted one in the same trip.
-        // The point budget is handled by Building_AutoMechUpgrader.WantedOperations.
-        return (policy ?? EffectiveUpgradePolicy).AllowedUpgradeDefs
-            .Where(d => d.CanAdd(Mech.def, upgradesToKeep))
-            .ToList();
-    }
-
     private static readonly CachedTexture CheckNowIcon = new("UI/Gizmos/MU_InsertMechanoid");
 
     /// <summary>The player's controlled mechs on a map, or on every map.</summary>
