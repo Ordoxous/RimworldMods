@@ -49,6 +49,16 @@
 							</thingCategories>
 						</value>
 					</Operation>
+					<!-- 1.7 errors on anything haulable without a mass. Compared by name, so an upstream mass wins -->
+					<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+						<xpath>Defs/ThingDef[defName="MU_MechUpgrader"]</xpath>
+						<compare>Name</compare>
+						<value>
+							<statBases>
+								<Mass>50</Mass>
+							</statBases>
+						</value>
+					</Operation>
 				</caseTrue>
 			</Operation>
 		</caseTrue>

@@ -9,11 +9,19 @@ namespace Ordo.Tweaks;
 [StaticConstructorOnStartup]
 public static class ToolsCategory
 {
+    // Other mods can give weapons their work offsets after startup: Setosa's Power Tools queues a long event from its static
+    // constructor that applies its settings. Waiting until every static constructor has run, then queueing behind whatever
+    // they queued, catches those weapons whichever order the static constructors ran in.
     static ToolsCategory()
     {
         if (!TweaksSettings.ToolsCategory)
             return;
 
+        LongEventHandler.ExecuteWhenFinished(() => LongEventHandler.QueueLongEvent(AddTools, "Ordo_Tweaks_ToolsCategory", false, null));
+    }
+
+    private static void AddTools()
+    {
         var toolsCategory = ThingCategoryDef.Named("Ordo_Tools");
 
         foreach (var def in DefDatabase<ThingDef>.AllDefsListForReading.Where(IsTool))

@@ -73,6 +73,22 @@
 						</value>
 					</Operation>
 
+					<!-- 1.7 errors on anything haulable without a mass. The 1x1 portables weigh 15; these are 3x3 -->
+					<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+						<xpath>
+							Defs/ThingDef[
+							  defName="VFE_IndustrialWoodFiredGenerator" or
+							  defName="VFE_IndustrialChemfuelPoweredGenerator"
+							]
+						</xpath>
+						<compare>Name</compare>
+						<value>
+							<statBases>
+								<Mass>60</Mass>
+							</statBases>
+						</value>
+					</Operation>
+
 				</caseTrue>
 			</Operation>
 		</caseTrue>

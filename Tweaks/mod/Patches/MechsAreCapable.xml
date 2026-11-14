@@ -15,21 +15,21 @@
 				<packageId>true</packageId>
 				<caseTrue>
 					<Operation Class="XmlExtensions.HybridPatch">
-						<xpath>Defs/ThingDef[defName="Mech_Lifter"]/race/mechEnabledWorkTypes</xpath>
+						<xpath>Defs/ThingDef[defName="Mech_Lifter" or defName="VR_Construct_Lifter"]/race/mechEnabledWorkTypes</xpath>
 						<value>
-							<li Operation="SafeAdd" Compare="InnerText">FSFMerge</li>
 							<li Operation="SafeAdd" Compare="InnerText">FSFDeliver</li>
 						</value>
 					</Operation>
 
+					<!-- Complex Jobs' merge work type is optional and off by default: its own patch adds the def only when enabled.
+					     Naming it when it doesn't exist is a load error. Its patches run first, through loadAfter in About.xml -->
 					<Operation Class="XmlExtensions.Conditional">
-						<xpath>Defs/ThingDef[defName="VR_Construct_Lifter"]/race/mechEnabledWorkTypes</xpath>
+						<xpath>Defs/WorkTypeDef[defName="FSFMerge"]</xpath>
 						<caseTrue>
 							<Operation Class="XmlExtensions.HybridPatch">
-								<xpath>Defs/ThingDef[defName="VR_Construct_Lifter"]/race/mechEnabledWorkTypes</xpath>
+								<xpath>Defs/ThingDef[defName="Mech_Lifter" or defName="VR_Construct_Lifter"]/race/mechEnabledWorkTypes</xpath>
 								<value>
 									<li Operation="SafeAdd" Compare="InnerText">FSFMerge</li>
-									<li Operation="SafeAdd" Compare="InnerText">FSFDeliver</li>
 								</value>
 							</Operation>
 						</caseTrue>

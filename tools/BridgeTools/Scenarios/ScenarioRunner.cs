@@ -18,8 +18,8 @@ public sealed class Scenario
 	// The scenario is skipped unless this ability is loaded, for abilities behind a DLC
 	public readonly string RequiresAbility;
 
-	// The scenario is skipped unless this mod (by packageId) is active, for a mod's optional integrations. A skip shows in the
-	// results, so a profile missing the mod can't pass for one that has it.
+	// The scenario is skipped unless these mods (packageIds, separated by commas) are all active, for a mod's optional
+	// integrations. A skip shows in the results, so a profile missing the mod can't pass for one that has it.
 	public readonly string RequiresMod;
 
 	// The features it covers, so that ordo/run_scenarios can run just the suite for one of them
@@ -144,10 +144,10 @@ public sealed class ScenarioRunner
 				continue;
 			}
 
-			if (scenario.RequiresMod != null && !ModsConfig.IsActive(scenario.RequiresMod))
+			if (scenario.RequiresMod?.Split(',').Select(id => id.Trim()).FirstOrDefault(id => !ModsConfig.IsActive(id)) is { } missingMod)
 			{
 				skipped++;
-				results.Add(new { scenario.Name, status = "skip", reason = $"{scenario.RequiresMod} isn't active" });
+				results.Add(new { scenario.Name, status = "skip", reason = $"{missingMod} isn't active" });
 				continue;
 			}
 

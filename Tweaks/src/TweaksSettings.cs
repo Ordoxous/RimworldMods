@@ -12,7 +12,6 @@ internal static class TweaksSettings
     public static bool HaulDownedMechs => GetBool("HaulDownedMechs", true);
     public static bool LimitHemogenFarming => GetBool("LimitHemogenFarming", true);
     public static int HemogenPackCap => Mathf.RoundToInt(GetFloat("HemogenPackCap", 30f));
-    public static bool UnlockAllTrees => GetBool("UnlockAllTrees", true);
     public static bool ToolsCategory => GetBool("ToolsCategory", true);
 
     private static bool GetBool(string key, bool defaultValue) =>

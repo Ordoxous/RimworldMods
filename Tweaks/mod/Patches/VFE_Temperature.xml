@@ -29,6 +29,25 @@
 							</thingCategories>
 						</value>
 					</Operation>
+					<!-- 1.7 errors on anything haulable without a mass. The heater has its own (6); compared by name, so it's kept -->
+					<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+						<xpath>Defs/ThingDef[defName="VTE_WallMountedCooler"]</xpath>
+						<compare>Name</compare>
+						<value>
+							<statBases>
+								<Mass>6</Mass>
+							</statBases>
+						</value>
+					</Operation>
+					<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+						<xpath>Defs/ThingDef[defName="VTE_WallMountedVent"]</xpath>
+						<compare>Name</compare>
+						<value>
+							<statBases>
+								<Mass>3</Mass>
+							</statBases>
+						</value>
+					</Operation>
 				</caseTrue>
 			</Operation>
 		</caseTrue>

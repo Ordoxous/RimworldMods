@@ -14,6 +14,8 @@
 				<defaultValue>true</defaultValue>
 				<caseTrue>
 					<Operation Class="XmlExtensions.PatchOperationSafeAdd">
+						<!-- All four are needed. RS_GeneVault and RS_GeneRepository inherit vanilla's GeneBuildingBase, but on 1.7 that
+						     base sets no minifiedDef (vanilla sets it on each gene building), so they aren't minifiable without this -->
 						<xpath>Defs/ThingDef[defName="RS_GeneVault" or defName="RS_GeneRepository" or defName="RS_GeneCentrifuge" or defName="RS_XenoGermDuplicator"]</xpath>
 						<compare>Both</compare>
 						<value>

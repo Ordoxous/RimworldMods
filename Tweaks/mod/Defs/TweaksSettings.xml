@@ -86,12 +86,6 @@
 				<max>200</max>
 				<decimals>0</decimals>
 			</li>
-			<li MayRequire="ferny.progressionagriculture" Class="XmlExtensions.Setting.Checkbox">
-				<key>UnlockAllTrees</key>
-				<defaultValue>true</defaultValue>
-				<label>Unlock all trees</label>
-				<tooltip>Progression: Agriculture treats every sowable tree as already unlocked. Applies the next time a game loads. Turning this off won't re-lock trees in an existing save.</tooltip>
-			</li>
 			<li Class="XmlExtensions.Setting.Checkbox">
 				<key>ToolsCategory</key>
 				<defaultValue>true</defaultValue>
@@ -188,11 +182,6 @@
 				<key>DubsWellsOnGravships</key>
 				<defaultValue>true</defaultValue>
 				<label>Dubs water wells can be placed on gravships *</label>
-			</li>
-			<li MayRequire="VanillaExpanded.VFEFactory" Class="XmlExtensions.Setting.Checkbox">
-				<key>VfeFactoryComponentResearchFix</key>
-				<defaultValue>true</defaultValue>
-				<label>VFE Factory: remove research requirement from component assembly *</label>
 			</li>
 
 		</settings>

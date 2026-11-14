@@ -24,13 +24,7 @@
             <Private>False</Private>
         </Reference>
         
-        <Reference Include="WVC_MoreMechanoidsWorkModes_Main">
-            <HintPath Condition="Exists('$(WorkshopDirectory)\3418017359\$(RimworldVersion)\Assemblies\ProgressionAgriculture.dll')">$(WorkshopDirectory)\3418017359\$(RimworldVersion)\Assemblies\ProgressionAgriculture.dll</HintPath>
-            <HintPath Condition="!Exists('$(WorkshopDirectory)\3418017359\$(RimworldVersion)\Assemblies\ProgressionAgriculture.dll')">$(WorkshopDirectory)\3418017359\$(RimworldFallbackVersion)\Assemblies\ProgressionAgriculture.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        
-        <Reference Include="WVC_MoreMechanoidsWorkModes_Main">
+        <Reference Include="BiotechPatch">
             <HintPath Condition="Exists('$(WorkshopDirectory)\3461060466\$(RimworldVersion)\Assemblies\BiotechPatch.dll')">$(WorkshopDirectory)\3461060466\$(RimworldVersion)\Assemblies\BiotechPatch.dll</HintPath>
             <HintPath Condition="!Exists('$(WorkshopDirectory)\3461060466\$(RimworldVersion)\Assemblies\BiotechPatch.dll')">$(WorkshopDirectory)\3461060466\$(RimworldFallbackVersion)\Assemblies\BiotechPatch.dll</HintPath>
             <Private>False</Private>
