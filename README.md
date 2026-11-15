@@ -11,6 +11,7 @@ Ordoxous' RimWorld 1.7 mods, plus the tooling used to test them in a running gam
 | [LegendaryIsUnique](LegendaryIsUnique/README.md) | LegendaryIsUnique | `Ordo.LegendaryIsUnique` | A Legendary craft of a weapon that has an Odyssey unique variant makes the unique version | Harmony, Odyssey (VSE optional) | 7 scenarios |
 | [Tweaks](Tweaks/README.md) | Tweaks | `Ordo.Tweaks` | Small, individually switchable changes to the base game and other mods | Harmony, Biotech, WVC Work Modes, XML Extensions | 32 scenarios |
 | [BlueprintMaterials](BlueprintMaterials/README.md) | BlueprintMaterials | `Ordo.BlueprintMaterials` | A Select Material gizmo on blueprints: change a placed blueprint's material, or a floor to another in its group, without cancelling it | Harmony | 11 scenarios, 2 showcase clips |
+| [ColonistBarJobs](ColonistBarJobs/README.md) | Colonist Bar Job Icons | `Ordo.ColonistBarJobs` | An icon on each colonist bar portrait for what the colonist is doing now: the bench, item, bed or building they work on, or the kind of work | Harmony | 7 scenarios |
 
 ## Layout
 
