@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+  <name>Colonist Bar Job Icons</name>
+  <author>Ordoxous</author>
+  <url>https://github.com/Ordoxous/RimworldMods/tree/master/ColonistBarJobs</url>
+  <supportedVersions>
+    <li>1.7</li>
+  </supportedVersions>
+  <modDependencies>
+    <li>
+      <packageId>brrainz.harmony</packageId>
+      <displayName>Harmony</displayName>
+    </li>
+  </modDependencies>
+  <loadAfter>
+    <li>brrainz.harmony</li>
+  </loadAfter>
+  <packageId>Ordo.ColonistBarJobs</packageId>
+  <description>Shows an icon for what each colonist is doing right now on the colonist bar: the bench they work at, the item they carry, the bed they sleep in, or the kind of work. Hover the icon for the job.</description>
+</ModMetaData>

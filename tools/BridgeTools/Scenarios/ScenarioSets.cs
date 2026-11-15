@@ -15,6 +15,7 @@ public static class ScenarioSets
 		("Ordo.MechUpgradesUi", () => MechUpgradesUiScenarios.All),
 		("Ordo.BlueprintMaterials", () => BlueprintMaterialsScenarios.All),
 		("Ordo.LegendaryIsUnique", () => LegendaryIsUniqueScenarios.All),
-		("Ordo.Tweaks", () => TweaksScenarios.All)
+		("Ordo.Tweaks", () => TweaksScenarios.All),
+		("Ordo.ColonistBarJobs", () => ColonistBarJobsScenarios.All)
 	};
 }

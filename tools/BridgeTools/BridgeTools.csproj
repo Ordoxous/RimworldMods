@@ -22,6 +22,7 @@
         <ProjectReference Include="..\..\MechUpgradesUi\MechUpgradesUi.csproj" Private="false" />
         <ProjectReference Include="..\..\BlueprintMaterials\BlueprintMaterials.csproj" Private="false" />
         <ProjectReference Include="..\..\LegendaryIsUnique\LegendaryIsUnique.csproj" Private="false" />
+        <ProjectReference Include="..\..\ColonistBarJobs\ColonistBarJobs.csproj" Private="false" />
     </ItemGroup>
 
     <!-- MechUpgradesUi's scenarios read Mechanoid Upgrades' types. It has no 1.7 folder yet, so fall back as MechUpgradesUi.csproj does -->

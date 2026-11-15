@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  Which icon a job shows when the thing it targets isn't the right picture. A job is matched by its JobDef first, then by the
+  work type of the work giver that gave it; anything unmatched shows the icon of the thing it targets (the bench, the item
+  carried, the bed, the building a frame becomes), and nothing if it targets a cell or a pawn.
+  Give either texPath (a texture) or thingIcon (a ThingDef whose icon is drawn).
+-->
+<Defs>
+
+  <!-- Jobs whose target would mislead: these take a building or a pawn away rather than work on it -->
+  <Ordo.ColonistBarJobs.JobIconDef>
+    <defName>Ordo_JobIcon_Deconstruct</defName>
+    <texPath>UI/Designators/Deconstruct</texPath>
+    <jobs>
+      <li>Deconstruct</li>
+    </jobs>
+  </Ordo.ColonistBarJobs.JobIconDef>
+
+  <Ordo.ColonistBarJobs.JobIconDef>
+    <defName>Ordo_JobIcon_Uninstall</defName>
+    <texPath>UI/Designators/Uninstall</texPath>
+    <jobs>
+      <li>Uninstall</li>
+    </jobs>
+  </Ordo.ColonistBarJobs.JobIconDef>
+
+  <Ordo.ColonistBarJobs.JobIconDef>
+    <defName>Ordo_JobIcon_Strip</defName>
+    <texPath>UI/Designators/Strip</texPath>
+    <jobs>
+      <li>Strip</li>
+    </jobs>
+  </Ordo.ColonistBarJobs.JobIconDef>
+
+  <Ordo.ColonistBarJobs.JobIconDef>
+    <defName>Ordo_JobIcon_Slaughter</defName>
+    <texPath>UI/Designators/Slaughter</texPath>
+    <jobs>
+      <li>Slaughter</li>
+    </jobs>
+  </Ordo.ColonistBarJobs.JobIconDef>
+
+  <!-- Work types whose targets are pawns, cells or plain rock -->
+  <Ordo.ColonistBarJobs.JobIconDef>
+    <defName>Ordo_JobIcon_Mining</defName>
+    <texPath>UI/Designators/Mine</texPath>
+    <workTypes>
+      <li>Mining</li>
+    </workTypes>
+  </Ordo.ColonistBarJobs.JobIconDef>
+
+  <Ordo.ColonistBarJobs.JobIconDef>
+    <defName>Ordo_JobIcon_PlantCutting</defName>
+    <texPath>UI/Designators/CutPlants</texPath>
+    <workTypes>
+      <li>PlantCutting</li>
+    </workTypes>
+  </Ordo.ColonistBarJobs.JobIconDef>
+
+  <Ordo.ColonistBarJobs.JobIconDef>
+    <defName>Ordo_JobIcon_Growing</defName>
+    <texPath>UI/Designators/Harvest</texPath>
+    <workTypes>
+      <li>Growing</li>
+    </workTypes>
+  </Ordo.ColonistBarJobs.JobIconDef>
+
+  <Ordo.ColonistBarJobs.JobIconDef>
+    <defName>Ordo_JobIcon_Hunting</defName>
+    <texPath>UI/Designators/Hunt</texPath>
+    <workTypes>
+      <li>Hunting</li>
+    </workTypes>
+  </Ordo.ColonistBarJobs.JobIconDef>
+
+  <Ordo.ColonistBarJobs.JobIconDef>
+    <defName>Ordo_JobIcon_Handling</defName>
+    <texPath>UI/Designators/Tame</texPath>
+    <workTypes>
+      <li>Handling</li>
+    </workTypes>
+  </Ordo.ColonistBarJobs.JobIconDef>
+
+  <Ordo.ColonistBarJobs.JobIconDef>
+    <defName>Ordo_JobIcon_Doctor</defName>
+    <thingIcon>MedicineIndustrial</thingIcon>
+    <workTypes>
+      <li>Doctor</li>
+    </workTypes>
+  </Ordo.ColonistBarJobs.JobIconDef>
+
+</Defs>
