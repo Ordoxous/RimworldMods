@@ -23,6 +23,13 @@ Behaviour found while building and testing mods here. Each one cost time once.
 - Body size shrinks with youth. Anything that compares sizes (knockback, for example) gives random results with randomly aged pawns, so spawn adults in tests.
 - Summary health can stay at 100% after a hit that removes a minor part such as a tail. Count injuries and missing parts too.
 
+## Ideology
+
+- **The ideoligion screen lists precepts by exact class.** `IdeoUIUtility.DoPrecepts` draws each section with a filter such as `p.preceptClass == typeof(Precept_Animal)`, so a precept of a custom class shows nowhere. Add a section with a postfix that calls the private `DoPreceptsInt` through the publicizer (Saddlebound does; the call works at runtime on Waylith).
+- **Don't subclass `Precept_Animal` for anything other than venerated animals.** Vanilla treats every `Precept_Animal` as one (`Ideo.IsVeneratedAnimal`). Extend `Precept_ThingDef` instead.
+- Precepts with `defaultSelectionWeight` 0 (the default) are never picked by the per-issue pass of `IdeoFoundation.RandomizePrecepts`, and `countsTowardsPreceptLimit` false keeps them out of the impact pass. Add them yourself in a postfix, as vanilla adds venerated animals.
+- `rimworld/click_ui_target` on an "Add ..." button in the ideoligion editor (vanilla's "Add animal..." too) doesn't open its menu, so test a precept worker's choices in a scenario instead.
+
 ## Abilities
 
 - `Ability.StartCooldown(0)` leaves `CanCast` false until the next tick.

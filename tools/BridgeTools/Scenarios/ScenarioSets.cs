@@ -16,6 +16,7 @@ public static class ScenarioSets
         ("Ordo.BlueprintMaterials", () => BlueprintMaterialsScenarios.All),
         ("Ordo.LegendaryIsUnique", () => LegendaryIsUniqueScenarios.All),
         ("Ordo.Tweaks", () => TweaksScenarios.All),
-        ("Ordo.ColonistBarJobs", () => ColonistBarJobsScenarios.All)
+        ("Ordo.ColonistBarJobs", () => ColonistBarJobsScenarios.All),
+        ("Ordo.Saddlebound", () => SaddleboundScenarios.All)
     };
 }

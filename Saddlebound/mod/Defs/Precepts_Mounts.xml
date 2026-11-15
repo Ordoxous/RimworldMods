@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+  <!-- Mount death: a player-faction animal that has been ridden dies. Ordo_MountDied has no doer, so every free
+       colonist hears of it. Ordo_OwnMountDied has the mount's usual rider as doer, for their own extra memory, which
+       adds to the first. -->
+
+  <IssueDef>
+    <defName>Ordo_MountDeath</defName>
+    <label>mount death</label>
+    <!-- Placeholder icon -->
+    <iconPath>UI/Issues/Bonding</iconPath>
+  </IssueDef>
+
+  <HistoryEventDef>
+    <defName>Ordo_MountDied</defName>
+    <label>mount died</label>
+  </HistoryEventDef>
+
+  <HistoryEventDef>
+    <defName>Ordo_OwnMountDied</defName>
+    <label>own mount died</label>
+  </HistoryEventDef>
+
+  <PreceptDef>
+    <defName>Ordo_MountDeath_Mourned</defName>
+    <issue>Ordo_MountDeath</issue>
+    <label>mourned</label>
+    <description>A mount that carried us is one of us. When it falls, we grieve, and its rider grieves most.</description>
+    <impact>Low</impact>
+    <displayOrderInIssue>10</displayOrderInIssue>
+    <associatedMemes>
+      <li>Ordo_HordeRiders</li>
+      <li>AnimalPersonhood</li>
+    </associatedMemes>
+    <comps>
+      <li Class="PreceptComp_KnowsMemoryThought">
+        <eventDef>Ordo_MountDied</eventDef>
+        <thought>Ordo_MountDied</thought>
+        <description>A mount died</description>
+      </li>
+      <li Class="PreceptComp_SelfTookMemoryThought">
+        <eventDef>Ordo_OwnMountDied</eventDef>
+        <thought>Ordo_OwnMountDied</thought>
+        <description>Your usual mount died</description>
+      </li>
+    </comps>
+  </PreceptDef>
+
+  <ThoughtDef>
+    <defName>Ordo_MountDied</defName>
+    <thoughtClass>Thought_Memory</thoughtClass>
+    <durationDays>5</durationDays>
+    <stackLimit>3</stackLimit>
+    <stackedEffectMultiplier>0.5</stackedEffectMultiplier>
+    <doNotApplyToQuestLodgers>true</doNotApplyToQuestLodgers>
+    <nullifyingTraits>
+      <li>Psychopath</li>
+    </nullifyingTraits>
+    <stages>
+      <li>
+        <label>our mount died</label>
+        <description>One of the mounts that carried us has fallen. We have lost one of our own.</description>
+        <baseMoodEffect>-4</baseMoodEffect>
+      </li>
+    </stages>
+  </ThoughtDef>
+
+  <ThoughtDef>
+    <defName>Ordo_OwnMountDied</defName>
+    <thoughtClass>Thought_Memory</thoughtClass>
+    <durationDays>8</durationDays>
+    <stackLimit>2</stackLimit>
+    <stackedEffectMultiplier>0.5</stackedEffectMultiplier>
+    <doNotApplyToQuestLodgers>true</doNotApplyToQuestLodgers>
+    <nullifyingTraits>
+      <li>Psychopath</li>
+    </nullifyingTraits>
+    <stages>
+      <li>
+        <label>my mount died</label>
+        <description>The mount I rode most is dead. No other will carry me the same way.</description>
+        <baseMoodEffect>-4</baseMoodEffect>
+      </li>
+    </stages>
+  </ThoughtDef>
+
+  <!-- Mounted glory: killing an enemy from the saddle. Version 1 has only the kill memory; the on-foot penalty is
+       planned. -->
+
+  <IssueDef>
+    <defName>Ordo_MountedGlory</defName>
+    <label>mounted glory</label>
+    <!-- Placeholder icon -->
+    <iconPath>UI/Issues/Raiding</iconPath>
+  </IssueDef>
+
+  <HistoryEventDef>
+    <defName>Ordo_KilledFromSaddle</defName>
+    <label>killed from the saddle</label>
+  </HistoryEventDef>
+
+  <PreceptDef>
+    <defName>Ordo_MountedGlory_Glorious</defName>
+    <issue>Ordo_MountedGlory</issue>
+    <label>glorious</label>
+    <description>The finest death we can give an enemy is beneath our hooves. A kill made from the saddle is worth three made on foot.</description>
+    <impact>Low</impact>
+    <displayOrderInIssue>10</displayOrderInIssue>
+    <associatedMemes>
+      <li>Ordo_HordeRiders</li>
+      <li>Raider</li>
+    </associatedMemes>
+    <comps>
+      <li Class="PreceptComp_SelfTookMemoryThought">
+        <eventDef>Ordo_KilledFromSaddle</eventDef>
+        <thought>Ordo_KilledFromSaddle</thought>
+        <description>Killed an enemy while mounted</description>
+      </li>
+    </comps>
+  </PreceptDef>
+
+  <ThoughtDef>
+    <defName>Ordo_KilledFromSaddle</defName>
+    <thoughtClass>Thought_Memory</thoughtClass>
+    <durationDays>3</durationDays>
+    <stackLimit>3</stackLimit>
+    <doNotApplyToQuestLodgers>true</doNotApplyToQuestLodgers>
+    <stages>
+      <li>
+        <label>killed from the saddle</label>
+        <description>I rode down an enemy. Glory to the horde!</description>
+        <baseMoodEffect>3</baseMoodEffect>
+      </li>
+    </stages>
+  </ThoughtDef>
+
+</Defs>

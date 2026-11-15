@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+  <!-- Riding: how a culture feels about being in the saddle. Riding is tracked by Saddlebound's RidingTracker: on
+       mounting and dismounting through Giddy-Up, and while travelling in a caravan with a paired mount. -->
+
+  <IssueDef>
+    <defName>Ordo_Riding</defName>
+    <label>riding</label>
+    <!-- Placeholder icon -->
+    <iconPath>UI/Issues/AnimalConnection</iconPath>
+  </IssueDef>
+
+  <HistoryEventDef>
+    <defName>Ordo_Mounted</defName>
+    <label>mounted an animal</label>
+  </HistoryEventDef>
+
+  <PreceptDef>
+    <defName>Ordo_Riding_Disliked</defName>
+    <issue>Ordo_Riding</issue>
+    <label>disliked</label>
+    <description>Animals are not furniture. Climbing onto one's back is undignified, and we do it only when we must.</description>
+    <impact>Low</impact>
+    <displayOrderInIssue>0</displayOrderInIssue>
+    <enabledForNPCFactions>false</enabledForNPCFactions>
+    <conflictingMemes>
+      <li>Ordo_HordeRiders</li>
+    </conflictingMemes>
+    <associatedMemes>
+      <li>AnimalPersonhood</li>
+    </associatedMemes>
+    <comps>
+      <li Class="PreceptComp_SelfTookMemoryThought">
+        <eventDef>Ordo_Mounted</eventDef>
+        <thought>Ordo_HadToRide</thought>
+        <description>Mounted an animal</description>
+      </li>
+    </comps>
+  </PreceptDef>
+
+  <PreceptDef>
+    <defName>Ordo_Riding_Respected</defName>
+    <issue>Ordo_Riding</issue>
+    <label>respected</label>
+    <description>A rider is a fine thing to be. Time in the saddle lifts the spirit.</description>
+    <impact>Low</impact>
+    <displayOrderInIssue>10</displayOrderInIssue>
+    <enabledForNPCFactions>false</enabledForNPCFactions>
+    <associatedMemes>
+      <li>Rancher</li>
+      <li MayRequire="VanillaExpanded.VMemesE">VME_Nomad</li>
+    </associatedMemes>
+    <comps>
+      <li Class="PreceptComp_SituationalThought">
+        <thought>Ordo_RodeRecently</thought>
+      </li>
+    </comps>
+  </PreceptDef>
+
+  <PreceptDef>
+    <defName>Ordo_Riding_Essential</defName>
+    <issue>Ordo_Riding</issue>
+    <label>essential</label>
+    <description>The saddle is where we belong. A day without riding is a day half-lived, and a long walk is a kind of exile.</description>
+    <impact>Medium</impact>
+    <displayOrderInIssue>20</displayOrderInIssue>
+    <enabledForNPCFactions>false</enabledForNPCFactions>
+    <associatedMemes>
+      <li>Ordo_HordeRiders</li>
+      <li MayRequire="VanillaExpanded.VMemesE">VME_Nomad</li>
+    </associatedMemes>
+    <comps>
+      <li Class="PreceptComp_SituationalThought">
+        <thought>Ordo_RidingEssential</thought>
+        <thoughtStageDescriptions>
+          <li>Rode in the last day</li>
+          <li>No riding for 2 days, with a mount available</li>
+          <li>No riding for 4 days, with a mount available</li>
+        </thoughtStageDescriptions>
+      </li>
+    </comps>
+  </PreceptDef>
+
+  <!-- Thoughts -->
+
+  <ThoughtDef>
+    <defName>Ordo_HadToRide</defName>
+    <durationDays>1</durationDays>
+    <stackLimit>1</stackLimit>
+    <doNotApplyToQuestLodgers>true</doNotApplyToQuestLodgers>
+    <stages>
+      <li>
+        <label>had to ride</label>
+        <description>I had to climb onto an animal's back like a sack of grain. Undignified for both of us.</description>
+        <baseMoodEffect>-2</baseMoodEffect>
+      </li>
+    </stages>
+  </ThoughtDef>
+
+  <ThoughtDef>
+    <defName>Ordo_RodeRecently</defName>
+    <workerClass>Ordo.Saddlebound.ThoughtWorker_Precept_RodeRecently</workerClass>
+    <doNotApplyToQuestLodgers>true</doNotApplyToQuestLodgers>
+    <stages>
+      <li>
+        <label>rode recently</label>
+        <description>I've had time in the saddle. It does me good.</description>
+        <baseMoodEffect>2</baseMoodEffect>
+      </li>
+    </stages>
+  </ThoughtDef>
+
+  <ThoughtDef>
+    <defName>Ordo_RidingEssential</defName>
+    <workerClass>Ordo.Saddlebound.ThoughtWorker_Precept_RidingEssential</workerClass>
+    <doNotApplyToQuestLodgers>true</doNotApplyToQuestLodgers>
+    <stages>
+      <li>
+        <label>rode recently</label>
+        <description>I've been in the saddle, where I belong.</description>
+        <baseMoodEffect>3</baseMoodEffect>
+      </li>
+      <li>
+        <label>haven't ridden</label>
+        <description>It's been days since I rode, and there's a mount right here. My legs weren't made for walking.</description>
+        <baseMoodEffect>-2</baseMoodEffect>
+      </li>
+      <li>
+        <label>long without riding</label>
+        <description>I've been on foot for days, like an outcast, while good mounts stand idle. This is no way to live.</description>
+        <baseMoodEffect>-5</baseMoodEffect>
+      </li>
+    </stages>
+  </ThoughtDef>
+
+</Defs>

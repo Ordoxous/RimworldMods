@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+  <!-- Preferred mounts: species an ideoligion holds to be the right animals to ride, one precept per species, as
+       vanilla's venerated animals are. Chosen in the ideoligion editor under "Preferred mounts". Generated ideoligions
+       get them in a step of their own (PreferredMounts.Generate): two for Horde Riders, one with Riding: Respected or
+       Essential. -->
+
+  <IssueDef>
+    <defName>Ordo_PreferredMounts</defName>
+    <label>preferred mount</label>
+    <allowMultiplePrecepts>true</allowMultiplePrecepts>
+  </IssueDef>
+
+  <HistoryEventDef>
+    <defName>Ordo_RodePreferredMount</defName>
+    <label>rode a preferred mount</label>
+  </HistoryEventDef>
+
+  <HistoryEventDef>
+    <defName>Ordo_RodeLesserMount</defName>
+    <label>rode a lesser mount</label>
+  </HistoryEventDef>
+
+  <PreceptDef>
+    <defName>Ordo_PreferredMount</defName>
+    <issue>Ordo_PreferredMounts</issue>
+    <label>preferred mount</label>
+    <description>Believers hold this animal to be the proper mount for our people. Riding one lifts the spirit. Where riding is essential, riding anything else feels like settling for less.</description>
+    <preceptClass>Ordo.Saddlebound.Precept_PreferredMount</preceptClass>
+    <workerClass>Ordo.Saddlebound.PreceptWorker_PreferredMount</workerClass>
+    <useChoicesFromBuildingDefs>true</useChoicesFromBuildingDefs>
+    <countsTowardsPreceptLimit>false</countsTowardsPreceptLimit>
+    <canGenerateAsSpecialPrecept>false</canGenerateAsSpecialPrecept>
+    <defaultSelectionWeight>0</defaultSelectionWeight>
+    <selectionWeight>0</selectionWeight>
+    <impact>Low</impact>
+    <maxCount>3</maxCount>
+    <comps>
+      <li Class="PreceptComp_SelfTookMemoryThought">
+        <eventDef>Ordo_RodePreferredMount</eventDef>
+        <thought>Ordo_RodePreferredMount</thought>
+        <description>Rode a preferred mount</description>
+      </li>
+      <li Class="PreceptComp_SelfTookMemoryThought">
+        <eventDef>Ordo_RodeLesserMount</eventDef>
+        <thought>Ordo_RodeLesserMount</thought>
+        <description>Rode another mount (with riding essential)</description>
+      </li>
+    </comps>
+  </PreceptDef>
+
+  <!-- With several preferred mounts, each precept's comp gives the memory; a stack limit of 1 makes the second one
+       renew the first instead of stacking -->
+
+  <ThoughtDef>
+    <defName>Ordo_RodePreferredMount</defName>
+    <durationDays>1</durationDays>
+    <stackLimit>1</stackLimit>
+    <doNotApplyToQuestLodgers>true</doNotApplyToQuestLodgers>
+    <stages>
+      <li>
+        <label>rode a preferred mount</label>
+        <description>I rode one of the animals our people were meant to ride. It felt right.</description>
+        <baseMoodEffect>2</baseMoodEffect>
+      </li>
+    </stages>
+  </ThoughtDef>
+
+  <ThoughtDef>
+    <defName>Ordo_RodeLesserMount</defName>
+    <durationDays>1</durationDays>
+    <stackLimit>1</stackLimit>
+    <doNotApplyToQuestLodgers>true</doNotApplyToQuestLodgers>
+    <stages>
+      <li>
+        <label>rode a lesser mount</label>
+        <description>I had to ride some lesser beast instead of a proper mount. Better than walking, but only just.</description>
+        <baseMoodEffect>-1</baseMoodEffect>
+      </li>
+    </stages>
+  </ThoughtDef>
+
+</Defs>

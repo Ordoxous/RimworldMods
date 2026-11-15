@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+  <MemeDef>
+    <defName>Ordo_HordeRiders</defName>
+    <label>horde riders</label>
+    <description>The saddle is our home; to walk is to be lesser. Our people ride everywhere, fight from horseback, and mourn the mounts that fall beneath them.</description>
+    <!-- Placeholder: vanilla's rancher icon until the mod has its own art -->
+    <iconPath>UI/Memes/Rancher</iconPath>
+    <groupDef>Misc</groupDef>
+    <impact>2</impact>
+    <renderOrder>81</renderOrder>
+    <requireOne>
+      <li>
+        <li>Ordo_Riding_Essential</li>
+      </li>
+      <li>
+        <li>Ordo_MountedGlory_Glorious</li>
+      </li>
+    </requireOne>
+    <generalRules>
+      <rulesStrings>
+        <li>memeAdjective->riding</li>
+        <li>memeAdjective->mounted</li>
+        <li>memeAdjective->hoofed</li>
+        <li>memeCreed->horde</li>
+        <li>memeCreed->host</li>
+        <li>memeCreed->cavalcade</li>
+        <li>memeHyphenPrefix->saddle</li>
+        <li>memeHyphenPrefix->hoof</li>
+        <li>memeHyphenPrefix->stirrup</li>
+        <li>memeConcept->the saddle</li>
+        <li>memeConcept->the gallop</li>
+        <li>memeConcept->the open plain</li>
+        <li>memeLeaderNoun->khan</li>
+        <li>memeLeaderNoun->horselord</li>
+        <li>memeLeaderAdjective->saddle-born</li>
+        <li>memeMoralist->rider</li>
+        <li>memeMoralist->horse-sage</li>
+      </rulesStrings>
+    </generalRules>
+    <descriptionMaker>
+      <rules>
+        <rulesStrings>
+          <!-- theist myth -->
+          <li>creation(tag=meme_Ordo_HordeRiders)        ->[deity0_name] made the first steed from the wind and gave it to the first rider, so that no [memberName] would ever walk alone.</li>
+          <li>episode(uses=1,tag=meme_Ordo_HordeRiders)  ->The riders of [deity0_name] crossed the world in a single season, and the earth shook beneath them.</li>
+          <!-- theist founder -->
+          <li>intro(tag=meme_Ordo_HordeRiders)           ->On the [place_summary] [place_name], the [memberNamePlural] followed the herds and never slept twice in the same place.</li>
+          <li>conflict(tag=meme_Ordo_HordeRiders)        ->A walled [foeLeader] tried to fence the plains, and [foeLeader_possessive] [foeSoldiers] slaughtered the herds with [place_personalWeapon]s.</li>
+          <li>founderJoin(tag=meme_Ordo_HordeRiders)     ->A [place_job] named [founderName] tamed a horse no one else could ride.</li>
+          <li>victory(tag=meme_Ordo_HordeRiders)         ->[founderName] led the [memberNamePlural] in a charge that broke the walls of the [foeSoldiers], and the plains were free again.</li>
+          <!-- ideological founder -->
+          <li>setup(tag=meme_Ordo_HordeRiders)           ->[founderName] grew up among the herders of a frontier world, where a pawn without a mount was a pawn without a future.</li>
+          <li>story(uses=1,tag=meme_Ordo_HordeRiders)    ->[founderName] gathered the scattered riders into one horde and taught them to fight from the saddle.</li>
+          <!-- ideological lesson -->
+          <li>lessonIntro(tag=meme_Ordo_HordeRiders)         ->My grandmother put me on a horse before I could walk. When I asked her why, she told me</li>
+          <li>lesson(tag=meme_Ordo_HordeRiders)              ->a people on foot can be caught, but a people in the saddle can never be held</li>
+          <li>lessonReinforcement(tag=meme_Ordo_HordeRiders) ->I have not been caught yet.</li>
+          <!-- archist -->
+          <li>archistBasis(tag=meme_Ordo_HordeRiders)    ->The archotechs move across the stars as our riders move across the plains: swift, untiring, never bound to one place.</li>
+          <li>archistFact(tag=meme_Ordo_HordeRiders)     ->Rider and mount together are more than either alone, as human and archotech will one day be.</li>
+          <li>archistProphecy(tag=meme_Ordo_HordeRiders) ->[inTheEnd], the archotechs will send a steed for every rider who never once chose to walk.</li>
+          <!-- animist -->
+          <li>animistBasis(tag=meme_Ordo_HordeRiders)    ->Every mount carries a spirit of the open wind, and it shares that spirit with whoever rides it.</li>
+          <li>animistFact(tag=meme_Ordo_HordeRiders)     ->A rider who walks when they could ride insults the spirit of their mount.</li>
+          <li>animistProphecy(tag=meme_Ordo_HordeRiders) ->[itIsSaid] that the wielder of the [relic0_name] will hear every hoofbeat in the world at once.</li>
+        </rulesStrings>
+      </rules>
+    </descriptionMaker>
+    <symbolPacks>
+      <li>
+        <ideoName>Hoofcult</ideoName>
+        <theme>horses</theme>
+        <adjective>hoofbound</adjective>
+        <member>rider</member>
+      </li>
+      <li>
+        <ideoName>Saddlefaith</ideoName>
+        <theme>the saddle</theme>
+        <adjective>saddleborn</adjective>
+        <member>saddler</member>
+      </li>
+      <li>
+        <ideoName>Windriding</ideoName>
+        <theme>the wind</theme>
+        <adjective>windborne</adjective>
+        <member>windrider</member>
+      </li>
+    </symbolPacks>
+  </MemeDef>
+
+</Defs>
