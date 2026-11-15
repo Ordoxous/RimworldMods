@@ -53,9 +53,10 @@ public class HemogenTilSet
         {
             return false;
         }
-        
+
         var packCount = __instance.Pawn.Map.listerThings.ThingsOfDef(ThingDefOf.HemogenPack).Sum(t => t.stackCount);
-        if (packCount >= TweaksSettings.HemogenPackCap) {
+        if (packCount >= TweaksSettings.HemogenPackCap)
+        {
             return false;
         }
 

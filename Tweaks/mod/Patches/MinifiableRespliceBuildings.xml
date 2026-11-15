@@ -2,32 +2,32 @@
 
 <Patch>
 
-	<Operation Class="XmlExtensions.FindMod">
-		<mods>
-			<li>ReSplice.XOTR.Core</li>
-		</mods>
-		<packageId>true</packageId>
-		<caseTrue>
-			<Operation Class="XmlExtensions.OptionalPatch">
-				<modId>Ordo.Tweaks</modId>
-				<key>MinifiableResplice</key>
-				<defaultValue>true</defaultValue>
-				<caseTrue>
-					<Operation Class="XmlExtensions.PatchOperationSafeAdd">
-						<!-- All four are needed. RS_GeneVault and RS_GeneRepository inherit vanilla's GeneBuildingBase, but on 1.7 that
-						     base sets no minifiedDef (vanilla sets it on each gene building), so they aren't minifiable without this -->
-						<xpath>Defs/ThingDef[defName="RS_GeneVault" or defName="RS_GeneRepository" or defName="RS_GeneCentrifuge" or defName="RS_XenoGermDuplicator"]</xpath>
-						<compare>Both</compare>
-						<value>
-							<minifiedDef>MinifiedThing</minifiedDef>
-							<thingCategories>
-								<li>BuildingsProduction</li>
-							</thingCategories>
-						</value>
-					</Operation>
-				</caseTrue>
-			</Operation>
-		</caseTrue>
-	</Operation>
+  <Operation Class="XmlExtensions.FindMod">
+    <mods>
+      <li>ReSplice.XOTR.Core</li>
+    </mods>
+    <packageId>true</packageId>
+    <caseTrue>
+      <Operation Class="XmlExtensions.OptionalPatch">
+        <modId>Ordo.Tweaks</modId>
+        <key>MinifiableResplice</key>
+        <defaultValue>true</defaultValue>
+        <caseTrue>
+          <Operation Class="XmlExtensions.PatchOperationSafeAdd">
+            <!-- All four are needed. RS_GeneVault and RS_GeneRepository inherit vanilla's GeneBuildingBase, but on 1.7 that
+                 base sets no minifiedDef (vanilla sets it on each gene building), so they aren't minifiable without this -->
+            <xpath>Defs/ThingDef[defName="RS_GeneVault" or defName="RS_GeneRepository" or defName="RS_GeneCentrifuge" or defName="RS_XenoGermDuplicator"]</xpath>
+            <compare>Both</compare>
+            <value>
+              <minifiedDef>MinifiedThing</minifiedDef>
+              <thingCategories>
+                <li>BuildingsProduction</li>
+              </thingCategories>
+            </value>
+          </Operation>
+        </caseTrue>
+      </Operation>
+    </caseTrue>
+  </Operation>
 
 </Patch>

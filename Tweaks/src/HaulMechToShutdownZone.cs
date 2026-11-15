@@ -138,7 +138,7 @@ public class WorkGiver_HaulMechToShutdownZone : WorkGiver_Scanner
         bool forced = false
     )
     {
-        var mech = (Pawn) target;
+        var mech = (Pawn)target;
         if (!UnpoweredMechHauling.TryFindCell(pawn, mech, out var cell))
         {
             return null;
@@ -155,7 +155,7 @@ public class JobDriver_HaulMechToShutdownZone : JobDriver
     private const TargetIndex MechIndex = TargetIndex.A;
     private const TargetIndex CellIndex = TargetIndex.B;
 
-    private Pawn Mech => (Pawn) job.GetTarget(MechIndex).Thing;
+    private Pawn Mech => (Pawn)job.GetTarget(MechIndex).Thing;
 
     public override bool TryMakePreToilReservations(
         bool errorOnFailed

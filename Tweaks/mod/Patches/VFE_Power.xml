@@ -4,94 +4,94 @@
 
   <!-- TODO: Align fuel cost to portability -->
 
-	<Operation Class="XmlExtensions.FindMod">
-		<mods>
-			<li>VanillaExpanded.VFEPower</li>
-		</mods>
-		<packageId>true</packageId>
-		<caseTrue>
-			<Operation Class="XmlExtensions.OptionalPatch">
-				<modId>Ordo.Tweaks</modId>
-				<key>VfeGeneratorRebalance</key>
-				<defaultValue>true</defaultValue>
-				<caseTrue>
+  <Operation Class="XmlExtensions.FindMod">
+    <mods>
+      <li>VanillaExpanded.VFEPower</li>
+    </mods>
+    <packageId>true</packageId>
+    <caseTrue>
+      <Operation Class="XmlExtensions.OptionalPatch">
+        <modId>Ordo.Tweaks</modId>
+        <key>VfeGeneratorRebalance</key>
+        <defaultValue>true</defaultValue>
+        <caseTrue>
 
-					<Operation Class="XmlExtensions.UseSetting">
-						<modId>Ordo.Tweaks</modId>
-						<key>VfePortableGeneratorWatts</key>
-						<defaultValue>200</defaultValue>
-						<apply>
-							<Operation Class="PatchOperationReplace">
-								<xpath>
-									Defs/ThingDef[
-									defName="VFE_PortableWoodFiredGenerator" or
-									defName="VFE_PortableChemfuelPoweredGenerator"
-									]/comps/li[@Class="CompProperties_Power"]/basePowerConsumption
-								</xpath>
-								<value>
-									<!-- VFE's default is -500, which makes it more useful than the larger generators -->
-									<!-- The default setting considers per-tile generation as 200 -->
-									<basePowerConsumption>-{VfePortableGeneratorWatts}</basePowerConsumption>
-								</value>
-							</Operation>
-						</apply>
-					</Operation>
+          <Operation Class="XmlExtensions.UseSetting">
+            <modId>Ordo.Tweaks</modId>
+            <key>VfePortableGeneratorWatts</key>
+            <defaultValue>200</defaultValue>
+            <apply>
+              <Operation Class="PatchOperationReplace">
+                <xpath>
+                  Defs/ThingDef[
+                  defName="VFE_PortableWoodFiredGenerator" or
+                  defName="VFE_PortableChemfuelPoweredGenerator"
+                  ]/comps/li[@Class="CompProperties_Power"]/basePowerConsumption
+                </xpath>
+                <value>
+                  <!-- VFE's default is -500, which makes it more useful than the larger generators -->
+                  <!-- The default setting considers per-tile generation as 200 -->
+                  <basePowerConsumption>-{VfePortableGeneratorWatts}</basePowerConsumption>
+                </value>
+              </Operation>
+            </apply>
+          </Operation>
 
-					<Operation Class="XmlExtensions.UseSetting">
-						<modId>Ordo.Tweaks</modId>
-						<key>VfeIndustrialGeneratorWatts</key>
-						<defaultValue>3000</defaultValue>
-						<apply>
-							<Operation Class="PatchOperationReplace">
-								<xpath>
-									Defs/ThingDef[
-									  defName="VFE_IndustrialWoodFiredGenerator" or
-									  defName="VFE_IndustrialChemfuelPoweredGenerator"
-									]/comps/li[compClass="CompPowerPlant"]/basePowerConsumption
-								</xpath>
-								<value>
-									<!-- VFE's default is -2400, bumped to be fair to the research cost -->
-									<!-- The default setting considers per-tile generation as 300 -->
-									<basePowerConsumption>-{VfeIndustrialGeneratorWatts}</basePowerConsumption>
-								</value>
-							</Operation>
-						</apply>
-					</Operation>
+          <Operation Class="XmlExtensions.UseSetting">
+            <modId>Ordo.Tweaks</modId>
+            <key>VfeIndustrialGeneratorWatts</key>
+            <defaultValue>3000</defaultValue>
+            <apply>
+              <Operation Class="PatchOperationReplace">
+                <xpath>
+                  Defs/ThingDef[
+                    defName="VFE_IndustrialWoodFiredGenerator" or
+                    defName="VFE_IndustrialChemfuelPoweredGenerator"
+                  ]/comps/li[compClass="CompPowerPlant"]/basePowerConsumption
+                </xpath>
+                <value>
+                  <!-- VFE's default is -2400, bumped to be fair to the research cost -->
+                  <!-- The default setting considers per-tile generation as 300 -->
+                  <basePowerConsumption>-{VfeIndustrialGeneratorWatts}</basePowerConsumption>
+                </value>
+              </Operation>
+            </apply>
+          </Operation>
 
-					<Operation Class="XmlExtensions.PatchOperationSafeAdd">
-						<xpath>
-							Defs/ThingDef[
-							  defName="VFE_IndustrialWoodFiredGenerator" or
-							  defName="VFE_IndustrialChemfuelPoweredGenerator"
-							]
-						</xpath>
-						<value>
-							<minifiedDef>MinifiedThing</minifiedDef>
-							<thingCategories>
-								<li>BuildingsPower</li>
-							</thingCategories>
-						</value>
-					</Operation>
+          <Operation Class="XmlExtensions.PatchOperationSafeAdd">
+            <xpath>
+              Defs/ThingDef[
+                defName="VFE_IndustrialWoodFiredGenerator" or
+                defName="VFE_IndustrialChemfuelPoweredGenerator"
+              ]
+            </xpath>
+            <value>
+              <minifiedDef>MinifiedThing</minifiedDef>
+              <thingCategories>
+                <li>BuildingsPower</li>
+              </thingCategories>
+            </value>
+          </Operation>
 
-					<!-- 1.7 errors on anything haulable without a mass. The 1x1 portables weigh 15; these are 3x3 -->
-					<Operation Class="XmlExtensions.PatchOperationSafeAdd">
-						<xpath>
-							Defs/ThingDef[
-							  defName="VFE_IndustrialWoodFiredGenerator" or
-							  defName="VFE_IndustrialChemfuelPoweredGenerator"
-							]
-						</xpath>
-						<compare>Name</compare>
-						<value>
-							<statBases>
-								<Mass>60</Mass>
-							</statBases>
-						</value>
-					</Operation>
+          <!-- 1.7 errors on anything haulable without a mass. The 1x1 portables weigh 15; these are 3x3 -->
+          <Operation Class="XmlExtensions.PatchOperationSafeAdd">
+            <xpath>
+              Defs/ThingDef[
+                defName="VFE_IndustrialWoodFiredGenerator" or
+                defName="VFE_IndustrialChemfuelPoweredGenerator"
+              ]
+            </xpath>
+            <compare>Name</compare>
+            <value>
+              <statBases>
+                <Mass>60</Mass>
+              </statBases>
+            </value>
+          </Operation>
 
-				</caseTrue>
-			</Operation>
-		</caseTrue>
-	</Operation>
+        </caseTrue>
+      </Operation>
+    </caseTrue>
+  </Operation>
 
 </Patch>

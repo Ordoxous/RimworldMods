@@ -9,13 +9,13 @@ namespace Ordo.BridgeTools.Scenarios;
 // their types are never needed.
 public static class ScenarioSets
 {
-	public static readonly (string PackageId, Func<List<Scenario>> Scenarios)[] All =
-	{
-		("Ordo.SillyAnimalThings", () => SillyAnimalThingsScenarios.All),
-		("Ordo.MechUpgradesUi", () => MechUpgradesUiScenarios.All),
-		("Ordo.BlueprintMaterials", () => BlueprintMaterialsScenarios.All),
-		("Ordo.LegendaryIsUnique", () => LegendaryIsUniqueScenarios.All),
-		("Ordo.Tweaks", () => TweaksScenarios.All),
-		("Ordo.ColonistBarJobs", () => ColonistBarJobsScenarios.All)
-	};
+    public static readonly (string PackageId, Func<List<Scenario>> Scenarios)[] All =
+    {
+        ("Ordo.SillyAnimalThings", () => SillyAnimalThingsScenarios.All),
+        ("Ordo.MechUpgradesUi", () => MechUpgradesUiScenarios.All),
+        ("Ordo.BlueprintMaterials", () => BlueprintMaterialsScenarios.All),
+        ("Ordo.LegendaryIsUnique", () => LegendaryIsUniqueScenarios.All),
+        ("Ordo.Tweaks", () => TweaksScenarios.All),
+        ("Ordo.ColonistBarJobs", () => ColonistBarJobsScenarios.All)
+    };
 }

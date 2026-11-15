@@ -7,10 +7,10 @@ namespace Ordo.BridgeTools.Showcase;
 // To showcase another mod, write its clips in a file like SillyAnimalThingsShowcase.cs and add a line here.
 public static class ShowcaseSets
 {
-	public static readonly (string PackageId, Func<List<ShowcaseClip>> Clips)[] All =
-	{
-		("Ordo.SillyAnimalThings", () => SillyAnimalThingsShowcase.All),
-		("Ordo.MechUpgradesUi", () => MechUpgradesUiShowcase.All),
-		("Ordo.BlueprintMaterials", () => BlueprintMaterialsShowcase.All)
-	};
+    public static readonly (string PackageId, Func<List<ShowcaseClip>> Clips)[] All =
+    {
+        ("Ordo.SillyAnimalThings", () => SillyAnimalThingsShowcase.All),
+        ("Ordo.MechUpgradesUi", () => MechUpgradesUiShowcase.All),
+        ("Ordo.BlueprintMaterials", () => BlueprintMaterialsShowcase.All)
+    };
 }

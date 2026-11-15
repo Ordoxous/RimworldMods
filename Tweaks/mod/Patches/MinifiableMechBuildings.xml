@@ -2,66 +2,66 @@
 
 <Patch>
 
-	<Operation Class="XmlExtensions.FindMod">
-		<mods>
-			<li>drilledhead.MechaWeaponChanger</li>
-		</mods>
-		<packageId>true</packageId>
-		<caseTrue>
-			<Operation Class="XmlExtensions.OptionalPatch">
-				<modId>Ordo.Tweaks</modId>
-				<key>MinifiableMechaWeaponChanger</key>
-				<defaultValue>true</defaultValue>
-				<caseTrue>
-					<Operation Class="XmlExtensions.PatchOperationSafeAdd">
-						<xpath>Defs/ThingDef[defName="MechaWeaponChanger"]</xpath>
-						<compare>Both</compare>
-						<value>
-							<minifiedDef>MinifiedThing</minifiedDef>
-							<thingCategories>
-								<li>BuildingsProduction</li>
-							</thingCategories>
-						</value>
-					</Operation>
-				</caseTrue>
-			</Operation>
-		</caseTrue>
-	</Operation>
+  <Operation Class="XmlExtensions.FindMod">
+    <mods>
+      <li>drilledhead.MechaWeaponChanger</li>
+    </mods>
+    <packageId>true</packageId>
+    <caseTrue>
+      <Operation Class="XmlExtensions.OptionalPatch">
+        <modId>Ordo.Tweaks</modId>
+        <key>MinifiableMechaWeaponChanger</key>
+        <defaultValue>true</defaultValue>
+        <caseTrue>
+          <Operation Class="XmlExtensions.PatchOperationSafeAdd">
+            <xpath>Defs/ThingDef[defName="MechaWeaponChanger"]</xpath>
+            <compare>Both</compare>
+            <value>
+              <minifiedDef>MinifiedThing</minifiedDef>
+              <thingCategories>
+                <li>BuildingsProduction</li>
+              </thingCategories>
+            </value>
+          </Operation>
+        </caseTrue>
+      </Operation>
+    </caseTrue>
+  </Operation>
 
-	<Operation Class="XmlExtensions.FindMod">
-		<mods>
-			<li>GoGaTio.MechanoidUpgrades</li>
-		</mods>
-		<packageId>true</packageId>
-		<caseTrue>
-			<Operation Class="XmlExtensions.OptionalPatch">
-				<modId>Ordo.Tweaks</modId>
-				<key>MinifiableMechUpgrader</key>
-				<defaultValue>true</defaultValue>
-				<caseTrue>
-					<Operation Class="XmlExtensions.PatchOperationSafeAdd">
-						<xpath>Defs/ThingDef[defName="MU_MechUpgrader"]</xpath>
-						<compare>Both</compare>
-						<value>
-							<minifiedDef>MinifiedThing</minifiedDef>
-							<thingCategories>
-								<li>BuildingsProduction</li>
-							</thingCategories>
-						</value>
-					</Operation>
-					<!-- 1.7 errors on anything haulable without a mass. Compared by name, so an upstream mass wins -->
-					<Operation Class="XmlExtensions.PatchOperationSafeAdd">
-						<xpath>Defs/ThingDef[defName="MU_MechUpgrader"]</xpath>
-						<compare>Name</compare>
-						<value>
-							<statBases>
-								<Mass>50</Mass>
-							</statBases>
-						</value>
-					</Operation>
-				</caseTrue>
-			</Operation>
-		</caseTrue>
-	</Operation>
+  <Operation Class="XmlExtensions.FindMod">
+    <mods>
+      <li>GoGaTio.MechanoidUpgrades</li>
+    </mods>
+    <packageId>true</packageId>
+    <caseTrue>
+      <Operation Class="XmlExtensions.OptionalPatch">
+        <modId>Ordo.Tweaks</modId>
+        <key>MinifiableMechUpgrader</key>
+        <defaultValue>true</defaultValue>
+        <caseTrue>
+          <Operation Class="XmlExtensions.PatchOperationSafeAdd">
+            <xpath>Defs/ThingDef[defName="MU_MechUpgrader"]</xpath>
+            <compare>Both</compare>
+            <value>
+              <minifiedDef>MinifiedThing</minifiedDef>
+              <thingCategories>
+                <li>BuildingsProduction</li>
+              </thingCategories>
+            </value>
+          </Operation>
+          <!-- 1.7 errors on anything haulable without a mass. Compared by name, so an upstream mass wins -->
+          <Operation Class="XmlExtensions.PatchOperationSafeAdd">
+            <xpath>Defs/ThingDef[defName="MU_MechUpgrader"]</xpath>
+            <compare>Name</compare>
+            <value>
+              <statBases>
+                <Mass>50</Mass>
+              </statBases>
+            </value>
+          </Operation>
+        </caseTrue>
+      </Operation>
+    </caseTrue>
+  </Operation>
 
 </Patch>

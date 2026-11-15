@@ -35,7 +35,7 @@ public class JobDriver_HaulMechForRepair : JobDriver
         this.FailOnDespawnedNullOrForbidden(ZoneCellIndex);
         yield return Toils_Goto.GotoThing(MechIndex, PathEndMode.ClosestTouch)
             .FailOnSomeonePhysicallyInteracting(MechIndex)
-            .FailOn(() => !((Pawn) job.GetTarget(MechIndex).Thing).Downed);
+            .FailOn(() => !((Pawn)job.GetTarget(MechIndex).Thing).Downed);
         yield return Toils_Haul.StartCarryThing(MechIndex);
         yield return Toils_Haul.CarryHauledThingToCell(ZoneCellIndex, PathEndMode.OnCell);
         yield return Toils_Haul.PlaceHauledThingInCell(ZoneCellIndex, null, false);
@@ -62,14 +62,14 @@ public class WorkGiver_HaulMechForRepair : WorkGiver_Scanner
         bool forced = false
     )
     {
-        var targetPawn = (Pawn) target;
+        var targetPawn = (Pawn)target;
 
         if (
             !targetPawn.IsColonyMech
             || !targetPawn.Downed
             || targetPawn.CurJobDef == JobDefOf.MechCharge
             || targetPawn.IsForbidden(pawn)
-            || !pawn.CanReserve((LocalTargetInfo) targetPawn, ignoreOtherReservations: forced)
+            || !pawn.CanReserve((LocalTargetInfo)targetPawn, ignoreOtherReservations: forced)
             || ShutdownUtility.MechInShutdownZone(targetPawn, targetPawn.Position, MechanoidWorkType.Work)
             || UnpoweredMechHauling.VanillaTakesToCharger(targetPawn, pawn, forced)
         )
@@ -93,13 +93,13 @@ public class WorkGiver_HaulMechForRepair : WorkGiver_Scanner
         bool forced = false
     )
     {
-        var targetPawn = (Pawn) target;
-        
+        var targetPawn = (Pawn)target;
+
         var allZones = targetPawn.Map?.zoneManager?.AllZones;
 
         if (ShutdownUtility.TryFindRandomMechShutdownZone(allZones, targetPawn, targetPawn.Map, MechanoidWorkType.Work, out var targetSpot))
         {
-            var job = JobMaker.MakeJob(TweaksDefOf.HaulMechForRepair, (LocalTargetInfo) targetPawn, targetSpot);
+            var job = JobMaker.MakeJob(TweaksDefOf.HaulMechForRepair, (LocalTargetInfo)targetPawn, targetSpot);
             job.count = 1;
             return job;
         }

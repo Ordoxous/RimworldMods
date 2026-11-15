@@ -7,7 +7,8 @@ using Verse;
 namespace Ordo.Tweaks;
 
 [StaticConstructorOnStartup]
-public static class ShowArmorIndicators {
+public static class ShowArmorIndicators
+{
 
     static ShowArmorIndicators()
     {
@@ -23,7 +24,8 @@ public static class ShowArmorIndicators {
         DamageInfo dinfo,
         Thing __instance,
         DamageWorker.DamageResult __result
-    ) {
+    )
+    {
         if (!TweaksSettings.ArmorIndicators)
         {
             return;
@@ -47,7 +49,7 @@ public static class ShowArmorIndicators {
                 position,
                 map,
                 new StringBuilder().AppendStriked((damageBeforeMitigation - damageAfterMitigation).ToString("F0")).ToString(),
-                __result.deflectedByMetalArmor || __result.diminishedByMetalArmor ? Color.white : Color.cyan, 
+                __result.deflectedByMetalArmor || __result.diminishedByMetalArmor ? Color.white : Color.cyan,
                 3.65f
             );
         }
@@ -61,7 +63,7 @@ public static class ShowArmorIndicators {
             position,
             map,
             damageAfterMitigation.ToString("F0"),
-            Color.red, 
+            Color.red,
             3.65f
         );
     }

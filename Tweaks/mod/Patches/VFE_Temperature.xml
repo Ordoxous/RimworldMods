@@ -2,55 +2,55 @@
 
 <Patch>
 
-	<Operation Class="XmlExtensions.FindMod">
-		<mods>
-			<li>VanillaExpanded.Temperature</li>
-		</mods>
-		<packageId>true</packageId>
-		<caseTrue>
-			<Operation Class="XmlExtensions.OptionalPatch">
-				<modId>Ordo.Tweaks</modId>
-				<key>MinifiableVteWallUnits</key>
-				<defaultValue>true</defaultValue>
-				<caseTrue>
-					<Operation Class="XmlExtensions.PatchOperationSafeAdd">
-						<xpath>
-							Defs/ThingDef[
-							  defName="VTE_WallMountedHeater" or
-							  defName="VTE_WallMountedCooler" or
-							  defName="VTE_WallMountedVent"
-							]
-						</xpath>
-						<compare>Both</compare>
-						<value>
-							<minifiedDef>MinifiedThing</minifiedDef>
-							<thingCategories>
-								<li>BuildingsTemperature</li>
-							</thingCategories>
-						</value>
-					</Operation>
-					<!-- 1.7 errors on anything haulable without a mass. The heater has its own (6); compared by name, so it's kept -->
-					<Operation Class="XmlExtensions.PatchOperationSafeAdd">
-						<xpath>Defs/ThingDef[defName="VTE_WallMountedCooler"]</xpath>
-						<compare>Name</compare>
-						<value>
-							<statBases>
-								<Mass>6</Mass>
-							</statBases>
-						</value>
-					</Operation>
-					<Operation Class="XmlExtensions.PatchOperationSafeAdd">
-						<xpath>Defs/ThingDef[defName="VTE_WallMountedVent"]</xpath>
-						<compare>Name</compare>
-						<value>
-							<statBases>
-								<Mass>3</Mass>
-							</statBases>
-						</value>
-					</Operation>
-				</caseTrue>
-			</Operation>
-		</caseTrue>
-	</Operation>
+  <Operation Class="XmlExtensions.FindMod">
+    <mods>
+      <li>VanillaExpanded.Temperature</li>
+    </mods>
+    <packageId>true</packageId>
+    <caseTrue>
+      <Operation Class="XmlExtensions.OptionalPatch">
+        <modId>Ordo.Tweaks</modId>
+        <key>MinifiableVteWallUnits</key>
+        <defaultValue>true</defaultValue>
+        <caseTrue>
+          <Operation Class="XmlExtensions.PatchOperationSafeAdd">
+            <xpath>
+              Defs/ThingDef[
+                defName="VTE_WallMountedHeater" or
+                defName="VTE_WallMountedCooler" or
+                defName="VTE_WallMountedVent"
+              ]
+            </xpath>
+            <compare>Both</compare>
+            <value>
+              <minifiedDef>MinifiedThing</minifiedDef>
+              <thingCategories>
+                <li>BuildingsTemperature</li>
+              </thingCategories>
+            </value>
+          </Operation>
+          <!-- 1.7 errors on anything haulable without a mass. The heater has its own (6); compared by name, so it's kept -->
+          <Operation Class="XmlExtensions.PatchOperationSafeAdd">
+            <xpath>Defs/ThingDef[defName="VTE_WallMountedCooler"]</xpath>
+            <compare>Name</compare>
+            <value>
+              <statBases>
+                <Mass>6</Mass>
+              </statBases>
+            </value>
+          </Operation>
+          <Operation Class="XmlExtensions.PatchOperationSafeAdd">
+            <xpath>Defs/ThingDef[defName="VTE_WallMountedVent"]</xpath>
+            <compare>Name</compare>
+            <value>
+              <statBases>
+                <Mass>3</Mass>
+              </statBases>
+            </value>
+          </Operation>
+        </caseTrue>
+      </Operation>
+    </caseTrue>
+  </Operation>
 
 </Patch>
