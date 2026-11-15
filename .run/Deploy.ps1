@@ -8,15 +8,14 @@ param(
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 
-$dotnet = Get-Command dotnet -ErrorAction SilentlyContinue
-if ($dotnet) {
-    $dotnet = $dotnet.Source
-} else {
-    $dotnet = Join-Path $env:USERPROFILE '.dotnet\dotnet.exe'
-    if (-not (Test-Path $dotnet)) {
-        throw 'Could not find dotnet on PATH or in ~/.dotnet'
-    }
+# Use the first dotnet that has an SDK: Rider's PATH can put a runtime-only install in Program Files ahead of ~/.dotnet
+$candidates = @(Join-Path $env:USERPROFILE '.dotnet\dotnet.exe') +
+    @(Get-Command dotnet -All -ErrorAction SilentlyContinue | ForEach-Object { $_.Source })
+$dotnet = $candidates | Where-Object { (Test-Path $_) -and (& $_ --list-sdks 2>$null) } | Select-Object -First 1
+if (-not $dotnet) {
+    throw "No dotnet with an SDK found. Tried: $($candidates -join ', ')"
 }
+Write-Host "Using $dotnet on PowerShell $($PSVersionTable.PSVersion)"
 
 if ($Project -eq 'All') {
     $projects = Get-ChildItem -Path $root -Filter '*.csproj' -Recurse -Depth 1 | ForEach-Object { $_.BaseName }
