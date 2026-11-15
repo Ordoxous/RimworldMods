@@ -3,7 +3,8 @@ using Verse;
 
 namespace Ordo.MechUpgradesUi;
 
-public class PawnColumnWorker_MechWorkView : PawnColumnWorker_Text {
+public class PawnColumnWorker_MechWorkView : PawnColumnWorker_Text
+{
 
     /// <inheritdoc />
     public override string GetTextFor(Pawn pawn)

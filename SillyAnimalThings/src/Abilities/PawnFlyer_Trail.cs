@@ -8,24 +8,24 @@ namespace Ordo.SillyAnimalThings;
 // the ground.
 public class PawnFlyer_Trail : PawnFlyer
 {
-	private const int TrailIntervalTicks = 2;
+    private const int TrailIntervalTicks = 2;
 
-	private static readonly Color DustColor = new(0.85f, 0.8f, 0.7f, 0.9f);
+    private static readonly Color DustColor = new(0.85f, 0.8f, 0.7f, 0.9f);
 
-	public override void Tick()
-	{
-		base.Tick();
+    public override void Tick()
+    {
+        base.Tick();
 
-		if (Spawned && this.IsHashIntervalTick(TrailIntervalTicks))
-		{
-			Trail(DrawPos);
-		}
-	}
+        if (Spawned && this.IsHashIntervalTick(TrailIntervalTicks))
+        {
+            Trail(DrawPos);
+        }
+    }
 
-	protected virtual void Trail(
-		Vector3 position
-	)
-	{
-		FleckMaker.ThrowDustPuffThick(position, Map, Rand.Range(0.8f, 1.2f), DustColor);
-	}
+    protected virtual void Trail(
+        Vector3 position
+    )
+    {
+        FleckMaker.ThrowDustPuffThick(position, Map, Rand.Range(0.8f, 1.2f), DustColor);
+    }
 }

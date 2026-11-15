@@ -1,0 +1,36 @@
+# The repo's formatting conventions. Rider and dotnet format both read this file.
+# No charset is set: some files have a UTF-8 BOM and some don't, and setting one would add or strip it on save.
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.md]
+indent_size = 2
+trim_trailing_whitespace = false
+
+# XML (defs, patches, translations, About files, run configurations) and the solution file
+[*.{xml,slnx}]
+indent_size = 2
+
+# Edited in Excel, which needs the BOM to read them as UTF-8
+[*.csv]
+charset = utf-8-bom
+trim_trailing_whitespace = false
+
+[*.cs]
+csharp_style_namespace_declarations = file_scoped:suggestion
+
+# Braces on their own line
+csharp_new_line_before_open_brace = all
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+
+# One parameter per line in declarations. Rider applies this when it reformats; dotnet format doesn't wrap lines.
+resharper_csharp_wrap_parameters_style = chop_always
+resharper_csharp_max_formal_parameters_on_line = 1

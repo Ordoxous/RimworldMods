@@ -8,11 +8,12 @@ namespace Ordo.MechUpgradesUi;
 
 public class WorldComponent_UpgradeDatabase : WorldComponent
 {
-    
+
     private List<UpgradePolicy> _policies = [];
 
     /// <inheritdoc />
-    public WorldComponent_UpgradeDatabase(World world) : base(world) {
+    public WorldComponent_UpgradeDatabase(World world) : base(world)
+    {
     }
 
     public List<UpgradePolicy> GetPolicies() => _policies;
@@ -46,7 +47,7 @@ public class WorldComponent_UpgradeDatabase : WorldComponent
             if (pawn.IsColonyMech && pawn.TryGetComp<CompUpgradableMechWithPolicy>(out var comp))
             {
                 if (comp.CurrentUpgradePolicy == policy)
-                    return new AcceptanceReport("OutfitInUse".Translate((NamedArgument) (Thing) pawn));
+                    return new AcceptanceReport("OutfitInUse".Translate((NamedArgument)(Thing)pawn));
             }
         }
 

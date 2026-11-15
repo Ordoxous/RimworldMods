@@ -5,65 +5,65 @@ namespace Ordo.SillyAnimalThings;
 
 public class CompProperties_AbilityStrike : CompProperties_AbilityEffect
 {
-	public DamageDef damageDef;
+    public DamageDef damageDef;
 
-	public float damageBase;
+    public float damageBase;
 
-	public float damagePerBodySize;
+    public float damagePerBodySize;
 
-	public float armorPenetration;
+    public float armorPenetration;
 
-	// Above zero, the strike also staggers the target for this long and knocks it back
-	public int knockbackStaggerTicks;
+    // Above zero, the strike also staggers the target for this long and knocks it back
+    public int knockbackStaggerTicks;
 
-	// How far away an enemy can be before the AI goes after it
-	public float aiMaxDistance = 8f;
+    // How far away an enemy can be before the AI goes after it
+    public float aiMaxDistance = 8f;
 
-	public CompProperties_AbilityStrike()
-	{
-		compClass = typeof(CompAbilityEffect_Strike);
-	}
+    public CompProperties_AbilityStrike()
+    {
+        compClass = typeof(CompAbilityEffect_Strike);
+    }
 }
 
 // A single melee hit whose damage scales with the caster, so one ability suits both rats and megaspiders
 public class CompAbilityEffect_Strike : CompAbilityEffect
 {
-	public new CompProperties_AbilityStrike Props => (CompProperties_AbilityStrike)props;
+    public new CompProperties_AbilityStrike Props => (CompProperties_AbilityStrike)props;
 
-	public override void Apply(
-		LocalTargetInfo target,
-		LocalTargetInfo dest
-	)
-	{
-		base.Apply(target, dest);
+    public override void Apply(
+        LocalTargetInfo target,
+        LocalTargetInfo dest
+    )
+    {
+        base.Apply(target, dest);
 
-		var pawn = parent.pawn;
-		if (target.Pawn is not { Spawned: true } targetPawn)
-		{
-			return;
-		}
+        var pawn = parent.pawn;
+        if (target.Pawn is not { Spawned: true } targetPawn)
+        {
+            return;
+        }
 
-		var damage = Props.damageBase + Props.damagePerBodySize * pawn.BodySize;
-		targetPawn.TakeDamage(new DamageInfo(Props.damageDef, damage, Props.armorPenetration, instigator: pawn));
+        var damage = Props.damageBase + Props.damagePerBodySize * pawn.BodySize;
+        targetPawn.TakeDamage(new DamageInfo(Props.damageDef, damage, Props.armorPenetration, instigator: pawn));
 
-		if (Props.knockbackStaggerTicks > 0 && targetPawn.Spawned && !targetPawn.Dead)
-		{
-			KnockbackUtility.KnockBack(targetPawn, pawn.Position, pawn, Props.knockbackStaggerTicks);
-		}
-	}
+        if (Props.knockbackStaggerTicks > 0 && targetPawn.Spawned && !targetPawn.Dead)
+        {
+            KnockbackUtility.KnockBack(targetPawn, pawn.Position, pawn, Props.knockbackStaggerTicks);
+        }
+    }
 
-	public override bool AICanTargetNow(
-		LocalTargetInfo target
-	)
-	{
-		var pawn = parent.pawn;
-		if (target.Pawn is not { } targetPawn)
-		{
-			return false;
-		}
+    public override bool AICanTargetNow(
+        LocalTargetInfo target
+    )
+    {
+        var pawn = parent.pawn;
+        if (target.Pawn is not { } targetPawn)
+        {
+            return false;
+        }
 
-		return !targetPawn.Downed
-		       && targetPawn.IsEnemyOf(pawn)
-		       && targetPawn.Position.InHorDistOf(pawn.Position, Props.aiMaxDistance);
-	}
+        return !targetPawn.Downed
+               && targetPawn.IsEnemyOf(pawn)
+               && targetPawn.Position.InHorDistOf(pawn.Position, Props.aiMaxDistance);
+    }
 }

@@ -18,7 +18,7 @@ public class PawnColumnWorker_MechUpgrades : PawnColumnWorker
 
         var currPoints = MechUpgradeUtility.CurrentPoints(comp.upgrades);
         var maxPoints = MechUpgradeUtility.MaxUpgradePoints(pawn);
-        var pointsRatio = maxPoints > 0 ? currPoints / (float) maxPoints : 0f;
+        var pointsRatio = maxPoints > 0 ? currPoints / (float)maxPoints : 0f;
 
         var fillableBar = Widgets.FillableBar(
             rect.ContractedBy(4f),
@@ -27,10 +27,10 @@ public class PawnColumnWorker_MechUpgrades : PawnColumnWorker
             BaseContent.ClearTex,
             false
         );
-        
+
         if (Widgets.ButtonInvisible(fillableBar))
         {
-            CameraJumper.TryJumpAndSelect((GlobalTargetInfo) (Thing) pawn);
+            CameraJumper.TryJumpAndSelect((GlobalTargetInfo)(Thing)pawn);
             Find.MainTabsRoot.EscapeCurrentTab(false);
             InspectPaneUtility.OpenTab(typeof(ITab_MechUpgrades));
         }

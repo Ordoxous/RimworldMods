@@ -23,7 +23,7 @@ It's all in `src/ReplaceBlueprintMaterials.cs`: a Harmony postfix on `Blueprint_
 
 Menus are built on click, not with the gizmo. Text is in `mod/Languages/English/Keyed/BlueprintMaterials.xml`.
 
-Style: 4 spaces and K&R braces in places, unlike the repo's newer mods, which use tabs. Match the file you're in.
+Style: as set in the repo's `.editorconfig` (4 spaces, braces on their own line).
 
 ## Testing
 

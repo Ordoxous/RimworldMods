@@ -32,6 +32,7 @@ dotnet build <Mod>/<Mod>.csproj -c Debug -t:CopyToRimworld
 
 ## Conventions
 
-- C#: tabs, a file-scoped namespace `Ordo.<Mod>`, and one parameter per line in method signatures.
-- XML: 2 spaces. DefNames use the `Ordo_` prefix. Guard DLC content with `MayRequire="Ludeon.RimWorld.<DLC>"`.
+- Formatting is in the repo's `.editorconfig`: spaces, 4 for C#, project files, JSON and PowerShell, 2 for XML and Markdown, LF line endings. Run `dotnet format whitespace <project>` after writing C#; it fixes indentation and braces but doesn't wrap parameters.
+- C#: a file-scoped namespace `Ordo.<Mod>`, braces on their own line, and one parameter per line in method signatures.
+- XML: defNames use the `Ordo_` prefix. Guard DLC content with `MayRequire="Ludeon.RimWorld.<DLC>"`.
 - Package IDs are `Ordo.<Mod>`. The bridge tools treat any running mod with code whose packageId starts with `Ordo.` as "ours".

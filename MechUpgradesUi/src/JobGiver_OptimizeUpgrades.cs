@@ -21,7 +21,7 @@ public class JobGiver_OptimizeUpgrades : ThinkNode_JobGiver
 
         // Set up front, so a trip that fails partway can't be retried in a tight loop
         var intervalTicks = MechUpgradesUiMod.Settings.PolicyCheckIntervalHours * GenDate.TicksPerHour;
-        pawn.mindState.nextApparelOptimizeTick = Find.TickManager.TicksGame + Rand.Range((int) (intervalTicks * 0.8f), (int) (intervalTicks * 1.2f));
+        pawn.mindState.nextApparelOptimizeTick = Find.TickManager.TicksGame + Rand.Range((int)(intervalTicks * 0.8f), (int)(intervalTicks * 1.2f));
 
         // The status shown to the player starts from UsableBy too. Being free right now only matters for an actual trip
         var upgraders = Building_AutoMechUpgrader.UsableBy(pawn)
@@ -41,7 +41,7 @@ public class JobGiver_OptimizeUpgrades : ThinkNode_JobGiver
         {
             if (mostOperations.Value.Count > 0)
             {
-                return JobMaker.MakeJob(JobDefOf.EnterBuilding, (LocalTargetInfo) (Thing) mostOperations.Key);
+                return JobMaker.MakeJob(JobDefOf.EnterBuilding, (LocalTargetInfo)(Thing)mostOperations.Key);
             }
         }
 

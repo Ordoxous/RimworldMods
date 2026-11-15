@@ -9,7 +9,7 @@ This README is for working on the mod. The player-facing description is in `mod/
 - **Hard:** Harmony, Odyssey.
 - **Optional: Biotech,** needed for Fire Burst (the whole Incendiary tag) and the toxalope. These are guarded with `MayRequire="Ludeon.RimWorld.Biotech"`.
 
-All defNames use the `Ordo_` prefix. Style: tabs, file-scoped namespace `Ordo.SillyAnimalThings`, and one parameter per line in method signatures. XML uses 2 spaces.
+All defNames use the `Ordo_` prefix. Style: as set in the repo's `.editorconfig`, with the file-scoped namespace `Ordo.SillyAnimalThings` and one parameter per line in method signatures.
 
 ## How it works
 
@@ -191,7 +191,7 @@ Run the suite with `ordo/run_scenarios`. The scenarios are in `tools/BridgeTools
 - **Suites:** one per ability (`charge`, `detonate`, ...), plus `ai`, `player`, `knockback`, `visuals` and `setup`.
 - **The `visuals` suite** checks that each overlay's mote appears and goes, through `HediffComp_Overlay.LastMote`, because the game doesn't list motes with the map's other things. Use the showcase to judge how something looks.
 - **Player scenarios use non-roamers** (rats, boomrats). A player-owned roamer isn't hostile to anything until it has fought, which a scenario can't rely on.
-- **Headless runs take 1.4-4 s.** A windowed run is needed for anything that draws.
+- **Headless runs take 1.4-5 s.** A windowed run is needed for anything that draws.
 
 **The suite is known to catch bugs:**
 
@@ -200,6 +200,7 @@ Run the suite with `ordo/run_scenarios`. The scenarios are in `tools/BridgeTools
 
 **Results:**
 
+- 49/49 on `sillyanimalthings-biotech-headless` on 2026-11-14 (4.9 s), after the shared `Stage` and runner changes for BlueprintMaterials.
 - 49/49 on `sillyanimalthings-biotech-headless` on 2026-11-13. No errors were logged except from the faults put in on purpose.
 - In earlier testing, all 15 abilities passed when commanded, and all that have AI use passed for it.
 - Not measured: Withdraw's armor bonus, Howl's stat bonus, Charge damage across body sizes, and Fire Burst's burning (only its cooldown is checked).
@@ -214,7 +215,10 @@ Run the suite with `ordo/run_scenarios`. The scenarios are in `tools/BridgeTools
 
 ### Showcase
 
-`tools/BridgeTools/Showcase/SillyAnimalThingsShowcase.cs` has 22 clips: one per ability, plus `ai_*` clips showing when animals use them. Record on `sillyanimalthings-showcase` with `ordo/record_showcase`, then cut with `make_showcase.ps1`. All 15 ability clips take about 95 s to record and 45 s to cut.
+`tools/BridgeTools/Showcase/SillyAnimalThingsShowcase.cs` has 22 clips: one per ability, plus `ai_*` clips showing when animals use them. Record on `sillyanimalthings-showcase` with `ordo/record_showcase` into `tools/BridgeTools/videos/sillyanimalthings`, then cut with `make_showcase.ps1 -OutputDirectory <that folder>`. All 22 take about 2.5 minutes to record and a minute to cut.
+
+- Last recorded on 2026-11-14, after the recorder switched to filming the whole window and cropping afterwards. All 22 recorded, `charge` on its second take, and a frame from each was checked.
+- The showcase window must be 1920x1080. The profile's window had been saved at 2560x1351, whose odd height makes ffmpeg fail; see the skill's `showcase.md`.
 
 - Captions come from each ability's label and description.
 - The Gnaw clip starts its wall worn down, because a real wall takes three bites with ten seconds between them.

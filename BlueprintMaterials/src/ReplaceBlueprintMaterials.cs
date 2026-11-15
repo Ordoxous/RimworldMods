@@ -76,7 +76,7 @@ public class ReplaceBlueprintMaterials
     )
     {
         foreach (var value in values)
-           yield return value;
+            yield return value;
 
         if (TryBuildAlternativeTerrainGizmo(__instance, out var gizmo))
         {
@@ -95,7 +95,8 @@ public class ReplaceBlueprintMaterials
     )
     {
         var entityDef = blueprint.def.entityDefToBuild;
-        if (entityDef is not TerrainDef { designatorDropdown: { } groupDef } terrainDef) {
+        if (entityDef is not TerrainDef { designatorDropdown: { } groupDef } terrainDef)
+        {
             action = null;
             return false;
         }
@@ -124,7 +125,8 @@ public class ReplaceBlueprintMaterials
                             sharesMaterial ? def.LabelCap : materialDef.LabelAsStuff,
                             () =>
                             {
-                                foreach (var selected in command.SelectedBlueprints().ToList()) {
+                                foreach (var selected in command.SelectedBlueprints().ToList())
+                                {
                                     selected.Destroy(DestroyMode.Cancel);
                                     var newBlueprint = GenConstruct.PlaceBlueprintForBuild(def, selected.Position, map, def.defaultPlacingRot, Faction.OfPlayer, null);
                                     Find.Selector.Select(newBlueprint, false, false);
@@ -163,12 +165,14 @@ public class ReplaceBlueprintMaterials
             iconProportions = entityDef.graphicData.drawSize.RotatedBy(entityDef.defaultPlacingRot),
             iconDrawScale = GenUI.IconDrawScale(entityDef),
         };
-        command.action = () => {
+        command.action = () =>
+        {
             var floatMenuOptionList = possibleStuffs
                 .Where(def => def == currentStuff || IsAvailable(def, map))
                 .Select(stuff => new FloatMenuOption(
                         stuff.LabelAsStuff,
-                        () => {
+                        () =>
+                        {
                             if (stuff == currentStuff)
                                 return;
 
@@ -192,7 +196,8 @@ public class ReplaceBlueprintMaterials
     }
 }
 
-public class Command_Action_AlternativeMaterial : Command_Action {
+public class Command_Action_AlternativeMaterial : Command_Action
+{
 
     // The mod's own, so the gizmo looks the same with or without Ideology, whose style icon it once borrowed
     private static readonly CachedTexture ChangeMaterialTex = new("UI/Gizmos/Ordo_BlueprintMaterials_ChangeMaterial");

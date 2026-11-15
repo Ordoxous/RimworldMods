@@ -22,7 +22,7 @@ Everything is in `src/LegendaryIsUnique.cs`. Harmony patches are applied in its 
 - **Minimum quality:** Excellent, Masterwork or Legendary (default Legendary).
 - **Chance a qualifying weapon becomes unique:** 5-100% in steps of 5 (default 100%).
 
-Style: tabs, file-scoped namespace `Ordo.LegendaryIsUnique`, and one parameter per line in method signatures.
+Style: as set in the repo's `.editorconfig`, with the file-scoped namespace `Ordo.LegendaryIsUnique` and one parameter per line in method signatures.
 
 ## Testing
 

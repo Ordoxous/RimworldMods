@@ -22,7 +22,8 @@ public class UpgradePolicy : Policy
     /// </summary>
     public bool ReplaceLowerRanked;
 
-    public UpgradePolicy() {
+    public UpgradePolicy()
+    {
     }
 
     public UpgradePolicy(int id, string label)
@@ -30,7 +31,7 @@ public class UpgradePolicy : Policy
     {
     }
 
-    public override string LoadKey => nameof (UpgradePolicy);
+    public override string LoadKey => nameof(UpgradePolicy);
 
     /// <summary>The upgrades this policy allows.</summary>
     public IEnumerable<MechUpgradeDef> AllowedUpgradeDefs =>
@@ -96,7 +97,7 @@ public class UpgradePolicy : Policy
             return;
 
         Filter.CopyAllowancesFrom(upgradePolicy.Filter);
-        Ranking = [..upgradePolicy.Ranking];
+        Ranking = [.. upgradePolicy.Ranking];
         ReplaceLowerRanked = upgradePolicy.ReplaceLowerRanked;
     }
 

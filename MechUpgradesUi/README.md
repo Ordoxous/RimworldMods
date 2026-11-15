@@ -35,7 +35,7 @@ The mod doesn't use Harmony. All its changes to MU and the game are XML patches 
 
 A player-ordered insert is recognised by `pawn.CurJob.playerForced`. MU's gizmo and float menu option both go through `Building_Enterable.SelectPawn`, which takes an ordered job. The think tree's trips don't.
 
-Style: 4 spaces, as in the existing files (unlike the repo's other mods, which use tabs).
+Style: as set in the repo's `.editorconfig` (4 spaces).
 
 ## Testing
 
@@ -75,6 +75,7 @@ How the scenarios are built:
 
 **Results:**
 
+- 2026-11-14, after BlueprintMaterials' changes to the shared `Stage` (selection cleared in cleanup, blueprints and frames removed): 34/34 on `mechupgradesui-headless`, in about 7 s.
 - 2026-11-14, after ranking: 34/34 on `mechupgradesui-headless`, in about 4 s. The dialog's ranked list, drag handles and checkbox were checked by eye on the windowed profile. A real drag wasn't: RimBridge can only drag on the map. `ranking_move` covers what a drop does.
 - 2026-11-14, after the second UI pass: 27/27 on `mechupgradesui-headless`, in about 3 s. On the windowed profile, the policy dialog opened from a lifter was checked by eye: "Used by", the mech type preset, and the lifter's own section with its adding, skipped and removing lines. The alerts and the red and yellow markers were only checked by scenario.
 - 22/22 on `mechupgradesui-headless`, in about 7 s, after the first UI pass.

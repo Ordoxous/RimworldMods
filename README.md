@@ -32,6 +32,7 @@ The project name, assembly name and deployed folder under `RimWorld\Mods` are th
 | `tools/BridgeTools/Showcase` | Records captioned clips with the game's sound, one `<Mod>Showcase.cs` per mod |
 | `tools/HotReloadDelta` | Makes .NET hot reload deltas for a running game |
 | `tools/ProcessAudioCapture` | Records only the game's sound, for the showcase |
+| `tools/return_focus.ps1` | Gives keyboard focus back when a windowed test game takes it on launch; start it in the background before starting a windowed profile |
 | `.claude/skills/rimworld-mod-dev` | How to build, deploy, test, reload, debug, profile and record any mod here. Written for coding agents, but it's the most complete guide to the workflow |
 
 ## Building
@@ -54,6 +55,7 @@ Tests run inside the real game. GABS launches RimWorld with a per-mod profile, a
 ## Conventions
 
 - Package IDs are `Ordo.<Mod>`, and C# namespaces `Ordo.<Mod>`. New defNames use the `Ordo_` prefix.
-- C#: file-scoped namespaces and one parameter per line in method signatures. Newer mods use tabs; MechUpgradesUi and Tweaks use 4 spaces, so match the file you're in.
-- XML: 2 spaces. Guard DLC content with `MayRequire="Ludeon.RimWorld.<DLC>"`.
+- Formatting is set in `.editorconfig`, which Rider and `dotnet format` both read: spaces, never tabs; 4 for C#, project files, JSON and PowerShell, and 2 for XML and Markdown; LF line endings.
+- C#: file-scoped namespaces, braces on their own line, and one parameter per line in method signatures. `dotnet format whitespace <project>` fixes indentation and braces; Rider's reformat also wraps parameters.
+- XML: guard DLC content with `MayRequire="Ludeon.RimWorld.<DLC>"`.
 - Each mod's `README.md` is its developer documentation: design, how to test it, results, history and open questions. Update it with any change to the mod.

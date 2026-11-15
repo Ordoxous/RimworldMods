@@ -5,32 +5,32 @@ namespace Ordo.SillyAnimalThings;
 
 public class CompProperties_AbilityChargeTarget : CompProperties_AbilityEffect
 {
-	// Closer than this the AI just melees instead of charging
-	public float aiMinDistance = 3.9f;
+    // Closer than this the AI just melees instead of charging
+    public float aiMinDistance = 3.9f;
 
-	public CompProperties_AbilityChargeTarget()
-	{
-		compClass = typeof(CompAbilityEffect_ChargeTarget);
-	}
+    public CompProperties_AbilityChargeTarget()
+    {
+        compClass = typeof(CompAbilityEffect_ChargeTarget);
+    }
 }
 
 // Only lets the AI charge at enemies that aren't already in melee range
 public class CompAbilityEffect_ChargeTarget : CompAbilityEffect
 {
-	public new CompProperties_AbilityChargeTarget Props => (CompProperties_AbilityChargeTarget)props;
+    public new CompProperties_AbilityChargeTarget Props => (CompProperties_AbilityChargeTarget)props;
 
-	public override bool AICanTargetNow(
-		LocalTargetInfo target
-	)
-	{
-		var pawn = parent.pawn;
-		if (target.Pawn is not { } targetPawn)
-		{
-			return false;
-		}
+    public override bool AICanTargetNow(
+        LocalTargetInfo target
+    )
+    {
+        var pawn = parent.pawn;
+        if (target.Pawn is not { } targetPawn)
+        {
+            return false;
+        }
 
-		return !targetPawn.Downed
-		       && targetPawn.IsEnemyOf(pawn)
-		       && !targetPawn.Position.InHorDistOf(pawn.Position, Props.aiMinDistance);
-	}
+        return !targetPawn.Downed
+               && targetPawn.IsEnemyOf(pawn)
+               && !targetPawn.Position.InHorDistOf(pawn.Position, Props.aiMinDistance);
+    }
 }
