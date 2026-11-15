@@ -114,7 +114,9 @@
             <MinorVersionsMatch Condition="'$(RimWorldVersionMinor)' == '$(RimRefVersionMinor)'">true</MinorVersionsMatch>
             <IgnorePatchVersion Condition="'$(RimRefVersionPatchComparable)' == '*' OR '$(UseStrictRimWorldVersionComparison)' != 'true'">true</IgnorePatchVersion>
             <PatchVersionsMatch Condition="'$(RimWorldVersionPatch)' == '$(RimRefVersionPatchComparable)' OR '$(IgnorePatchVersion)' == 'true'">true</PatchVersionsMatch>
-            <ShouldRemoveRimRef Condition="'$(MinorVersionsMatch)' == 'true' AND '$(PatchVersionsMatch)' == 'true'">true</ShouldRemoveRimRef>
+            <!-- Only swap when there are local assemblies to swap in. The 1.7 Waylith build has no */Managed folder, so the glob is empty;
+                 removing the package then leaves nothing to compile against, and Rider's restore drops the package entirely. -->
+            <ShouldRemoveRimRef Condition="'$(MinorVersionsMatch)' == 'true' AND '$(PatchVersionsMatch)' == 'true' AND '@(LocalRimWorldAssembly)' != ''">true</ShouldRemoveRimRef>
             <ShouldRemoveRimRef Condition="'$(ShouldRemoveRimRef)' != 'true'">false</ShouldRemoveRimRef>
         </PropertyGroup>
 
