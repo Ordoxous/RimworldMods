@@ -48,7 +48,7 @@ Load what the task needs:
 
 - Always build with `-c Debug`. Without it, `CopyToRimworld` deploys whatever stale DLL was already in `out/`.
 - Stop the game before deploying a DLL or the bridge tools; companions and mod DLLs load only at startup.
-- Have the Steam client running before starting the game. Without it, Harmony failed to load and the bridge never came up. When `games_connect` times out, read `~/.gabs/rimworld/launch.log` before anything else.
+- Have the Steam client running before starting the game. Without it, Harmony failed to load and the bridge never came up. When `games_connect` times out, read `~/.gabs/rimworld/launch.log` before anything else. The project's `.claude/settings.json` has a PreToolUse hook that blocks `games_start` while `steam.exe` isn't running.
 - A failed bridge call leaves a blocking "attention" item: clear it with `games_ack_attention` before carrying on.
 - Read errors with `list_logs` at `minimumLevel: error`. Warnings are flooded by the bridge's own startup timing.
 - Never record the user's microphone, which is ffmpeg's only audio input on this machine.

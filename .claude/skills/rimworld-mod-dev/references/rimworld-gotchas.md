@@ -35,3 +35,6 @@ Behaviour found while building and testing mods here. Each one cost time once.
 - Motes aren't listed with the map's other things. To test that a mote appears, keep a reference to it in the mod.
 - The base game's motes and rings grow several cells wide, which fills the screen over a crowd. Make smaller copies for effects that show on many pawns.
 - A thing drawn in the same cell as a pawn can be hidden underneath it. Land thrown objects one cell back towards the thrower.
+
+- **Pure black draws nothing in UI boxes.** On Waylith, a solid box of colour (0, 0, 0) is invisible at any alpha, through `Widgets.DrawBoxSolid` or `WhiteTex` tinted by `GUI.color`. Use near-black, such as (0.05, 0.05, 0.06).
+- **Finding vanilla textures.** They are packed, so they can't be listed on disk. `ordo/list_textures` lists a folder by texture name, and `ordo/textures_exist` checks exact paths. The game's own paths are also UTF-16 string literals in `Assembly-CSharp.dll`, readable with a short perl extraction.

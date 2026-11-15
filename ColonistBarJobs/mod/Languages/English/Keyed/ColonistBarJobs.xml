@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+  <Ordo_ColonistBarJobs_SettingsCategory>Colonist Bar Job Icons</Ordo_ColonistBarJobs_SettingsCategory>
+  <Ordo_ColonistBarJobs_Corner>Corner of the portrait</Ordo_ColonistBarJobs_Corner>
+  <Ordo_ColonistBarJobs_Corner_TopRight>Top right</Ordo_ColonistBarJobs_Corner_TopRight>
+  <Ordo_ColonistBarJobs_Corner_TopLeft>Top left</Ordo_ColonistBarJobs_Corner_TopLeft>
+  <Ordo_ColonistBarJobs_Corner_BottomRight>Bottom right</Ordo_ColonistBarJobs_Corner_BottomRight>
+  <Ordo_ColonistBarJobs_Corner_BottomLeft>Bottom left</Ordo_ColonistBarJobs_Corner_BottomLeft>
+  <Ordo_ColonistBarJobs_Size>Icon size: {0} of the portrait</Ordo_ColonistBarJobs_Size>
+  <Ordo_ColonistBarJobs_SizeTip>The icon's width as a share of the portrait's width.</Ordo_ColonistBarJobs_SizeTip>
+  <Ordo_ColonistBarJobs_OffsetX>Move sideways: {0}</Ordo_ColonistBarJobs_OffsetX>
+  <Ordo_ColonistBarJobs_OffsetY>Move up or down: {0}</Ordo_ColonistBarJobs_OffsetY>
+  <Ordo_ColonistBarJobs_OffsetTip>Pixels away from the corner, at the normal bar size. Positive moves the icon towards the middle of the portrait, negative past its edge.</Ordo_ColonistBarJobs_OffsetTip>
+  <Ordo_ColonistBarJobs_Backdrop>Backdrop darkness: {0}</Ordo_ColonistBarJobs_Backdrop>
+  <Ordo_ColonistBarJobs_Reset>Reset to defaults</Ordo_ColonistBarJobs_Reset>
+  <Ordo_ColonistBarJobs_Preview>Preview</Ordo_ColonistBarJobs_Preview>
+
+</LanguageData>

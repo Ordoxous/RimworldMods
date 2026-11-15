@@ -7,14 +7,12 @@ using Verse.AI;
 
 namespace Ordo.ColonistBarJobs;
 
-// Draws the current job's icon in the top right of each colonist bar portrait, with the job report as its tooltip
+// Draws the current job's icon on each colonist bar portrait, where the settings put it, with the job report as its tooltip
 [StaticConstructorOnStartup]
 public static class ColonistBarJobIcons
 {
-    // The icon's share of the portrait's width
-    private const float SizeFactor = 0.4f;
-
-    private static readonly Color Backdrop = new(0f, 0f, 0f, 0.45f);
+    // Near-black, not black: on Waylith a box of pure black (0, 0, 0) draws nothing at any alpha, while any other colour draws
+    private static readonly Color Backdrop = new(0.05f, 0.05f, 0.06f);
 
     // Resolved once per job: the bar draws every frame, a job changes a few times a minute. Jobs are pooled and reused, so a
     // job is known by its loadID (new from each JobMaker.MakeJob), not by reference.
@@ -53,15 +51,6 @@ public static class ColonistBarJobIcons
         return icon;
     }
 
-    // The rect the icon takes in a portrait's rect
-    public static Rect IconRect(
-        Rect portrait
-    )
-    {
-        var size = Mathf.Round(portrait.width * SizeFactor);
-        return new Rect(portrait.xMax - size - 1f, portrait.y + 1f, size, size);
-    }
-
     private static void Postfix_DrawColonist(
         [HarmonyArgument(0)] Rect rect,
         [HarmonyArgument(1)] Pawn colonist
@@ -78,7 +67,7 @@ public static class ColonistBarJobIcons
             return;
         }
 
-        var iconRect = IconRect(rect);
+        var iconRect = ColonistBarJobsMod.Settings.IconRect(rect);
         if (Event.current.type == EventType.Repaint)
         {
             Draw(iconRect, icon);
@@ -95,8 +84,12 @@ public static class ColonistBarJobIcons
         // The bar fades portraits of pawns on other maps through GUI.color; keep that fade
         var alpha = GUI.color.a;
         var old = GUI.color;
-        GUI.color = new Color(Backdrop.r, Backdrop.g, Backdrop.b, Backdrop.a * alpha);
-        GUI.DrawTexture(rect, BaseContent.WhiteTex);
+        var opacity = ColonistBarJobsMod.Settings.BackdropOpacity;
+        if (opacity > 0f)
+        {
+            Widgets.DrawBoxSolid(rect, new Color(Backdrop.r, Backdrop.g, Backdrop.b, opacity * alpha));
+        }
+
         GUI.color = new Color(1f, 1f, 1f, alpha);
 
         var inner = rect.ContractedBy(1f);

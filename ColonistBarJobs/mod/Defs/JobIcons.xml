@@ -40,6 +40,32 @@
     </jobs>
   </Ordo.ColonistBarJobs.JobIconDef>
 
+  <!-- Off work. Recreation shows what it's done with (the TV, the chess table) when there is one, and the joy icon otherwise
+       (walks, skygazing, meditating, praying). The idle and sleeping icons are vanilla's own colonist bar icons. -->
+  <Ordo.ColonistBarJobs.JobIconDef>
+    <defName>Ordo_JobIcon_Recreation</defName>
+    <texPath>UI/Icons/DrugPolicy/Joy</texPath>
+    <recreation>true</recreation>
+    <targetFirst>true</targetFirst>
+  </Ordo.ColonistBarJobs.JobIconDef>
+
+  <Ordo.ColonistBarJobs.JobIconDef>
+    <defName>Ordo_JobIcon_Wander</defName>
+    <texPath>UI/Icons/ColonistBar/Idle</texPath>
+    <jobs>
+      <li>GotoWander</li>
+      <li>Wait_Wander</li>
+    </jobs>
+  </Ordo.ColonistBarJobs.JobIconDef>
+
+  <Ordo.ColonistBarJobs.JobIconDef>
+    <defName>Ordo_JobIcon_Sleep</defName>
+    <texPath>UI/Icons/ColonistBar/Sleeping</texPath>
+    <jobs>
+      <li>LayDown</li>
+    </jobs>
+  </Ordo.ColonistBarJobs.JobIconDef>
+
   <!-- Work types whose targets are pawns, cells or plain rock -->
   <Ordo.ColonistBarJobs.JobIconDef>
     <defName>Ordo_JobIcon_Mining</defName>

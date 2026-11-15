@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__gabs__games_start",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "tasklist //FI \"IMAGENAME eq steam.exe\" //NH | grep -qi \"steam.exe\" || { echo \"Steam isn't running. Without it Harmony doesn't load and the RimBridge bridge never comes up. Ask the user to start Steam, then retry.\" >&2; exit 2; }",
+            "timeout": 15,
+            "statusMessage": "Checking that Steam is running"
+          }
+        ]
+      }
+    ]
+  }
+}

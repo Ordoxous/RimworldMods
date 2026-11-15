@@ -11,6 +11,13 @@ public class JobIconDef : Def
 {
     public List<JobDef> jobs = new();
     public List<WorkTypeDef> workTypes = new();
+
+    // Matches every recreation job (a JobDef with a joyKind) that no job mapping covers
+    public bool recreation;
+
+    // When the job targets a thing with an icon, show that instead: the TV being watched says more than "recreation"
+    public bool targetFirst;
+
     [NoTranslate] public string texPath;
     public ThingDef thingIcon;
 
@@ -44,9 +51,9 @@ public class JobIconDef : Def
             yield return "has neither texPath nor thingIcon";
         }
 
-        if (jobs.Count == 0 && workTypes.Count == 0)
+        if (jobs.Count == 0 && workTypes.Count == 0 && !recreation)
         {
-            yield return "matches no jobs or work types";
+            yield return "matches no jobs, work types or recreation";
         }
     }
 }
@@ -84,12 +91,14 @@ public static class JobIconResolver
 {
     private static Dictionary<JobDef, JobIconDef> byJob;
     private static Dictionary<WorkTypeDef, JobIconDef> byWorkType;
+    private static JobIconDef recreationIcon;
 
     // Rebuilds the lookups from the defs; call after a def reload
     public static void Reset()
     {
         byJob = null;
         byWorkType = null;
+        recreationIcon = null;
     }
 
     private static void EnsureLookups()
@@ -112,6 +121,11 @@ public static class JobIconResolver
             {
                 byWorkType[workType] = def;
             }
+
+            if (def.recreation)
+            {
+                recreationIcon = def;
+            }
         }
     }
 
@@ -119,7 +133,8 @@ public static class JobIconResolver
         Pawn pawn
     ) => For(pawn?.CurJob);
 
-    // The job's own mapping, then its work type's, then the thing it targets
+    // The job's own mapping, then its work type's, then recreation's; a mapping marked targetFirst gives way to the thing the
+    // job targets, which is also the last resort
     public static JobIcon For(
         Job job
     )
@@ -130,21 +145,32 @@ public static class JobIconResolver
         }
 
         EnsureLookups();
+        var target = FromThing(job.targetA.Thing);
 
-        if (byJob.TryGetValue(job.def, out var jobIcon) && FromDef(jobIcon) is { IsEmpty: false } fromJob)
+        if (byJob.TryGetValue(job.def, out var jobIcon) && Mapped(jobIcon, target) is { IsEmpty: false } fromJob)
         {
             return fromJob;
         }
 
         if (job.workGiverDef?.workType is { } workType
             && byWorkType.TryGetValue(workType, out var workTypeIcon)
-            && FromDef(workTypeIcon) is { IsEmpty: false } fromWorkType)
+            && Mapped(workTypeIcon, target) is { IsEmpty: false } fromWorkType)
         {
             return fromWorkType;
         }
 
-        return FromThing(job.targetA.Thing);
+        if (job.def.joyKind != null && recreationIcon != null && Mapped(recreationIcon, target) is { IsEmpty: false } fromRecreation)
+        {
+            return fromRecreation;
+        }
+
+        return target;
     }
+
+    private static JobIcon Mapped(
+        JobIconDef def,
+        JobIcon target
+    ) => def.targetFirst && !target.IsEmpty ? target : FromDef(def);
 
     private static JobIcon FromDef(
         JobIconDef def

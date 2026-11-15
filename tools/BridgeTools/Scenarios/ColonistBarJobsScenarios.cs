@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using HarmonyLib;
 using Ordo.ColonistBarJobs;
 using RimWorld;
+using UnityEngine;
 using Verse;
 using Verse.AI;
 
@@ -13,15 +14,18 @@ namespace Ordo.BridgeTools.Scenarios;
 // relies on; one has a real colonist take jobs, for the cache. Drawing itself needs a windowed profile and is checked by eye.
 public static class ColonistBarJobsScenarios
 {
-    // Suites: "setup" for defs, textures and the patch, "resolve" for which icon a job gets, "cache" for following job changes
+    // Suites: "setup" for defs, textures and the patch, "resolve" for which icon a job gets, "cache" for following job changes,
+    // "settings" for where the settings put the icon
     public static readonly List<Scenario> All = new()
     {
+        new("settings_corners_size_and_offsets", "settings", CornersSizeAndOffsets),
         new("setup_defs_textures_and_patch", "setup", DefsTexturesAndPatch),
         new("resolve_job_mapping_beats_target", "resolve", JobMappingBeatsTarget),
         new("resolve_work_type_mapping", "resolve", WorkTypeMapping),
         new("resolve_target_thing", "resolve", TargetThing),
         new("resolve_blueprint_shows_what_it_builds", "resolve", BlueprintShowsWhatItBuilds),
         new("resolve_nothing_to_show", "resolve", NothingToShow),
+        new("resolve_off_work", "resolve offwork", OffWork),
         new("cache_follows_job", "cache", CacheFollowsJob)
     };
 
@@ -137,6 +141,75 @@ public static class ColonistBarJobsScenarios
     }
 
     // A miner gets the mining icon once at work, and none once drafted: the cache follows the pawn's job
+    // Recreation shows the joy icon unless it's done with a thing; wandering and sleeping show vanilla's idle and sleeping icons,
+    // sleeping even in a bed
+    private static Task OffWork(
+        ScenarioContext context
+    )
+    {
+        JobDef Job(
+            string defName
+        ) => DefDatabase<JobDef>.GetNamed(defName);
+
+        var skygaze = JobIconResolver.For(JobMaker.MakeJob(Job("Skygaze"), context.Cell(0, 0)));
+        context.Check($"skygazing shows the recreation icon: {skygaze}", skygaze.Source == Icon("Ordo_JobIcon_Recreation"));
+
+        var pin = context.Place(DefDatabase<ThingDef>.GetNamed("HorseshoesPin"), 2, 0, ThingDefOf.WoodLog);
+        var horseshoes = JobIconResolver.For(JobMaker.MakeJob(Job("Play_Horseshoes"), pin));
+        context.Check($"horseshoes shows the pin, not the recreation icon: {horseshoes}", horseshoes.Def == pin.def && horseshoes.Source == null);
+
+        var wander = JobIconResolver.For(JobMaker.MakeJob(JobDefOf.GotoWander, context.Cell(3, 3)));
+        context.Check($"wandering shows the idle icon: {wander}", wander.Source == Icon("Ordo_JobIcon_Wander"));
+
+        var bed = context.Place(ThingDefOf.Bed, 5, 0, ThingDefOf.WoodLog);
+        var sleep = JobIconResolver.For(JobMaker.MakeJob(JobDefOf.LayDown, bed));
+        context.Check($"sleeping in a bed shows the sleeping icon: {sleep}", sleep.Source == Icon("Ordo_JobIcon_Sleep"));
+        return Task.CompletedTask;
+    }
+
+    // Each corner on a vanilla-sized portrait (48 px) and a doubled one, where offsets scale with the portrait
+    private static Task CornersSizeAndOffsets(
+        ScenarioContext context
+    )
+    {
+        var settings = new ColonistBarJobsSettings { Size = 0.25f };
+        var portrait = new Rect(100f, 10f, 48f, 48f);
+
+        void Expect(
+            IconCorner corner,
+            float offsetX,
+            float offsetY,
+            Rect at,
+            Rect expected
+        )
+        {
+            settings.Corner = corner;
+            settings.OffsetX = offsetX;
+            settings.OffsetY = offsetY;
+            var rect = settings.IconRect(at);
+            context.Check($"{corner} offset ({offsetX}, {offsetY}) on {at}: {rect}, expected {expected}", rect == expected);
+        }
+
+        Expect(IconCorner.TopRight, 0f, 0f, portrait, new Rect(135f, 11f, 12f, 12f));
+        Expect(IconCorner.TopLeft, 0f, 0f, portrait, new Rect(101f, 11f, 12f, 12f));
+        Expect(IconCorner.BottomRight, 0f, 0f, portrait, new Rect(135f, 45f, 12f, 12f));
+        Expect(IconCorner.BottomLeft, 0f, 0f, portrait, new Rect(101f, 45f, 12f, 12f));
+
+        // Positive moves inward from the corner, negative outward past the edge
+        Expect(IconCorner.TopRight, 4f, 2f, portrait, new Rect(131f, 13f, 12f, 12f));
+        Expect(IconCorner.BottomLeft, -3f, -3f, portrait, new Rect(98f, 48f, 12f, 12f));
+
+        // A portrait twice the size doubles the icon and the offsets
+        var big = new Rect(0f, 0f, 96f, 96f);
+        Expect(IconCorner.TopLeft, 4f, 0f, big, new Rect(9f, 1f, 24f, 24f));
+
+        var defaults = new ColonistBarJobsSettings();
+        defaults.Reset();
+        context.Check($"defaults are top right at {ColonistBarJobsSettings.DefaultSize:P0}",
+            defaults.Corner == IconCorner.TopRight && defaults.Size == ColonistBarJobsSettings.DefaultSize && defaults.OffsetX == 0f);
+        return Task.CompletedTask;
+    }
+
     private static async Task CacheFollowsJob(
         ScenarioContext context
     )
