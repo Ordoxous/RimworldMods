@@ -35,7 +35,7 @@ public static class ToolsCategory
                 parent.allChildThingDefsCached.Add(def);
         }
 
-        toolsCategory.sortedChildThingDefsCached = toolsCategory.childThingDefs.OrderBy(def => def.label).ToList();
+        toolsCategory.sortedChildThingDefsCached = toolsCategory.childThingDefs.OrderBy(def => def.label, System.StringComparer.CurrentCulture).ToList();
     }
 
     private static bool IsTool(ThingDef def) =>

@@ -426,10 +426,10 @@ public static class SaddleboundScenarios
 
             (int, int) Seen()
             {
-                SeenChance = null;
+                _seenChance = null;
                 var pawns = new List<Pawn>();
                 GiddyUpAdapter.GenerateMountsMethod.Invoke(null, new object[] { pawns, new IncidentParms { faction = faction, target = context.Map } });
-                return SeenChance ?? (-1, -1);
+                return _seenChance ?? (-1, -1);
             }
 
             ideo.memes.Remove(meme);
@@ -578,13 +578,13 @@ public static class SaddleboundScenarios
         return Task.CompletedTask;
     }
 
-    private static (int, int)? SeenChance;
+    private static (int, int)? _seenChance;
 
     public static bool ReadChancePrefix(
         ref bool __result
     )
     {
-        SeenChance = (GiddyUpAdapter.EnemyMountChance, GiddyUpAdapter.EnemyMountChancePreInd);
+        _seenChance = (GiddyUpAdapter.EnemyMountChance, GiddyUpAdapter.EnemyMountChancePreInd);
         __result = false;
         return false;
     }

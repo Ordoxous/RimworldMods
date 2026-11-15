@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
@@ -78,7 +79,7 @@ public static class UpgradePlanner
             var ordered = allowedInstalled.Select(u => (upgrade: u, isInstalled: true))
                 .Concat(candidates.Select(u => (upgrade: u, isInstalled: false)))
                 .OrderBy(x => policy.RankOf(x.upgrade.def))
-                .ThenBy(x => x.upgrade.def.defName)
+                .ThenBy(x => x.upgrade.def.defName, StringComparer.Ordinal)
                 .ThenBy(x => x.isInstalled ? 0 : 1);
 
             var resulting = new List<MechUpgrade>();
@@ -126,8 +127,8 @@ public static class UpgradePlanner
         var added = new List<MechUpgrade>();
 
         var ordered = policy == null
-            ? candidates.OrderBy(u => u.def.defName)
-            : candidates.OrderBy(u => policy.RankOf(u.def)).ThenBy(u => u.def.defName);
+            ? candidates.OrderBy(u => u.def.defName, StringComparer.Ordinal)
+            : candidates.OrderBy(u => policy.RankOf(u.def)).ThenBy(u => u.def.defName, StringComparer.Ordinal);
         foreach (var upgrade in ordered)
         {
             var reason = WhyNot(mechDef, freePoints, resulting, upgrade);

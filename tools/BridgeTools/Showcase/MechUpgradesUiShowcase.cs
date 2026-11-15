@@ -258,11 +258,11 @@ public static class MechUpgradesUiShowcase
         string column
     )
     {
-        const BindingFlags Private = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
+        const BindingFlags anyInstance = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
         if (Find.MainTabsRoot.OpenTab?.TabWindow is not MainTabWindow_PawnTable window
-            || typeof(MainTabWindow_PawnTable).GetField("table", Private)?.GetValue(window) is not PawnTable table
-            || typeof(PawnTable).GetField("cachedColumnWidths", Private)?.GetValue(table) is not List<float> widths
-            || typeof(PawnTable).GetField("cachedRowHeights", Private)?.GetValue(table) is not List<float> heights)
+            || typeof(MainTabWindow_PawnTable).GetField("table", anyInstance)?.GetValue(window) is not PawnTable table
+            || typeof(PawnTable).GetField("cachedColumnWidths", anyInstance)?.GetValue(table) is not List<float> widths
+            || typeof(PawnTable).GetField("cachedRowHeights", anyInstance)?.GetValue(table) is not List<float> heights)
         {
             return null;
         }
@@ -274,8 +274,8 @@ public static class MechUpgradesUiShowcase
             return null;
         }
 
-        var margin = (float)(typeof(Window).GetProperty("Margin", Private)?.GetValue(window) ?? 0f);
-        var extraTop = (float)(typeof(MainTabWindow_PawnTable).GetProperty("ExtraTopSpace", Private)?.GetValue(window) ?? 0f);
+        var margin = (float)(typeof(Window).GetProperty("Margin", anyInstance)?.GetValue(window) ?? 0f);
+        var extraTop = (float)(typeof(MainTabWindow_PawnTable).GetProperty("ExtraTopSpace", anyInstance)?.GetValue(window) ?? 0f);
         var x = window.windowRect.x + margin + widths.Take(columnIndex).Sum(width => (int)width);
         var y = window.windowRect.y + margin + extraTop + (int)table.HeaderHeight + heights.Take(row).Sum(height => (int)height);
         return new Rect(x, y, (int)widths[columnIndex], (int)heights[row]);

@@ -5,7 +5,6 @@ using Ordo.BlueprintMaterials;
 using RimWorld;
 using UnityEngine;
 using Verse;
-using Verse.AI;
 
 namespace Ordo.BridgeTools.Showcase;
 

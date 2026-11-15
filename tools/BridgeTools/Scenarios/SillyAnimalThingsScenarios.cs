@@ -32,15 +32,11 @@ public static class SillyAnimalThingsScenarios
 
     private const string PoisonBite = "Ordo_PoisonBite";
 
-    private const string Regenerate = "Ordo_Regenerate";
-
     private const string Spit = "Ordo_Spit";
 
     private const string TrunkBlast = "Ordo_TrunkBlast";
 
     private const string TrunkThrow = "Ordo_TrunkThrow";
-
-    private const string Withdraw = "Ordo_Withdraw";
 
     private const string Rallied = "Ordo_Rallied";
 
@@ -145,14 +141,9 @@ public static class SillyAnimalThingsScenarios
         var destination = context.Cell(5, 0);
         context.Cast(penguin, BellySlide, destination);
 
-        var layDown = false;
         await context.Until(
             "the penguin is lying down mid-slide",
-            () =>
-            {
-                layDown = context.Map.listerThings.AllThings.OfType<PawnFlyer>().Any(flyer => flyer.FlyingPawn == penguin && flyer.FlyingPawn.jobs?.posture == PawnPosture.LayingOnGroundNormal);
-                return layDown;
-            },
+            () => context.Map.listerThings.AllThings.OfType<PawnFlyer>().Any(flyer => flyer.FlyingPawn == penguin && flyer.FlyingPawn.jobs?.posture == PawnPosture.LayingOnGroundNormal),
             100
         );
         await context.Until("the penguin lands", () => penguin.Spawned && penguin.Position == destination, 200);
@@ -167,7 +158,7 @@ public static class SillyAnimalThingsScenarios
         var tortoise = context.Spawn("Tortoise", 0, 0, PawnMode.Trained);
         context.HurtBelow(tortoise, 0.75f);
 
-        await context.Until("the tortoise withdraws", () => ScenarioContext.HasHediff(tortoise, Withdrawn), 120);
+        await context.Until("the tortoise withdraws", () => Stage.HasHediff(tortoise, Withdrawn), 120);
         if (!await context.Until("the shell shows", () => HasMote(tortoise, "Ordo_Mote_Shell"), 10))
         {
             return;
@@ -251,7 +242,7 @@ public static class SillyAnimalThingsScenarios
         context.Cast(penguin, BellySlide, destination);
 
         await context.Until("the penguin reaches its destination", () => penguin.Spawned && penguin.Position == destination, 200);
-        context.Check("the slide is on cooldown", ScenarioContext.OnCooldown(penguin, BellySlide));
+        context.Check("the slide is on cooldown", Stage.OnCooldown(penguin, BellySlide));
     }
 
     private static async Task ChargeAsPlayer(
@@ -269,11 +260,11 @@ public static class SillyAnimalThingsScenarios
         await context.Until("the charger lands", () => charger.Spawned && charger.Position == landing, 200);
         await context.Step(1);
 
-        context.Check("the enemy is hurt", ScenarioContext.Hurt(enemy));
-        context.Check("the enemy is staggered", ScenarioContext.Staggered(enemy));
-        context.Check("the friend is unhurt", !ScenarioContext.Hurt(friend));
-        context.Check("the friend isn't staggered", !ScenarioContext.Staggered(friend));
-        context.Check("the wild animal is unhurt", !ScenarioContext.Hurt(wild));
+        context.Check("the enemy is hurt", Stage.Hurt(enemy));
+        context.Check("the enemy is staggered", Stage.Staggered(enemy));
+        context.Check("the friend is unhurt", !Stage.Hurt(friend));
+        context.Check("the friend isn't staggered", !Stage.Staggered(friend));
+        context.Check("the wild animal is unhurt", !Stage.Hurt(wild));
     }
 
     // A manhunter should use the ability by itself on the colonist it's going after
@@ -288,10 +279,10 @@ public static class SillyAnimalThingsScenarios
         var colonist = context.Colonist(distance, 0);
         var manhunter = context.Spawn(kind, 0, 0, PawnMode.Manhunter);
 
-        await context.Until($"the manhunter casts {ability}", () => ScenarioContext.OnCooldown(manhunter, ability), 300);
+        await context.Until($"the manhunter casts {ability}", () => Stage.OnCooldown(manhunter, ability), 300);
         if (hurtsColonist)
         {
-            await context.Until("the colonist is hurt", () => ScenarioContext.Hurt(colonist), 300);
+            await context.Until("the colonist is hurt", () => Stage.Hurt(colonist), 300);
         }
     }
 
@@ -306,20 +297,20 @@ public static class SillyAnimalThingsScenarios
         var start = target.Position;
         context.Cast(horse, Kick, target);
 
-        if (!await context.Until("the target is hurt", () => ScenarioContext.Hurt(target), 300))
+        if (!await context.Until("the target is hurt", () => Stage.Hurt(target), 300))
         {
-            context.Fail(ScenarioContext.Describe(target));
+            context.Fail(Stage.Describe(target));
         }
 
-        context.Check("the target is staggered", ScenarioContext.Staggered(target));
+        context.Check("the target is staggered", Stage.Staggered(target));
         context.Check("the target is knocked back", target.Position != start);
-        context.Check("the kick is on cooldown", ScenarioContext.OnCooldown(horse, Kick));
-        context.Check("the target shows it's dazed", ScenarioContext.HasHediff(target, "Ordo_Dazed"));
+        context.Check("the kick is on cooldown", Stage.OnCooldown(horse, Kick));
+        context.Check("the target shows it's dazed", Stage.HasHediff(target, "Ordo_Dazed"));
         await context.Until("the stun stars show", () => HasMote(target, "Mote_Stun"), 5);
 
         // Lasts as long as the stagger, which is 120 ticks for a kick
         await context.Step(130);
-        context.Check("the daze wears off", !ScenarioContext.HasHediff(target, "Ordo_Dazed"));
+        context.Check("the daze wears off", !Stage.HasHediff(target, "Ordo_Dazed"));
     }
 
     // A rat, because a cobra's natural bite is venomous too and would hide a failure
@@ -331,8 +322,8 @@ public static class SillyAnimalThingsScenarios
         var target = context.Spawn("Cow", 3, 0, PawnMode.Enemy, hold: true);
         context.Cast(rat, PoisonBite, target);
 
-        await context.Until("the target is poisoned", () => ScenarioContext.HasHediff(target, "ToxicBuildup"), 300);
-        context.Check("the bite is on cooldown", ScenarioContext.OnCooldown(rat, PoisonBite));
+        await context.Until("the target is poisoned", () => Stage.HasHediff(target, "ToxicBuildup"), 300);
+        context.Check("the bite is on cooldown", Stage.OnCooldown(rat, PoisonBite));
     }
 
     private static async Task RoarHowlPlayer(
@@ -346,11 +337,11 @@ public static class SillyAnimalThingsScenarios
         var wild = context.Spawn("Cow", 0, -5, PawnMode.Wild, hold: true);
         context.Cast(wolf, Howl);
 
-        await context.Until("the caster is rallied", () => ScenarioContext.HasHediff(wolf, Rallied), 120);
-        context.Check("the nearby ally is rallied", ScenarioContext.HasHediff(ally, Rallied));
-        context.Check("the ally out of range isn't rallied", !ScenarioContext.HasHediff(farAlly, Rallied));
-        context.Check("the enemy isn't rallied", !ScenarioContext.HasHediff(enemy, Rallied));
-        context.Check("the wild animal isn't rallied", !ScenarioContext.HasHediff(wild, Rallied));
+        await context.Until("the caster is rallied", () => Stage.HasHediff(wolf, Rallied), 120);
+        context.Check("the nearby ally is rallied", Stage.HasHediff(ally, Rallied));
+        context.Check("the ally out of range isn't rallied", !Stage.HasHediff(farAlly, Rallied));
+        context.Check("the enemy isn't rallied", !Stage.HasHediff(enemy, Rallied));
+        context.Check("the wild animal isn't rallied", !Stage.HasHediff(wild, Rallied));
     }
 
     private static async Task RoarHowlManhunter(
@@ -361,8 +352,8 @@ public static class SillyAnimalThingsScenarios
         var wolf = context.Spawn("Wolf_Timber", 0, 0, PawnMode.Manhunter);
         var packmate = context.Spawn("Wolf_Timber", 0, 3, PawnMode.Manhunter);
 
-        await context.Until("a wolf howls", () => ScenarioContext.OnCooldown(wolf, Howl) || ScenarioContext.OnCooldown(packmate, Howl), 300);
-        await context.Until("the pack is rallied", () => ScenarioContext.HasHediff(wolf, Rallied) && ScenarioContext.HasHediff(packmate, Rallied), 60);
+        await context.Until("a wolf howls", () => Stage.OnCooldown(wolf, Howl) || Stage.OnCooldown(packmate, Howl), 300);
+        await context.Until("the pack is rallied", () => Stage.HasHediff(wolf, Rallied) && Stage.HasHediff(packmate, Rallied), 60);
     }
 
     // The roar only lands 40% of the time, so with this many enemies a total miss is about one run in 2000
@@ -382,24 +373,24 @@ public static class SillyAnimalThingsScenarios
         var wild = context.Spawn("Cow", -2, -2, PawnMode.Wild, hold: true);
         context.Cast(caster, Intimidate);
 
-        await context.Until("the roar goes off", () => ScenarioContext.OnCooldown(caster, Intimidate), 120);
+        await context.Until("the roar goes off", () => Stage.OnCooldown(caster, Intimidate), 120);
         await context.Step(1);
-        context.Check("at least one enemy is terrified", enemies.Any(ScenarioContext.Terrified));
-        context.Check("the friend isn't terrified", !ScenarioContext.Terrified(friend));
-        context.Check("the wild animal isn't terrified", !ScenarioContext.Terrified(wild));
+        context.Check("at least one enemy is terrified", enemies.Any(Stage.Terrified));
+        context.Check("the friend isn't terrified", !Stage.Terrified(friend));
+        context.Check("the wild animal isn't terrified", !Stage.Terrified(wild));
         context.Check(
             "every terrified enemy shows it, and no one else does",
-            enemies.All(enemy => ScenarioContext.Terrified(enemy) == ScenarioContext.HasHediff(enemy, "Ordo_Terrified"))
+            enemies.All(enemy => Stage.Terrified(enemy) == Stage.HasHediff(enemy, "Ordo_Terrified"))
         );
 
         // The halo goes when the terror does
-        var terrified = enemies.FirstOrDefault(ScenarioContext.Terrified);
+        var terrified = enemies.FirstOrDefault(Stage.Terrified);
         if (terrified != null)
         {
             await context.Until("the halo shows", () => HasMote(terrified, "Ordo_Mote_TerrorHalo"), 60);
             terrified.MentalState.RecoverFromState();
             await context.Step(1);
-            context.Check("the halo goes when the terror ends", !ScenarioContext.HasHediff(terrified, "Ordo_Terrified"));
+            context.Check("the halo goes when the terror ends", !Stage.HasHediff(terrified, "Ordo_Terrified"));
         }
     }
 
@@ -413,7 +404,7 @@ public static class SillyAnimalThingsScenarios
     {
         var pawn = context.Spawn(kind, 0, 0, mode);
         context.HurtBelow(pawn, belowHealth);
-        await context.Until($"{kind} gets {hediff}", () => ScenarioContext.HasHediff(pawn, hediff), 60);
+        await context.Until($"{kind} gets {hediff}", () => Stage.HasHediff(pawn, hediff), 60);
     }
 
     private static async Task HurtRegenerateUntrained(
@@ -423,7 +414,7 @@ public static class SillyAnimalThingsScenarios
         var pawn = context.Spawn("Wolverine", 0, 0, PawnMode.Tamed);
         context.HurtBelow(pawn, 0.6f);
         await context.Step(60);
-        context.Check("an untrained player animal doesn't cast it", !ScenarioContext.HasHediff(pawn, Regenerating));
+        context.Check("an untrained player animal doesn't cast it", !Stage.HasHediff(pawn, Regenerating));
     }
 
     private static async Task HurtRegenerateHeals(
@@ -446,7 +437,7 @@ public static class SillyAnimalThingsScenarios
         await context.Until("the tiger vanishes", () => tiger.IsPsychologicallyInvisible(), 120);
         await context.Step(30);
         context.Check("the invisibility survives the cast", tiger.IsPsychologicallyInvisible());
-        context.Check("it's on cooldown", ScenarioContext.OnCooldown(tiger, HiddenDragon));
+        context.Check("it's on cooldown", Stage.OnCooldown(tiger, HiddenDragon));
     }
 
     private static async Task CombatHiddenDragonAmbush(
@@ -457,15 +448,15 @@ public static class SillyAnimalThingsScenarios
         var tiger = context.Spawn("Tiger", 0, 0, PawnMode.Manhunter);
 
         await context.Until("the tiger vanishes", () => tiger.IsPsychologicallyInvisible(), 200);
-        context.Check("it's unseen before striking", !ScenarioContext.Hurt(colonist));
+        context.Check("it's unseen before striking", !Stage.Hurt(colonist));
 
         if (!await context.Until("the attack reveals the tiger", () => !tiger.IsPsychologicallyInvisible(), 900))
         {
-            context.Fail($"tiger: {ScenarioContext.Describe(tiger)}; colonist: {ScenarioContext.Describe(colonist)}");
+            context.Fail($"tiger: {Stage.Describe(tiger)}; colonist: {Stage.Describe(colonist)}");
         }
 
-        context.Check("the colonist was hurt", ScenarioContext.Hurt(colonist));
-        context.Check("the cooldown keeps running", ScenarioContext.OnCooldown(tiger, HiddenDragon));
+        context.Check("the colonist was hurt", Stage.Hurt(colonist));
+        context.Check("the cooldown keeps running", Stage.OnCooldown(tiger, HiddenDragon));
     }
 
     private static async Task CombatHiddenDragonTooClose(
@@ -476,7 +467,7 @@ public static class SillyAnimalThingsScenarios
         var tiger = context.Spawn("Tiger", 0, 0, PawnMode.Manhunter);
 
         await context.Step(120);
-        context.Check("a tiger already next to its target doesn't bother hiding", !ScenarioContext.OnCooldown(tiger, HiddenDragon));
+        context.Check("a tiger already next to its target doesn't bother hiding", !Stage.OnCooldown(tiger, HiddenDragon));
     }
 
     private static async Task DetonatePlayer(
@@ -491,7 +482,7 @@ public static class SillyAnimalThingsScenarios
         await context.Until("the boomalope takes off", () => context.Map.listerThings.AllThings.OfType<PawnFlyer_Rocket>().Any(flyer => flyer.FlyingPawn == boomalope), 120);
         await context.Until("the boomalope bursts", () => boomalope.Dead, 200);
         context.Check("it bursts at the target", boomalope.Corpse?.PositionHeld.InHorDistOf(target.Position, 1.5f) == true);
-        await context.Until("the blast reaches the target", () => ScenarioContext.Hurt(target), 120);
+        await context.Until("the blast reaches the target", () => Stage.Hurt(target), 120);
     }
 
     private static async Task DetonateManhunter(
@@ -502,9 +493,9 @@ public static class SillyAnimalThingsScenarios
         var boomalope = context.Spawn("Boomalope", 0, 0, PawnMode.Manhunter);
 
         await context.Until("the boomalope bursts", () => boomalope.Dead, 500);
-        if (!await context.Until("the blast burns the colonist", () => ScenarioContext.HasHediff(colonist, "Burn"), 120))
+        if (!await context.Until("the blast burns the colonist", () => Stage.HasHediff(colonist, "Burn"), 120))
         {
-            context.Fail($"boomalope: {ScenarioContext.Describe(boomalope)}; colonist: {ScenarioContext.Describe(colonist)}");
+            context.Fail($"boomalope: {Stage.Describe(boomalope)}; colonist: {Stage.Describe(colonist)}");
         }
     }
 
@@ -530,7 +521,7 @@ public static class SillyAnimalThingsScenarios
         var wall = context.Place(ThingDefOf.Wall, 2, 0, ThingDefOf.BlocksGranite);
 
         await context.Step(1);
-        context.Check("a stone wall isn't a valid target", !ScenarioContext.Ability(beaver, Gnaw).verb.ValidateTarget(wall, false));
+        context.Check("a stone wall isn't a valid target", !Stage.Ability(beaver, Gnaw).verb.ValidateTarget(wall, false));
     }
 
     private static async Task GnawHungryWild(
@@ -576,7 +567,7 @@ public static class SillyAnimalThingsScenarios
 
         await context.Until("the blast pushes the target", () => colonist.Position != start, 200);
         await context.Until("the spray puts out the fire", () => fireCell.GetFirstThing<Fire>(context.Map) == null, 120);
-        context.Check("the blast is on cooldown", ScenarioContext.OnCooldown(elephant, TrunkBlast));
+        context.Check("the blast is on cooldown", Stage.OnCooldown(elephant, TrunkBlast));
     }
 
     private static async Task TrunkThrowAtPawn(
@@ -589,8 +580,8 @@ public static class SillyAnimalThingsScenarios
         context.Cast(elephant, TrunkThrow, target);
 
         await context.Until("the chunk is picked up", () => chunk.Destroyed, 200);
-        await context.Until("the chunk hits the target", () => ScenarioContext.Hurt(target), 200);
-        context.Check("the throw is on cooldown", ScenarioContext.OnCooldown(elephant, TrunkThrow));
+        await context.Until("the chunk hits the target", () => Stage.Hurt(target), 200);
+        context.Check("the throw is on cooldown", Stage.OnCooldown(elephant, TrunkThrow));
 
         // In the target's own cell it would be drawn underneath the target
         var landed = GenRadial.RadialDistinctThingsAround(target.Position, context.Map, 2.9f, true).FirstOrDefault(thing => thing.def == ThingDefOf.ChunkSlagSteel);
@@ -621,7 +612,7 @@ public static class SillyAnimalThingsScenarios
         var elephant = context.Spawn("Elephant", 0, 0, PawnMode.Trained);
 
         await context.Step(1);
-        context.Check("the gizmo is disabled with no chunk nearby", ScenarioContext.Ability(elephant, TrunkThrow).GizmoDisabled(out _));
+        context.Check("the gizmo is disabled with no chunk nearby", Stage.Ability(elephant, TrunkThrow).GizmoDisabled(out _));
     }
 
     private static async Task SpitBlinds(
@@ -632,9 +623,9 @@ public static class SillyAnimalThingsScenarios
         var target = context.Spawn("Cow", 4, 0, PawnMode.Enemy, hold: true);
         context.Cast(alpaca, Spit, target);
 
-        await context.Until("the target is spat on", () => ScenarioContext.HasHediff(target, SpitInEyes), 200);
-        context.Check("the spit is on cooldown", ScenarioContext.OnCooldown(alpaca, Spit));
-        context.Check("the spit does no damage", !ScenarioContext.Hurt(target));
+        await context.Until("the target is spat on", () => Stage.HasHediff(target, SpitInEyes), 200);
+        context.Check("the spit is on cooldown", Stage.OnCooldown(alpaca, Spit));
+        context.Check("the spit does no damage", !Stage.Hurt(target));
 
         await context.Until("green drips show on the target", () => HasMote(target, "Mote_ToxicDamage"), 60);
     }
@@ -646,7 +637,7 @@ public static class SillyAnimalThingsScenarios
         var snail = context.Spawn("LavaSnail", 0, 0, PawnMode.Trained);
         context.Cast(snail, FireBurst);
 
-        await context.Until("the burst goes off", () => ScenarioContext.OnCooldown(snail, FireBurst), 300);
+        await context.Until("the burst goes off", () => Stage.OnCooldown(snail, FireBurst), 300);
     }
 
     // Something hits the animal in melee. A wild animal fights back against a colonist, who it isn't hostile to; a player's
@@ -668,9 +659,9 @@ public static class SillyAnimalThingsScenarios
 
         if (casts)
         {
-            if (!await context.Until($"the {kind} uses {ability} on its attacker", () => ScenarioContext.OnCooldown(animal, ability), 200))
+            if (!await context.Until($"the {kind} uses {ability} on its attacker", () => Stage.OnCooldown(animal, ability), 200))
             {
-                context.Fail(ScenarioContext.Describe(animal));
+                context.Fail(Stage.Describe(animal));
             }
 
             context.Check("it's fighting back, not manhunting", animal.MentalStateDef == null);
@@ -680,7 +671,7 @@ public static class SillyAnimalThingsScenarios
         // It must still fight, or the check below would pass without the AI ever considering the ability
         await context.Until($"the {kind} fights back in melee", () => animal.CurJobDef == JobDefOf.AttackMelee, 60);
         await context.Step(200);
-        context.Check($"the {kind} doesn't use {ability} by itself", !animal.Dead && !ScenarioContext.OnCooldown(animal, ability));
+        context.Check($"the {kind} doesn't use {ability} by itself", !animal.Dead && !Stage.OnCooldown(animal, ability));
     }
 
     // Vanilla's hunt never uses abilities, so this checks the predator stops for one and then carries on hunting
@@ -697,9 +688,9 @@ public static class SillyAnimalThingsScenarios
         hunt.killIncappedTarget = true;
         predator.jobs.StartJob(hunt, JobCondition.InterruptForced);
 
-        if (!await context.Until($"the {kind} uses {ability} while hunting", () => ScenarioContext.OnCooldown(predator, ability), 300))
+        if (!await context.Until($"the {kind} uses {ability} while hunting", () => Stage.OnCooldown(predator, ability), 300))
         {
-            context.Fail(ScenarioContext.Describe(predator));
+            context.Fail(Stage.Describe(predator));
             return;
         }
 
@@ -714,7 +705,7 @@ public static class SillyAnimalThingsScenarios
         var colonist = context.Colonist(7, 0);
         var goose = context.Spawn("Goose", -7, 0, PawnMode.Manhunter);
 
-        await context.Until("the goose roars", () => ScenarioContext.OnCooldown(goose, Intimidate), 600);
+        await context.Until("the goose roars", () => Stage.OnCooldown(goose, Intimidate), 600);
         var distance = goose.Position.DistanceTo(colonist.Position);
         context.Check($"it roars within range (was {distance:F1} cells away)", distance <= 10.5f);
     }
@@ -727,9 +718,9 @@ public static class SillyAnimalThingsScenarios
         context.Colonist(8, 0);
         var muffalo = context.Spawn("Muffalo", -8, 0, PawnMode.Manhunter);
 
-        if (!await context.Until("the muffalo charges once in range", () => ScenarioContext.OnCooldown(muffalo, Charge), 300))
+        if (!await context.Until("the muffalo charges once in range", () => Stage.OnCooldown(muffalo, Charge), 300))
         {
-            context.Fail(ScenarioContext.Describe(muffalo));
+            context.Fail(Stage.Describe(muffalo));
         }
     }
 
@@ -741,7 +732,7 @@ public static class SillyAnimalThingsScenarios
         var wolf = context.Spawn("Wolf_Timber", 0, 0, PawnMode.Manhunter);
 
         await context.Step(150);
-        context.Check("a lone wolf doesn't howl to nobody", !ScenarioContext.OnCooldown(wolf, Howl));
+        context.Check("a lone wolf doesn't howl to nobody", !Stage.OnCooldown(wolf, Howl));
     }
 
     // Detonate also qualifies at this range, and used to win because it comes first in the boomrat's list
@@ -752,12 +743,12 @@ public static class SillyAnimalThingsScenarios
         context.Colonist(2, 0);
         var boomrat = context.Spawn("Boomrat", 0, 0, PawnMode.Manhunter);
 
-        if (!await context.Until("the boomrat fire bursts", () => ScenarioContext.OnCooldown(boomrat, FireBurst) || boomrat.Dead, 300) || boomrat.Dead)
+        if (!await context.Until("the boomrat fire bursts", () => Stage.OnCooldown(boomrat, FireBurst) || boomrat.Dead, 300) || boomrat.Dead)
         {
-            context.Fail(ScenarioContext.Describe(boomrat));
+            context.Fail(Stage.Describe(boomrat));
             return;
         }
 
-        context.Check("it didn't detonate first", !ScenarioContext.OnCooldown(boomrat, Detonate));
+        context.Check("it didn't detonate first", !Stage.OnCooldown(boomrat, Detonate));
     }
 }

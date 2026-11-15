@@ -38,7 +38,7 @@ public static class LegendaryIsUniqueScenarios
     private static readonly Type ModType = typeof(LegendaryIsUnique.LegendaryIsUnique);
 
     private static Dictionary<string, ThingDef> VariantsByBase =>
-        (Dictionary<string, ThingDef>)ModType.GetField("_uniqueThingsByBaseDefName", BindingFlags.NonPublic | BindingFlags.Static)!.GetValue(null);
+        (Dictionary<string, ThingDef>)ModType.GetField("UniqueThingsByBaseDefName", BindingFlags.NonPublic | BindingFlags.Static)!.GetValue(null);
 
     private static readonly FieldInfo ForcedQuality = ModType.GetField("_forcedQuality", BindingFlags.NonPublic | BindingFlags.Static)!;
 
@@ -59,7 +59,7 @@ public static class LegendaryIsUniqueScenarios
     {
         return DefDatabase<RecipeDef>.AllDefsListForReading
             .Where(recipe => recipe.workSkill != null && recipe.products?.Count == 1)
-            .OrderBy(recipe => recipe.defName)
+            .OrderBy(recipe => recipe.defName, StringComparer.Ordinal)
             .FirstOrDefault(recipe =>
             {
                 var product = recipe.products[0].thingDef;
@@ -97,7 +97,7 @@ public static class LegendaryIsUniqueScenarios
         Pawn worker
     )
     {
-        return GenRecipe.MakeRecipeProducts(recipe, worker, new List<Thing>(), null, null, null, null, null).Single();
+        return GenRecipe.MakeRecipeProducts(recipe, worker, new List<Thing>(), null, null).Single();
     }
 
     private static QualityCategory? Quality(
@@ -353,7 +353,7 @@ public static class LegendaryIsUniqueScenarios
             {
                 try
                 {
-                    GenRecipe.PostProcessProduct(ThingMaker.MakeThing(recipe.products[0].thingDef), recipe, crafter, null, null, null);
+                    GenRecipe.PostProcessProduct(ThingMaker.MakeThing(recipe.products[0].thingDef), recipe, crafter);
                 }
                 catch (Exception exception)
                 {

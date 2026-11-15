@@ -1,5 +1,5 @@
+using System.Globalization;
 using System.Linq;
-using RimWorld;
 using UnityEngine;
 using Verse;
 
@@ -21,6 +21,8 @@ public class MechUpgradesUiSettings : ModSettings
 
     public override void ExposeData()
     {
+        // Kept explicit so it follows the constant if that changes
+        // ReSharper disable once RedundantArgumentDefaultValue
         Scribe_Values.Look(ref UseDefaultPolicyForUnassigned, nameof(UseDefaultPolicyForUnassigned), DefaultUseDefaultPolicyForUnassigned);
         Scribe_Values.Look(ref ShowDialogOnManualInsert, nameof(ShowDialogOnManualInsert), DefaultShowDialogOnManualInsert);
         Scribe_Values.Look(ref PolicyCheckIntervalHours, nameof(PolicyCheckIntervalHours), DefaultPolicyCheckIntervalHours);
@@ -72,7 +74,7 @@ public class MechUpgradesUiMod : Mod
 
         listing.Gap();
         Settings.PolicyCheckIntervalHours = listing.SliderLabeled(
-            "MU_Upgrades_Ui_Settings_Interval".Translate(Settings.PolicyCheckIntervalHours.ToString("0.#")),
+            "MU_Upgrades_Ui_Settings_Interval".Translate(Settings.PolicyCheckIntervalHours.ToString("0.#", CultureInfo.CurrentCulture)),
             Settings.PolicyCheckIntervalHours,
             1f,
             24f,

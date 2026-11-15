@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Ordo.BlueprintMaterials;
 using RimWorld;
 using Verse;
-using Verse.AI;
 
 namespace Ordo.BridgeTools.Scenarios;
 
@@ -207,12 +206,12 @@ public static class BlueprintMaterialsScenarios
             return;
         }
 
-        context.Check("the wood is on its way to the wall", worker.Map.enrouteManager.GetEnroute(wall, Wood, null) > 0);
+        context.Check("the wood is on its way to the wall", worker.Map.enrouteManager.GetEnroute(wall, Wood) > 0);
 
         ChangeMaterial(context, wall, Steel.LabelAsStuff, wall);
         context.Check($"the wall is now steel: {wall.stuffToUse?.defName}", wall.stuffToUse == Steel);
         await context.Until($"{Stage.Describe(worker)} stops bringing wood", () => !Bringing(Wood), 30);
-        context.Check("no wood is on its way to the wall", worker.Map.enrouteManager.GetEnroute(wall, Wood, null) == 0);
+        context.Check("no wood is on its way to the wall", worker.Map.enrouteManager.GetEnroute(wall, Wood) == 0);
         await context.Until($"{Stage.Describe(worker)} brings steel instead", () => Bringing(Steel) || wall.Destroyed, 2500);
     }
 

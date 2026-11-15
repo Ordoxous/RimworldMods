@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -36,7 +37,7 @@ public sealed class ProfilingTools
             .Where(method => !method.IsAbstract && !method.IsSpecialName && !method.ContainsGenericParameters && !method.Name.Contains('<') && method.GetMethodBody() != null)
             .Select(method => $"{method.DeclaringType!.FullName}:{method.Name}")
             .Distinct()
-            .OrderBy(target => target)
+            .OrderBy(target => target, StringComparer.Ordinal)
             .ToList();
     }
 }

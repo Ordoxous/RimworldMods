@@ -159,12 +159,13 @@ public sealed class UpgradeStatus
 
         // In the policy's rank order. Allowed upgrades the mech's type can't have at all are left out: they're there for other
         // mechs. An installed upgrade being replaced is listed with the removals
-        foreach (var def in policy.InRankOrder(policy.AllowedUpgradeDefs.Where(d => d.CanAdd(mech.def).Accepted)))
+        var listed = policy.AllowedUpgradeDefs
+            .Where(d => d.CanAdd(mech.def).Accepted)
+            .Where(d => plan.Keep.Any(u => u.def == d) || installed.All(u => u.def != d));
+        foreach (var def in policy.InRankOrder(listed))
         {
             if (plan.Keep.Any(u => u.def == def))
                 status.Lines.Add(new UpgradeLine(def, UpgradeState.Installed, null));
-            else if (installed.Any(u => u.def == def))
-                continue;
             else if (status.Additions.Any(u => u.def == def))
                 status.Lines.Add(new UpgradeLine(def, UpgradeState.Adding, null));
             else if (status.Unstocked.Contains(def))

@@ -78,7 +78,7 @@ public static class MechUpgradesUiScenarios
     {
         var site = Site.Set(context);
         context.Check($"a player mech's comp is {site.Mech.AllComps.OfType<CompUpgradableMechanoid>().FirstOrDefault()?.GetType().Name}", site.Comp != null);
-        context.Check($"{UpgraderDef} spawned as {site.Upgrader.GetType().Name}", site.Upgrader is Building_AutoMechUpgrader);
+        context.Check($"{UpgraderDef} spawned as a Building_AutoMechUpgrader", site.Upgrader != null);
         context.Check($"{UpgraderDef} is labelled {site.Upgrader.def.label}", site.Upgrader.def.label == "Auto mech upgrader");
 
         var columns = DefDatabase<PawnTableDef>.GetNamed("Mechs").columns.Select(column => column.defName).ToList();
@@ -1237,7 +1237,7 @@ public static class MechUpgradesUiScenarios
         return DefDatabase<MechUpgradeDef>.AllDefs
             .Where(def => def.linkedThingDef?.GetCompProperties<CompProperties_MechUpgrade>()?.upgradeDef == def)
             .Where(def => def.CanAdd(mech.def).Accepted)
-            .OrderBy(def => def.defName);
+            .OrderBy(def => def.defName, StringComparer.Ordinal);
     }
 
     // Two upgrades the mech can have together, that each fit on their own

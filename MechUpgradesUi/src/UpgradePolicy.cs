@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using MU;
 using RimWorld;
@@ -41,7 +42,7 @@ public class UpgradePolicy : Policy
 
     /// <summary>Upgrades in the order this policy picks them: by the ranking, then the unranked ones by defName.</summary>
     public IEnumerable<MechUpgradeDef> InRankOrder(IEnumerable<MechUpgradeDef> defs) =>
-        defs.OrderBy(RankOf).ThenBy(d => d.defName);
+        defs.OrderBy(RankOf).ThenBy(d => d.defName, StringComparer.Ordinal);
 
     /// <summary>Where an upgrade comes in the ranking. Every unranked upgrade shares the place after the last ranked one.</summary>
     public int RankOf(MechUpgradeDef def)

@@ -56,10 +56,10 @@ public class Dialog_ManageUpgradePolicies(
                         && ThingCategoryDef.Named("MU_Upgrades").ThisAndChildCategoryDefs.Contains(f.parentCategory))
             .ToList();
 
-    private static readonly Lazy<List<ThingDef>> upgradableMechRaces = new(() =>
+    private static readonly Lazy<List<ThingDef>> UpgradableMechRaces = new(() =>
         DefDatabase<ThingDef>.AllDefs
             .Where(t => t.race is { IsMechanoid: true } && t.comps.Any(c => c is CompProperties_UpgradableMechanoid))
-            .OrderBy(t => t.label)
+            .OrderBy(t => t.label, StringComparer.CurrentCulture)
             .ToList()
     );
 
@@ -131,7 +131,7 @@ public class Dialog_ManageUpgradePolicies(
     }
 
     private static IEnumerable<IGrouping<ThingDef, CompUpgradableMechWithPolicy>> CommonestFirst(IEnumerable<CompUpgradableMechWithPolicy> mechs) =>
-        mechs.GroupBy(c => c.Mech.def).OrderByDescending(g => g.Count()).ThenBy(g => g.Key.label);
+        mechs.GroupBy(c => c.Mech.def).OrderByDescending(g => g.Count()).ThenBy(g => g.Key.label, StringComparer.CurrentCulture);
 
     private Vector2 _previewScroll;
 
@@ -176,7 +176,7 @@ public class Dialog_ManageUpgradePolicies(
             .ToDictionary(g => g.Key, g => g.Count());
         int Count(ThingDef def) => counts.TryGetValue(def, out var n) ? n : 0;
 
-        foreach (var x in upgradableMechRaces.Value.OrderByDescending(Count))
+        foreach (var x in UpgradableMechRaces.Value.OrderByDescending(Count))
         {
             var label = Count(x) > 0 ? $"{x.LabelCap} ({Count(x)})" : x.LabelCap.ToString();
             yield return new Widgets.DropdownMenuElement<ThingDef>

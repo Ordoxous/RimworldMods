@@ -12,7 +12,7 @@ public class LegendaryIsUnique
 
     private const string UniqueSuffix = "_Unique";
 
-    private static readonly Dictionary<string, ThingDef> _uniqueThingsByBaseDefName = new();
+    private static readonly Dictionary<string, ThingDef> UniqueThingsByBaseDefName = new();
 
     // Quality pre-rolled for the craft in progress, handed back to the game's own roll so they match
     private static (Pawn Pawn, QualityCategory Quality)? _forcedQuality;
@@ -55,9 +55,9 @@ public class LegendaryIsUnique
             }
 
             var baseDefName = uniqueThingDef.defName[..^UniqueSuffix.Length];
-            if (!_uniqueThingsByBaseDefName.TryAdd(baseDefName, uniqueThingDef))
+            if (!UniqueThingsByBaseDefName.TryAdd(baseDefName, uniqueThingDef))
             {
-                Log.Warning($"[LegendaryIsUnique] Multiple unique variants for [{baseDefName}]: using [{_uniqueThingsByBaseDefName[baseDefName]}], ignoring [{uniqueThingDef}]");
+                Log.Warning($"[LegendaryIsUnique] Multiple unique variants for [{baseDefName}]: using [{UniqueThingsByBaseDefName[baseDefName]}], ignoring [{uniqueThingDef}]");
             }
         }
     }
@@ -70,7 +70,7 @@ public class LegendaryIsUnique
         Pawn worker
     )
     {
-        if (worker == null || !_uniqueThingsByBaseDefName.TryGetValue(product.def.defName, out var uniqueThingDef))
+        if (worker == null || !UniqueThingsByBaseDefName.TryGetValue(product.def.defName, out var uniqueThingDef))
         {
             return;
         }

@@ -206,7 +206,7 @@ public static class ColonistBarJobsScenarios
         var defaults = new ColonistBarJobsSettings();
         defaults.Reset();
         context.Check($"defaults are top right at {ColonistBarJobsSettings.DefaultSize:P0}",
-            defaults.Corner == IconCorner.TopRight && defaults.Size == ColonistBarJobsSettings.DefaultSize && defaults.OffsetX == 0f);
+            defaults.Corner == IconCorner.TopRight && Mathf.Approximately(defaults.Size, ColonistBarJobsSettings.DefaultSize) && defaults.OffsetX == 0f);
         return Task.CompletedTask;
     }
 

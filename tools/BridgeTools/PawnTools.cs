@@ -192,7 +192,7 @@ public sealed class PawnTools
                 passRates = found.EffectComps.Select(comp => new
                 {
                     comp = comp.GetType().Name,
-                    rate = Enumerable.Range(0, 1000).Count(_ => comp.Valid((LocalTargetInfo)other, false)) / 1000f
+                    rate = Enumerable.Range(0, 1000).Count(_ => comp.Valid((LocalTargetInfo)other)) / 1000f
                 }).ToList()
             })
             .ToList();
@@ -201,7 +201,7 @@ public sealed class PawnTools
             success = true,
             radius = found.def.EffectRadius,
             hasAreaOfEffect = found.def.HasAreaOfEffect,
-            canUseAoeToGetTargets = found.def.canUseAoeToGetTargets,
+            found.def.canUseAoeToGetTargets,
             targets
         };
     }

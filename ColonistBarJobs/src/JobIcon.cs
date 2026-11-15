@@ -21,21 +21,21 @@ public class JobIconDef : Def
     [NoTranslate] public string texPath;
     public ThingDef thingIcon;
 
-    [Unsaved] private Texture2D texture;
-    [Unsaved] private bool textureLoaded;
+    [Unsaved] private Texture2D _texture;
+    [Unsaved] private bool _textureLoaded;
 
     // Loaded on first use, on the main thread, and null when the path doesn't exist
     public Texture2D Texture
     {
         get
         {
-            if (!textureLoaded && texPath != null)
+            if (!_textureLoaded && texPath != null)
             {
-                texture = ContentFinder<Texture2D>.Get(texPath, reportFailure: false);
-                textureLoaded = true;
+                _texture = ContentFinder<Texture2D>.Get(texPath, reportFailure: false);
+                _textureLoaded = true;
             }
 
-            return texture;
+            return _texture;
         }
     }
 
@@ -89,42 +89,42 @@ public readonly struct JobIcon
 
 public static class JobIconResolver
 {
-    private static Dictionary<JobDef, JobIconDef> byJob;
-    private static Dictionary<WorkTypeDef, JobIconDef> byWorkType;
-    private static JobIconDef recreationIcon;
+    private static Dictionary<JobDef, JobIconDef> _byJob;
+    private static Dictionary<WorkTypeDef, JobIconDef> _byWorkType;
+    private static JobIconDef _recreationIcon;
 
     // Rebuilds the lookups from the defs; call after a def reload
     public static void Reset()
     {
-        byJob = null;
-        byWorkType = null;
-        recreationIcon = null;
+        _byJob = null;
+        _byWorkType = null;
+        _recreationIcon = null;
     }
 
     private static void EnsureLookups()
     {
-        if (byJob != null)
+        if (_byJob != null)
         {
             return;
         }
 
-        byJob = new Dictionary<JobDef, JobIconDef>();
-        byWorkType = new Dictionary<WorkTypeDef, JobIconDef>();
+        _byJob = new Dictionary<JobDef, JobIconDef>();
+        _byWorkType = new Dictionary<WorkTypeDef, JobIconDef>();
         foreach (var def in DefDatabase<JobIconDef>.AllDefsListForReading)
         {
             foreach (var job in def.jobs)
             {
-                byJob[job] = def;
+                _byJob[job] = def;
             }
 
             foreach (var workType in def.workTypes)
             {
-                byWorkType[workType] = def;
+                _byWorkType[workType] = def;
             }
 
             if (def.recreation)
             {
-                recreationIcon = def;
+                _recreationIcon = def;
             }
         }
     }
@@ -147,19 +147,19 @@ public static class JobIconResolver
         EnsureLookups();
         var target = FromThing(job.targetA.Thing);
 
-        if (byJob.TryGetValue(job.def, out var jobIcon) && Mapped(jobIcon, target) is { IsEmpty: false } fromJob)
+        if (_byJob.TryGetValue(job.def, out var jobIcon) && Mapped(jobIcon, target) is { IsEmpty: false } fromJob)
         {
             return fromJob;
         }
 
         if (job.workGiverDef?.workType is { } workType
-            && byWorkType.TryGetValue(workType, out var workTypeIcon)
+            && _byWorkType.TryGetValue(workType, out var workTypeIcon)
             && Mapped(workTypeIcon, target) is { IsEmpty: false } fromWorkType)
         {
             return fromWorkType;
         }
 
-        if (job.def.joyKind != null && recreationIcon != null && Mapped(recreationIcon, target) is { IsEmpty: false } fromRecreation)
+        if (job.def.joyKind != null && _recreationIcon != null && Mapped(_recreationIcon, target) is { IsEmpty: false } fromRecreation)
         {
             return fromRecreation;
         }

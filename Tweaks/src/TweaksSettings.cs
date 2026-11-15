@@ -1,3 +1,4 @@
+using System.Globalization;
 using UnityEngine;
 using XmlExtensions;
 
@@ -21,7 +22,12 @@ internal static class TweaksSettings
             : defaultValue;
 
     private static float GetFloat(string key, float defaultValue) =>
-        SettingsManager.TryGetSetting(ModId, key, out var value) && float.TryParse(value, out var parsed)
+        SettingsManager.TryGetSetting(ModId, key, out var value) && TryParseFloat(value, out var parsed)
             ? parsed
             : defaultValue;
+
+    // XmlExtensions may have saved the value in the player's locale ("30,5"), so fall back to it
+    private static bool TryParseFloat(string value, out float parsed) =>
+        float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out parsed)
+        || float.TryParse(value, NumberStyles.Float, CultureInfo.CurrentCulture, out parsed);
 }

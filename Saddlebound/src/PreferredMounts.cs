@@ -12,7 +12,7 @@ namespace Ordo.Saddlebound;
 // everywhere it looks.
 public class Precept_PreferredMount : Precept_ThingDef
 {
-    public override string UIInfoFirstLine => ThingDef == null ? base.UIInfoFirstLine : (string)ThingDef.LabelCap;
+    public override string UIInfoFirstLine => ThingDef == null ? base.UIInfoFirstLine : ThingDef.LabelCap;
 
     public override string TipLabel => def.issue.LabelCap + ": " + (ThingDef?.LabelCap ?? def.LabelCap);
 }
@@ -31,14 +31,14 @@ public class PreceptWorker_PreferredMount : PreceptWorker
             .Select(race => new PreceptThingChance { def = race, chance = 1f });
 
     public override AcceptanceReport CanUse(
-        ThingDef def,
+        ThingDef thingDef,
         Ideo ideo,
         FactionDef generatingFor
     )
     {
         foreach (var precept in ideo.PreceptsListForReading)
         {
-            if (precept is Precept_PreferredMount mount && mount.ThingDef == def)
+            if (precept is Precept_PreferredMount mount && mount.ThingDef == thingDef)
             {
                 return false;
             }

@@ -71,7 +71,7 @@ public sealed class ScenarioRunner
                     suites = set.Items
                         .SelectMany(scenario => scenario.Suites)
                         .Distinct()
-                        .OrderBy(suite => suite)
+                        .OrderBy(suite => suite, StringComparer.Ordinal)
                         .Select(suite => new { suite, scenarios = set.Items.Where(scenario => scenario.Suites.Contains(suite)).Select(scenario => scenario.Name) })
                 }
             )

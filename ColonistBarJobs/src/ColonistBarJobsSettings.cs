@@ -35,6 +35,8 @@ public class ColonistBarJobsSettings : ModSettings
 
     public override void ExposeData()
     {
+        // Kept explicit so TopRight stays the default if the enum is reordered
+        // ReSharper disable once RedundantArgumentDefaultValue
         Scribe_Values.Look(ref Corner, "corner", IconCorner.TopRight);
         Scribe_Values.Look(ref Size, "size", DefaultSize);
         Scribe_Values.Look(ref OffsetX, "offsetX");

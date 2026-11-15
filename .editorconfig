@@ -34,3 +34,45 @@ csharp_new_line_before_finally = true
 # One parameter per line in declarations. Rider applies this when it reformats; dotnet format doesn't wrap lines.
 resharper_csharp_wrap_parameters_style = chop_always
 resharper_csharp_max_formal_parameters_on_line = 1
+
+# The code has both, so neither is flagged
+resharper_arrange_trailing_comma_in_multiline_lists_highlighting = none
+
+# Naming. Private fields keep Rider's defaults (_camel, static readonly Pascal); these cover what RimWorld and Harmony force.
+
+# Harmony binds __instance, __result, __state and friends by name
+dotnet_naming_rule.parameters_rule.import_to_resharper = as_predefined
+dotnet_naming_rule.parameters_rule.severity = warning
+dotnet_naming_rule.parameters_rule.style = camel_case_style
+dotnet_naming_rule.parameters_rule.symbols = parameters_symbols
+dotnet_naming_rule.parameters_rule.resharper_style = aaBb, __ + aaBb
+dotnet_naming_symbols.parameters_symbols.applicable_kinds = parameter
+dotnet_naming_symbols.parameters_symbols.applicable_accessibilities = *
+
+# RimWorld loads public fields from XML and save files by name, and its own are camelCase
+dotnet_naming_rule.public_instance_fields_rule.severity = warning
+dotnet_naming_rule.public_instance_fields_rule.style = camel_case_style
+dotnet_naming_rule.public_instance_fields_rule.symbols = public_instance_fields_symbols
+dotnet_naming_rule.public_instance_fields_rule.resharper_style = aaBb, AaBb
+dotnet_naming_symbols.public_instance_fields_symbols.applicable_kinds = field
+dotnet_naming_symbols.public_instance_fields_symbols.applicable_accessibilities = public, internal, protected, protected_internal, private_protected
+dotnet_naming_symbols.public_instance_fields_symbols.resharper_required_modifiers = instance
+
+# [DefOf] fields are named after their defName, which can contain underscores
+dotnet_naming_rule.public_static_fields_rule.severity = warning
+dotnet_naming_rule.public_static_fields_rule.style = pascal_case_style
+dotnet_naming_rule.public_static_fields_rule.symbols = public_static_fields_symbols
+dotnet_naming_rule.public_static_fields_rule.resharper_style = AaBb, AaBb_AaBb
+dotnet_naming_symbols.public_static_fields_symbols.applicable_kinds = field
+dotnet_naming_symbols.public_static_fields_symbols.applicable_accessibilities = public, internal, protected, protected_internal, private_protected
+dotnet_naming_symbols.public_static_fields_symbols.required_modifiers = static
+
+# [DefOf] classes and RimWorld's settings pattern need public static fields
+dotnet_diagnostic.CA2211.severity = none
+
+dotnet_naming_style.camel_case_style.capitalization = camel_case
+dotnet_naming_style.pascal_case_style.capitalization = pascal_case
+
+# SillyAnimalThings keeps one namespace across its src subfolders
+[SillyAnimalThings/**.cs]
+resharper_check_namespace_highlighting = none

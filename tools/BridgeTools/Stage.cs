@@ -113,7 +113,7 @@ public abstract class Stage
 
     protected readonly IRimBridgeContext Bridge;
 
-    protected readonly IntVec3 Origin;
+    protected IntVec3 Origin { get; }
 
     protected readonly CancellationToken CancellationToken;
 

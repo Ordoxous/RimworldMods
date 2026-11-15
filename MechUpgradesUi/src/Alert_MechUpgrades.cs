@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -59,7 +60,7 @@ public class Alert_UpgradesNotInStock : Alert_MechUpgradesBase
         var text = new StringBuilder("MU_Upgrades_Ui_Alert_NotInStock_Desc".Translate());
         text.AppendLine();
         text.AppendLine();
-        foreach (var (def, mechs) in _wantedBy.OrderBy(kv => kv.Key.label).Select(kv => (kv.Key, kv.Value)))
+        foreach (var (def, mechs) in _wantedBy.OrderBy(kv => kv.Key.label, StringComparer.CurrentCulture).Select(kv => (kv.Key, kv.Value)))
             text.AppendLine($"  - {def.LabelCap}: {mechs.Select(m => m.LabelShort).ToCommaList()}");
         return text.ToString().TrimEndNewlines();
     }

@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using MU;
 using RimWorld;
-using UnityEngine;
 using Verse;
 using Verse.AI;
 
@@ -19,14 +18,14 @@ public class Building_AutoMechUpgrader : Building_MechUpgrader
     {
         // Not using MechUpgradeUtility.GetOperationsFromLists: it overwrites the given upgrader's saved upgrades list
         var plan = UpgradePlanner.Plan(pawn.def, MechUpgradeUtility.MaxUpgradePoints(pawn), currentUpgrades, policy, StockedUpgrades());
-        var operations = plan.Add
+        var planned = plan.Add
             .Select(u => new MechUpgradeOperation(u, UpgradeOperationType.Add))
             .ToList();
 
         // MU runs operations from the end of the list. Removals go last so they run first, otherwise
         // removing an upgrade would also take a shared ability from the upgrade replacing it
-        operations.AddRange(plan.Remove.Select(u => new MechUpgradeOperation(u, UpgradeOperationType.Remove)));
-        return operations;
+        planned.AddRange(plan.Remove.Select(u => new MechUpgradeOperation(u, UpgradeOperationType.Remove)));
+        return planned;
     }
 
     /// <summary>The storages linked to this upgrader that are active, so their upgrades can be fitted.</summary>

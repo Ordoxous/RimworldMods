@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -8,7 +7,6 @@ using HarmonyLib;
 using RimWorld;
 using UnityEngine;
 using Verse;
-using Verse.AI;
 
 namespace Ordo.BridgeTools.Scenarios;
 
@@ -467,7 +465,7 @@ public static class TweaksScenarios
                     for (var hit = 0; hit < 25 && !pawn.Dead; hit++)
                     {
                         Texts.Clear();
-                        var result = pawn.TakeDamage(new DamageInfo(DamageDefOf.Cut, 4f, 0f, hitPart: torso));
+                        var result = pawn.TakeDamage(new DamageInfo(DamageDefOf.Cut, 4f, hitPart: torso));
                         var blocked = result.deflected || result.diminished;
                         var struck = Texts.Where(text => Struck(text.Text)).ToList();
                         var red = Texts.Where(text => !Struck(text.Text)).ToList();
@@ -518,7 +516,7 @@ public static class TweaksScenarios
         var pawn = context.Colonist(0, 0);
         return RecordingTexts(() =>
         {
-            pawn.TakeDamage(new DamageInfo(DamageDefOf.Bomb, 500f, 0f, hitPart: pawn.RaceProps.body.corePart));
+            pawn.TakeDamage(new DamageInfo(DamageDefOf.Bomb, 500f, hitPart: pawn.RaceProps.body.corePart));
             context.Check("the pawn died", pawn.Dead);
             context.Check($"the killing blow's damage was shown on the map: [{string.Join(", ", Texts.Select(text => text.Text))}]", Texts.Any(text => !Struck(text.Text) && text.Map == context.Map));
             return Task.CompletedTask;
@@ -534,7 +532,7 @@ public static class TweaksScenarios
         {
             for (var hit = 0; hit < 5; hit++)
             {
-                pawn.TakeDamage(new DamageInfo(DamageDefOf.Cut, 4f, 0f, hitPart: pawn.RaceProps.body.corePart));
+                pawn.TakeDamage(new DamageInfo(DamageDefOf.Cut, 4f, hitPart: pawn.RaceProps.body.corePart));
             }
 
             context.Check($"with the setting off, no numbers: [{string.Join(", ", Texts.Select(text => text.Text))}]", Texts.Count == 0);

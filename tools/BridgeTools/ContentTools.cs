@@ -16,8 +16,8 @@ public sealed class ContentTools
     {
         var textures = ContentFinder<Texture2D>.GetAllInFolder(folder)
             .Where(texture => texture != null && (filter == null || texture.name.IndexOf(filter, System.StringComparison.OrdinalIgnoreCase) >= 0))
-            .Select(texture => new { name = texture.name, width = texture.width, height = texture.height })
-            .OrderBy(texture => texture.name)
+            .Select(texture => new { texture.name, texture.width, texture.height })
+            .OrderBy(texture => texture.name, System.StringComparer.Ordinal)
             .ToList();
         return new { success = true, folder, count = textures.Count, textures };
     }

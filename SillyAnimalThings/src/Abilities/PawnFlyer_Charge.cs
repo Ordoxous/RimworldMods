@@ -16,7 +16,7 @@ public class PawnFlyer_Charge : PawnFlyer_Trail
 
     private const int StaggerTicks = 120;
 
-    private static readonly List<Pawn> _tmpVictims = new();
+    private static readonly List<Pawn> TmpVictims = new();
 
     public override void RespawnPawn()
     {
@@ -32,7 +32,7 @@ public class PawnFlyer_Charge : PawnFlyer_Trail
             return;
         }
 
-        _tmpVictims.Clear();
+        TmpVictims.Clear();
         foreach (var cell in GenAdj.CellsAdjacent8Way(new TargetInfo(landingCell, map)))
         {
             if (cell.InBounds(map))
@@ -44,7 +44,7 @@ public class PawnFlyer_Charge : PawnFlyer_Trail
         CollectVictims(landingCell, map, charger);
 
         var damage = ImpactDamageBase + ImpactDamagePerBodySize * charger.BodySize;
-        foreach (var victim in _tmpVictims)
+        foreach (var victim in TmpVictims)
         {
             // An earlier victim may have blown up and taken this one with it
             if (victim.Dead || !victim.Spawned)
@@ -59,7 +59,7 @@ public class PawnFlyer_Charge : PawnFlyer_Trail
             }
         }
 
-        _tmpVictims.Clear();
+        TmpVictims.Clear();
     }
 
     private static void CollectVictims(
@@ -70,9 +70,9 @@ public class PawnFlyer_Charge : PawnFlyer_Trail
     {
         foreach (var thing in cell.GetThingList(map))
         {
-            if (thing is Pawn pawn && pawn != charger && pawn.IsEnemyOf(charger) && !_tmpVictims.Contains(pawn))
+            if (thing is Pawn pawn && pawn != charger && pawn.IsEnemyOf(charger) && !TmpVictims.Contains(pawn))
             {
-                _tmpVictims.Add(pawn);
+                TmpVictims.Add(pawn);
             }
         }
     }

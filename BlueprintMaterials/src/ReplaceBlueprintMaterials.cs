@@ -196,7 +196,7 @@ public class ReplaceBlueprintMaterials
     }
 }
 
-public class Command_Action_AlternativeMaterial : Command_Action
+public sealed class Command_Action_AlternativeMaterial : Command_Action
 {
 
     // The mod's own, so the gizmo looks the same with or without Ideology, whose style icon it once borrowed

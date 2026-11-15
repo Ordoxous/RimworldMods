@@ -9,7 +9,7 @@ public class Projectile_WaterBlast : Projectile
 {
     private const int StaggerTicks = 90;
 
-    private static readonly List<Thing> _tmpThings = new();
+    private static readonly List<Thing> TmpThings = new();
 
     public override void Impact(
         Thing hitThing,
@@ -22,9 +22,9 @@ public class Projectile_WaterBlast : Projectile
 
         if (!blockedByShield)
         {
-            _tmpThings.Clear();
-            _tmpThings.AddRange(cell.GetThingList(map));
-            foreach (var thing in _tmpThings)
+            TmpThings.Clear();
+            TmpThings.AddRange(cell.GetThingList(map));
+            foreach (var thing in TmpThings)
             {
                 if (thing.Destroyed)
                 {
@@ -45,7 +45,7 @@ public class Projectile_WaterBlast : Projectile
                 }
             }
 
-            _tmpThings.Clear();
+            TmpThings.Clear();
         }
 
         base.Impact(hitThing, blockedByShield);

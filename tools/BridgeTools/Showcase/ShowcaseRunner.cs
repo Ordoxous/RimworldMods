@@ -254,7 +254,7 @@ public sealed class ShowcaseRunner
         Map map
     )
     {
-        ColonyTools.SetHour(12);
+        ColonyTools.SetHour();
         map.weatherManager.curWeather = WeatherDefOf.Clear;
         map.weatherManager.lastWeather = WeatherDefOf.Clear;
     }

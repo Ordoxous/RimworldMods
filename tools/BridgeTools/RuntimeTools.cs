@@ -190,7 +190,7 @@ public sealed class RuntimeTools
         var def = DefDatabase<RimWorld.AbilityDef>.GetNamedSilentFail(defName);
         return def == null
             ? new { success = false, message = $"No ability named {defName}" }
-            : new { success = true, def.defName, def.label, range = def.verbProperties?.range, warmup = def.verbProperties?.warmupTime, cooldown = def.cooldownTicksRange.ToString() };
+            : new { success = true, def.defName, def.label, def.verbProperties?.range, warmup = def.verbProperties?.warmupTime, cooldown = def.cooldownTicksRange.ToString() };
     }
 
     private static string Describe(

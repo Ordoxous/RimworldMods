@@ -2,7 +2,6 @@
 using System.Linq;
 using MU;
 using Verse;
-using RimWorld;
 
 namespace Ordo.MechUpgradesUi;
 
