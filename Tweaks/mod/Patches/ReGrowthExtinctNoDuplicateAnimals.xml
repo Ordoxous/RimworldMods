@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+
+  <!--
+    ReGrowth: Extinct Animals (Continued) loads before ReGrowth 2 (its own loadBefore), so ReGrowth 2's
+    RG_Dodo, RG_Thrinaxodon and RG_Synthetion defs win, and their race wildBiomes already place them.
+    Extinct's patch adds the same animals to the same biomes' wildAnimals at the same commonality, so
+    each appears twice and BiomeDef.AllWildAnimals throws a duplicate key (Giddy-Up logs it for RG_Dodo).
+    Removing Extinct's wildAnimals entries leaves the spawn rates unchanged.
+  -->
+  <Operation Class="XmlExtensions.FindMod">
+    <mods>
+      <li>ReGrowth.BOTR.Core</li>
+    </mods>
+    <packageId>true</packageId>
+    <caseTrue>
+      <Operation Class="XmlExtensions.FindMod">
+        <mods>
+          <li>Mlie.ReGrowthExtinctAnimals</li>
+        </mods>
+        <packageId>true</packageId>
+        <caseTrue>
+          <Operation Class="XmlExtensions.OptionalPatch">
+            <modId>Ordo.Tweaks</modId>
+            <key>ReGrowthExtinctNoDuplicateAnimals</key>
+            <defaultValue>true</defaultValue>
+            <caseTrue>
+
+              <Operation Class="XmlExtensions.PatchOperationSafeRemove">
+                <xpath>Defs/BiomeDef/wildAnimals/RG_Dodo</xpath>
+              </Operation>
+
+              <Operation Class="XmlExtensions.PatchOperationSafeRemove">
+                <xpath>Defs/BiomeDef/wildAnimals/RG_Thrinaxodon</xpath>
+              </Operation>
+
+              <Operation Class="XmlExtensions.PatchOperationSafeRemove">
+                <xpath>Defs/BiomeDef/wildAnimals/RG_Synthetion</xpath>
+              </Operation>
+
+            </caseTrue>
+          </Operation>
+        </caseTrue>
+      </Operation>
+    </caseTrue>
+  </Operation>
+
+</Patch>

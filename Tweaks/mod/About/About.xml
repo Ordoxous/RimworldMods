@@ -35,6 +35,8 @@
     <li>FrozenSnowFox.ComplexJobs</li>
     <li>Tinda.Medieval.Tailor.Continued</li>
     <li>setosa.power.tools</li>
+    <li>ReGrowth.BOTR.Core</li>
+    <li>Mlie.ReGrowthExtinctAnimals</li>
   </loadAfter>
   <packageId>Ordo.Tweaks</packageId>
   <description>Various configurable tweaks</description>

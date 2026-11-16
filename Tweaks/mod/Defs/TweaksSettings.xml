@@ -189,6 +189,12 @@
         <defaultValue>true</defaultValue>
         <label>Dubs water wells can be placed on gravships *</label>
       </li>
+      <li MayRequire="ReGrowth.BOTR.Core,Mlie.ReGrowthExtinctAnimals" Class="XmlExtensions.Setting.Checkbox">
+        <key>ReGrowthExtinctNoDuplicateAnimals</key>
+        <defaultValue>true</defaultValue>
+        <label>ReGrowth: no duplicate extinct animals *</label>
+        <tooltip>With ReGrowth 2 and ReGrowth: Extinct Animals both active, the dodo, thrinaxodon and synthetion are each added to the same biomes twice, which breaks the wild animal list (Giddy-Up reports it). This removes the second copy. Spawn rates stay the same.</tooltip>
+      </li>
 
     </settings>
   </XmlExtensions.SettingsMenuDef>
