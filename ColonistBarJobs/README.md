@@ -6,15 +6,16 @@ Shows "Colonist Bar Job Icons" in game, package ID `Ordo.ColonistBarJobs`. It ad
 
 - **Hard:** Harmony.
 - **DLCs:** none needed.
-- **Works with:** CM Color Coded Mood Bar (`CrashM.ColorCodedMoodBar.11`), checked in game on 2026-11-15: the icons still draw over its recoloured portraits, and its bleeding mark sits on the body, clear of the default top-right corner. Its other icons (illness, temperature, relationships, gender) weren't triggered; if one collides, move the icon with the corner setting.
+- **Works with:** CM Color Coded Mood Bar (`CrashM.ColorCodedMoodBar.11`), checked in game on 2026-11-15 and 2026-11-16. It replaces `DrawColonist` with its own copy and its own icon list, so the activity row hooks its `MoodCache.DoIconVars` (to rearrange the list) and `MoodPatch.DrawIcons` (to draw over the placeholder) by name. If those names change, a warning is logged and the icon goes to its corner instead. Its bleeding mark sits on the body. Its other icons (illness, temperature, relationships, gender) weren't triggered.
 - **Mods that replace the bar:** won't show the icons. **Colonist Bar KF** rewrites the whole bar, so this mod's postfix on the vanilla drawer never runs with it loaded.
 
 ## How it works
 
 | Part | Where |
 |---|---|
-| A postfix on `ColonistBarColonistDrawer.DrawColonist` draws the icon where the settings put it, over a dark square. The tooltip is the job driver's report. | `src/ColonistBarJobIcons.cs` |
-| Settings: corner (default top right), size (15-50% of the portrait width, default 30%), sideways and up-down offsets (±16 px at the vanilla portrait width, scaling with the bar), and backdrop darkness (0-100%, default 75%), with a live preview. They apply at once. | `src/ColonistBarJobsSettings.cs` |
+| **Activity row (default):** a transpiler on `ColonistBarColonistDrawer.DrawIcons` runs once vanilla has filled its row of status icons at the bottom left, just before it sizes them. When there's a job icon, it removes vanilla's calm activities (idle, sleeping, medical rest), puts a clear placeholder first so the row sizes and spaces itself as usual, and draws the job icon over that slot. The urgent states stay: forming caravan, mental break, fleeing, attacking, burning, inspired, and the slave, ideology role or faction icon. Sleeping shows no job icon, so vanilla's Z stays. | `src/ActivityRow.cs` |
+| **Corner:** a postfix on `ColonistBarColonistDrawer.DrawColonist` draws the icon where the corner settings put it. It's also the fallback when the row couldn't be hooked. Both draw over a dark square, with the job driver's report as tooltip. | `src/ColonistBarJobIcons.cs` |
+| Settings: placement (activity row, the default, or a corner). For a corner: the corner (default top right), size (15-50% of the portrait width, default 30%), sideways and up-down offsets (±32 px at the vanilla portrait width, scaling with the bar), and backdrop darkness (0-100%, default 75%), with a live preview. They apply at once. | `src/ColonistBarJobsSettings.cs` |
 | The resolver decides what a job shows | `src/JobIcon.cs`, `JobIconResolver.For(Job)` |
 | Mappings for jobs and work types, as `Ordo.ColonistBarJobs.JobIconDef` | `mod/Defs/JobIcons.xml` |
 
@@ -22,7 +23,7 @@ Shows "Colonist Bar Job Icons" in game, package ID `Ordo.ColonistBarJobs`. It ad
 
 1. **A `JobIconDef` listing the job's `JobDef`.** For jobs whose target would mislead: Deconstruct, Uninstall, Strip and Slaughter would otherwise show the building or animal they remove.
 2. **A `JobIconDef` listing the work type of the job's work giver.** For work whose target is a pawn, a cell or plain rock: Mining, PlantCutting, Growing, Hunting, Handling, and Doctor (industrial medicine). Jobs that didn't come from a work giver (orders, think tree jobs) have no work type.
-3. **Recreation:** any job with a `joyKind` gets the joy icon (`UI/Icons/DrugPolicy/Joy`) unless it targets a thing with an icon (`targetFirst`), so watching TV shows the TV and skygazing or a walk shows the joy icon. Wandering (`GotoWander`, `Wait_Wander`) shows vanilla's idle icon and sleeping (`LayDown`) its sleeping icon, both as job mappings in step 1, so sleeping shows the sleeping icon even in a bed.
+3. **Recreation:** any job with a `joyKind` gets the joy icon (`UI/Icons/DrugPolicy/Joy`) unless it targets a thing with an icon (`targetFirst`), so watching TV shows the TV and skygazing or a walk shows the joy icon. Wandering (`GotoWander`, `Wait_Wander`) shows vanilla's idle icon, as a job mapping in step 1. Sleeping (`LayDown`) is mapped to `showNothing`, so it draws no icon, not even the bed: vanilla's own Z at the bottom left already shows it.
 4. **The icon of the job's target thing (`targetA`):**
    - Blueprints and frames show what they build, in its material.
    - Minified things show what's inside.
@@ -59,8 +60,9 @@ Shows "Colonist Bar Job Icons" in game, package ID `Ordo.ColonistBarJobs`. It ad
 | | `resolve_target_thing` | Hauling steel shows steel. Putting on a cloth parka shows a parka in cloth. |
 | | `resolve_blueprint_shows_what_it_builds` | A wooden wall blueprint shows a wooden wall |
 | | `resolve_nothing_to_show` | No job, walking to a cell and attacking a pawn show nothing |
-| | `resolve_off_work` | Skygazing shows the joy icon, horseshoes the pin, wandering the idle icon, and sleeping in a bed the sleeping icon |
-| `settings` | `settings_corners_size_and_offsets` | Each corner, offsets inward and outward, and offsets scaling with a doubled portrait |
+| | `resolve_off_work` | Skygazing shows the joy icon, horseshoes the pin, wandering the idle icon, and sleeping in a bed nothing |
+| `settings` | `settings_activity_row` | The row is the default and hooked; with a job icon the placeholder leads and idle goes but burning stays; with none, idle stays; the slot is vanilla's size |
+| | `settings_corners_size_and_offsets` | Each corner, offsets inward and outward, and offsets scaling with a doubled portrait |
 | `cache` | `cache_follows_job` | A real miner shows the mining icon while mining, and nothing once drafted |
 
 **Checking by eye:** `ordo/stage_colonistbarjobs` (`ColonistBarJobsTools.cs`) clears the map and leaves four colonists working: a hauler with steel and a stockpile, an idle colonist, a miner, and a builder at wooden wall blueprints. It unpauses the game.
@@ -75,9 +77,12 @@ Shows "Colonist Bar Job Icons" in game, package ID `Ordo.ColonistBarJobs`. It ad
 - **Windowed, by eye:** steel for the hauler, nothing for the idle colonist, the pickaxe for the miner, and a wooden wall for the builder.
 - **2026-11-15, settings and off-work icons:** 9/9 on `colonistbarjobs-headless`. Windowed on `colonistbarjobs-moodbar`: the four icons drew over the mood bar mod's portraits, wandering colonists showed the idle icon, and there were no errors in the log.
 
+- **2026-11-16, activity row:** 10/10 on `colonistbarjobs-headless` and on `colonistbarjobs-moodbar-headless`, with no errors in the log. Windowed, on both `colonistbarjobs` and `colonistbarjobs-moodbar`: steel, the pickaxe and the wooden wall drew first in the bottom-left row, and the idle colonist kept vanilla's clock.
+
 ## Open questions
 
 - **Backdrop:** at 75% the near-black square is visible but subtle, because the portrait background is already dark navy. Raise the default if players miss it.
-- **Settings window:** built and compiled, but the window itself (radio buttons, sliders, preview) hasn't been opened in game yet.
+- **Settings window:** opened in game on 2026-11-16. The preview matched the bar. The corner radio buttons sat at the far edge of their column, away from their labels, so they're now drawn in narrow 200 px rows.
+- **Offsets:** the range went from 16 to 32 px after the first in-game try maxed out the up-or-down slider.
 - **Unmapped work types:** Warden, Cleaning, Firefighter and Complex Jobs' work types fall back to the target's icon, which for filth or a prisoner shows nothing or something odd. Add mappings once they've been seen in play.
 - **Mechs:** mechanitors' mechs aren't on the vanilla bar, so they get nothing.

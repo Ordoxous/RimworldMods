@@ -41,7 +41,7 @@
   </Ordo.ColonistBarJobs.JobIconDef>
 
   <!-- Off work. Recreation shows what it's done with (the TV, the chess table) when there is one, and the joy icon otherwise
-       (walks, skygazing, meditating, praying). The idle and sleeping icons are vanilla's own colonist bar icons. -->
+       (walks, skygazing, meditating, praying). The idle icon is vanilla's own colonist bar icon. -->
   <Ordo.ColonistBarJobs.JobIconDef>
     <defName>Ordo_JobIcon_Recreation</defName>
     <texPath>UI/Icons/DrugPolicy/Joy</texPath>
@@ -58,9 +58,10 @@
     </jobs>
   </Ordo.ColonistBarJobs.JobIconDef>
 
+  <!-- Nothing while asleep: vanilla already draws its sleeping Z at the bottom left, and the bed would show otherwise -->
   <Ordo.ColonistBarJobs.JobIconDef>
     <defName>Ordo_JobIcon_Sleep</defName>
-    <texPath>UI/Icons/ColonistBar/Sleeping</texPath>
+    <showNothing>true</showNothing>
     <jobs>
       <li>LayDown</li>
     </jobs>

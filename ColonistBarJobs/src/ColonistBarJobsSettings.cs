@@ -3,6 +3,12 @@ using Verse;
 
 namespace Ordo.ColonistBarJobs;
 
+public enum IconPlacement
+{
+    ActivityRow,
+    Corner
+}
+
 public enum IconCorner
 {
     TopRight,
@@ -19,7 +25,10 @@ public class ColonistBarJobsSettings : ModSettings
 
     // Offsets are in pixels at the vanilla portrait width, and scale with the bar
     public const float VanillaPortraitWidth = 48f;
-    public const float MaxOffset = 16f;
+    public const float MaxOffset = 32f;
+
+    // In vanilla's row of activity icons at the bottom left, or in a corner of the player's choosing
+    public IconPlacement Placement = IconPlacement.ActivityRow;
 
     public IconCorner Corner = IconCorner.TopRight;
 
@@ -37,6 +46,7 @@ public class ColonistBarJobsSettings : ModSettings
     {
         // Kept explicit so TopRight stays the default if the enum is reordered
         // ReSharper disable once RedundantArgumentDefaultValue
+        Scribe_Values.Look(ref Placement, "placement", IconPlacement.ActivityRow);
         Scribe_Values.Look(ref Corner, "corner", IconCorner.TopRight);
         Scribe_Values.Look(ref Size, "size", DefaultSize);
         Scribe_Values.Look(ref OffsetX, "offsetX");
@@ -46,6 +56,7 @@ public class ColonistBarJobsSettings : ModSettings
 
     public void Reset()
     {
+        Placement = IconPlacement.ActivityRow;
         Corner = IconCorner.TopRight;
         Size = DefaultSize;
         OffsetX = 0f;
@@ -70,6 +81,8 @@ public class ColonistBarJobsSettings : ModSettings
 
 public class ColonistBarJobsMod : Mod
 {
+    private const float RadioRowWidth = 200f;
+
     public static ColonistBarJobsSettings Settings { get; private set; } = new();
 
     public ColonistBarJobsMod(
@@ -89,27 +102,43 @@ public class ColonistBarJobsMod : Mod
         var listing = new Listing_Standard();
         listing.Begin(inRect.LeftPart(0.6f));
 
-        listing.Label("Ordo_ColonistBarJobs_Corner".Translate());
-        foreach (IconCorner corner in System.Enum.GetValues(typeof(IconCorner)))
+        listing.Label("Ordo_ColonistBarJobs_Placement".Translate());
+        foreach (IconPlacement placement in System.Enum.GetValues(typeof(IconPlacement)))
         {
-            if (listing.RadioButton(("Ordo_ColonistBarJobs_Corner_" + corner).Translate(), settings.Corner == corner))
+            if (Radio(listing, ("Ordo_ColonistBarJobs_Placement_" + placement).Translate(), settings.Placement == placement))
             {
-                settings.Corner = corner;
+                settings.Placement = placement;
             }
         }
 
+        // The row sizes and places its icons itself; only a corner takes these
+        if (settings.Placement == IconPlacement.Corner)
+        {
+            listing.Gap();
+            listing.Label("Ordo_ColonistBarJobs_Corner".Translate());
+            foreach (IconCorner corner in System.Enum.GetValues(typeof(IconCorner)))
+            {
+                if (Radio(listing, ("Ordo_ColonistBarJobs_Corner_" + corner).Translate(), settings.Corner == corner))
+                {
+                    settings.Corner = corner;
+                }
+            }
+
+            listing.Gap();
+            settings.Size = listing.SliderLabeled(
+                "Ordo_ColonistBarJobs_Size".Translate(settings.Size.ToStringPercent()), settings.Size, 0.15f, 0.5f,
+                tooltip: "Ordo_ColonistBarJobs_SizeTip".Translate());
+            settings.OffsetX = Mathf.Round(listing.SliderLabeled(
+                "Ordo_ColonistBarJobs_OffsetX".Translate(settings.OffsetX.ToString("0")), settings.OffsetX,
+                -ColonistBarJobsSettings.MaxOffset, ColonistBarJobsSettings.MaxOffset,
+                tooltip: "Ordo_ColonistBarJobs_OffsetTip".Translate()));
+            settings.OffsetY = Mathf.Round(listing.SliderLabeled(
+                "Ordo_ColonistBarJobs_OffsetY".Translate(settings.OffsetY.ToString("0")), settings.OffsetY,
+                -ColonistBarJobsSettings.MaxOffset, ColonistBarJobsSettings.MaxOffset,
+                tooltip: "Ordo_ColonistBarJobs_OffsetTip".Translate()));
+        }
+
         listing.Gap();
-        settings.Size = listing.SliderLabeled(
-            "Ordo_ColonistBarJobs_Size".Translate(settings.Size.ToStringPercent()), settings.Size, 0.15f, 0.5f,
-            tooltip: "Ordo_ColonistBarJobs_SizeTip".Translate());
-        settings.OffsetX = Mathf.Round(listing.SliderLabeled(
-            "Ordo_ColonistBarJobs_OffsetX".Translate(settings.OffsetX.ToString("0")), settings.OffsetX,
-            -ColonistBarJobsSettings.MaxOffset, ColonistBarJobsSettings.MaxOffset,
-            tooltip: "Ordo_ColonistBarJobs_OffsetTip".Translate()));
-        settings.OffsetY = Mathf.Round(listing.SliderLabeled(
-            "Ordo_ColonistBarJobs_OffsetY".Translate(settings.OffsetY.ToString("0")), settings.OffsetY,
-            -ColonistBarJobsSettings.MaxOffset, ColonistBarJobsSettings.MaxOffset,
-            tooltip: "Ordo_ColonistBarJobs_OffsetTip".Translate()));
         settings.BackdropOpacity = listing.SliderLabeled(
             "Ordo_ColonistBarJobs_Backdrop".Translate(settings.BackdropOpacity.ToStringPercent()), settings.BackdropOpacity, 0f, 1f);
 
@@ -124,6 +153,20 @@ public class ColonistBarJobsMod : Mod
         DrawPreview(inRect.RightPart(0.35f).TopPartPixels(140f), settings);
     }
 
+    // A narrow row: Listing_Standard.RadioButton puts the button at the far end of the column, away from its label
+    private static bool Radio(
+        Listing_Standard listing,
+        string label,
+        bool chosen
+    )
+    {
+        var row = listing.GetRect(Text.LineHeight);
+        row.width = Mathf.Min(row.width, RadioRowWidth);
+        var clicked = Widgets.RadioButtonLabeled(row, label, chosen);
+        listing.Gap(listing.verticalSpacing);
+        return clicked;
+    }
+
     // A portrait-sized box with the icon where the settings put it
     private static void DrawPreview(
         Rect area,
@@ -135,9 +178,24 @@ public class ColonistBarJobsMod : Mod
         Widgets.DrawBoxSolid(portrait, new Color(0.17f, 0.22f, 0.27f));
         Widgets.DrawBox(portrait);
         var icon = new JobIcon(ContentFinder<Texture2D>.Get("UI/Designators/Mine", reportFailure: false), null, null, null);
-        if (!icon.IsEmpty)
+        if (icon.IsEmpty)
+        {
+            return;
+        }
+
+        if (settings.Placement == IconPlacement.Corner)
         {
             ColonistBarJobIcons.Draw(settings.IconRect(portrait), icon);
+            return;
+        }
+
+        // The job icon leads the row, here beside vanilla's inspired icon; the preview is twice the bar's size
+        var slot = ActivityRow.SlotRect(portrait, 2, portrait.width / ColonistBarJobsSettings.VanillaPortraitWidth);
+        ColonistBarJobIcons.Draw(slot, icon);
+        var inspired = ContentFinder<Texture2D>.Get("UI/Icons/ColonistBar/Inspired", reportFailure: false);
+        if (inspired != null)
+        {
+            GUI.DrawTexture(new Rect(slot.xMax, slot.y, slot.width, slot.height), inspired);
         }
     }
 }

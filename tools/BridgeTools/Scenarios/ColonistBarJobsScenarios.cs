@@ -19,6 +19,7 @@ public static class ColonistBarJobsScenarios
     public static readonly List<Scenario> All = new()
     {
         new("settings_corners_size_and_offsets", "settings", CornersSizeAndOffsets),
+        new("settings_activity_row", "settings", ActivityRowPlacement),
         new("setup_defs_textures_and_patch", "setup", DefsTexturesAndPatch),
         new("resolve_job_mapping_beats_target", "resolve", JobMappingBeatsTarget),
         new("resolve_work_type_mapping", "resolve", WorkTypeMapping),
@@ -141,8 +142,8 @@ public static class ColonistBarJobsScenarios
     }
 
     // A miner gets the mining icon once at work, and none once drafted: the cache follows the pawn's job
-    // Recreation shows the joy icon unless it's done with a thing; wandering and sleeping show vanilla's idle and sleeping icons,
-    // sleeping even in a bed
+    // Recreation shows the joy icon unless it's done with a thing; wandering shows vanilla's idle icon,
+    // and sleeping shows nothing (vanilla's own Z covers it), even in a bed
     private static Task OffWork(
         ScenarioContext context
     )
@@ -163,7 +164,7 @@ public static class ColonistBarJobsScenarios
 
         var bed = context.Place(ThingDefOf.Bed, 5, 0, ThingDefOf.WoodLog);
         var sleep = JobIconResolver.For(JobMaker.MakeJob(JobDefOf.LayDown, bed));
-        context.Check($"sleeping in a bed shows the sleeping icon: {sleep}", sleep.Source == Icon("Ordo_JobIcon_Sleep"));
+        context.Check($"sleeping in a bed shows nothing, not the bed: {sleep}", sleep.IsEmpty);
         return Task.CompletedTask;
     }
 
@@ -207,6 +208,43 @@ public static class ColonistBarJobsScenarios
         defaults.Reset();
         context.Check($"defaults are top right at {ColonistBarJobsSettings.DefaultSize:P0}",
             defaults.Corner == IconCorner.TopRight && Mathf.Approximately(defaults.Size, ColonistBarJobsSettings.DefaultSize) && defaults.OffsetX == 0f);
+        return Task.CompletedTask;
+    }
+
+    // The row's hook went in, the job icon leads the row and pushes out the calm activities but not the urgent ones, and
+    // takes the size vanilla gives a row of that many icons
+    private static Task ActivityRowPlacement(
+        ScenarioContext context
+    )
+    {
+        context.Check("the activity row is the default placement", new ColonistBarJobsSettings().Placement == IconPlacement.ActivityRow);
+        context.Check("the activity row is hooked in every drawer in use", ActivityRow.Hooked);
+
+        var callType = AccessTools.Inner(typeof(ColonistBarColonistDrawer), "IconDrawCall");
+        var texture = AccessTools.Field(callType, "texture");
+        var idle = ContentFinder<Texture2D>.Get("UI/Icons/ColonistBar/Idle");
+        var burning = ContentFinder<Texture2D>.Get("UI/Icons/ColonistBar/Burning");
+        var icons = (System.Collections.IList)System.Activator.CreateInstance(typeof(List<>).MakeGenericType(callType));
+
+        string Row() => string.Join(", ", icons.Cast<object>().Select(call => ((Texture2D)texture.GetValue(call)).name));
+        void Add(Texture2D tex) => icons.Add(System.Activator.CreateInstance(callType, tex, null, null));
+
+        Add(idle);
+        Add(burning);
+        ActivityRow.Rearrange(icons, callType, true);
+        context.Check($"with a job icon, it leads and idle goes, burning stays: [{Row()}]",
+            icons.Count == 2 && (Texture2D)texture.GetValue(icons[0]) == ActivityRow.Placeholder && (Texture2D)texture.GetValue(icons[1]) == burning);
+
+        icons.Clear();
+        Add(idle);
+        ActivityRow.Rearrange(icons, callType, false);
+        context.Check($"with no job icon, vanilla's idle icon stays: [{Row()}]", icons.Count == 1 && (Texture2D)texture.GetValue(icons[0]) == idle);
+
+        var portrait = new Rect(100f, 10f, 48f, 48f);
+        var one = ActivityRow.SlotRect(portrait, 1, 1f);
+        context.Check($"alone in the row it's vanilla's 20 px at the bottom left: {one}", one == new Rect(101f, 37f, 20f, 20f));
+        var three = ActivityRow.SlotRect(portrait, 3, 2f);
+        context.Check($"three icons share the row's 46 px, scaled with the bar: {three}", Mathf.Approximately(three.width, 46f / 3f * 2f));
         return Task.CompletedTask;
     }
 

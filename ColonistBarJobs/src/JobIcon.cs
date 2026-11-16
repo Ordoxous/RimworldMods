@@ -18,6 +18,9 @@ public class JobIconDef : Def
     // When the job targets a thing with an icon, show that instead: the TV being watched says more than "recreation"
     public bool targetFirst;
 
+    // The matched jobs draw no icon at all, for states vanilla's own bar icons already show (sleeping)
+    public bool showNothing;
+
     [NoTranslate] public string texPath;
     public ThingDef thingIcon;
 
@@ -46,7 +49,7 @@ public class JobIconDef : Def
             yield return error;
         }
 
-        if (texPath == null && thingIcon == null)
+        if (texPath == null && thingIcon == null && !showNothing)
         {
             yield return "has neither texPath nor thingIcon";
         }
@@ -147,9 +150,17 @@ public static class JobIconResolver
         EnsureLookups();
         var target = FromThing(job.targetA.Thing);
 
-        if (_byJob.TryGetValue(job.def, out var jobIcon) && Mapped(jobIcon, target) is { IsEmpty: false } fromJob)
+        if (_byJob.TryGetValue(job.def, out var jobIcon))
         {
-            return fromJob;
+            if (jobIcon.showNothing)
+            {
+                return JobIcon.None;
+            }
+
+            if (Mapped(jobIcon, target) is { IsEmpty: false } fromJob)
+            {
+                return fromJob;
+            }
         }
 
         if (job.workGiverDef?.workType is { } workType

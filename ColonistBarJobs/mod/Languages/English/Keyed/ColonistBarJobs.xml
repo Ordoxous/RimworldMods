@@ -2,6 +2,9 @@
 <LanguageData>
 
   <Ordo_ColonistBarJobs_SettingsCategory>Colonist Bar Job Icons</Ordo_ColonistBarJobs_SettingsCategory>
+  <Ordo_ColonistBarJobs_Placement>Where the icon goes</Ordo_ColonistBarJobs_Placement>
+  <Ordo_ColonistBarJobs_Placement_ActivityRow>First in the row of status icons (bottom left)</Ordo_ColonistBarJobs_Placement_ActivityRow>
+  <Ordo_ColonistBarJobs_Placement_Corner>In a corner</Ordo_ColonistBarJobs_Placement_Corner>
   <Ordo_ColonistBarJobs_Corner>Corner of the portrait</Ordo_ColonistBarJobs_Corner>
   <Ordo_ColonistBarJobs_Corner_TopRight>Top right</Ordo_ColonistBarJobs_Corner_TopRight>
   <Ordo_ColonistBarJobs_Corner_TopLeft>Top left</Ordo_ColonistBarJobs_Corner_TopLeft>

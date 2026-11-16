@@ -60,19 +60,31 @@ public static class ColonistBarJobIcons
             return;
         }
 
-        var icon = IconFor(colonist);
-        if (icon.IsEmpty)
+        // In the activity row the row's own hooks draw it; the corner is the fallback when they couldn't be installed
+        if (ColonistBarJobsMod.Settings.Placement == IconPlacement.ActivityRow && ActivityRow.Hooked)
         {
             return;
         }
 
-        var iconRect = ColonistBarJobsMod.Settings.IconRect(rect);
+        var icon = IconFor(colonist);
+        if (!icon.IsEmpty)
+        {
+            DrawWithTooltip(ColonistBarJobsMod.Settings.IconRect(rect), icon, colonist);
+        }
+    }
+
+    public static void DrawWithTooltip(
+        Rect rect,
+        JobIcon icon,
+        Pawn colonist
+    )
+    {
         if (Event.current.type == EventType.Repaint)
         {
-            Draw(iconRect, icon);
+            Draw(rect, icon);
         }
 
-        TooltipHandler.TipRegion(iconRect, new TipSignal(() => Tooltip(colonist), colonist.thingIDNumber ^ 0x0B4A));
+        TooltipHandler.TipRegion(rect, new TipSignal(() => Tooltip(colonist), colonist.thingIDNumber ^ 0x0B4A));
     }
 
     public static void Draw(
