@@ -16,6 +16,15 @@
     <races>
       <li>Elephant</li>
       <li>Mastodon</li>
+      <!-- Megafauna -->
+      <li MayRequire="spino.megafauna">Deinotherium</li>
+      <li MayRequire="spino.megafauna">Platybelodon</li>
+      <li MayRequire="spino.megafauna">WoollyMammoth</li>
+      <li MayRequire="spino.megafauna">Zygolophodon</li>
+      <!-- ReGrowth: Extinct Animals (Continued) -->
+      <li MayRequire="mlie.regrowthextinctanimals">RG_WoollyMammoth</li>
+      <!-- Vanilla Animals Expanded -->
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_IndianElephant</li>
     </races>
   </Ordo.SillyAnimalThings.AnimalTagDef>
 
@@ -27,6 +36,10 @@
     </abilities>
     <races>
       <li>Alphabeaver</li>
+      <!-- Megafauna -->
+      <li MayRequire="spino.megafauna">Castoroides</li>
+      <!-- Vanilla Animals Expanded -->
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_Beaver</li>
     </races>
   </Ordo.SillyAnimalThings.AnimalTagDef>
 
@@ -40,6 +53,19 @@
       <li>Boomalope</li>
       <li>Boomrat</li>
       <li MayRequire="Ludeon.RimWorld.Biotech">Toxalope</li>
+      <!-- Alpha Animals -->
+      <li MayRequire="sarg.alphaanimals">AA_Aerofleet</li>
+      <li MayRequire="sarg.alphaanimals">AA_ChemfuelMyrmidon</li>
+      <li MayRequire="sarg.alphaanimals">AA_ColossalAerofleet</li>
+      <li MayRequire="sarg.alphaanimals">AA_InfectedAerofleet</li>
+      <!-- Biomes! Prehistoric -->
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Aboomasaurus</li>
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Boomasaur</li>
+      <!-- Vanilla Animals Expanded -->
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_Boombat</li>
+      <!-- Vanilla Factions Expanded - Insectoids 2 -->
+      <li MayRequire="oskarpotocki.vfe.insectoid2">VFEI2_Boomtick</li>
+      <li MayRequire="oskarpotocki.vfe.insectoid2">VFEI2_Titantick</li>
     </races>
   </Ordo.SillyAnimalThings.AnimalTagDef>
 
@@ -52,6 +78,18 @@
     <races>
       <li>Boomrat</li>
       <li>LavaSnail</li>
+      <!-- Alpha Animals -->
+      <li MayRequire="sarg.alphaanimals">AA_Behemoth</li>
+      <li MayRequire="sarg.alphaanimals">AA_Cinderlisk</li>
+      <li MayRequire="sarg.alphaanimals">AA_FireWasp</li>
+      <li MayRequire="sarg.alphaanimals">AA_FlamingoPhoenix</li>
+      <li MayRequire="sarg.alphaanimals">AA_Thermadon</li>
+      <!-- Dark Ages : Beasts and Monsters -->
+      <li MayRequire="van.beasts">DA_BlackscaledBaskar</li>
+      <!-- Vanilla Factions Expanded - Insectoids 2 -->
+      <li MayRequire="oskarpotocki.vfe.insectoid2">VFEI2_Boomtick</li>
+      <li MayRequire="oskarpotocki.vfe.insectoid2">VFEI2_Fuelmite</li>
+      <li MayRequire="oskarpotocki.vfe.insectoid2">VFEI2_Hellbeetle</li>
     </races>
   </Ordo.SillyAnimalThings.AnimalTagDef>
 
@@ -66,6 +104,26 @@
       <li>Cougar</li>
       <li>Panther</li>
       <li>Cat_Scimitar</li>
+      <!-- Alpha Animals -->
+      <li MayRequire="sarg.alphaanimals">AA_ArcticLion</li>
+      <li MayRequire="sarg.alphaanimals">AA_CrystallineCaracal</li>
+      <li MayRequire="sarg.alphaanimals">AA_FrostLynx</li>
+      <li MayRequire="sarg.alphaanimals">AA_Genix</li>
+      <li MayRequire="sarg.alphaanimals">AA_SandLion</li>
+      <li MayRequire="sarg.alphaanimals">AA_SandProwler</li>
+      <!-- Megafauna -->
+      <li MayRequire="spino.megafauna">Smilodon</li>
+      <!-- ReGrowth: Extinct Animals (Continued) -->
+      <li MayRequire="mlie.regrowthextinctanimals">RG_SabertoothTiger</li>
+      <!-- Vanilla Animals Expanded -->
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_Cheetah</li>
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_Jaguar</li>
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_Lion</li>
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_Tiger</li>
+      <!-- Vanilla Animals Expanded — Royal Animals -->
+      <li MayRequire="vanillaexpanded.vaeroy">VAERoy_RoyalTiger</li>
+      <!-- Vanilla Animals Expanded — Waste Animals -->
+      <li MayRequire="vanillaexpanded.vaewaste">VAEWaste_Toxlion</li>
     </races>
   </Ordo.SillyAnimalThings.AnimalTagDef>
 
@@ -88,6 +146,63 @@
       <li>Elk</li>
       <li>Mastodon</li>
       <li>Elephant</li>
+      <!-- Alpha Animals -->
+      <li MayRequire="sarg.alphaanimals">AA_ChameleonYak</li>
+      <li MayRequire="sarg.alphaanimals">AA_DarkVandal</li>
+      <li MayRequire="sarg.alphaanimals">AA_Darkbeast</li>
+      <li MayRequire="sarg.alphaanimals">AA_DevilSheep</li>
+      <li MayRequire="sarg.alphaanimals">AA_Gallatross</li>
+      <li MayRequire="sarg.alphaanimals">AA_Gigantelope</li>
+      <li MayRequire="sarg.alphaanimals">AA_GreyCoatedMouflon</li>
+      <li MayRequire="sarg.alphaanimals">AA_NightRam</li>
+      <li MayRequire="sarg.alphaanimals">AA_Radyak</li>
+      <li MayRequire="sarg.alphaanimals">AA_ShadowCharger</li>
+      <li MayRequire="sarg.alphaanimals">AA_ShockGoat</li>
+      <li MayRequire="sarg.alphaanimals">AA_SpinedGow</li>
+      <li MayRequire="sarg.alphaanimals">AA_Thunderbeast</li>
+      <li MayRequire="sarg.alphaanimals">AA_Thunderox</li>
+      <li MayRequire="sarg.alphaanimals">AA_WindBeast</li>
+      <!-- Biomes! Oasis -->
+      <li MayRequire="biomesteam.oasis">BMT_DuneStrider</li>
+      <!-- Biomes! Prehistoric -->
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Centrosaurus</li>
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Chasmosaurus</li>
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Homalocephale</li>
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Pachycephalosaurus</li>
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Pachyrhinosaurus</li>
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Stegoceras</li>
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Stygimoloch</li>
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Styracosaurus</li>
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Triceratops</li>
+      <!-- Dark Ages : Beasts and Monsters -->
+      <li MayRequire="van.beasts">DA_DwarvenMuffton</li>
+      <li MayRequire="van.beasts">DA_Goldilox</li>
+      <li MayRequire="van.beasts">DA_NorthernDrog</li>
+      <!-- Megafauna -->
+      <li MayRequire="spino.megafauna">Aurochs</li>
+      <li MayRequire="spino.megafauna">Daeodon</li>
+      <li MayRequire="spino.megafauna">Deinotherium</li>
+      <li MayRequire="spino.megafauna">Elasmotherium</li>
+      <li MayRequire="spino.megafauna">Megaloceros</li>
+      <li MayRequire="spino.megafauna">Platybelodon</li>
+      <li MayRequire="spino.megafauna">Sivatherium</li>
+      <li MayRequire="spino.megafauna">Uintatherium</li>
+      <li MayRequire="spino.megafauna">WoollyMammoth</li>
+      <li MayRequire="spino.megafauna">Zygolophodon</li>
+      <!-- ReGrowth: Extinct Animals (Continued) -->
+      <li MayRequire="mlie.regrowthextinctanimals">RG_WoollyMammoth</li>
+      <li MayRequire="mlie.regrowthextinctanimals">RG_WoollyRhinoceros</li>
+      <!-- Vanilla Animals Expanded -->
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_Hippopotamus</li>
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_IndianElephant</li>
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_Moose</li>
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_Walrus</li>
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_Wildebeest</li>
+      <!-- Vanilla Animals Expanded — Endangered -->
+      <li MayRequire="vanillaexpanded.vaeendandext">AEXP_BlackRhino</li>
+      <!-- Vanilla Animals Expanded — Waste Animals -->
+      <li MayRequire="vanillaexpanded.vaewaste">VAEWaste_Wasteboar</li>
+      <li MayRequire="vanillaexpanded.vaewaste">VAEWaste_Wasteffalo</li>
     </races>
   </Ordo.SillyAnimalThings.AnimalTagDef>
 
@@ -102,6 +217,20 @@
       <li>Otter</li>
       <li>Seal</li>
       <li>SeaLion</li>
+      <!-- Biomes! Polluted Lands -->
+      <li MayRequire="biomesteam.biomespollutedlands">BMT_LyncusSeal</li>
+      <!-- Megafauna -->
+      <li MayRequire="spino.megafauna">Enhydriodon</li>
+      <li MayRequire="spino.megafauna">Gomphotaria</li>
+      <li MayRequire="spino.megafauna">Palaeeudyptes</li>
+      <!-- ReGrowth: Extinct Animals (Continued) -->
+      <li MayRequire="mlie.regrowthextinctanimals">RG_Megalenhydris</li>
+      <!-- Vanilla Animals Expanded -->
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_Otter</li>
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_Penguin</li>
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_Seal</li>
+      <!-- Vanilla Animals Expanded — Endangered -->
+      <li MayRequire="vanillaexpanded.vaeendandext">AEXP_RockhopperPenguin</li>
     </races>
   </Ordo.SillyAnimalThings.AnimalTagDef>
 
@@ -114,6 +243,18 @@
     <races>
       <li>Wolverine</li>
       <li>Badger</li>
+      <!-- Alpha Animals -->
+      <li MayRequire="sarg.alphaanimals">AA_RaptorShrimp</li>
+      <!-- Biomes! Polluted Lands -->
+      <li MayRequire="biomesteam.biomespollutedlands">BMT_FenridStoat</li>
+      <!-- Vanilla Animals Expanded -->
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_Badger</li>
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_MegaWolverine</li>
+      <!-- Vanilla Animals Expanded — Endangered -->
+      <li MayRequire="vanillaexpanded.vaeendandext">AEXP_TasmanianDevil</li>
+      <!-- Vanilla Animals Expanded — Waste Animals -->
+      <li MayRequire="vanillaexpanded.vaewaste">VAEWaste_Hydra</li>
+      <li MayRequire="vanillaexpanded.vaewaste">VAEWaste_Megatardi</li>
     </races>
   </Ordo.SillyAnimalThings.AnimalTagDef>
 
@@ -130,6 +271,33 @@
       <li>Wolf_Great</li>
       <li>BogHound</li>
       <li>Husky</li>
+      <!-- Alpha Animals -->
+      <li MayRequire="sarg.alphaanimals">AA_AnimusVox</li>
+      <li MayRequire="sarg.alphaanimals">AA_Erin</li>
+      <li MayRequire="sarg.alphaanimals">AA_PedigreedRaptor</li>
+      <li MayRequire="sarg.alphaanimals">AA_RipperHound</li>
+      <li MayRequire="sarg.alphaanimals">AA_Skiphound</li>
+      <!-- Biomes! Polluted Lands -->
+      <li MayRequire="biomesteam.biomespollutedlands">BMT_WasteHound</li>
+      <!-- Biomes! Prehistoric -->
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Deinonychus</li>
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Utahraptor</li>
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Velociraptor</li>
+      <!-- Dark Ages : Beasts and Monsters -->
+      <li MayRequire="van.beasts">DA_ImperialRedhound</li>
+      <!-- Megafauna -->
+      <li MayRequire="spino.megafauna">Dinocrocuta</li>
+      <!-- ReGrowth 2 -->
+      <li MayRequire="regrowth.botr.core">RG_Velociraptor</li>
+      <!-- Vanilla Animals Expanded -->
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_ArcticCoyote</li>
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_Coyote</li>
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_GermanShepherd</li>
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_Hyena</li>
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_Rottweiler</li>
+      <!-- Vanilla Animals Expanded — Endangered -->
+      <li MayRequire="vanillaexpanded.vaeendandext">AEXP_AfricanWildDog</li>
+      <li MayRequire="vanillaexpanded.vaeendandext">AEXP_Thylacine</li>
     </races>
   </Ordo.SillyAnimalThings.AnimalTagDef>
 
@@ -145,6 +313,41 @@
       <li>Cobra</li>
       <li>Megaspider</li>
       <li>MonitorLizard</li>
+      <!-- Alpha Animals -->
+      <li MayRequire="sarg.alphaanimals">AA_Animalisk</li>
+      <li MayRequire="sarg.alphaanimals">AA_Barbslinger</li>
+      <li MayRequire="sarg.alphaanimals">AA_BlackSpider</li>
+      <li MayRequire="sarg.alphaanimals">AA_Blizzarisk</li>
+      <li MayRequire="sarg.alphaanimals">AA_BlizzariskClutchMother</li>
+      <li MayRequire="sarg.alphaanimals">AA_Cinderlisk</li>
+      <li MayRequire="sarg.alphaanimals">AA_Dunealisk</li>
+      <li MayRequire="sarg.alphaanimals">AA_DunealiskClutchMother</li>
+      <li MayRequire="sarg.alphaanimals">AA_DuskRat</li>
+      <li MayRequire="sarg.alphaanimals">AA_Feralisk</li>
+      <li MayRequire="sarg.alphaanimals">AA_FeraliskClutchMother</li>
+      <li MayRequire="sarg.alphaanimals">AA_Junglelisk</li>
+      <li MayRequire="sarg.alphaanimals">AA_Murkling</li>
+      <li MayRequire="sarg.alphaanimals">AA_RoughPlatedMonitor</li>
+      <!-- Biomes! Oasis -->
+      <li MayRequire="biomesteam.oasis">BMT_Sandstalker</li>
+      <!-- Biomes! Prehistoric -->
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Pulmonoscorpius</li>
+      <!-- Dark Ages : Beasts and Monsters -->
+      <li MayRequire="van.beasts">DA_BlackScribe</li>
+      <li MayRequire="van.beasts">DA_Witchort</li>
+      <!-- Megafauna -->
+      <li MayRequire="spino.megafauna">Megalania</li>
+      <li MayRequire="spino.megafauna">Pulmonoscorpius</li>
+      <!-- Vanilla Animals Expanded -->
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_GilaMonster</li>
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_Platypus</li>
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_Rattlesnake</li>
+      <!-- Vanilla Animals Expanded — Waste Animals -->
+      <li MayRequire="vanillaexpanded.vaewaste">VAEWaste_Hydra</li>
+      <li MayRequire="vanillaexpanded.vaewaste">VAEWaste_Toxscorpion</li>
+      <!-- Vanilla Factions Expanded - Insectoids 2 -->
+      <li MayRequire="oskarpotocki.vfe.insectoid2">VFEI2_RoyalMegaspider</li>
+      <li MayRequire="oskarpotocki.vfe.insectoid2">VFEI2_Venomite</li>
     </races>
   </Ordo.SillyAnimalThings.AnimalTagDef>
 
@@ -159,6 +362,35 @@
       <li>Gorilla</li>
       <li>Bear_Grizzly</li>
       <li>Cobra</li>
+      <!-- Alpha Animals -->
+      <li MayRequire="sarg.alphaanimals">AA_Behemoth</li>
+      <!-- Biomes! Polluted Lands -->
+      <li MayRequire="biomesteam.biomespollutedlands">BMT_Screecher</li>
+      <!-- Biomes! Prehistoric -->
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Carcharodontosaurus</li>
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Spinosaurus</li>
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_TRex</li>
+      <!-- Dark Ages : Beasts and Monsters -->
+      <li MayRequire="van.beasts">DA_BeardedTroll</li>
+      <li MayRequire="van.beasts">DA_BlackscaledBaskar</li>
+      <li MayRequire="van.beasts">DA_Crestel</li>
+      <li MayRequire="van.beasts">DA_RockTroll</li>
+      <!-- Megafauna -->
+      <li MayRequire="spino.megafauna">Dinopithecus</li>
+      <li MayRequire="spino.megafauna">Gigantopithecus</li>
+      <li MayRequire="spino.megafauna">ShortfacedBear</li>
+      <li MayRequire="spino.megafauna">Titanis</li>
+      <!-- ReGrowth: Extinct Animals (Continued) -->
+      <li MayRequire="mlie.regrowthextinctanimals">RG_TerrorBird</li>
+      <!-- Vanilla Animals Expanded -->
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_BlackBear</li>
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_Gorilla</li>
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_Lion</li>
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_WildGoose</li>
+      <!-- Vanilla Animals Expanded — Royal Animals -->
+      <li MayRequire="vanillaexpanded.vaeroy">VAERoy_Swan</li>
+      <!-- Vanilla Animals Expanded — Waste Animals -->
+      <li MayRequire="vanillaexpanded.vaewaste">VAEWaste_Toxbear</li>
     </races>
   </Ordo.SillyAnimalThings.AnimalTagDef>
 
@@ -176,6 +408,50 @@
       <li>LavaSnail</li>
       <li>Armadillo</li>
       <li>Megascarab</li>
+      <!-- Alpha Animals -->
+      <li MayRequire="sarg.alphaanimals">AA_BlackScarab</li>
+      <li MayRequire="sarg.alphaanimals">AA_BoulderMit</li>
+      <li MayRequire="sarg.alphaanimals">AA_CrepuscularBeetle</li>
+      <li MayRequire="sarg.alphaanimals">AA_CrystalMit</li>
+      <li MayRequire="sarg.alphaanimals">AA_IronhuskBeetle</li>
+      <li MayRequire="sarg.alphaanimals">AA_MegaLouse</li>
+      <li MayRequire="sarg.alphaanimals">AA_PebbleMit</li>
+      <li MayRequire="sarg.alphaanimals">AA_Plasmorph</li>
+      <li MayRequire="sarg.alphaanimals">AA_SummitCrab</li>
+      <!-- Biomes! Polluted Lands -->
+      <li MayRequire="biomesteam.biomespollutedlands">BMT_BarbedPangolin</li>
+      <li MayRequire="biomesteam.biomespollutedlands">BMT_SludgeCrawler</li>
+      <li MayRequire="biomesteam.biomespollutedlands">BMT_TaintedTurtle</li>
+      <li MayRequire="biomesteam.biomespollutedlands">BMT_TripleSnapper</li>
+      <!-- Biomes! Prehistoric -->
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Ammonite</li>
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Ankylosaurus</li>
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Borealopelta</li>
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Cameroceras</li>
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_ChromaticAnkylosaurus</li>
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_GiantAmmonite</li>
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Henodus</li>
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Minmi</li>
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Orthoceras</li>
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Polacanthus</li>
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Trilobite</li>
+      <!-- Dark Ages : Beasts and Monsters -->
+      <li MayRequire="van.beasts">DA_IroncasketBeetle</li>
+      <li MayRequire="van.beasts">DA_LeviathanCrab</li>
+      <!-- Megafauna -->
+      <li MayRequire="spino.megafauna">Doedicurus</li>
+      <li MayRequire="spino.megafauna">Megalochelys</li>
+      <!-- Vanilla Animals Expanded -->
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_DesertTortoise</li>
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_Hedgehog</li>
+      <!-- Vanilla Animals Expanded — Endangered -->
+      <li MayRequire="vanillaexpanded.vaeendandext">AEXP_Pangolin</li>
+      <!-- Vanilla Factions Expanded - Insectoids 2 -->
+      <li MayRequire="oskarpotocki.vfe.insectoid2">VFEI2_Ironclad</li>
+      <li MayRequire="oskarpotocki.vfe.insectoid2">VFEI2_RoyalMegascarab</li>
+      <li MayRequire="oskarpotocki.vfe.insectoid2">VFEI2_Tankroach</li>
+      <!-- Vanilla Gravship Expanded - Chapter 2 -->
+      <li MayRequire="vanillaexpanded.gravship2">VGE_Exopede</li>
     </races>
   </Ordo.SillyAnimalThings.AnimalTagDef>
 
@@ -191,6 +467,33 @@
       <li>Ostrich</li>
       <li>Emu</li>
       <li>Cassowary</li>
+      <!-- Alpha Animals -->
+      <li MayRequire="sarg.alphaanimals">AA_DesertAve</li>
+      <li MayRequire="sarg.alphaanimals">AA_FrostAve</li>
+      <li MayRequire="sarg.alphaanimals">AA_MeadowAve</li>
+      <li MayRequire="sarg.alphaanimals">AA_NightAve</li>
+      <li MayRequire="sarg.alphaanimals">AA_NightMule</li>
+      <li MayRequire="sarg.alphaanimals">AA_RoyalAve</li>
+      <!-- Biomes! Prehistoric -->
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Gallimimus</li>
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Ornithomimus</li>
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Struthiomimus</li>
+      <!-- Dark Ages : Beasts and Monsters -->
+      <li MayRequire="van.beasts">DA_Crestel</li>
+      <li MayRequire="van.beasts">DA_Pilgrim</li>
+      <!-- Megafauna -->
+      <li MayRequire="spino.megafauna">Dinornis</li>
+      <li MayRequire="spino.megafauna">Procoptodon</li>
+      <li MayRequire="spino.megafauna">Titanis</li>
+      <!-- ReGrowth: Extinct Animals (Continued) -->
+      <li MayRequire="mlie.regrowthextinctanimals">RG_TerrorBird</li>
+      <!-- Vanilla Animals Expanded -->
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_Giraffe</li>
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_Kangaroo</li>
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_Zebra</li>
+      <!-- Vanilla Animals Expanded — Endangered -->
+      <li MayRequire="vanillaexpanded.vaeendandext">AEXP_Moa</li>
+      <li MayRequire="vanillaexpanded.vaeendandext">AEXP_Quagga</li>
     </races>
   </Ordo.SillyAnimalThings.AnimalTagDef>
 
@@ -203,6 +506,16 @@
     <races>
       <li>Dromedary</li>
       <li>Alpaca</li>
+      <!-- Biomes! Polluted Lands -->
+      <li MayRequire="biomesteam.biomespollutedlands">BMT_GastroToad</li>
+      <!-- Biomes! Prehistoric -->
+      <li MayRequire="biomesteam.biomesprehistoric">BMT_Dilophosaurus</li>
+      <!-- Megafauna -->
+      <li MayRequire="spino.megafauna">Macrauchenia</li>
+      <!-- Vanilla Animals Expanded -->
+      <li MayRequire="vanillaexpanded.vanillaanimalsexpanded">AEXP_Camel</li>
+      <!-- Vanilla Factions Expanded - Insectoids 2 -->
+      <li MayRequire="oskarpotocki.vfe.insectoid2">VFEI2_Acidspitter</li>
     </races>
   </Ordo.SillyAnimalThings.AnimalTagDef>
 

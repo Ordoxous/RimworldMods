@@ -1,0 +1,492 @@
+﻿Animal,Mod,DefName,Tags
+"Acanthamoeba Gigantea, Huge",Alpha Animals,AA_AcanthamoebaGiganteaHuge,
+"Acanthamoeba Gigantea, Large",Alpha Animals,AA_AcanthamoebaGiganteaLarge,
+"Acanthamoeba Gigantea, Small",Alpha Animals,AA_AcanthamoebaGiganteaSmall,
+Aerofleet,Alpha Animals,AA_Aerofleet,Volatile
+Agaripawn,Alpha Animals,AA_Agaripawn,
+Agaripod,Alpha Animals,AA_Agaripod,
+Angel Moth,Alpha Animals,AA_AngelMoth,Flier
+Angel Moth Larva,Alpha Animals,AA_AngelMothLarva,
+Anima Colossus,Alpha Animals,AA_AnimaColossus,
+Animalisk,Alpha Animals,AA_Animalisk,Venomous
+Animus Vox,Alpha Animals,AA_AnimusVox,Pack Howler
+Arctic Lion,Alpha Animals,AA_ArcticLion,Big Cat
+Arcturan Sky Eel,Alpha Animals,AA_Skyeel,Flier
+Atispec,Alpha Animals,AA_Atispec,
+Aurora Sylph,Alpha Animals,AA_AuroraSylph,
+Barbslinger,Alpha Animals,AA_Barbslinger,Venomous
+Bedbug,Alpha Animals,AA_BedBug,
+Behemoth,Alpha Animals,AA_Behemoth,Intimidating;Incendiary
+Black Empress,Alpha Animals,VFEI2_BlackEmpress,Hive
+Black Insectoid Queen,Alpha Animals,VFEI2_BlackQueen,Hive
+Black Larvae,Alpha Animals,AA_BlackLarvae,
+Black Scarab,Alpha Animals,AA_BlackScarab,Shelled
+Black Spelopede,Alpha Animals,AA_BlackSpelopede,
+Black Swarmlings,Alpha Animals,VFEI2_BlackSwarmling,
+Blackspider,Alpha Animals,AA_BlackSpider,Venomous
+Blizzarisk,Alpha Animals,AA_Blizzarisk,Venomous
+Blizzarisk Clutch Mother,Alpha Animals,AA_BlizzariskClutchMother,Venomous
+Blood Shrimp,Alpha Animals,AA_BloodShrimp,
+Bobeene,Alpha Animals,AA_Bobeene,
+Bouldermit,Alpha Animals,AA_BoulderMit,Shelled
+Bumbledrone,Alpha Animals,AA_Bumbledrone,
+Bumbledrone Hierophant,Alpha Animals,AA_BumbledroneHierophant,
+Bumbledrone Queen,Alpha Animals,AA_BumbledroneQueen,Hive
+Cactipine,Alpha Animals,AA_Cactipine,Quilled
+Chameleon Yak,Alpha Animals,AA_ChameleonYak,Charger
+Chemfuel Myrmidon,Alpha Animals,AA_ChemfuelMyrmidon,Volatile
+Cinderlisk,Alpha Animals,AA_Cinderlisk,Venomous;Incendiary
+Colossal Aerofleet,Alpha Animals,AA_ColossalAerofleet,Volatile
+Crepuscular Beetle,Alpha Animals,AA_CrepuscularBeetle,Shelled
+Crescendo Anole,Alpha Animals,AA_CrescendoAnole,
+Crystalline Caracal,Alpha Animals,AA_CrystallineCaracal,Big Cat
+Crystalmit,Alpha Animals,AA_CrystalMit,Shelled
+Dark Vandal,Alpha Animals,AA_DarkVandal,Charger
+Darkbeast,Alpha Animals,AA_Darkbeast,Charger
+Decay Drake,Alpha Animals,AA_DecayDrake,
+Desert Ave,Alpha Animals,AA_DesertAve,Kicker
+Devil Sheep,Alpha Animals,AA_DevilSheep,Charger
+Drainer,Alpha Animals,AA_Drainer,Flier
+Drainer Larva,Alpha Animals,AA_DrainerLarva,
+Dunealisk,Alpha Animals,AA_Dunealisk,Venomous
+Dunealisk Clutch Mother,Alpha Animals,AA_DunealiskClutchMother,Venomous
+Dusk Prowler,Alpha Animals,AA_DuskProwler,
+Dusk Rat,Alpha Animals,AA_DuskRat,Venomous
+Empress Butterfly,Alpha Animals,AA_EmpressButterfly,Flier
+Empress Butterfly Larva,Alpha Animals,AA_EmpressButterflyLarva,
+Engorged Tentacular Aberration,Alpha Animals,AA_EngorgedTentacularAberration,
+Erin,Alpha Animals,AA_Erin,Pack Howler;Scavenger
+Eyeling,Alpha Animals,AA_Eyeling,
+Fangsquid,Alpha Animals,AA_Fangsquid,
+Feralisk,Alpha Animals,AA_Feralisk,Venomous
+Feralisk Clutch Mother,Alpha Animals,AA_FeraliskClutchMother,Venomous
+Fire Wasp,Alpha Animals,AA_FireWasp,Incendiary;Flier
+Fission Mouse,Alpha Animals,AA_FissionMouse,Leaper
+"Fission Mouse, Second Generation",Alpha Animals,AA_FissionMouseSecond,
+"Fission Mouse, Third Generation",Alpha Animals,AA_FissionMouseThird,
+Flamingo Phoenix,Alpha Animals,AA_FlamingoPhoenix,Incendiary;Flier
+Frost Ave,Alpha Animals,AA_FrostAve,Kicker
+Frost Lynx,Alpha Animals,AA_FrostLynx,Big Cat
+Frostbound Behemoth,Alpha Animals,AA_FrostboundBehemoth,
+Frostling,Alpha Animals,AA_Frostling,Quilled
+Frostmite,Alpha Animals,AA_Frostmite,
+Fungal Husk,Alpha Animals,AA_FungalHusk,
+Gallatross,Alpha Animals,AA_Gallatross,Charger
+Genix,Alpha Animals,AA_Genix,Big Cat
+Giant Crowned Silkie,Alpha Animals,AA_GiantCrownedSilkie,
+Gigantelope,Alpha Animals,AA_Gigantelope,Charger
+Great Devourer,Alpha Animals,AA_GreatDevourer,
+Green Goo,Alpha Animals,AA_GreenGoo,
+Grey-Coated Mouflon,Alpha Animals,AA_GreyCoatedMouflon,Charger
+Groundrunner,Alpha Animals,AA_Groundrunner,Burrower
+Helixien,Alpha Animals,AA_Helixien,
+Infected Aerofleet,Alpha Animals,AA_InfectedAerofleet,Volatile
+Ironhusk Beetle,Alpha Animals,AA_IronhuskBeetle,Shelled
+Junglelisk,Alpha Animals,AA_Junglelisk,Venomous
+Larval Atispec,Alpha Animals,AA_LarvalAtispec,
+Lockjaw,Alpha Animals,AA_Lockjaw,
+Locusts,Alpha Animals,AA_Locusts,
+Luciferbug,Alpha Animals,AA_LuciferBug,
+Mammoth Worm,Alpha Animals,AA_MammothWorm,
+Mantrap,Alpha Animals,AA_Mantrap,
+Mature Fleshbeast,Alpha Animals,AA_MatureFleshbeast,
+Meadow Ave,Alpha Animals,AA_MeadowAve,Kicker
+Megalouse,Alpha Animals,AA_MegaLouse,Shelled
+Metallovore,Alpha Animals,AA_Metallovore,
+Mime,Alpha Animals,AA_Mime,
+Moribund Gallatross,Alpha Animals,AA_GallatrossMoribund,
+Murkling,Alpha Animals,AA_Murkling,Venomous;Scavenger
+Mycoid Colossus,Alpha Animals,AA_MycoidColossus,
+Needlepost,Alpha Animals,AA_Needlepost,Quilled
+Needleroll,Alpha Animals,AA_Needleroll,Quilled
+Night Ave,Alpha Animals,AA_NightAve,Kicker
+Nightling,Alpha Animals,AA_Nightling,Quilled
+Nightmule,Alpha Animals,AA_NightMule,Kicker
+Nightram,Alpha Animals,AA_NightRam,Charger
+Ocular Cactus,Alpha Animals,AA_OcularCactus,
+Ocular Jelly,Alpha Animals,AA_OcularJelly,
+Ocular Nightling,Alpha Animals,AA_OcularNightling,
+Ocular Originator,Alpha Animals,AA_OcularOriginator,
+Overgrown Colossus,Alpha Animals,AA_OvergrownColossus,
+Pebblemit,Alpha Animals,AA_PebbleMit,Shelled
+Pedigreed Raptor,Alpha Animals,AA_PedigreedRaptor,Pack Howler
+Phoenix Owlcat,Alpha Animals,AA_PhoenixOwlcat,Small Cat
+Plasmorph,Alpha Animals,AA_Plasmorph,Shelled
+Radyak,Alpha Animals,AA_Radyak,Charger
+Raptor Shrimp,Alpha Animals,AA_RaptorShrimp,Tenacious
+Ravager,Alpha Animals,AA_Ravager,
+Ray-Hound,Alpha Animals,AA_RayHound,
+Razorjack,Alpha Animals,AA_Razorjack,
+Red Goo,Alpha Animals,AA_RedGoo,
+Red Spore,Alpha Animals,AA_RedSpore,
+Ripper Hound,Alpha Animals,AA_RipperHound,Pack Howler
+Rough-Plated Monitor,Alpha Animals,AA_RoughPlatedMonitor,Venomous
+Royal Ave,Alpha Animals,AA_RoyalAve,Kicker
+Sand Lion,Alpha Animals,AA_SandLion,Big Cat
+Sand Prowler,Alpha Animals,AA_SandProwler,Big Cat
+Sand Squid,Alpha Animals,AA_SandSquid,
+Shadow Charger,Alpha Animals,AA_ShadowCharger,Charger
+Shock Goat,Alpha Animals,AA_ShockGoat,Charger
+Skiphound,Alpha Animals,AA_Skiphound,Pack Howler;Loyal
+Slurrypede,Alpha Animals,AA_Slurrypede,
+Small Butterflies,Alpha Animals,AA_SmallButterfly,
+Spined Gow,Alpha Animals,AA_SpinedGow,Charger
+Summit Crab,Alpha Animals,AA_SummitCrab,Shelled
+Swarmling,Alpha Animals,AA_Swarmling,
+Tar Guzzler,Alpha Animals,AA_TarGuzzler,
+Teratogenic Originator,Alpha Animals,AA_TeratogenicOriginator,
+Terramorph,Alpha Animals,AA_Terramorph,
+Tetra Slug,Alpha Animals,AA_TetraSlug,
+Thermadon,Alpha Animals,AA_Thermadon,Incendiary
+Thunderbeast,Alpha Animals,AA_Thunderbeast,Charger
+Thunderox,Alpha Animals,AA_Thunderox,Charger
+Unblinking Eye,Alpha Animals,AA_UnblinkingEye,
+Wildpawn,Alpha Animals,AA_Wildpawn,
+Wildpod,Alpha Animals,AA_Wildpod,
+Windbeast,Alpha Animals,AA_WindBeast,Charger
+Ocular Slinger,Alpha Genes,AG_OcularSlinger,
+Maxolotl,Biomes! Core,BMT_Maxolotl,
+Rose Flamingo,Biomes! Core,BiomesIslands_Flamingo,Flier
+Terrestrial Octopus,Biomes! Core,BMT_LandOctopus,
+Dune Strider,Biomes! Oasis,BMT_DuneStrider,Charger
+Long-Beak Heron,Biomes! Oasis,BMT_Heron,Flier
+Orchid Okapi,Biomes! Oasis,BMT_OrchidOkapi,
+Palm Warbler,Biomes! Oasis,BMT_PalmWarbler,
+Sandstalker,Biomes! Oasis,BMT_Sandstalker,Venomous
+Sunsnake,Biomes! Oasis,BMT_Sunsnake,
+Tamarin,Biomes! Oasis,BMT_Tamarin,Leaper
+Barbed Pangolin,Biomes! Polluted Lands,BMT_BarbedPangolin,Shelled;Burrower
+Bilious Varog,Biomes! Polluted Lands,BMT_BiliousVarog,Alligator
+Bloodletter Petrel,Biomes! Polluted Lands,BMT_BloodletterPetrel,Flier
+Carrion Vulture,Biomes! Polluted Lands,BMT_CarrionVulture,Flier;Scavenger
+Fenrid Stoat,Biomes! Polluted Lands,BMT_FenridStoat,Tenacious
+Gastro Toad,Biomes! Polluted Lands,BMT_GastroToad,Spitter;Leaper
+Glowtail,Biomes! Polluted Lands,BMT_Glowtail,
+Lyncus Seal,Biomes! Polluted Lands,BMT_LyncusSeal,Slider
+Maligoat,Biomes! Polluted Lands,BMT_Maligoat,
+Mantrap,Biomes! Polluted Lands,BMT_Creature_Mantrap,
+Megaphorid Maggot,Biomes! Polluted Lands,BMT_MegaphoridLarva,
+Mucklurker Catfish,Biomes! Polluted Lands,BMT_MucklurkerCatfish,
+Mutating Tumorfish,Biomes! Polluted Lands,BMT_MutatingTumorfishAdult,
+Mutating Tumorfish Fry,Biomes! Polluted Lands,BMT_MutatingTumorfishFry,
+Mutating Tumorfish Spawn,Biomes! Polluted Lands,BMT_MutatingTumorfishSpawn,
+Polluwog,Biomes! Polluted Lands,BMT_Polluwog,
+Screecher,Biomes! Polluted Lands,BMT_Screecher,Intimidating;Flier
+Sludgecrawler,Biomes! Polluted Lands,BMT_SludgeCrawler,Shelled
+Smog Caterpillar,Biomes! Polluted Lands,BMT_SmogMothLarvae,
+Smog Moth,Biomes! Polluted Lands,BMT_SmogMoth,Flier
+Tainted Turtle,Biomes! Polluted Lands,BMT_TaintedTurtle,Shelled
+Tox-Wool Sheep,Biomes! Polluted Lands,BMT_ToxSheep,
+Triple Snapper,Biomes! Polluted Lands,BMT_TripleSnapper,Shelled
+Varmot,Biomes! Polluted Lands,BMT_Varmot,
+Waste Hound,Biomes! Polluted Lands,BMT_WasteHound,Pack Howler
+Aboomasaurus,Biomes! Prehistoric,BMT_Aboomasaurus,Volatile
+Allosaurus,Biomes! Prehistoric,BMT_Allosaurus,
+Amargasaurus,Biomes! Prehistoric,BMT_Amargasaurus,
+Ammonite,Biomes! Prehistoric,BMT_Ammonite,Shelled
+Anhanguera,Biomes! Prehistoric,BMT_Anhanguera,Flier
+Ankylosaurus,Biomes! Prehistoric,BMT_Ankylosaurus,Shelled
+Anomalocaris,Biomes! Prehistoric,BMT_Anomalocaris,
+Anteosaurus,Biomes! Prehistoric,BMT_Anteosaurus,
+Apatosaurus,Biomes! Prehistoric,BMT_Apatosaurus,
+Arthropleura,Biomes! Prehistoric,BMT_Arthropleura,
+Baryonyx,Biomes! Prehistoric,BMT_Baryonyx,
+Belemnite,Biomes! Prehistoric,BMT_Belemnite,
+Bladecrest,Biomes! Prehistoric,BMT_Bladecrest,
+Boomasaurolophus,Biomes! Prehistoric,BMT_Boomasaur,Volatile
+Borealopelta,Biomes! Prehistoric,BMT_Borealopelta,Shelled
+Brachiosaurus,Biomes! Prehistoric,BMT_Brachiosaurus,
+Camarasaurus,Biomes! Prehistoric,BMT_Camarasaurus,
+Cameroceras,Biomes! Prehistoric,BMT_Cameroceras,Shelled
+Carcharodontosaurus,Biomes! Prehistoric,BMT_Carcharodontosaurus,Intimidating
+Carnotaurus,Biomes! Prehistoric,BMT_Carnotaurus,
+Centrosaurus,Biomes! Prehistoric,BMT_Centrosaurus,Charger
+Chasmosaurus,Biomes! Prehistoric,BMT_Chasmosaurus,Charger
+Chlorosaurus,Biomes! Prehistoric,BMT_Chlorosaurus,
+Chromatic Ankylosaurus,Biomes! Prehistoric,BMT_ChromaticAnkylosaurus,Shelled
+Chungkingosaurus,Biomes! Prehistoric,BMT_Chungkingosaurus,
+Coelacanth,Biomes! Prehistoric,BMT_Coelacanth,
+Compsognathus,Biomes! Prehistoric,BMT_Compsognathus,
+Corythosaurus,Biomes! Prehistoric,BMT_Corythosaurus,
+Cryodrakon,Biomes! Prehistoric,BMT_Cryodrakon,Flier
+Deinonychus,Biomes! Prehistoric,BMT_Deinonychus,Pack Howler
+Dilophosaurus,Biomes! Prehistoric,BMT_Dilophosaurus,Spitter
+Dimetrodon,Biomes! Prehistoric,BMT_Dimetrodon,
+Dimorphodon,Biomes! Prehistoric,BMT_Dimorphodon,Flier
+Diplocaulus,Biomes! Prehistoric,BMT_Diplocaulus,
+Dryosaurus,Biomes! Prehistoric,BMT_Dryosaurus,
+Dunkleosteus,Biomes! Prehistoric,BMT_Dunkleosteus,
+Edmontosaurus,Biomes! Prehistoric,BMT_Edmontosaurus,
+Elasmosaurus,Biomes! Prehistoric,BMT_Elasmosaurus,
+Eurypterid,Biomes! Prehistoric,BMT_Eurypterid,
+Gallimimus,Biomes! Prehistoric,BMT_Gallimimus,Kicker
+Giant Ammonite,Biomes! Prehistoric,BMT_GiantAmmonite,Shelled
+Henodus,Biomes! Prehistoric,BMT_Henodus,Shelled
+Homalocephale,Biomes! Prehistoric,BMT_Homalocephale,Charger
+Hypsilophodon,Biomes! Prehistoric,BMT_Hypsilophodon,
+Icthyosaurus,Biomes! Prehistoric,BMT_Icthyosaurus,
+Iguanodon,Biomes! Prehistoric,BMT_Iguanodon,
+Inostrancevia,Biomes! Prehistoric,BMT_Inostrancevia,
+Jamoytius,Biomes! Prehistoric,BMT_Jamoytius,
+Juravenator,Biomes! Prehistoric,BMT_Juravenator,
+Kaikaifilu,Biomes! Prehistoric,BMT_Kaikaifilu,
+Kaiwhekea,Biomes! Prehistoric,BMT_Kaiwhekea,
+Kaprosuchus,Biomes! Prehistoric,BMT_Kaprosuchus,Alligator
+Kentrosaurus,Biomes! Prehistoric,BMT_Kentrosaurus,
+Kronosaurus,Biomes! Prehistoric,BMT_Kronosaurus,
+Leaellynasaura,Biomes! Prehistoric,BMT_Leaellynasaura,
+Leedsichthys,Biomes! Prehistoric,BMT_Leedsichthys,
+Liopleurodon,Biomes! Prehistoric,BMT_Liopleurodon,
+Lystrosaurus,Biomes! Prehistoric,BMT_Lystrosaur,
+Maiasaura,Biomes! Prehistoric,BMT_Maiasaura,
+Megalodon,Biomes! Prehistoric,BMT_Megalodon,
+Meganeura,Biomes! Prehistoric,BMT_Meganeura,Flier
+Minmi,Biomes! Prehistoric,BMT_Minmi,Shelled
+Mosasaurus,Biomes! Prehistoric,BMT_Mosasaurus,
+Nanosaurus,Biomes! Prehistoric,BMT_Nanosaurus,
+Olorotitan,Biomes! Prehistoric,BMT_Olorotitan,
+Onchiodon,Biomes! Prehistoric,BMT_Onchiodon,
+Ornithomimus,Biomes! Prehistoric,BMT_Ornithomimus,Kicker
+Orthoceras,Biomes! Prehistoric,BMT_Orthoceras,Shelled
+Ouranosaurus,Biomes! Prehistoric,BMT_Ouranosaurus,
+Oviraptor,Biomes! Prehistoric,BMT_Oviraptor,
+Pachycephalosaurus,Biomes! Prehistoric,BMT_Pachycephalosaurus,Charger
+Pachyrhinosaurus,Biomes! Prehistoric,BMT_Pachyrhinosaurus,Charger
+Panphagia,Biomes! Prehistoric,BMT_Panphagia,
+Parasaurolophus,Biomes! Prehistoric,BMT_Parasaur,
+Pisanosaurus,Biomes! Prehistoric,BMT_Pisanosaurus,
+Polacanthus,Biomes! Prehistoric,BMT_Polacanthus,Shelled
+Protoceratops,Biomes! Prehistoric,BMT_Protoceratops,
+Psittacosaurus,Biomes! Prehistoric,BMT_Psittacosaurus,
+Pteranodon,Biomes! Prehistoric,BMT_Pteranodon,Flier
+Pulmonoscorpius,Biomes! Prehistoric,BMT_Pulmonoscorpius,Venomous
+Quetzal,Biomes! Prehistoric,BMT_Quetzal,Flier
+Sarcosuchus,Biomes! Prehistoric,BMT_Sarcosuchus,Alligator
+Saurumbo,Biomes! Prehistoric,BMT_Saurumbo,
+Shonisaurus,Biomes! Prehistoric,BMT_Shonisaurus,
+Sinornithosaurus,Biomes! Prehistoric,BMT_Sinornithosaurus,
+Spinosaurus,Biomes! Prehistoric,BMT_Spinosaurus,Intimidating
+Stegoceras,Biomes! Prehistoric,BMT_Stegoceras,Charger
+Stegosaurus,Biomes! Prehistoric,BMT_Stegosaurus,
+Struthiomimus,Biomes! Prehistoric,BMT_Struthiomimus,Kicker
+Stygimoloch,Biomes! Prehistoric,BMT_Stygimoloch,Charger
+Styracosaurus,Biomes! Prehistoric,BMT_Styracosaurus,Charger
+Tapejara,Biomes! Prehistoric,BMT_Tapejara,Flier
+Thalassodromeus,Biomes! Prehistoric,BMT_Thalassodromeus,Flier
+Thalattosuchus,Biomes! Prehistoric,BMT_Thalattosuchus,
+Therizinosaurus,Biomes! Prehistoric,BMT_Therizinosaurus,
+Timimus,Biomes! Prehistoric,BMT_Timimus,
+Titanoboa,Biomes! Prehistoric,BMT_Titanoboa,
+Triceratops,Biomes! Prehistoric,BMT_Triceratops,Charger
+Trilobite,Biomes! Prehistoric,BMT_Trilobite,Shelled
+Troodon,Biomes! Prehistoric,BMT_Troodon,
+Tyrannosaurus,Biomes! Prehistoric,BMT_TRex,Intimidating
+Utahraptor,Biomes! Prehistoric,BMT_Utahraptor,Pack Howler
+Velociraptor,Biomes! Prehistoric,BMT_Velociraptor,Pack Howler
+Wannanosaurus,Biomes! Prehistoric,BMT_Wannanosaurus,
+Wuerhosaurus,Biomes! Prehistoric,BMT_Wuerhosaurus,
+Yinlong,Biomes! Prehistoric,BMT_Yinlong,
+Yutyrannus,Biomes! Prehistoric,BMT_Yutyrannus,
+Arctic Owlcat,Dark Ages : Beasts and Monsters,DA_ArcticOwlcat,Small Cat
+Barogoth,Dark Ages : Beasts and Monsters,DA_Barog,
+Bearded Troll,Dark Ages : Beasts and Monsters,DA_BeardedTroll,Intimidating
+Black Scribe,Dark Ages : Beasts and Monsters,DA_BlackScribe,Venomous
+Blackscaled Baskar,Dark Ages : Beasts and Monsters,DA_BlackscaledBaskar,Intimidating;Incendiary;Flier
+Crestel,Dark Ages : Beasts and Monsters,DA_Crestel,Kicker;Intimidating
+Crowned Witchort,Dark Ages : Beasts and Monsters,DA_Witchort,Venomous
+Dwarven Muffton,Dark Ages : Beasts and Monsters,DA_DwarvenMuffton,Charger;Leaper
+Forest Owlcat,Dark Ages : Beasts and Monsters,DA_ForestOwlcat,Small Cat
+Giant Snaptoad,Dark Ages : Beasts and Monsters,DA_Snaptoad,Leaper
+Goldilox,Dark Ages : Beasts and Monsters,DA_Goldilox,Charger
+Imperial Redhound,Dark Ages : Beasts and Monsters,DA_ImperialRedhound,Pack Howler;Loyal
+Ironcasket Beetle,Dark Ages : Beasts and Monsters,DA_IroncasketBeetle,Shelled;Burrower
+Karabal,Dark Ages : Beasts and Monsters,DA_Karabal,Flier
+Leviathan,Dark Ages : Beasts and Monsters,DA_LeviathanCrab,Shelled
+Northern Drog,Dark Ages : Beasts and Monsters,DA_NorthernDrog,Charger
+Phrak,Dark Ages : Beasts and Monsters,DA_Phrak,
+Pilgrim,Dark Ages : Beasts and Monsters,DA_Pilgrim,Kicker
+Red-Horned Larpah,Dark Ages : Beasts and Monsters,DA_RedhornedLarpah,Leaper
+Rock Troll,Dark Ages : Beasts and Monsters,DA_RockTroll,Intimidating
+Silver Mole,Dark Ages : Beasts and Monsters,DA_SilverMole,Burrower
+Snow Taraal,Dark Ages : Beasts and Monsters,DA_SnowTaraal,Scavenger
+Taraal,Dark Ages : Beasts and Monsters,DA_Taraal,
+Andrewsarchus,Megafauna,Andrewsarchus,
+Arthropleura,Megafauna,Arthropleura,
+Aurochs,Megafauna,Aurochs,Charger
+Castoroides,Megafauna,Castoroides,Woodchewer
+Chalicotherium,Megafauna,Chalicotherium,
+Daeodon,Megafauna,Daeodon,Charger
+Deinotherium,Megafauna,Deinotherium,Trunked;Charger
+Dinocrocuta,Megafauna,Dinocrocuta,Pack Howler;Scavenger
+Dinopithecus,Megafauna,Dinopithecus,Intimidating
+Dinornis,Megafauna,Dinornis,Kicker
+Diprotodon,Megafauna,Diprotodon,
+Doedicurus,Megafauna,Doedicurus,Shelled
+Elasmotherium,Megafauna,Elasmotherium,Charger
+Enhydriodon,Megafauna,Enhydriodon,Slider
+Gigantophis,Megafauna,Gigantophis,
+Gigantopithecus,Megafauna,Gigantopithecus,Intimidating
+Gomphotaria,Megafauna,Gomphotaria,Slider
+Josephoartigasia,Megafauna,Josephoartigasia,
+Macrauchenia,Megafauna,Macrauchenia,Spitter
+Megalania,Megafauna,Megalania,Venomous
+Megaloceros,Megafauna,Megaloceros,Charger
+Megalochelys,Megafauna,Megalochelys,Shelled
+Meganeura,Megafauna,Meganeura,Flier
+Palaeeudyptes,Megafauna,Palaeeudyptes,Slider
+Paraceratherium,Megafauna,Paraceratherium,
+Platybelodon,Megafauna,Platybelodon,Trunked;Charger
+Procoptodon,Megafauna,Procoptodon,Kicker;Leaper
+Pulmonoscorpius,Megafauna,Pulmonoscorpius,Venomous
+Purussaurus,Megafauna,Purussaurus,Alligator
+Quinkana,Megafauna,Quinkana,Alligator
+Short-Faced Bear,Megafauna,ShortfacedBear,Intimidating
+Sivatherium,Megafauna,Sivatherium,Charger
+Smilodon,Megafauna,Smilodon,Big Cat
+Titanis,Megafauna,Titanis,Kicker;Intimidating
+Titanoboa,Megafauna,Titanoboa,
+Uintatherium,Megafauna,Uintatherium,Charger
+Woolly Mammoth,Megafauna,WoollyMammoth,Trunked;Charger
+Zygolophodon,Megafauna,Zygolophodon,Trunked;Charger
+Arctic Drak,ReGrowth 2,RG_ArcticDrak,
+Dodo,ReGrowth 2,RG_Dodo,
+Hemolope,ReGrowth 2,RG_Hemolope,
+Kiwi,ReGrowth 2,RG_KiwiBird,
+Neutrolope,ReGrowth 2,RG_Neutrolope,
+Rabbit,ReGrowth 2,RG_Rabbit,Prolific;Leaper
+Rimclaw,ReGrowth 2,RG_Rimclaw,
+Sabertooth Squirrel,ReGrowth 2,RG_SabertoothSquirrel,
+Synthetion,ReGrowth 2,RG_Synthetion,
+Thrinaxodon,ReGrowth 2,RG_Thrinaxodon,Burrower
+Velociraptor,ReGrowth 2,RG_Velociraptor,Pack Howler
+Woolly Stegosaurus,ReGrowth 2,RG_WoollyStegosaurus,
+Megalenhydris,ReGrowth: Extinct Animals (Continued),RG_Megalenhydris,Slider
+Smilodon,ReGrowth: Extinct Animals (Continued),RG_SabertoothTiger,Big Cat
+Terror Bird,ReGrowth: Extinct Animals (Continued),RG_TerrorBird,Kicker;Intimidating
+Woolly Mammoth,ReGrowth: Extinct Animals (Continued),RG_WoollyMammoth,Trunked;Charger
+Woolly Rhinoceros,ReGrowth: Extinct Animals (Continued),RG_WoollyRhinoceros,Charger
+Abyssinian Cat,Vanilla Animals Expanded,AEXP_CatAbyssinian,Small Cat
+Alligator,Vanilla Animals Expanded,AEXP_Alligator,Alligator
+Anaconda,Vanilla Animals Expanded,AEXP_Anaconda,
+Arctic Coyote,Vanilla Animals Expanded,AEXP_ArcticCoyote,Pack Howler
+Badger,Vanilla Animals Expanded,AEXP_Badger,Tenacious;Burrower
+Beagle,Vanilla Animals Expanded,AEXP_Beagle,Loyal
+Beaver,Vanilla Animals Expanded,AEXP_Beaver,Woodchewer
+Bengal Cat,Vanilla Animals Expanded,AEXP_CatBengal,Small Cat
+Black Bear,Vanilla Animals Expanded,AEXP_BlackBear,Intimidating
+Boombat,Vanilla Animals Expanded,AEXP_Boombat,Volatile;Flier
+British Shorthair Cat,Vanilla Animals Expanded,AEXP_CatBritishShorthair,Small Cat
+Camel,Vanilla Animals Expanded,AEXP_Camel,Spitter
+Cheetah,Vanilla Animals Expanded,AEXP_Cheetah,Big Cat
+Chihuahua,Vanilla Animals Expanded,AEXP_Chihuahua,Loyal
+Corgi,Vanilla Animals Expanded,AEXP_Corgi,Loyal
+Coyote,Vanilla Animals Expanded,AEXP_Coyote,Pack Howler
+Crocodile,Vanilla Animals Expanded,AEXP_Crocodile,Alligator
+Desert Tortoise,Vanilla Animals Expanded,AEXP_DesertTortoise,Shelled
+French Bulldog,Vanilla Animals Expanded,AEXP_FrenchBulldog,Loyal
+German Shepherd,Vanilla Animals Expanded,AEXP_GermanShepherd,Pack Howler;Loyal
+Gila Monster,Vanilla Animals Expanded,AEXP_GilaMonster,Venomous
+Giraffe,Vanilla Animals Expanded,AEXP_Giraffe,Kicker
+Gorilla,Vanilla Animals Expanded,AEXP_Gorilla,Intimidating
+Great Dane,Vanilla Animals Expanded,AEXP_GreatDane,Loyal
+Hedgehog,Vanilla Animals Expanded,AEXP_Hedgehog,Shelled;Quilled
+Hippopotamus,Vanilla Animals Expanded,AEXP_Hippopotamus,Charger
+Hyena,Vanilla Animals Expanded,AEXP_Hyena,Pack Howler;Scavenger
+Indian Elephant,Vanilla Animals Expanded,AEXP_IndianElephant,Trunked;Charger
+Jaguar,Vanilla Animals Expanded,AEXP_Jaguar,Big Cat
+Kangaroo,Vanilla Animals Expanded,AEXP_Kangaroo,Kicker;Leaper
+Koala,Vanilla Animals Expanded,AEXP_Koala,
+Lemur,Vanilla Animals Expanded,AEXP_Lemur,Leaper
+Lion,Vanilla Animals Expanded,AEXP_Lion,Big Cat;Intimidating
+Maine Coon,Vanilla Animals Expanded,AEXP_CatMaineCoon,Small Cat
+Mandrill,Vanilla Animals Expanded,AEXP_Mandrill,
+Megawolverine,Vanilla Animals Expanded,AEXP_MegaWolverine,Tenacious
+Moose,Vanilla Animals Expanded,AEXP_Moose,Charger
+Munchkin Cat,Vanilla Animals Expanded,AEXP_CatMunchkin,Small Cat
+Musk Ox,Vanilla Animals Expanded,AEXP_Muskox,Musky
+Norwegian Forest Cat,Vanilla Animals Expanded,AEXP_CatNorwegianForest,Small Cat
+Otter,Vanilla Animals Expanded,AEXP_Otter,Slider
+Penguin,Vanilla Animals Expanded,AEXP_Penguin,Slider
+Persian Cat,Vanilla Animals Expanded,AEXP_CatPersian,Small Cat
+Platypus,Vanilla Animals Expanded,AEXP_Platypus,Venomous
+Poodle,Vanilla Animals Expanded,AEXP_Poodle,Loyal
+Porcupine,Vanilla Animals Expanded,AEXP_Porcupine,Quilled
+Pug,Vanilla Animals Expanded,AEXP_Pug,Loyal
+Rattlesnake,Vanilla Animals Expanded,AEXP_Rattlesnake,Venomous
+Red Panda,Vanilla Animals Expanded,AEXP_RedPanda,
+Rottweiler,Vanilla Animals Expanded,AEXP_Rottweiler,Pack Howler;Loyal
+Seal,Vanilla Animals Expanded,AEXP_Seal,Slider
+Shih-Tzu,Vanilla Animals Expanded,AEXP_Shih-Tzu,Loyal
+Siamese Cat,Vanilla Animals Expanded,AEXP_CatSiamese,Small Cat
+Somali Cat,Vanilla Animals Expanded,AEXP_CatSomali,Small Cat
+Sphynx Cat,Vanilla Animals Expanded,AEXP_CatSphynx,Small Cat
+Tapir,Vanilla Animals Expanded,AEXP_Tapir,
+Tiger,Vanilla Animals Expanded,AEXP_Tiger,Big Cat
+Walrus,Vanilla Animals Expanded,AEXP_Walrus,Charger
+Welsh Terrier,Vanilla Animals Expanded,AEXP_WelshTerrier,Loyal
+Wild Goose,Vanilla Animals Expanded,AEXP_WildGoose,Intimidating;Flier
+Wildebeest,Vanilla Animals Expanded,AEXP_Wildebeest,Charger
+Zebra,Vanilla Animals Expanded,AEXP_Zebra,Kicker
+African Wild Dog,Vanilla Animals Expanded — Endangered,AEXP_AfricanWildDog,Pack Howler
+Black Rhinoceros,Vanilla Animals Expanded — Endangered,AEXP_BlackRhino,Charger
+Black-Footed Ferret,Vanilla Animals Expanded — Endangered,AEXP_BlackFootedFerret,
+Bonobo,Vanilla Animals Expanded — Endangered,AEXP_Bonobo,
+Giant Panda,Vanilla Animals Expanded — Endangered,AEXP_Panda,
+Giant Pangolin,Vanilla Animals Expanded — Endangered,AEXP_Pangolin,Shelled;Burrower
+Moa,Vanilla Animals Expanded — Endangered,AEXP_Moa,Kicker
+Quagga,Vanilla Animals Expanded — Endangered,AEXP_Quagga,Kicker
+Rockhopper Penguin,Vanilla Animals Expanded — Endangered,AEXP_RockhopperPenguin,Slider;Leaper
+Tasmanian Devil,Vanilla Animals Expanded — Endangered,AEXP_TasmanianDevil,Tenacious
+Thylacine,Vanilla Animals Expanded — Endangered,AEXP_Thylacine,Pack Howler
+Angora Rabbit,Vanilla Animals Expanded — Royal Animals,VAERoy_AngoraRabbit,Prolific;Leaper
+Crane,Vanilla Animals Expanded — Royal Animals,VAERoy_Crane,Flier
+Megachicken,Vanilla Animals Expanded — Royal Animals,VAERoy_Megachicken,
+Orangutan,Vanilla Animals Expanded — Royal Animals,VAERoy_Orangutan,
+Peacock,Vanilla Animals Expanded — Royal Animals,VAERoy_Peacock,
+Pheasant,Vanilla Animals Expanded — Royal Animals,VAERoy_Pheasant,
+Quail,Vanilla Animals Expanded — Royal Animals,VAERoy_Quail,
+Royal Tiger,Vanilla Animals Expanded — Royal Animals,VAERoy_RoyalTiger,Big Cat
+Swan,Vanilla Animals Expanded — Royal Animals,VAERoy_Swan,Intimidating;Flier
+Hydra,Vanilla Animals Expanded — Waste Animals,VAEWaste_Hydra,Venomous;Tenacious
+Megatardi,Vanilla Animals Expanded — Waste Animals,VAEWaste_Megatardi,Tenacious
+Pestigator,Vanilla Animals Expanded — Waste Animals,VAEWaste_Pestigator,Alligator
+Toxafox,Vanilla Animals Expanded — Waste Animals,VAEWaste_Toxafox,Scavenger
+Toxbear,Vanilla Animals Expanded — Waste Animals,VAEWaste_Toxbear,Intimidating
+Toxiguana,Vanilla Animals Expanded — Waste Animals,VAEWaste_Toxiguana,
+Toxlion,Vanilla Animals Expanded — Waste Animals,VAEWaste_Toxlion,Big Cat
+Toxscorpion,Vanilla Animals Expanded — Waste Animals,VAEWaste_Toxscorpion,Venomous
+Wasteboar,Vanilla Animals Expanded — Waste Animals,VAEWaste_Wasteboar,Charger
+Wastedeer,Vanilla Animals Expanded — Waste Animals,VAEWaste_Wastedeer,
+Wasteffalo,Vanilla Animals Expanded — Waste Animals,VAEWaste_Wasteffalo,Charger
+Acidspitter,Vanilla Factions Expanded - Insectoids 2,VFEI2_Acidspitter,Spitter
+Boomtick,Vanilla Factions Expanded - Insectoids 2,VFEI2_Boomtick,Volatile;Incendiary
+Durapod,Vanilla Factions Expanded - Insectoids 2,VFEI2_Durapod,
+Empress,Vanilla Factions Expanded - Insectoids 2,VFEI2_Empress,Hive
+Fuelmite,Vanilla Factions Expanded - Insectoids 2,VFEI2_Fuelmite,Incendiary
+Gigalocust,Vanilla Factions Expanded - Insectoids 2,VFEI2_Gigalocust,Leaper
+Gigamite,Vanilla Factions Expanded - Insectoids 2,VFEI2_Gigamite,
+Hellbeetle,Vanilla Factions Expanded - Insectoids 2,VFEI2_Hellbeetle,Incendiary
+Insectoid Queen,Vanilla Factions Expanded - Insectoids 2,VFEI2_Queen,Hive
+Ironclad,Vanilla Factions Expanded - Insectoids 2,VFEI2_Ironclad,Shelled
+Macrofly,Vanilla Factions Expanded - Insectoids 2,VFEI2_Macrofly,
+Megapede,Vanilla Factions Expanded - Insectoids 2,VFEI2_Megapede,
+Megathrips,Vanilla Factions Expanded - Insectoids 2,VFEI2_Megathrips,
+Megawasp,Vanilla Factions Expanded - Insectoids 2,VFEI2_Megawasp,
+Patriarch,Vanilla Factions Expanded - Insectoids 2,VFEI2_Patriarch,Hive
+Royal Megascarab,Vanilla Factions Expanded - Insectoids 2,VFEI2_RoyalMegascarab,Shelled;Hive
+Royal Megaspider,Vanilla Factions Expanded - Insectoids 2,VFEI2_RoyalMegaspider,Venomous;Hive
+Royal Spelopede,Vanilla Factions Expanded - Insectoids 2,VFEI2_RoyalSpelopede,Hive
+Silverfish,Vanilla Factions Expanded - Insectoids 2,VFEI2_Silverfish,
+Swarmlings,Vanilla Factions Expanded - Insectoids 2,VFEI2_Swarmling,
+Tankroach,Vanilla Factions Expanded - Insectoids 2,VFEI2_Tankroach,Shelled
+Teramantis,Vanilla Factions Expanded - Insectoids 2,VFEI2_Teramantis,
+Titantick,Vanilla Factions Expanded - Insectoids 2,VFEI2_Titantick,Volatile
+Venomite,Vanilla Factions Expanded - Insectoids 2,VFEI2_Venomite,Venomous
+Exoleech,Vanilla Gravship Expanded - Chapter 2,VGE_Exoleech,
+Exopede,Vanilla Gravship Expanded - Chapter 2,VGE_Exopede,Shelled
+Exoworm,Vanilla Gravship Expanded - Chapter 2,VGE_Exoworm,
+Exoworm Knot,Vanilla Gravship Expanded - Chapter 2,VGE_ExowormKnot,
+Moving Exohive,Vanilla Gravship Expanded - Chapter 2,VGE_Exohive,
+Nullipede,Vanilla Gravship Expanded - Chapter 2,VFEI2_Nullipede,
+Ice Crawler,Vanilla Quests Expanded - Cryptoforge,VQE_IceCrawler,
+Megamidge,Vanilla Quests Expanded - Cryptoforge,VQE_Megamidge,

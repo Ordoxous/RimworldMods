@@ -8,6 +8,7 @@ This README is for working on the mod. The player-facing description is in `mod/
 
 - **Hard:** Harmony, Odyssey.
 - **Optional: Biotech,** needed for Fire Burst (the whole Incendiary tag) and the toxalope. These are guarded with `MayRequire="Ludeon.RimWorld.Biotech"`.
+- **Optional: animal mods from the user's modlist.** Their races are in the tags' `races` lists, each `<li>` guarded with `MayRequire` on the mod that defines the race, grouped by mod under a comment. See "Modded animals" below.
 
 All defNames use the `Ordo_` prefix. Style: as set in the repo's `.editorconfig`, with the file-scoped namespace `Ordo.SillyAnimalThings` and one parameter per line in method signatures.
 
@@ -104,6 +105,7 @@ Poison Bite has no visual after the bite (`ToxicBuildup` is the base game's hedi
 **The CSVs are the design record.** The mod doesn't read them:
 
 - `Animals.csv`: Animal, Tags (semicolon-separated). All 107 animals; 25 are untagged.
+- `ModdedAnimals.csv`: Animal, Mod, DefName, Tags. The 491 animals that the mods in the user's modlist add; 292 are tagged. Tags the mod hasn't built yet (Flier, Loyal, Small Cat and the rest) are recorded here too, for when they're built.
 - `Tags.csv`: Tag, Abilities, Description. All 26 tags, including ones with no ability built yet.
 - Keep the UTF-8 BOM: the user edits these files in Excel.
 
@@ -112,7 +114,7 @@ Built tags and members, live in `AnimalTags_SillyAnimals.xml`:
 | Tag | Animals | Abilities |
 |---|---|---|
 | Trunked | Elephant, Mastodon | Trunk Blast, Trunk Throw |
-| Woodchewer | Alphabeaver | Gnaw (deliberately wood-specific and alphabeaver-only) |
+| Woodchewer | Alphabeaver (plus modded beavers) | Gnaw (deliberately wood-specific: beavers only) |
 | Volatile | Boomalope, Boomrat, Toxalope | Detonate. The toxalope's death action is `DeathActionWorker_ToxCloud`, so it releases a tox cloud |
 | Incendiary | Boomrat, Lava Snail | Fire Burst |
 | Big Cat | Tiger, Cougar, Panther, Scimitar Cat | Hidden Dragon (big cats only) |
@@ -142,6 +144,19 @@ Designed but not built:
 | Flier | Bluebird, Sparrow, Crow, Macaw, Vulture, Duck, Goose, Swan | Swoop |
 | Loyal | Labrador Retriever, Husky, Yorkshire Terrier | Fetch |
 | Hive | Hive Queen, Larva, Spelopede, Megaspider, Megascarab | Call the Swarm |
+
+### Modded animals
+
+Done on 2026-11-16 for the user's modlist: 24 mods add 517 animal races. These mods are covered: Alpha Animals, Biomes! (Core, Oasis, Polluted Lands, Prehistoric), Dark Ages: Beasts and Monsters, Megafauna, ReGrowth 2, ReGrowth: Extinct Animals, Vanilla Animals Expanded with Endangered, Royal and Waste, VFE Insectoids 2 and VGE Chapter 2.
+
+- **230 race entries in built tags.** The rule was a clear real-world or in-fiction match to a vanilla member. Elephant kin are Trunked and Charger. Horned, tusked and head-butting herbivores (including ceratopsians and pachycephalosaurs) are Chargers. Penguins, otters and seals are Sliders. Venomous snakes, lizards, scorpions and the Alpha "-lisk" spiders are Venomous. Armored dinosaurs, shelled cephalopods, crabs, beetles and tortoises are Shelled. Flightless birds, zebras and kangaroos are Kickers. Big predators, trolls and dragons are Intimidating.
+- **Volatile only goes to races whose death action explodes or makes a cloud**, because Detonate kills the caster to set off its death action. Those are the boombat, boomtick, titantick, the aboomasaurus and boomasaurolophus, the chemfuel myrmidon and the aerofleets.
+- **Woodchewer is beavers only:** the VAE beaver and Megafauna's castoroides (a giant beaver, body size 1.75) get Gnaw and the hungry gnawing behaviour.
+- **Left out of the CSV entirely:** summoned and temporary creatures (`_Temporary`, `AAVPE_`), Vanilla Psycasts constructs, skeletons and spirits, dryads, and the Ancients splicer mutants.
+- **Too big for Charge:** Paraceratherium (body size 15) would deal 122 damage, so it's untagged. The sivatherium (8, 70 damage) and gallatross (6) are Chargers; check those in game.
+- **Not yet tested in game.** Use the `sillyanimalthings-modlist` profile (see Testing); `tags_grant_abilities` covers every loaded race.
+
+To add another mod's animals, add its races to the tag lists the same way. Find the defName and packageId from the race's ThingDef and the mod's `About.xml`.
 
 Untagged for now, and fine as plain animals: most livestock, Deer, Caribou, Chinchilla, Squirrel, Capybara, Iguana, the three foxes (a "Trickster" tag was floated), Panda, Polar Bear, Heron, Flamingo, Megasloth, and both thrumbos (they already have Odyssey roars).
 
@@ -182,7 +197,8 @@ Effort and worth of the unbuilt abilities:
 
 - `sillyanimalthings` (Core and Odyssey) skips the 3 Fire Burst scenarios.
 - `sillyanimalthings-biotech` runs all 49.
-- Both have `-headless` twins.
+- `sillyanimalthings-modlist` loads all four DLCs and the 24 animal mods from the user's modlist, with their dependencies (35 mods in all, from the Workshop). It checks that the modded races resolve and get their abilities.
+- Each has a `-headless` twin.
 - `sillyanimalthings-profiling` adds Dubs Performance Analyzer.
 - `sillyanimalthings-showcase` is for recording.
 
@@ -237,7 +253,7 @@ The first profiled run, on 2026-11-10, found nothing that costs anything every t
 
 ## Risks to check in game
 
-- How often hostile elephants and walruses use their abilities, and whether hungry wild alphabeavers are too eager to eat buildings.
+- How often hostile elephants and walruses use their abilities, and whether hungry wild beavers (alphabeaver, VAE beaver, castoroides) are too eager to eat buildings.
 - Boomrat: Fire Burst goes before Detonate within 2.9 cells. Fire burst isn't protected from its own flames, so a boomrat may set itself alight (funny, but check).
 - Charge damage across body sizes (goat about 16, mastodon about 44).
 - Intimidate: whether `Terror` on colonists from wild geese is too harsh. In testing, one manhunting goose and cobra put two of three colonists in `Terror` within seconds.
