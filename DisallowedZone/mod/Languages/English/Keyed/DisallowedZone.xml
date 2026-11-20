@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <Ordo_DisallowedZone_Expand>Expand disallowed zone</Ordo_DisallowedZone_Expand>
+  <Ordo_DisallowedZone_ExpandDesc>Paint the disallowed zone. While the zone is switched on, it's taken out of every colonist's and animal's allowed area, including Unrestricted ones: they won't work there, they leave it if they're inside, and they avoid walking through it. Drafted pawns ignore it.</Ordo_DisallowedZone_ExpandDesc>
+  <Ordo_DisallowedZone_Clear>Clear disallowed zone</Ordo_DisallowedZone_Clear>
+  <Ordo_DisallowedZone_ClearDesc>Remove cells from the disallowed zone.</Ordo_DisallowedZone_ClearDesc>
+  <Ordo_DisallowedZone_TurnOn>Disallowed zone: off</Ordo_DisallowedZone_TurnOn>
+  <Ordo_DisallowedZone_TurnOff>Disallowed zone: ON</Ordo_DisallowedZone_TurnOff>
+  <Ordo_DisallowedZone_ToggleDesc>Switch the disallowed zone on or off. While it's on, colonists and animals treat it as outside their allowed area.</Ordo_DisallowedZone_ToggleDesc>
+  <Ordo_DisallowedZone_ToggleTip>Disallowed zone: while on, colonists and animals treat the zone as outside their allowed area.</Ordo_DisallowedZone_ToggleTip>
+  <Ordo_DisallowedZone_Empty>Paint a disallowed zone first.</Ordo_DisallowedZone_Empty>
+  <Ordo_DisallowedZone_Activated>Disallowed zone switched on.</Ordo_DisallowedZone_Activated>
+  <Ordo_DisallowedZone_Deactivated>Disallowed zone switched off.</Ordo_DisallowedZone_Deactivated>
+  <Ordo_DisallowedZone_Alert>Disallowed zone on</Ordo_DisallowedZone_Alert>
+  <Ordo_DisallowedZone_AlertDesc>A disallowed zone is switched on. Colonists and animals treat it as outside their allowed area until you switch it off.\n\nMaps: {0}</Ordo_DisallowedZone_AlertDesc>
+  <Ordo_DisallowedZone_Unrestricted>Unrestricted</Ordo_DisallowedZone_Unrestricted>
+  <Ordo_DisallowedZone_Label>disallowed zone</Ordo_DisallowedZone_Label>
+</LanguageData>

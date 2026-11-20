@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+  <Operation Class="PatchOperationInsert">
+    <xpath>Defs/DesignationCategoryDef[defName="Zone"]/specialDesignatorClasses/li[text()="Designator_AreaAllowedClear"]</xpath>
+    <order>Append</order>
+    <value>
+      <li>Ordo.DisallowedZone.Designator_DisallowedZoneExpand</li>
+      <li>Ordo.DisallowedZone.Designator_DisallowedZoneClear</li>
+      <li>Ordo.DisallowedZone.Designator_DisallowedZoneToggle</li>
+    </value>
+  </Operation>
+</Patch>
