@@ -10,6 +10,7 @@ internal static class TweaksSettings
     private const string ModId = "Ordo.Tweaks";
 
     public static bool ArmorIndicators => GetBool("ArmorIndicators", true);
+    public static bool DeteriorationAlertSkipTainted => GetBool("DeteriorationAlertSkipTainted", true);
     public static bool HaulDownedMechs => GetBool("HaulDownedMechs", true);
     public static bool HaulUnpoweredMechs => GetBool("HaulUnpoweredMechs", true);
     public static bool LimitHemogenFarming => GetBool("LimitHemogenFarming", true);

@@ -40,6 +40,7 @@ Workshop mods are in `D:\SteamLibrary\steamapps\workshop\content\<id>`. Several 
 | WVC Work Modes | 2888380373 | 1.7 |
 | Fantasy Biotech (`VR_Construct_*`) | 3632363090 | 1.6 |
 | Setosa's Power Tools | 3526160222 | 1.6 |
+| TD Enhancement Pack - Continued | 3525414162 | 1.7 (its C# source ships in `Source/`) |
 
 No decompiler is installed. To read a mod's IL, load `UnityStubs.dll` and `Assembly-CSharp.dll` from the game root with `Assembly.LoadFrom` in PowerShell, then the mod's DLL. `GetTypes()` throws a `ReflectionTypeLoadException`, but `Exception.Types` still holds most types, and `GetMethodBody().GetILAsByteArray()` with `Module.ResolveMember` is enough to see what a method calls.
 
@@ -60,6 +61,7 @@ All are on by default.
 | Setting key | What it does | Applies with | Where |
 |---|---|---|---|
 | `ArmorIndicators` | Floating numbers when a pawn takes damage: red for damage dealt, struck-through for damage armor blocked (white for metal armor, cyan otherwise) | Always | `src/ShowArmorIndicators.cs`, a postfix on `Thing.TakeDamage` |
+| `DeteriorationAlertSkipTainted` | TD Enhancement Pack's "deteriorating things" alert stops counting tainted apparel (worn by a corpse). The apparel still deteriorates, and vanilla's "deteriorated away" message is untouched | TD Enhancement Pack | `src/DeteriorationAlertNoTainted.cs`, a postfix on TD's `Alert_Deterioration.GetReport` |
 | `HaulDownedMechs` | Haulers (and mechs that can haul) carry downed colony mechs to a WVC shutdown zone, where they can repair | Always | `src/HaulMechForRepair.cs`, `Defs/HaulMechsForRepair.xml` |
 | `HaulUnpoweredMechs` | Haulers (and mechs that can haul) carry colony mechs that shut down for lack of power to a WVC shutdown zone, when no charger is free for them: the zone cell nearest a charger the mech can use, so it's closer and out of the way until one frees up | Always | `src/HaulMechToShutdownZone.cs`, `Defs/HaulMechsToShutdownZone.xml` |
 | `LightMechsUseStandardChargers` | Light mechs can use the standard recharger | Always | `Patches/ChargeSmallMechsInTheBigCharger.xml` |
@@ -84,6 +86,7 @@ Notes on the tweaks:
 - **`HaulUnpoweredMechs`** takes the same mechs as vanilla's `HaulMechsToCharger` (spawned, not downed, in low-energy self-shutdown, not in a self-shutdown control group, below its recharge limit) and only when vanilla's own `JobGiver_GetEnergy_Charger.GetClosestCharger` finds nothing, so the two never compete; once a charger frees up, vanilla carries the mech on from the zone. A mech already in a shutdown zone is left alone. The cell is the zone cell nearest the interaction cell of any compatible, unforbidden charger, taken or unpowered (weight classes come from the def, so `LightMechsUseStandardChargers` counts), else a random one. It doesn't use WVC's `TryFindRandomMechShutdownZone`, which shuffles the map's zone list in place. After the drop the hauler releases the cell and starts the mech's `SelfShutdown` job on it, as vanilla starts the charge job; otherwise the energy need picks its own nearby spot, which can be outside the zone. Downed mechs are `HaulDownedMechs`'s, which skips a downed mech vanilla would take to a free charger (below its recharge limit, not in a self-shutdown group, `GetClosestCharger` finds one); a downed mech at its limit isn't vanilla's, so it still goes to the zone. That reading of vanilla comes from `WorkGiver_HaulMechToCharger.HasJobOnThing`: downed mechs skip its self-shutdown check but not the others.
 - **`HemogenTilSet`** runs every tick, so it checks the 15000-tick interval before reading the setting. It skips pawns that aren't spawned (in caravans and transport pods, comps still tick).
 - **`ShowArmorIndicators`** uses `MapHeld` and `PositionHeld`, because a killing blow despawns the pawn.
+- **`DeteriorationAlertSkipTainted`** (2026-11-20) finds TD's alert by name, so Tweaks has no reference to TD's assembly, and logs a warning instead of patching if the type or method is gone. TD's alert lists every haulable, unforbidden, unfogged thing below half its hit points that deteriorates where it lies; the postfix removes tainted apparel from that list, and turns the alert off when nothing else is left. Block Unwanted Minutiae's "MessageDeterioratedAway - But only tainted apparel" option covers the separate vanilla message, by matching its text.
 - **`ReGrowthExtinctNoDuplicateAnimals`** (2026-11-15): Extinct Animals (3820991509) declares `loadBefore` ReGrowth 2 (2260097569), so ReGrowth 2's `RG_Dodo`, `RG_Thrinaxodon` and `RG_Synthetion` defs override its trimmed ones, and their `wildBiomes` already cover every biome Extinct's `Patches/Core_limited.xml` adds them to, at the same values. Each animal then appears twice in those biomes and `BiomeDef.AllWildAnimals` throws "same key" (Giddy-Up logs it for `RG_Dodo` and skips its biome cache). Loading Extinct after ReGrowth 2 also clears the error, but contradicts its `loadBefore`, so RimSort reports a loop. Not yet covered by a scenario; checked only against the parent mods' files.
 
 Style: 4 spaces in the C# files.
@@ -93,7 +96,7 @@ Style: 4 spaces in the C# files.
 **Profiles** (in `~/.gabs/config.json`):
 
 - `tweaks` and `tweaks-headless` load Tweaks' hard dependencies only: Harmony, Core, Biotech, XML Extensions, WVC Work Modes, RimBridgeServer and Tweaks. Data folder `~/.gabs/rimworld/tweaks`.
-- `tweaks-mods` and `tweaks-mods-headless` add Odyssey and every mod a tweak targets: Mechanoid Upgrades, Complex Jobs, Simple Improve, BiotechPatch, VSE, Medieval Tailor, VFE Power and Production, Vanilla Temperature, Mecha Weapon Changer, ReSplice, Dubs Bad Hygiene, Fantasy Biotech and Setosa's Power Tools, plus Vanilla Expanded Framework, which several of them need: 23 mods in all. They're Workshop mods, so the Steam client must be running. Data folder `~/.gabs/rimworld/tweaks-mods`. It takes about a minute to start.
+- `tweaks-mods` and `tweaks-mods-headless` add Odyssey and every mod a tweak targets: Mechanoid Upgrades, Complex Jobs, Simple Improve, BiotechPatch, VSE, Medieval Tailor, VFE Power and Production, Vanilla Temperature, Mecha Weapon Changer, ReSplice, Dubs Bad Hygiene, Fantasy Biotech, Setosa's Power Tools and TD Enhancement Pack, plus Vanilla Expanded Framework, which several of them need: 24 mods in all. They're Workshop mods, so the Steam client must be running. Data folder `~/.gabs/rimworld/tweaks-mods`. It takes about a minute to start.
 - Both saves were made fresh, headless, from the main menu. Nothing is drawn by the tweaks that matters to the tests, so the headless profiles are enough.
 
 Run `ordo/run_scenarios` on both. The scenarios are in `tools/BridgeTools/Scenarios/TweaksScenarios.cs`. A scenario for another mod's tweak requires that mod (`requiresMod`) and shows as skipped on `tweaks`.
@@ -106,6 +109,7 @@ Run `ordo/run_scenarios` on both. The scenarios are in `tools/BridgeTools/Scenar
 | `haul_mechs` | `haul_downed_mech_to_shutdown_zone`, `haul_downed_mech_off`, `haul_downed_mech_charger_free`, `haul_downed_mech_full_charger_free`, `haul_unpowered_mech_no_charger`, `haul_unpowered_mech_near_charger`, `haul_unpowered_mech_charger_free`, `haul_unpowered_mech_off` | A lifter with its moving parts missing is downed; a hauler carries it into a WVC shutdown zone (made by reflection) with the tweak's job. With the setting off, the work giver skips and the mech stays put. At 10% energy with a powered charger, the tweak has no job and vanilla's `HaulMechToCharger` puts it on the charger; at full energy, the tweak still takes it to the zone. A lifter at 0 energy shuts itself down: with no charger, a hauler carries it into the zone with the unpowered job, it shuts down again there, and isn't hauled again. With a charger on no power net, it goes on the zone cell nearest the charger. With a charger powered by a charged battery, the tweak has no job and vanilla takes it to the charger. With the setting off, the work giver skips |
 | `tools` | `tools_category`, `tools_category_power_tools` | The category holds exactly the weapons with a positive work-stat offset, each lists it, and the tree's caches include them. Vanilla and the other mods have none, so the second, requiring Setosa's Power Tools, fails on an empty category: with it there are 7 tools, and 4 weapons with other offsets left out |
 | `hemogen` | `hemogen_below_cap_queues`, `hemogen_at_cap_waits`, `hemogen_off_ignores_cap` | The game clock is moved to the colonist's next 15000-tick interval and the comp ticks once: with no packs an extraction is queued, with 30 it isn't, and with the limit off it is |
+| `deterioration` | `deterioration_alert_skips_tainted`, `deterioration_alert_only_tainted_inactive`, `deterioration_alert_off_counts_tainted` | Cloth parkas lie in the open at 40% hit points, one tainted and (in two of them) one clean, and a new TD alert's report is read directly, with TD's own alert switch forced on. With the setting on, the clean parka is listed and the tainted one isn't; with only the tainted one, the alert is inactive. With the setting off, the tainted one is listed |
 
 How the scenarios are built:
 
@@ -115,6 +119,8 @@ How the scenarios are built:
 **Results (2026-11-14):** 26/26 on `tweaks-mods-headless`, twice in a row in one game (about 1 s). On `tweaks-headless`, 11 pass and 15 skip, each naming its missing mod.
 
 **With `HaulUnpoweredMechs` (2026-11-14):** 30/30 on `tweaks-mods-headless`, twice in one game. Then 32/32 with the downed-mech charger guard and its two scenarios, twice in one game. Not yet run on `tweaks-headless`. The first run failed both hauling scenarios on a logged "Could not reserve" error: the hauler still held the cell when it started the mech's shutdown job, now released first.
+
+**With `DeteriorationAlertSkipTainted` (2026-11-20):** 35/35 on `tweaks-mods-headless`. Not yet run on `tweaks-headless`, where the three `deterioration` scenarios skip.
 
 Every scenario was seen to fail:
 
@@ -129,6 +135,7 @@ Every scenario was seen to fail:
   - The unpowered work giver skips vanilla's charger check, and picks a random cell (one batch): `haul_unpowered_mech_charger_free` ("the tweak has no job while a charger is free") and `haul_unpowered_mech_near_charger` (put on (15, 0, 18), nearest (25, 0, 18)).
   - The downed-mech giver without the charger guard: `haul_downed_mech_charger_free` ("the tweak has no job for it while a charger is free"). Vanilla's giver (priority 90, scanned first) still won the actual haul, so only the direct check catches it.
   - The limit setting ignored (on its own): `hemogen_off_ignores_cap`.
+  - The deterioration postfix ignores its setting: `deterioration_alert_off_counts_tainted`. It removes nothing: `deterioration_alert_skips_tainted` and `deterioration_alert_only_tainted_inactive` ("culprits: Cloth parka (normal 40% T)").
 - **Every XML tweak and the tools category switched off** in the profile's saved settings, with the VSE and glove values set back to the parent mods' own: each `patch_*` scenario failed, saying what it found. For example, "the standard recharger takes light mechs: [Medium, Heavy, UltraHeavy]", and the VFE generators at 500 W and 2400 W.
 - **`FSFMerge` unconditional again, and the cap's menu default set to 25:** `setup_no_load_errors` and `setup_setting_defaults`.
 

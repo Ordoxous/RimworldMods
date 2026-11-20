@@ -25,6 +25,12 @@
         <label>Show armor and damage numbers</label>
         <tooltip>Shows floating numbers for damage dealt and damage blocked by armor.</tooltip>
       </li>
+      <li MayRequire="MemeGoddess.TDPack" Class="XmlExtensions.Setting.Checkbox">
+        <key>DeteriorationAlertSkipTainted</key>
+        <defaultValue>true</defaultValue>
+        <label>Deterioration alert ignores tainted apparel</label>
+        <tooltip>TD Enhancement Pack's "deteriorating things" alert stops counting apparel taken from corpses. The apparel still deteriorates as normal.</tooltip>
+      </li>
       <li Class="XmlExtensions.Setting.GapLine"><spacing>12</spacing></li>
 
       <!-- Mechs -->

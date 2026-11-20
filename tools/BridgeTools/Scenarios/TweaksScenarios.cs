@@ -32,7 +32,7 @@ public static class TweaksScenarios
         "VTE_WallMountedCooler", "VTE_WallMountedVent", "WaterWellInlet", "DeepWaterWellInlet"
     };
 
-    // Suites: "setup" for loading, "patches" for the XML patches, one per C# tweak ("armor", "haul_mechs", "tools", "hemogen"),
+    // Suites: "setup" for loading, "patches" for the XML patches, one per C# tweak ("armor", "haul_mechs", "tools", "hemogen", "deterioration"),
     // and "settings" for the scenarios that turn a tweak off
     public static readonly List<Scenario> All = new()
     {
@@ -69,7 +69,10 @@ public static class TweaksScenarios
         new("tools_category_power_tools", "tools", context => ToolsCategory(context, requireTools: true), requiresMod: "setosa.power.tools"),
         new("hemogen_below_cap_queues", "hemogen", context => Hemogen(context, packs: 0, limit: true, expectBill: true), requiresMod: "biotechpatch.1trickPwnyta"),
         new("hemogen_at_cap_waits", "hemogen", context => Hemogen(context, packs: 30, limit: true, expectBill: false), requiresMod: "biotechpatch.1trickPwnyta"),
-        new("hemogen_off_ignores_cap", "hemogen settings", context => Hemogen(context, packs: 30, limit: false, expectBill: true), requiresMod: "biotechpatch.1trickPwnyta")
+        new("hemogen_off_ignores_cap", "hemogen settings", context => Hemogen(context, packs: 30, limit: false, expectBill: true), requiresMod: "biotechpatch.1trickPwnyta"),
+        new("deterioration_alert_skips_tainted", "deterioration", context => DeteriorationAlert(context, skip: true, withClean: true), requiresMod: "MemeGoddess.TDPack"),
+        new("deterioration_alert_only_tainted_inactive", "deterioration", context => DeteriorationAlert(context, skip: true, withClean: false), requiresMod: "MemeGoddess.TDPack"),
+        new("deterioration_alert_off_counts_tainted", "deterioration settings", context => DeteriorationAlert(context, skip: false, withClean: true), requiresMod: "MemeGoddess.TDPack")
     };
 
     private static Type SettingsManager => AccessTools.TypeByName("XmlExtensions.SettingsManager");
@@ -150,6 +153,7 @@ public static class TweaksScenarios
         var expected = new Dictionary<string, string>
         {
             ["ArmorIndicators"] = "true",
+            ["DeteriorationAlertSkipTainted"] = "true",
             ["HaulDownedMechs"] = "true",
             ["HaulUnpoweredMechs"] = "true",
             ["ToolsCategory"] = "true",
@@ -167,6 +171,11 @@ public static class TweaksScenarios
                 {
                     continue;
                 }
+            }
+
+            if (key == "DeteriorationAlertSkipTainted" && !ModsConfig.IsActive("MemeGoddess.TDPack"))
+            {
+                continue;
             }
 
             context.Check($"{key}: the menu's default ({menu ?? "none"}) matches the C# default ({value})", menu != null && string.Equals(menu, value, StringComparison.OrdinalIgnoreCase));
@@ -947,5 +956,87 @@ public static class TweaksScenarios
 
             return Task.CompletedTask;
         });
+    }
+
+    // TD Enhancement Pack's alert lists unforbidden things outside, below half their hit points. Two parkas lie in the open at 40%:
+    // one tainted, and optionally one clean. A fresh alert's report is read directly, since alerts only update on their own cycle.
+    private static Task DeteriorationAlert(
+        ScenarioContext context,
+        bool skip,
+        bool withClean
+    )
+    {
+        var alertType = AccessTools.TypeByName("TD_Enhancement_Pack.Alert_Deterioration");
+        if (alertType == null)
+        {
+            context.Fail("TD_Enhancement_Pack.Alert_Deterioration wasn't found");
+            return Task.CompletedTask;
+        }
+
+        Apparel Parka(
+            int x,
+            bool tainted
+        )
+        {
+            var parka = (Apparel)context.Place(ThingDef.Named("Apparel_Parka"), x, 0, ThingDefOf.Cloth);
+            parka.HitPoints = (int)(parka.MaxHitPoints * 0.4f);
+            parka.WornByCorpse = tainted;
+            return parka;
+        }
+
+        var taintedParka = Parka(3, tainted: true);
+        var cleanParka = withClean ? Parka(5, tainted: false) : null;
+        context.Check(
+            $"the tainted parka deteriorates where it lies (rate {SteadyEnvironmentEffects.FinalDeteriorationRate(taintedParka):0.##})",
+            SteadyEnvironmentEffects.FinalDeteriorationRate(taintedParka) > 0
+        );
+
+        // TD's own switch for the alert, on by default
+        var tdSettings = AccessTools.Field(AccessTools.TypeByName("TD_Enhancement_Pack.Mod"), "settings")?.GetValue(null);
+        var tdAlertOn = tdSettings == null ? null : AccessTools.Field(tdSettings.GetType(), "alertDeteriorating");
+        if (tdAlertOn == null)
+        {
+            context.Fail("TD Enhancement Pack's alertDeteriorating setting wasn't found");
+            return Task.CompletedTask;
+        }
+
+        var wasTdAlertOn = tdAlertOn.GetValue(tdSettings);
+        tdAlertOn.SetValue(tdSettings, true);
+        return WithSetting("DeteriorationAlertSkipTainted", skip ? "true" : "false", () =>
+        {
+            try
+            {
+                CheckDeteriorationReport(context, alertType, taintedParka, cleanParka, skip);
+            }
+            finally
+            {
+                tdAlertOn.SetValue(tdSettings, wasTdAlertOn);
+            }
+
+            return Task.CompletedTask;
+        });
+    }
+
+    private static void CheckDeteriorationReport(
+        ScenarioContext context,
+        Type alertType,
+        Apparel taintedParka,
+        Apparel cleanParka,
+        bool skip
+    )
+    {
+        var report = ((Alert)Activator.CreateInstance(alertType)).GetReport();
+        var culprits = report.culpritsThings ?? new List<Thing>();
+        var listsTainted = culprits.Contains(taintedParka);
+        context.Check($"with the setting {(skip ? "on" : "off")}, the alert {(listsTainted ? "lists" : "leaves out")} the tainted parka", listsTainted == !skip);
+        if (cleanParka != null)
+        {
+            context.Check("the alert lists the clean parka", report.active && culprits.Contains(cleanParka));
+        }
+        else
+        {
+            // The blank test map has nothing else deteriorating, so with only the tainted parka the alert goes quiet
+            context.Check($"with only tainted apparel the alert is inactive (culprits: {string.Join(", ", culprits.Select(thing => thing.LabelCap))})", !report.active);
+        }
     }
 }
