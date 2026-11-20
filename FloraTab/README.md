@@ -66,6 +66,38 @@ Shows "Flora Tab" in game, package ID `Ordo.FloraTab`. It adds a **Flora** main 
 **Profiles:**
 - `floratab`: Harmony, Core, RimBridgeServer and the mod.
 - `floratab-headless`: the same with no window.
+- `floratab-profiling`: as `floratab`, plus Dubs Performance Analyzer. It's windowed, because DPA fails headless.
+
+### Profiling
+
+`mod/Analyzer.xml` gives the mod its own Dubs Performance Analyzer tab, under Modder > FloraTab. It names each method that does real work: the window's drawing and update, the survey, the forecast, the highlight and the row actions. The 1.7 DPA build only finds some methods when given whole `Types`, and it skips names it can't find without logging anything. So after adding or renaming methods, regenerate the list with `ordo/profiling_targets mod=FloraTab`.
+
+**All of the mod's work happens while the tab is open,** and none of it runs in game ticks, so `ordo/run_scenarios profile=true` shows nothing for it.
+
+**DPA can't time most of it.** Patched through `rimworld/dpa_patch_methods`, with the category set to Update or GUI, DPA recorded only `WindowUpdate`, which also runs `FloraHighlight:Draw`. It recorded nothing from the window's `OnGUI`: `DoWindowContents` and everything it calls, which includes the survey and the forecast. That was over 30 s at Superfast with the tab open. So the Modder tab is likely to show only `WindowUpdate` and the highlight.
+
+**Instead, the `perf` suite times the work directly.** `perf_survey_and_forecast` runs the survey and the forecast 20 times each with a stopwatch, on whatever map it runs on. It logs a line starting `[FloraTab perf]`, because the runner doesn't report checks that pass. It fails if:
+- a forecast rebuild averages 5 ms or more
+- a survey with a new forecast averages 20 ms or more
+- a survey with the hour's forecast averages 10 ms or more
+
+To run it:
+1. Load a save with plenty of plants in `floratab-profiling` or `floratab`.
+2. Run `ordo/run_scenarios mod=Ordo.FloraTab suite=perf`.
+3. Read the line with `rimbridge/list_logs`.
+
+The test save is `floratab-perf` in the `floratab-profiling` data folder. It's the 250×250 Crashlanded debug colony on a desert map, with berry bushes, healroot, agave, ambrosia, oaks and poplars spawned across the map.
+
+**Results,** 2026-11-20, windowed, on the `floratab-perf` save with 827 plants of 10 kinds, trees and cultivated plants included:
+
+| What | When it runs | Average | Worst |
+|---|---|---|---|
+| Forecast rebuild | Once an in-game hour | 0.19 ms | 0.27 ms |
+| Survey with a new forecast | The first survey each in-game hour | 1.2 ms | 1.5 ms |
+| Survey with the hour's forecast | Once a second of real time while the tab is open | 1.0 ms | 1.4 ms |
+| `WindowUpdate`, from DPA | Every frame while the tab is open | 0.00015 ms | 0.0017 ms |
+
+That's about 1 ms once a second while the tab is open, and nothing while it's closed.
 
 **Scenarios** (`tools/BridgeTools/Scenarios/FloraTabScenarios.cs`). Counts are compared with a survey taken before anything is placed, or by checking that a row contains the placed plants, so plants already on the map don't affect the results.
 
@@ -85,6 +117,7 @@ Shows "Flora Tab" in game, package ID `Ordo.FloraTab`. It adds a **Flora** main 
 | | `risk_forecast_first_hour_below` | The forecast's first-hour-below search, on a made-up forecast |
 | | `risk_frost_kills_only_die_if_leafless` | On a made-up forecast with -100° at hour 12, an outdoor potato is killed in 0.5 days and a berry bush isn't. With no frost, nothing is killed. |
 | `growth` | `growth_days_until_ready_matches_a_day` | A ready bush is ready in 0 days. A young bush's growth over a real day, stepped 2000 ticks at a time, is within 25% of the forecast's. |
+| `perf` | `perf_survey_and_forecast` | Times the survey and the forecast on the current map. See Profiling. |
 
 **Stepping time:** one `context.Step(60000)` grew a bush only about half as much as 30 steps of 2000 ticks did. That was seen twice, against two different estimates. A diagnostic stepping 2000 ticks at a time saw growth match the game's own `GrowthPerTick × 2000` to within 10%. Step in chunks when a test depends on ticking over a long time.
 
@@ -94,11 +127,14 @@ Shows "Flora Tab" in game, package ID `Ordo.FloraTab`. It adds a **Flora** main 
 
 - 2026-11-20: first version.
 - 2026-11-20: hovering a row outlines its plants on the map.
+- 2026-11-20: Dubs Performance Analyzer tab (`mod/Analyzer.xml`), the `floratab-profiling` profile, and the `perf` suite. A survey of 827 plants takes about 1 ms.
 - 2026-11-20: At risk (dying, old age, frost), Next ready from an hourly forecast, Area and Within filters, and the Nearest column. Soon became part of Next ready's tooltip.
 
 ## Open questions
 
-- **Not seen in game yet:** the hover highlight, the new toolbar and the new columns. The test game was shared with another session. It needs a windowed game, and hovering a row may need a person's mouse.
-- **Width:** the window is about 1000 px wide. On a 1280 px screen that fits, but narrower screens would clip the right-hand buttons.
+- **Not seen in game yet:** the hover highlight. Hovering a row may need a person's mouse.
+- **Seen:** the toolbar and columns were seen in a windowed game during the profiling run.
+- **Width:** the window is 1026 px wide. On a 1280 px screen it fits, but narrower screens would clip the right-hand buttons.
+- **Truncated label:** "Within: Any distance" is cut off to "Within: Any dista..." on its 130 px button.
 - Should rows be grouped by product, for example several berry-like plants from mods all giving berries?
 - Should there be a hotkey? Wildlife uses F5, and nothing is bound here yet.

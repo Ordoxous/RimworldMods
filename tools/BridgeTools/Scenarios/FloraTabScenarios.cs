@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Ordo.FloraTab;
 using RimWorld;
@@ -29,7 +31,8 @@ public static class FloraTabScenarios
         new("risk_frost_kills_only_die_if_leafless", "risk", FrostKillsOnlyDieIfLeafless),
         new("growth_days_until_ready_matches_a_day", "growth", DaysUntilReadyMatchesADay),
         new("filter_area", "filter area", AreaFilter),
-        new("filter_distance_and_nearest", "filter area", DistanceAndNearest)
+        new("filter_distance_and_nearest", "filter area", DistanceAndNearest),
+        new("perf_survey_and_forecast", "perf", SurveyAndForecastCost)
     };
 
     private static readonly FloraFilter Wild = new();
@@ -363,6 +366,61 @@ public static class FloraTabScenarios
         var close = Row(context, agave, new FloraFilter { maxDistance = 5 });
         context.Check("within 5 cells lists the near agave", close != null && close.plants.Contains(near));
         context.Check("but not the far one", close == null || !close.plants.Contains(far));
+        return Task.CompletedTask;
+    }
+
+    // Times the open tab's work on whatever map the scenario runs on, so run it on a map with plenty of plants. DPA can't time
+    // it: all of it runs from the window's OnGUI, which DPA's Update and Tick categories don't record. The tab surveys once a
+    // second while open, and the forecast is rebuilt once an in-game hour.
+    private static Task SurveyAndForecastCost(
+        ScenarioContext context
+    )
+    {
+        const int runs = 20;
+        var all = new FloraFilter { includeTrees = true, includeCultivated = true };
+        var cachedHour = typeof(MapForecast).GetField("cachedHour", BindingFlags.NonPublic | BindingFlags.Static);
+
+        var rows = FloraSurvey.Build(context.Map, all);
+        var plants = rows.Sum(row => row.plants.Count);
+
+        double forecastAvg = 0, forecastMax = 0, coldAvg = 0, coldMax = 0, warmAvg = 0, warmMax = 0;
+        var watch = new Stopwatch();
+        for (var i = 0; i < runs; i++)
+        {
+            cachedHour.SetValue(null, -1);
+            watch.Restart();
+            MapForecast.For(context.Map);
+            var ms = watch.Elapsed.TotalMilliseconds;
+            forecastAvg += ms / runs;
+            forecastMax = System.Math.Max(forecastMax, ms);
+
+            cachedHour.SetValue(null, -1);
+            watch.Restart();
+            FloraSurvey.Build(context.Map, all);
+            ms = watch.Elapsed.TotalMilliseconds;
+            coldAvg += ms / runs;
+            coldMax = System.Math.Max(coldMax, ms);
+
+            watch.Restart();
+            FloraSurvey.Build(context.Map, all);
+            ms = watch.Elapsed.TotalMilliseconds;
+            warmAvg += ms / runs;
+            warmMax = System.Math.Max(warmMax, ms);
+        }
+
+        // Passing checks aren't reported, so the timings also go to the log
+        string[] lines =
+        {
+            $"surveyed {plants} plants of {rows.Count} kinds, trees and cultivated included",
+            $"forecast rebuild, once an in-game hour: avg {forecastAvg:F2} ms, max {forecastMax:F2} ms",
+            $"survey with a new forecast, the first each hour: avg {coldAvg:F2} ms, max {coldMax:F2} ms",
+            $"survey with the hour's forecast, once a second: avg {warmAvg:F2} ms, max {warmMax:F2} ms"
+        };
+        Log.Message("[FloraTab perf] " + string.Join("; ", lines));
+        context.Check(lines[0], plants > 0);
+        context.Check(lines[1], forecastAvg < 5);
+        context.Check(lines[2], coldAvg < 20);
+        context.Check(lines[3], warmAvg < 10);
         return Task.CompletedTask;
     }
 }

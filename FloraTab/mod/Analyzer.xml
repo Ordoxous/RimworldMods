@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Gives the mod its own tab in Dubs Performance Analyzer, under Modder, which profiles every method listed here. DPA reads
+     this file from the mod's root folder; without DPA it does nothing.
+     Methods are named one by one: the 1.7 build of DPA only finds methods in a few types given as Types. It skips a name it
+     can't find without logging anything, so after renaming or adding methods, regenerate this list with the
+     ordo/profiling_targets bridge tool.
+     Everything here runs only while the Flora tab is open, from the window's drawing and update, never from game ticks.
+     DPA didn't record the drawing (OnGUI) when tested, only WindowUpdate and the highlight it draws; the perf scenario
+     suite times the survey and forecast instead (see the README). -->
+<Analyzer>
+  <FloraTab>
+    <Methods>
+      <li>Ordo.FloraTab.MainTabWindow_Flora:DoWindowContents</li>
+      <li>Ordo.FloraTab.MainTabWindow_Flora:WindowUpdate</li>
+      <li>Ordo.FloraTab.MainTabWindow_Flora:Survey</li>
+      <li>Ordo.FloraTab.MainTabWindow_Flora:Sort</li>
+      <li>Ordo.FloraTab.MainTabWindow_Flora:DoToolbar</li>
+      <li>Ordo.FloraTab.MainTabWindow_Flora:DoHeader</li>
+      <li>Ordo.FloraTab.MainTabWindow_Flora:DoRow</li>
+      <li>Ordo.FloraTab.MainTabWindow_Flora:JumpToNext</li>
+      <li>Ordo.FloraTab.MainTabWindow_Flora:HarvestAll</li>
+      <li>Ordo.FloraTab.MainTabWindow_Flora:CancelAll</li>
+      <li>Ordo.FloraTab.FloraSurvey:Build</li>
+      <li>Ordo.FloraTab.FloraSurvey:ExpectedYield</li>
+      <li>Ordo.FloraTab.FloraSurvey:DaysUntilOldAge</li>
+      <li>Ordo.FloraTab.FloraSurvey:BaseCenter</li>
+      <li>Ordo.FloraTab.MapForecast:For</li>
+      <li>Ordo.FloraTab.MapForecast:DaysUntilReady</li>
+      <li>Ordo.FloraTab.MapForecast:DaysUntilKilled</li>
+      <li>Ordo.FloraTab.MapForecast:FirstHourBelow</li>
+      <li>Ordo.FloraTab.MapForecast:GrowthCurve</li>
+      <li>Ordo.FloraTab.FloraHighlight:Draw</li>
+      <li>Ordo.FloraTab.FloraDesignations:HarvestReady</li>
+      <li>Ordo.FloraTab.FloraDesignations:Cancel</li>
+    </Methods>
+  </FloraTab>
+</Analyzer>
