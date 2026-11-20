@@ -37,6 +37,7 @@
     <li>setosa.power.tools</li>
     <li>ReGrowth.BOTR.Core</li>
     <li>Mlie.ReGrowthExtinctAnimals</li>
+    <li>Garethp.ReplaceStuffCompatibility</li>
   </loadAfter>
   <packageId>Ordo.Tweaks</packageId>
   <description>Various configurable tweaks</description>

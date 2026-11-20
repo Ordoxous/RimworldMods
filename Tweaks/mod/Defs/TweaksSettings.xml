@@ -189,6 +189,12 @@
         <defaultValue>true</defaultValue>
         <label>Dubs water wells can be placed on gravships *</label>
       </li>
+      <li MayRequire="Garethp.ReplaceStuffCompatibility,OskarPotocki.VanillaFactionsExpanded.Core" Class="XmlExtensions.Setting.Checkbox">
+        <key>VefWallMountsOnAnyWall</key>
+        <defaultValue>true</defaultValue>
+        <label>Wall-mounted things don't remove gravship hull *</label>
+        <tooltip>Replace Stuff Compatibility's wall check only knows walls named "wall", so building a wall-mounted cooler, vent or heater on gravship hull (or another modded wall) deconstructs the hull. This gives those things back Vanilla Expanded Framework's own wall check.</tooltip>
+      </li>
       <li MayRequire="ReGrowth.BOTR.Core,Mlie.ReGrowthExtinctAnimals" Class="XmlExtensions.Setting.Checkbox">
         <key>ReGrowthExtinctNoDuplicateAnimals</key>
         <defaultValue>true</defaultValue>
