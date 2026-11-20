@@ -1,6 +1,7 @@
 ﻿<Solution>
   <Project Path="BlueprintMaterials/BlueprintMaterials.csproj" />
   <Project Path="ColonistBarJobs/ColonistBarJobs.csproj" />
+  <Project Path="FloraTab/FloraTab.csproj" />
   <Project Path="LegendaryIsUnique/LegendaryIsUnique.csproj" />
   <Project Path="MechUpgradesUi\MechUpgradesUi.csproj" />
   <Project Path="Saddlebound/Saddlebound.csproj" />

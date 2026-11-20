@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+  <name>Flora Tab</name>
+  <author>Ordoxous</author>
+  <url>https://github.com/Ordoxous/RimworldMods/tree/master/FloraTab</url>
+  <supportedVersions>
+    <li>1.7</li>
+  </supportedVersions>
+  <packageId>Ordo.FloraTab</packageId>
+  <description>Adds a Flora tab next to Wildlife that lists the wild plants on the map you can harvest, such as berries, healroot and trees. For each kind it shows how many there are, how many are ready, the yield you'd get now and how many are already marked. Mark a whole kind for harvest in one click, or jump to the next one on the map.</description>
+</ModMetaData>

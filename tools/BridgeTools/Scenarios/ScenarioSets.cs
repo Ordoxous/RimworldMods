@@ -17,6 +17,7 @@ public static class ScenarioSets
         ("Ordo.LegendaryIsUnique", () => LegendaryIsUniqueScenarios.All),
         ("Ordo.Tweaks", () => TweaksScenarios.All),
         ("Ordo.ColonistBarJobs", () => ColonistBarJobsScenarios.All),
-        ("Ordo.Saddlebound", () => SaddleboundScenarios.All)
+        ("Ordo.Saddlebound", () => SaddleboundScenarios.All),
+        ("Ordo.FloraTab", () => FloraTabScenarios.All)
     };
 }
