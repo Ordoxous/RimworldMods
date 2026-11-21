@@ -31,7 +31,7 @@ The project name, assembly name and deployed folder under `RimWorld\Mods` are th
 |---|---|
 | `Directory.Build.props` | Settings for every project: .NET 10, `Ordo.<Mod>` namespaces, the RimWorld reference packages, publicizing `Assembly-CSharp`, and the `out/Assemblies` output in every configuration. `SteamLibraryDirectory` defaults to `D:\SteamLibrary`; override it (or `RimWorldDirectory`) in a git-ignored `Directory.Build.local.props` |
 | `Directory.Build.targets` | Targets for every project: `WorkshopReference`, copying `mod/` into `out/`, the `CopyToRimworld` deploy target, and the About.xml check |
-| `build/LocalRimWorldReferences.targets` | Swaps the reference packages for the locally installed game's assemblies when the versions match, so the IDE shows real method bodies |
+| `build/LocalRimWorldReferences.targets` | In Debug builds, swaps the `Krafs.Rimworld.Ref` assemblies for the installed game's when the versions match, so the IDE shows real method bodies |
 | `tools/BridgeTools` | A companion DLL for RimBridgeServer that adds the `ordo/*` tools: spawning, scenarios, def and C# reloading, profiling, and showcase recording. Not a mod |
 | `tools/BridgeTools/Scenarios` | The in-game regression suites, one `<Mod>Scenarios.cs` per mod |
 | `tools/BridgeTools/Showcase` | Records captioned clips with the game's sound, one `<Mod>Showcase.cs` per mod |

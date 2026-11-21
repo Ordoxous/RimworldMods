@@ -10,7 +10,7 @@
     <!-- The host bridge supplies this at runtime, and NuGet doesn't carry the version it ships, so compile against its copy -->
     <ItemGroup>
         <Reference Include="RimBridgeServer.Sdk">
-            <HintPath>$(RimWorldDirectory)Mods\RimBridgeServer\1.6\Assemblies\RimBridgeServer.Sdk.dll</HintPath>
+            <HintPath>$(RimWorldDirectory)\Mods\RimBridgeServer\1.6\Assemblies\RimBridgeServer.Sdk.dll</HintPath>
             <Private>false</Private>
         </Reference>
     </ItemGroup>
