@@ -1,7 +1,7 @@
 using RimWorld;
 using Verse;
 
-namespace Ordo.FloraTab;
+namespace Ordo.NatureTab;
 
 // Marks or unmarks a whole row for harvest, with the same checks as dragging vanilla's harvest designators over it
 public static class FloraDesignations

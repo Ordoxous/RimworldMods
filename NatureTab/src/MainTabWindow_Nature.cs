@@ -5,12 +5,12 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace Ordo.FloraTab;
+namespace Ordo.NatureTab;
 
 // The Nature main tab: a page for the map's harvestable wild plants and one for its ore, each a table of kinds, like
 // Wildlife is for animals, and the Animals and Wildlife tabs moved in. The area and distance are shared by the plants and
 // minerals pages, the search by all four.
-public class MainTabWindow_Flora : MainTabWindow
+public class MainTabWindow_Nature : MainTabWindow
 {
     private const float ToolbarHeight = 32f;
     private const float RefreshSeconds = 1f;
@@ -47,7 +47,7 @@ public class MainTabWindow_Flora : MainTabWindow
         int page = Array.FindIndex(Pages, p => p is PawnTablePage tablePage && tablePage.ButtonDefName == button.defName);
         if (page < 0)
             return;
-        MainButtonDef def = DefDatabase<MainButtonDef>.GetNamed("Ordo_Flora");
+        MainButtonDef def = DefDatabase<MainButtonDef>.GetNamed("Ordo_Nature");
         MainTabsRoot tabsRoot = Find.MainTabsRoot;
         if (tabsRoot.OpenTab != def)
         {
@@ -57,7 +57,7 @@ public class MainTabWindow_Flora : MainTabWindow
         else if (currentPage == page)
             tabsRoot.EscapeCurrentTab();
         else
-            ((MainTabWindow_Flora)def.TabWindow).SwitchTo(page);
+            ((MainTabWindow_Nature)def.TabWindow).SwitchTo(page);
     }
 
     public override void PostOpen()
@@ -146,14 +146,14 @@ public class MainTabWindow_Flora : MainTabWindow
     {
         var rect = new Rect(x, bar.y, 150f, bar.height);
         x += rect.width + 8f;
-        string current = area?.Label ?? "Ordo_FloraTab_Anywhere".Translate();
-        TooltipHandler.TipRegion(rect, "Ordo_FloraTab_AreaTip".Translate());
-        if (!Widgets.ButtonText(rect, "Ordo_FloraTab_Area".Translate(current).Truncate(rect.width - 10f)))
+        string current = area?.Label ?? "Ordo_NatureTab_Anywhere".Translate();
+        TooltipHandler.TipRegion(rect, "Ordo_NatureTab_AreaTip".Translate());
+        if (!Widgets.ButtonText(rect, "Ordo_NatureTab_Area".Translate(current).Truncate(rect.width - 10f)))
             return;
 
         var options = new List<FloatMenuOption>
         {
-            new("Ordo_FloraTab_Anywhere".Translate(), () => SetArea(null)),
+            new("Ordo_NatureTab_Anywhere".Translate(), () => SetArea(null)),
         };
         if (surveyedMap != null)
         {
@@ -181,14 +181,14 @@ public class MainTabWindow_Flora : MainTabWindow
         var rect = new Rect(x, bar.y, 160f, bar.height);
         x += rect.width + 8f;
         string current = maxDistance > 0
-            ? "Ordo_FloraTab_Cells".Translate(maxDistance).ToString()
-            : "Ordo_FloraTab_AnyDistance".Translate().ToString();
-        TooltipHandler.TipRegion(rect, "Ordo_FloraTab_WithinTip".Translate());
-        if (!Widgets.ButtonText(rect, "Ordo_FloraTab_Within".Translate(current).Truncate(rect.width - 10f)))
+            ? "Ordo_NatureTab_Cells".Translate(maxDistance).ToString()
+            : "Ordo_NatureTab_AnyDistance".Translate().ToString();
+        TooltipHandler.TipRegion(rect, "Ordo_NatureTab_WithinTip".Translate());
+        if (!Widgets.ButtonText(rect, "Ordo_NatureTab_Within".Translate(current).Truncate(rect.width - 10f)))
             return;
 
         var options = DistanceChoices.Select(cells => new FloatMenuOption(
-            cells > 0 ? "Ordo_FloraTab_Cells".Translate(cells).ToString() : "Ordo_FloraTab_AnyDistance".Translate().ToString(),
+            cells > 0 ? "Ordo_NatureTab_Cells".Translate(cells).ToString() : "Ordo_NatureTab_AnyDistance".Translate().ToString(),
             () =>
             {
                 maxDistance = cells;

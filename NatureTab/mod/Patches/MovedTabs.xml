@@ -18,12 +18,12 @@
   <Operation Class="PatchOperationReplace">
     <success>Always</success>
     <xpath>Defs/MainButtonDef[defName="Animals" or defName="Wildlife"]/workerClass</xpath>
-    <value><workerClass>Ordo.FloraTab.MainButtonWorker_NaturePage</workerClass></value>
+    <value><workerClass>Ordo.NatureTab.MainButtonWorker_NaturePage</workerClass></value>
   </Operation>
   <Operation Class="PatchOperationAdd">
     <success>Always</success>
     <xpath>Defs/MainButtonDef[(defName="Animals" or defName="Wildlife") and not(workerClass)]</xpath>
-    <value><workerClass>Ordo.FloraTab.MainButtonWorker_NaturePage</workerClass></value>
+    <value><workerClass>Ordo.NatureTab.MainButtonWorker_NaturePage</workerClass></value>
   </Operation>
 
 </Patch>

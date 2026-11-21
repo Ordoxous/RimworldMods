@@ -5,7 +5,7 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace Ordo.FloraTab;
+namespace Ordo.NatureTab;
 
 // A page that moves in one of the game's pawn table tabs, such as Animals or Wildlife, whose button this mod hides and
 // whose hotkey opens the page. When a mod has replaced that tab's window with its own pawn table window, such as Animal
@@ -203,8 +203,8 @@ public class AnimalsPage : PawnTablePage
 {
     private const float SlaughterButtonWidth = 220f;
 
-    public override string LabelKey => "Ordo_FloraTab_AnimalsPage";
-    protected override string NoneKey => "Ordo_FloraTab_NoAnimals";
+    public override string LabelKey => "Ordo_NatureTab_AnimalsPage";
+    protected override string NoneKey => "Ordo_NatureTab_NoAnimals";
     public override string ButtonDefName => "Animals";
     protected override Type VanillaWindowClass => typeof(MainTabWindow_Animals);
     protected override PawnTableDef TableDef => PawnTableDefOf.Animals;
@@ -225,8 +225,8 @@ public class AnimalsPage : PawnTablePage
 // The wild animals in view, from the Wildlife tab, for hunting and taming
 public class WildlifePage : PawnTablePage
 {
-    public override string LabelKey => "Ordo_FloraTab_WildlifePage";
-    protected override string NoneKey => "Ordo_FloraTab_NoWildlife";
+    public override string LabelKey => "Ordo_NatureTab_WildlifePage";
+    protected override string NoneKey => "Ordo_NatureTab_NoWildlife";
     public override string ButtonDefName => "Wildlife";
     protected override Type VanillaWindowClass => typeof(MainTabWindow_Wildlife);
     protected override PawnTableDef TableDef => PawnTableDefOf.Wildlife;

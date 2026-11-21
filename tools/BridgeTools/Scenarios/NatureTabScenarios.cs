@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Ordo.FloraTab;
+using Ordo.NatureTab;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -13,7 +13,7 @@ namespace Ordo.BridgeTools.Scenarios;
 // The survey and the row actions are the tab's whole logic; the window only draws their results, which is checked by eye in a
 // windowed profile. Counts are compared against a survey taken before placing anything, so plants already on the map don't
 // matter.
-public static class FloraTabScenarios
+public static class NatureTabScenarios
 {
     // Suites: "setup" for the button def, "survey" for what the rows count, "filter" for the toolbar's toggles, "designate"
     // for the Harvest and Cancel buttons
@@ -81,9 +81,9 @@ public static class FloraTabScenarios
         ScenarioContext context
     )
     {
-        var def = DefDatabase<MainButtonDef>.GetNamedSilentFail("Ordo_Flora");
-        context.Check("the Ordo_Flora main button loaded", def != null);
-        context.Check($"it opens the Nature window: {def?.tabWindowClass}", def?.tabWindowClass == typeof(MainTabWindow_Flora));
+        var def = DefDatabase<MainButtonDef>.GetNamedSilentFail("Ordo_Nature");
+        context.Check("the Ordo_Nature main button loaded", def != null);
+        context.Check($"it opens the Nature window: {def?.tabWindowClass}", def?.tabWindowClass == typeof(MainTabWindow_Nature));
         var animals = DefDatabase<MainButtonDef>.GetNamed("Animals");
         context.Check($"it takes the Animals button's place: {def?.order} vs {animals.order}", def != null && def.order == animals.order);
         foreach (var moved in new[] { animals, DefDatabase<MainButtonDef>.GetNamed("Wildlife") })
@@ -91,7 +91,7 @@ public static class FloraTabScenarios
             context.Check($"the {moved.defName} button is hidden", !moved.buttonVisible);
             context.Check($"the {moved.defName} hotkey opens its page: {moved.workerClass}", moved.Worker is MainButtonWorker_NaturePage);
         }
-        context.Check("the window is made", def?.TabWindow is MainTabWindow_Flora);
+        context.Check("the window is made", def?.TabWindow is MainTabWindow_Nature);
         return Task.CompletedTask;
     }
 
@@ -333,7 +333,7 @@ public static class FloraTabScenarios
             max = System.Math.Max(max, ms);
         }
         string line = $"mineral survey of {cells} visible ore cells in {rows.Count} kinds: avg {avg:F2} ms, max {max:F2} ms";
-        Log.Message("[FloraTab perf] " + line);
+        Log.Message("[NatureTab perf] " + line);
         context.Check(line, avg < 10);
         return Task.CompletedTask;
     }
@@ -632,7 +632,7 @@ public static class FloraTabScenarios
             $"survey with a new forecast, the first each hour: avg {coldAvg:F2} ms, max {coldMax:F2} ms",
             $"survey with the hour's forecast, once a second: avg {warmAvg:F2} ms, max {warmMax:F2} ms"
         };
-        Log.Message("[FloraTab perf] " + string.Join("; ", lines));
+        Log.Message("[NatureTab perf] " + string.Join("; ", lines));
         context.Check(lines[0], plants > 0);
         context.Check(lines[1], forecastAvg < 5);
         context.Check(lines[2], coldAvg < 20);
@@ -681,25 +681,25 @@ public static class FloraTabScenarios
         ScenarioContext context
     )
     {
-        var nature = DefDatabase<MainButtonDef>.GetNamed("Ordo_Flora");
+        var nature = DefDatabase<MainButtonDef>.GetNamed("Ordo_Nature");
         var animals = DefDatabase<MainButtonDef>.GetNamed("Animals");
         var tabs = Find.MainTabsRoot;
         tabs.EscapeCurrentTab(false);
 
         animals.Worker.Activate();
         context.Check($"opens the Nature tab: {tabs.OpenTab?.defName}", tabs.OpenTab == nature);
-        context.Check($"on the Animals page: {MainTabWindow_Flora.Page.GetType().Name}", MainTabWindow_Flora.Page is AnimalsPage);
+        context.Check($"on the Animals page: {MainTabWindow_Nature.Page.GetType().Name}", MainTabWindow_Nature.Page is AnimalsPage);
 
         animals.Worker.Activate();
         context.Check($"pressing it again closes it: {tabs.OpenTab?.defName}", tabs.OpenTab == null);
 
         // Open on another page, the hotkey switches to Animals rather than closing
         tabs.SetCurrentTab(nature, false);
-        ((MainTabWindow_Flora)nature.TabWindow).SwitchTo(0);
-        context.Check($"another page shows first: {MainTabWindow_Flora.Page.GetType().Name}", MainTabWindow_Flora.Page is PlantsPage);
+        ((MainTabWindow_Nature)nature.TabWindow).SwitchTo(0);
+        context.Check($"another page shows first: {MainTabWindow_Nature.Page.GetType().Name}", MainTabWindow_Nature.Page is PlantsPage);
         animals.Worker.Activate();
-        context.Check($"from another page it switches to Animals: {MainTabWindow_Flora.Page.GetType().Name}, open {tabs.OpenTab?.defName}",
-            tabs.OpenTab == nature && MainTabWindow_Flora.Page is AnimalsPage);
+        context.Check($"from another page it switches to Animals: {MainTabWindow_Nature.Page.GetType().Name}, open {tabs.OpenTab?.defName}",
+            tabs.OpenTab == nature && MainTabWindow_Nature.Page is AnimalsPage);
 
         tabs.EscapeCurrentTab(false);
         return Task.CompletedTask;
@@ -781,21 +781,21 @@ public static class FloraTabScenarios
         ScenarioContext context
     )
     {
-        var nature = DefDatabase<MainButtonDef>.GetNamed("Ordo_Flora");
+        var nature = DefDatabase<MainButtonDef>.GetNamed("Ordo_Nature");
         var animals = DefDatabase<MainButtonDef>.GetNamed("Animals");
         var wildlife = DefDatabase<MainButtonDef>.GetNamed("Wildlife");
         var tabs = Find.MainTabsRoot;
         tabs.EscapeCurrentTab(false);
 
         wildlife.Worker.Activate();
-        context.Check($"opens the Wildlife page: {tabs.OpenTab?.defName}, {MainTabWindow_Flora.Page.GetType().Name}",
-            tabs.OpenTab == nature && MainTabWindow_Flora.Page is WildlifePage);
+        context.Check($"opens the Wildlife page: {tabs.OpenTab?.defName}, {MainTabWindow_Nature.Page.GetType().Name}",
+            tabs.OpenTab == nature && MainTabWindow_Nature.Page is WildlifePage);
         animals.Worker.Activate();
-        context.Check($"the Animals hotkey switches to Animals: {MainTabWindow_Flora.Page.GetType().Name}",
-            tabs.OpenTab == nature && MainTabWindow_Flora.Page is AnimalsPage);
+        context.Check($"the Animals hotkey switches to Animals: {MainTabWindow_Nature.Page.GetType().Name}",
+            tabs.OpenTab == nature && MainTabWindow_Nature.Page is AnimalsPage);
         wildlife.Worker.Activate();
-        context.Check($"and F5 back to Wildlife: {MainTabWindow_Flora.Page.GetType().Name}",
-            tabs.OpenTab == nature && MainTabWindow_Flora.Page is WildlifePage);
+        context.Check($"and F5 back to Wildlife: {MainTabWindow_Nature.Page.GetType().Name}",
+            tabs.OpenTab == nature && MainTabWindow_Nature.Page is WildlifePage);
         wildlife.Worker.Activate();
         context.Check($"pressing it again closes it: {tabs.OpenTab?.defName}", tabs.OpenTab == null);
         return Task.CompletedTask;

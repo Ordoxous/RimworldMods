@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+  <Ordo_NatureTab_Plant>Plant</Ordo_NatureTab_Plant>
+  <Ordo_NatureTab_Yields>Yields</Ordo_NatureTab_Yields>
+  <Ordo_NatureTab_YieldsTip>What harvesting it gives. Click an icon for its info card.</Ordo_NatureTab_YieldsTip>
+  <Ordo_NatureTab_NoYield>nothing</Ordo_NatureTab_NoYield>
+  <Ordo_NatureTab_NoYieldTip>Harvesting this plant gives nothing.</Ordo_NatureTab_NoYieldTip>
+  <Ordo_NatureTab_SecondaryYieldTip>Also given when harvested: up to {0} at full growth, less when it is less grown. Only people and mechanoids get it, and a harvester with less than 100% plant harvest yield may not.</Ordo_NatureTab_SecondaryYieldTip>
+  <Ordo_NatureTab_RandomYieldTip>Sometimes given when harvested ({1} of the time, picked at random): up to {0} at full growth, less when it is less grown. Only people and mechanoids get it.</Ordo_NatureTab_RandomYieldTip>
+  <Ordo_NatureTab_YieldNowRowTip>About {0} {1}</Ordo_NatureTab_YieldNowRowTip>
+  <Ordo_NatureTab_YieldValueRowTip>Worth about {0} in all. The column sorts by this.</Ordo_NatureTab_YieldValueRowTip>
+  <Ordo_NatureTab_Count>Count</Ordo_NatureTab_Count>
+  <Ordo_NatureTab_CountTip>How many of this plant you can see on the map.</Ordo_NatureTab_CountTip>
+  <Ordo_NatureTab_Ready>Ready</Ordo_NatureTab_Ready>
+  <Ordo_NatureTab_ReadyTip>How many can be harvested now.</Ordo_NatureTab_ReadyTip>
+  <Ordo_NatureTab_Next>Next ready</Ordo_NatureTab_Next>
+  <Ordo_NatureTab_NextTip>How long until the next growing plant is ready, at its current growth rate. Plants rest at night, and that is counted in.</Ordo_NatureTab_NextTip>
+  <Ordo_NatureTab_NextRowTip>The next one is ready in about {0}.</Ordo_NatureTab_NextRowTip>
+  <Ordo_NatureTab_SoonRowTip>{0} of the {1} growing will be ready within about 10 days.</Ordo_NatureTab_SoonRowTip>
+  <Ordo_NatureTab_StalledRowTip>{0} are not growing now: out of season, too cold or hot, too dark, or blighted.</Ordo_NatureTab_StalledRowTip>
+  <Ordo_NatureTab_GrowthStopsRowTip>Growth stops in about {0}, when it gets colder than {1}.</Ordo_NatureTab_GrowthStopsRowTip>
+  <Ordo_NatureTab_Stalled>stalled</Ordo_NatureTab_Stalled>
+  <Ordo_NatureTab_Risk>At risk</Ordo_NatureTab_Risk>
+  <Ordo_NatureTab_RiskTip>How many are dying now (old age, blight, poison, light or vacuum), will reach old age within 7 days, or will be killed by frost within 7 days. Frost only kills crops and plants that die when leafless; wild plants just stop growing in the cold. Harvest these first.</Ordo_NatureTab_RiskTip>
+  <Ordo_NatureTab_DyingRowTip>{0} dying now.</Ordo_NatureTab_DyingRowTip>
+  <Ordo_NatureTab_OldAgeRowTip>{0} will start dying of old age, the first in about {1}.</Ordo_NatureTab_OldAgeRowTip>
+  <Ordo_NatureTab_FrostRowTip>{0} will be killed by frost, the first in about {1}.</Ordo_NatureTab_FrostRowTip>
+  <Ordo_NatureTab_RiskHighlightTip>Hover the row to see them outlined in red on the map.</Ordo_NatureTab_RiskHighlightTip>
+  <Ordo_NatureTab_Near>Nearest</Ordo_NatureTab_Near>
+  <Ordo_NatureTab_NearTip>Cells from your base to the nearest one, in a straight line. The base is the middle of the home area.</Ordo_NatureTab_NearTip>
+  <Ordo_NatureTab_NearRowTip>The nearest {1} is {0} cells from your base.</Ordo_NatureTab_NearRowTip>
+  <Ordo_NatureTab_Yield>Yield now</Ordo_NatureTab_Yield>
+  <Ordo_NatureTab_YieldTip>About how much harvesting every ready plant would give, after growth, damage and difficulty. Plants that give more than one thing show each amount. Sorting goes by what it is all worth.</Ordo_NatureTab_YieldTip>
+  <Ordo_NatureTab_Marked>Marked</Ordo_NatureTab_Marked>
+  <Ordo_NatureTab_MarkedTip>How many are already designated for harvest.</Ordo_NatureTab_MarkedTip>
+  <Ordo_NatureTab_HarvestAll>Harvest</Ordo_NatureTab_HarvestAll>
+  <Ordo_NatureTab_HarvestAllTip>Designate every ready {0} for harvest.</Ordo_NatureTab_HarvestAllTip>
+  <Ordo_NatureTab_Cancel>Cancel</Ordo_NatureTab_Cancel>
+  <Ordo_NatureTab_CancelTip>Remove the harvest designation from every {0}.</Ordo_NatureTab_CancelTip>
+  <Ordo_NatureTab_JumpTip>Click to jump to the next {0} on the map, ready ones first.</Ordo_NatureTab_JumpTip>
+  <Ordo_NatureTab_IncludeTrees>Trees</Ordo_NatureTab_IncludeTrees>
+  <Ordo_NatureTab_IncludeTreesTip>Also list trees harvested for wood.</Ordo_NatureTab_IncludeTreesTip>
+  <Ordo_NatureTab_IncludeCultivated>Cultivated</Ordo_NatureTab_IncludeCultivated>
+  <Ordo_NatureTab_IncludeCultivatedTip>Also list plants in growing zones and hydroponics basins.</Ordo_NatureTab_IncludeCultivatedTip>
+  <Ordo_NatureTab_OnlyReady>Only ready</Ordo_NatureTab_OnlyReady>
+  <Ordo_NatureTab_OnlyReadyTip>Hide plants with nothing ready to harvest.</Ordo_NatureTab_OnlyReadyTip>
+  <Ordo_NatureTab_HideYieldless>Hide yieldless</Ordo_NatureTab_HideYieldless>
+  <Ordo_NatureTab_HideYieldlessTip>Hide plants that give nothing when harvested.</Ordo_NatureTab_HideYieldlessTip>
+  <Ordo_NatureTab_Area>Area: {0}</Ordo_NatureTab_Area>
+  <Ordo_NatureTab_AreaTip>Only list plants inside this area. Harvest then marks only those.</Ordo_NatureTab_AreaTip>
+  <Ordo_NatureTab_Anywhere>anywhere</Ordo_NatureTab_Anywhere>
+  <Ordo_NatureTab_Within>Within: {0}</Ordo_NatureTab_Within>
+  <Ordo_NatureTab_WithinTip>Only list plants this close to your base, in a straight line. Harvest then marks only those.</Ordo_NatureTab_WithinTip>
+  <Ordo_NatureTab_AnyDistance>any distance</Ordo_NatureTab_AnyDistance>
+  <Ordo_NatureTab_Cells>{0} cells</Ordo_NatureTab_Cells>
+  <Ordo_NatureTab_None>No harvestable plants found.</Ordo_NatureTab_None>
+  <Ordo_NatureTab_Designated>Designated {0} for harvest.</Ordo_NatureTab_Designated>
+
+  <Ordo_NatureTab_PlantsPage>Plants</Ordo_NatureTab_PlantsPage>
+  <Ordo_NatureTab_MineralsPage>Minerals</Ordo_NatureTab_MineralsPage>
+  <Ordo_NatureTab_AnimalsPage>Animals</Ordo_NatureTab_AnimalsPage>
+  <Ordo_NatureTab_NoAnimals>No colony animals on this map.</Ordo_NatureTab_NoAnimals>
+  <Ordo_NatureTab_WildlifePage>Wildlife</Ordo_NatureTab_WildlifePage>
+  <Ordo_NatureTab_NoWildlife>No wild animals in view.</Ordo_NatureTab_NoWildlife>
+
+  <Ordo_NatureTab_Mineral>Mineral</Ordo_NatureTab_Mineral>
+  <Ordo_NatureTab_MineralYieldsTip>What mining it gives. Click for its info card.</Ordo_NatureTab_MineralYieldsTip>
+  <Ordo_NatureTab_JumpVeinTip>Click to jump to the next vein of {0} on the map, nearest your base first.</Ordo_NatureTab_JumpVeinTip>
+  <Ordo_NatureTab_CellCount>Cells</Ordo_NatureTab_CellCount>
+  <Ordo_NatureTab_CellCountTip>How many cells of it you can see on the map. Ore hidden inside unexplored rock is not counted.</Ordo_NatureTab_CellCountTip>
+  <Ordo_NatureTab_Veins>Veins</Ordo_NatureTab_Veins>
+  <Ordo_NatureTab_VeinsTip>How many separate lumps the cells form, counting cells that touch side by side.</Ordo_NatureTab_VeinsTip>
+  <Ordo_NatureTab_MineYield>Yield</Ordo_NatureTab_MineYield>
+  <Ordo_NatureTab_MineYieldTip>About how much mining every cell would give, for a miner with 100% mining yield, after difficulty. Cells already part-mined count what they have left.</Ordo_NatureTab_MineYieldTip>
+  <Ordo_NatureTab_Value>Value</Ordo_NatureTab_Value>
+  <Ordo_NatureTab_ValueTip>What that yield is worth at base market value.</Ordo_NatureTab_ValueTip>
+  <Ordo_NatureTab_Overhead>Overhead</Ordo_NatureTab_Overhead>
+  <Ordo_NatureTab_OverheadTip>How many cells are under overhead mountain. Overhead mountain collapses onto anyone below if it ends up more than 6 cells from a support, so mine these with care.</Ordo_NatureTab_OverheadTip>
+  <Ordo_NatureTab_OverheadRowTip>{0} of the {1} cells are under overhead mountain. Hover the row to see them outlined in orange on the map.</Ordo_NatureTab_OverheadRowTip>
+  <Ordo_NatureTab_MarkedMineTip>How many cells are already designated for mining.</Ordo_NatureTab_MarkedMineTip>
+  <Ordo_NatureTab_MineAll>Mine</Ordo_NatureTab_MineAll>
+  <Ordo_NatureTab_MineAllTip>Designate every {0} cell listed for mining.</Ordo_NatureTab_MineAllTip>
+  <Ordo_NatureTab_CancelMineTip>Remove the mining designation from every {0} cell.</Ordo_NatureTab_CancelMineTip>
+  <Ordo_NatureTab_NoMinerals>No minerals found. Ore inside unexplored rock shows up once it's uncovered.</Ordo_NatureTab_NoMinerals>
+  <Ordo_NatureTab_DesignatedMine>Designated {0} cells of {1} for mining.</Ordo_NatureTab_DesignatedMine>
+
+</LanguageData>

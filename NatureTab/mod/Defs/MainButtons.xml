@@ -2,10 +2,10 @@
 <Defs>
 
   <MainButtonDef>
-    <defName>Ordo_Flora</defName>
+    <defName>Ordo_Nature</defName>
     <label>nature</label>
     <description>Your animals, the wildlife, and the wild plants you can harvest and the ore you can mine on the map, with harvesting and mining designated in one click.</description>
-    <tabWindowClass>Ordo.FloraTab.MainTabWindow_Flora</tabWindowClass>
+    <tabWindowClass>Ordo.NatureTab.MainTabWindow_Nature</tabWindowClass>
     <order>40</order>
     <closesWorldView>true</closesWorldView>
   </MainButtonDef>

@@ -1,6 +1,6 @@
-# FloraTab
+# NatureTab
 
-Shows "Flora Tab" in game, package ID `Ordo.FloraTab`. It adds a **Nature** main tab, in the Animals button's place, with four pages:
+Shows "Nature Tab" in game, package ID `Ordo.NatureTab`. It adds a **Nature** main tab, in the Animals button's place, with four pages:
 - **Plants:** the harvestable wild plants on the current map, such as berry bushes, wild healroot, agave and, if you turn it on, trees.
 - **Minerals:** the visible ore, such as steel, gold, plasteel, jade, uranium and compacted machinery.
 - **Animals:** the Animals tab, moved in: the game's, or a mod's replacement such as Animal Tab. Its button is hidden, and its hotkey (F4) opens this page.
@@ -8,7 +8,7 @@ Shows "Flora Tab" in game, package ID `Ordo.FloraTab`. It adds a **Nature** main
 
 Plants and Minerals are tables with one row per kind.
 
-The mod and the button def keep their Flora names (`Ordo.FloraTab`, `Ordo_Flora`, `MainTabWindow_Flora`) so saves and mod lists aren't affected.
+The mod was called Flora Tab (`Ordo.FloraTab`) until 2026-11-21. Classes about plants keep "Flora" in their names (`FloraSurvey`, `FloraRow`, `FloraHighlight` and so on), because flora means plants.
 
 ## Dependencies
 
@@ -19,12 +19,12 @@ The mod and the button def keep their Flora names (`Ordo.FloraTab`, `Ordo_Flora`
 
 | Part | Where |
 |---|---|
-| The main button: `Ordo_Flora`, order 40, the same as vanilla's Animals button, which it replaces | `mod/Defs/MainButtons.xml` |
+| The main button: `Ordo_Nature`, order 40, the same as vanilla's Animals button, which it replaces | `mod/Defs/MainButtons.xml` |
 | The Animals and Wildlife buttons: hidden (`buttonVisible`), and given `MainButtonWorker_NaturePage`, so each hotkey opens its page, switches to it, or closes the window if that page is showing | `mod/Patches/MovedTabs.xml`, `src/MainButtonWorker_NaturePage.cs` |
 | The survey: one row per plant kind, with its counts, readiness, risk and distance | `src/FloraSurvey.cs` |
 | The forecast: the map's next 7 days hour by hour, used for frost and days until ready | `src/MapForecast.cs` |
 | Harvest and Cancel for a whole row | `src/FloraDesignations.cs` |
-| The window: the page tabs, and the shared toolbar with area and distance dropdowns (Plants and Minerals only) and a search box. Each page adds its own toggles. It resizes to fit when a survey changes the page's size. | `src/MainTabWindow_Flora.cs` |
+| The window: the page tabs, and the shared toolbar with area and distance dropdowns (Plants and Minerals only) and a search box. Each page adds its own toggles. It resizes to fit when a survey changes the page's size. | `src/MainTabWindow_Nature.cs` |
 | The table both pages use: columns that each say how they sort and draw, the header, scrolling, hover and jump-to-next | `src/TablePage.cs` |
 | The pages: their columns, toggles and row buttons | `src/PlantsPage.cs`, `src/MineralsPage.cs`, `src/PawnTablePage.cs` (Animals and Wildlife) |
 | Minerals: the survey, Mine and Cancel, and the hover highlight | `src/MineralSurvey.cs`, `src/MineralDesignations.cs`, `src/MineralHighlight.cs` |
@@ -116,33 +116,33 @@ Both are a `PawnTablePage`, which takes over one main button: `AnimalsPage` for 
 ## Testing
 
 **Profiles:**
-- `floratab`: Harmony, Core, RimBridgeServer and the mod.
-- `floratab-headless`: the same with no window.
-- `floratab-animaltab` and `floratab-animaltab-headless`: as `floratab`, plus Ideology and Animal Tab, for the hosted mode. Without Ideology, Animal Tab logs an error the first time its window is made: its static `MemeDef_Rancher` field looks up Ideology's Rancher meme. `animals_hosts_animal_tab` only runs when Animal Tab is loaded.
+- `naturetab`: Harmony, Core, RimBridgeServer and the mod.
+- `naturetab-headless`: the same with no window.
+- `naturetab-animaltab` and `naturetab-animaltab-headless`: as `naturetab`, plus Ideology and Animal Tab, for the hosted mode. Without Ideology, Animal Tab logs an error the first time its window is made: its static `MemeDef_Rancher` field looks up Ideology's Rancher meme. `animals_hosts_animal_tab` only runs when Animal Tab is loaded.
 - **Run the whole suite headless.** Steps advance one tick per frame, and windowed frames are capped, so the growth scenario's 60,000 ticks take many minutes windowed and the bridge stops answering until they're done. Windowed, run only `suite=animals` or another short suite.
-- `floratab-profiling`: as `floratab`, plus Dubs Performance Analyzer. It's windowed, because DPA fails headless.
+- `naturetab-profiling`: as `naturetab`, plus Dubs Performance Analyzer. It's windowed, because DPA fails headless.
 
 ### Profiling
 
-`mod/Analyzer.xml` gives the mod its own Dubs Performance Analyzer tab, under Modder > FloraTab. It names each method that does real work: the window's drawing and update, the survey, the forecast, the highlight and the row actions. The 1.7 DPA build only finds some methods when given whole `Types`, and it skips names it can't find without logging anything. So after adding or renaming methods, regenerate the list with `ordo/profiling_targets mod=FloraTab`.
+`mod/Analyzer.xml` gives the mod its own Dubs Performance Analyzer tab, under Modder > NatureTab. It names each method that does real work: the window's drawing and update, the survey, the forecast, the highlight and the row actions. The 1.7 DPA build only finds some methods when given whole `Types`, and it skips names it can't find without logging anything. So after adding or renaming methods, regenerate the list with `ordo/profiling_targets mod=NatureTab`.
 
 **All of the mod's work happens while the tab is open,** and none of it runs in game ticks, so `ordo/run_scenarios profile=true` shows nothing for it.
 
 **DPA can't time most of it.** Patched through `rimworld/dpa_patch_methods`, with the category set to Update or GUI, DPA recorded only `WindowUpdate`, which also runs `FloraHighlight:Draw`. It recorded nothing from the window's `OnGUI`: `DoWindowContents` and everything it calls, which includes the survey and the forecast. That was over 30 s at Superfast with the tab open. So the Modder tab is likely to show only `WindowUpdate` and the highlight.
 
-**Instead, the `perf` suite times the work directly.** `perf_survey_and_forecast` runs the survey and the forecast 20 times each with a stopwatch, on whatever map it runs on. It logs a line starting `[FloraTab perf]`, because the runner doesn't report checks that pass. It fails if:
+**Instead, the `perf` suite times the work directly.** `perf_survey_and_forecast` runs the survey and the forecast 20 times each with a stopwatch, on whatever map it runs on. It logs a line starting `[NatureTab perf]`, because the runner doesn't report checks that pass. It fails if:
 - a forecast rebuild averages 5 ms or more
 - a survey with a new forecast averages 20 ms or more
 - a survey with the hour's forecast averages 10 ms or more
 
 To run it:
-1. Load a save with plenty of plants in `floratab-profiling` or `floratab`.
-2. Run `ordo/run_scenarios mod=Ordo.FloraTab suite=perf`.
+1. Load a save with plenty of plants in `naturetab-profiling` or `naturetab`.
+2. Run `ordo/run_scenarios mod=Ordo.NatureTab suite=perf`.
 3. Read the line with `rimbridge/list_logs`.
 
-The test save is `floratab-perf` in the `floratab-profiling` data folder. It's the 250×250 Crashlanded debug colony on a desert map, with berry bushes, healroot, agave, ambrosia, oaks and poplars spawned across the map.
+The test save is `naturetab-perf` in the `naturetab-profiling` data folder. It's the 250×250 Crashlanded debug colony on a desert map, with berry bushes, healroot, agave, ambrosia, oaks and poplars spawned across the map.
 
-**Results,** 2026-11-20, windowed, on the `floratab-perf` save with 827 plants of 10 kinds, trees and cultivated plants included:
+**Results,** 2026-11-20, windowed, on the `naturetab-perf` save with 827 plants of 10 kinds, trees and cultivated plants included:
 
 | What | When it runs | Average | Worst |
 |---|---|---|---|
@@ -153,11 +153,11 @@ The test save is `floratab-perf` in the `floratab-profiling` data folder. It's t
 
 That's about 1 ms once a second while the tab is open, and nothing while it's closed.
 
-**Scenarios** (`tools/BridgeTools/Scenarios/FloraTabScenarios.cs`). Counts are compared with a survey taken before anything is placed, or by checking that a row contains the placed plants, so plants already on the map don't affect the results.
+**Scenarios** (`tools/BridgeTools/Scenarios/NatureTabScenarios.cs`). Counts are compared with a survey taken before anything is placed, or by checking that a row contains the placed plants, so plants already on the map don't affect the results.
 
 | Suite | Scenarios | What it checks |
 |---|---|---|
-| `setup` | `setup_main_button` | The button def loads, opens `MainTabWindow_Flora` and takes the Animals button's order. The Animals and Wildlife buttons are hidden and have the page worker. |
+| `setup` | `setup_main_button` | The button def loads, opens `MainTabWindow_Nature` and takes the Animals button's order. The Animals and Wildlife buttons are hidden and have the page worker. |
 | `survey` | `survey_counts_ready_soon_and_yield` | 2 grown and 1 young berry bush: count +3, ready +2, yield +2 full harvests, and the product is berries |
 | | `survey_skips_unharvestable_and_fogged` | Grass has no row. Wild healroot is listed, and hidden once fogged. |
 | `filter` | `filter_trees` | An oak is hidden by default and listed with Trees on |
@@ -181,25 +181,26 @@ That's about 1 ms once a second while the tab is open, and nothing while it's cl
 
 **Stepping time:** one `context.Step(60000)` grew a bush only about half as much as 30 steps of 2000 ticks did. That was seen twice, against two different estimates. A diagnostic stepping 2000 ticks at a time saw growth match the game's own `GrowthPerTick × 2000` to within 10%. Step in chunks when a test depends on ticking over a long time.
 
-**Results:** 2026-11-21, after adding the Wildlife page: `floratab-headless` 26/26 passed with the Animal Tab scenario skipped, and `floratab-animaltab-headless` 27/27. In `floratab-animaltab` windowed, F5 opened the Wildlife page with a wild muffalo and hare, the hunt and tame columns and Animal Tab's Handler column, and Wildlife was gone from the bottom bar. That was checked by eye from a screenshot.
+**Results:** 2026-11-21, after adding the Wildlife page: `naturetab-headless` 26/26 passed with the Animal Tab scenario skipped, and `naturetab-animaltab-headless` 27/27. In `naturetab-animaltab` windowed, F5 opened the Wildlife page with a wild muffalo and hare, the hunt and tame columns and Animal Tab's Handler column, and Wildlife was gone from the bottom bar. That was checked by eye from a screenshot.
 
-**Results:** 2026-11-21, `floratab-animaltab-headless`, after hosting Animal Tab: 25/25 passed. `floratab-animaltab` windowed: the animals suite passed, and F4 showed Animal Tab's window inside the page, with its handler, milk and meat columns, filter button and auto-slaughter icon. That was checked by eye from a screenshot. Opening Animal Tab's filter bar was only tested by its scenario, not by eye.
+**Results:** 2026-11-21, `naturetab-animaltab-headless`, after hosting Animal Tab: 25/25 passed. `naturetab-animaltab` windowed: the animals suite passed, and F4 showed Animal Tab's window inside the page, with its handler, milk and meat columns, filter button and auto-slaughter icon. That was checked by eye from a screenshot. Opening Animal Tab's filter bar was only tested by its scenario, not by eye.
 
-**Results:** 2026-11-21, `floratab-headless`, after adding the Animals page: 24/24 passed. Then in the windowed `floratab` profile, F4 opened the Resources tab on the Animals page, with a trained muffalo and rooster in the vanilla table, Manage auto-slaughter in the toolbar, and the Resources button between Assign and Wildlife. That was checked by eye from a screenshot.
+**Results:** 2026-11-21, `naturetab-headless`, after adding the Animals page: 24/24 passed. Then in the windowed `naturetab` profile, F4 opened the Resources tab on the Animals page, with a trained muffalo and rooster in the vanilla table, Manage auto-slaughter in the toolbar, and the Resources button between Assign and Wildlife. That was checked by eye from a screenshot.
 
-**Results:** 2026-11-20, `floratab-headless`, after adding risk, area and days until ready: 14/14 passed, with no errors in the log. Earlier the same day, in the windowed `floratab` profile, the first version of the tab opened next to Wildlife with correct counts, and Harvest appeared only on rows with unmarked ready plants. That was checked by eye from a screenshot.
+**Results:** 2026-11-20, `naturetab-headless`, after adding risk, area and days until ready: 14/14 passed, with no errors in the log. Earlier the same day, in the windowed `naturetab` profile, the first version of the tab opened next to Wildlife with correct counts, and Harvest appeared only on rows with unmarked ready plants. That was checked by eye from a screenshot.
 
 ## History
 
 - 2026-11-20: first version.
 - 2026-11-20: hovering a row outlines its plants on the map.
-- 2026-11-20: Dubs Performance Analyzer tab (`mod/Analyzer.xml`), the `floratab-profiling` profile, and the `perf` suite. A survey of 827 plants takes about 1 ms.
+- 2026-11-20: Dubs Performance Analyzer tab (`mod/Analyzer.xml`), the `naturetab-profiling` profile, and the `perf` suite. A survey of 827 plants takes about 1 ms.
 - 2026-11-20: At risk (dying, old age, frost), Next ready from an hourly forecast, Area and Within filters, and the Nearest column. Soon became part of Next ready's tooltip.
 - 2026-11-20: several yields per plant, Hide yieldless, sortable columns, and the Minerals page. The tab became Resources.
 - 2026-11-21: the Animals tab moved in as a third page.
 - 2026-11-21: with Animal Tab loaded, the Animals page hosts its window.
 - 2026-11-21: the Wildlife tab moved in as a fourth page.
 - 2026-11-21: the tab became Nature, since it holds animals as well as resources.
+- 2026-11-21: the mod became Nature Tab: package `Ordo.NatureTab` (was `Ordo.FloraTab`), folder and project `NatureTab`, button def `Ordo_Nature`, window `MainTabWindow_Nature`, keys `Ordo_NatureTab_*`, and the `naturetab*` test profiles. It was never published, so no one's mod list or saves depended on the old names.
 
 ## Open questions
 

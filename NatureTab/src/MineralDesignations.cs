@@ -1,7 +1,7 @@
 using RimWorld;
 using Verse;
 
-namespace Ordo.FloraTab;
+namespace Ordo.NatureTab;
 
 // Marks or unmarks a whole row for mining, with the same checks as dragging vanilla's mine designator over it
 public static class MineralDesignations

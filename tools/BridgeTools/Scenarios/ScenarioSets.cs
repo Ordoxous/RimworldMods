@@ -18,7 +18,7 @@ public static class ScenarioSets
         ("Ordo.Tweaks", () => TweaksScenarios.All),
         ("Ordo.ColonistBarJobs", () => ColonistBarJobsScenarios.All),
         ("Ordo.Saddlebound", () => SaddleboundScenarios.All),
-        ("Ordo.FloraTab", () => FloraTabScenarios.All),
+        ("Ordo.NatureTab", () => NatureTabScenarios.All),
         ("Ordo.DisallowedZone", () => DisallowedZoneScenarios.All)
     };
 }

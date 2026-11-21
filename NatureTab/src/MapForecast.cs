@@ -3,7 +3,7 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace Ordo.FloraTab;
+namespace Ordo.NatureTab;
 
 // The map's next 7 days, hour by hour: outdoor temperature, sun glow and whether plants rest. From it, when frost kills a
 // plant and when a growing plant will be ready.

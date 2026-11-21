@@ -3,7 +3,7 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace Ordo.FloraTab;
+namespace Ordo.NatureTab;
 
 // Outlines a row's cells on the map while the row is hovered: marked for mining in yellow, else under overhead mountain
 // in orange, else white. When none are on screen, an arrow at the screen edge points to the vein nearest the base.

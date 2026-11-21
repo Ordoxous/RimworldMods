@@ -6,7 +6,7 @@ using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace Ordo.FloraTab;
+namespace Ordo.NatureTab;
 
 // One column of a page's table: its header, width, how it sorts and how it draws a row's cell
 public sealed class Column<TRow>

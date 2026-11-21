@@ -3,7 +3,7 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace Ordo.FloraTab;
+namespace Ordo.NatureTab;
 
 // One row of the Minerals page: every visible cell of one kind of ore on the map
 public class MineralRow

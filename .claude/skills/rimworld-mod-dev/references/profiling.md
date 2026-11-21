@@ -14,7 +14,7 @@ The runner patches every method `ordo/profiling_targets` lists for each mod unde
 
 ## UI code: DPA doesn't see OnGUI
 
-`rimworld/dpa_patch_methods` patched a main tab's `DoWindowContents` and the methods it calls without error, but DPA recorded no calls to them, with the category set to either Update or GUI. It recorded only the window's `WindowUpdate`. That was FloraTab, windowed, over 30 s with the tab open. So for work done while drawing, time it with a `Stopwatch` in a scenario and `Log.Message` the numbers, because the runner doesn't report checks that pass. FloraTab's `perf_survey_and_forecast` is an example; read its line with `rimbridge/list_logs`.
+`rimworld/dpa_patch_methods` patched a main tab's `DoWindowContents` and the methods it calls without error, but DPA recorded no calls to them, with the category set to either Update or GUI. It recorded only the window's `WindowUpdate`. That was NatureTab, windowed, over 30 s with the tab open. So for work done while drawing, time it with a `Stopwatch` in a scenario and `Log.Message` the numbers, because the runner doesn't report checks that pass. NatureTab's `perf_survey_and_forecast` is an example; read its line with `rimbridge/list_logs`.
 
 ## A DPA tab for players: `mod/Analyzer.xml`
 

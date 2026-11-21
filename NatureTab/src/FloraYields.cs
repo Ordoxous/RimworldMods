@@ -6,7 +6,7 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace Ordo.FloraTab;
+namespace Ordo.NatureTab;
 
 // One thing a plant kind gives when harvested
 public sealed class YieldSource
@@ -108,7 +108,7 @@ public static class FloraYields
         }
         catch (Exception e)
         {
-            Log.WarningOnce($"[FloraTab] Couldn't read {DualCropExtension}: {e.Message}", 0x0F10A7AB);
+            Log.WarningOnce($"[NatureTab] Couldn't read {DualCropExtension}: {e.Message}", 0x0F10A7AB);
         }
     }
 

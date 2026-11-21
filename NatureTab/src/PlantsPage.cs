@@ -5,7 +5,7 @@ using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace Ordo.FloraTab;
+namespace Ordo.NatureTab;
 
 // The Plants page: the map's harvestable wild plants grouped by kind, like Wildlife is for animals
 public class PlantsPage : TablePage<FloraRow>
@@ -15,47 +15,47 @@ public class PlantsPage : TablePage<FloraRow>
 
     public PlantsPage() => SortByDefault(3, descending: true);
 
-    public override string LabelKey => "Ordo_FloraTab_PlantsPage";
-    protected override string NoneKey => "Ordo_FloraTab_None";
+    public override string LabelKey => "Ordo_NatureTab_PlantsPage";
+    protected override string NoneKey => "Ordo_NatureTab_None";
 
     protected override List<Column<FloraRow>> MakeColumns() => new()
     {
         new()
         {
-            labelKey = "Ordo_FloraTab_Plant", width = 200f, headerIndent = IconSize + 8f, leftAligned = true,
+            labelKey = "Ordo_NatureTab_Plant", width = 200f, headerIndent = IconSize + 8f, leftAligned = true,
             sortText = r => r.def.label,
             draw = (rect, row) => ThingCell(rect, row.def,
-                row.def.LabelCap + "\n\n" + row.def.description + "\n\n" + "Ordo_FloraTab_JumpTip".Translate(row.def.label),
+                row.def.LabelCap + "\n\n" + row.def.description + "\n\n" + "Ordo_NatureTab_JumpTip".Translate(row.def.label),
                 () => JumpToNext(row)),
         },
         new()
         {
-            labelKey = "Ordo_FloraTab_Yields", tipKey = "Ordo_FloraTab_YieldsTip", width = 170f, leftAligned = true,
+            labelKey = "Ordo_NatureTab_Yields", tipKey = "Ordo_NatureTab_YieldsTip", width = 170f, leftAligned = true,
             sortText = r => r.yields.Count == 0 ? "" : r.yields[0].Thing.label,
             draw = DoYieldsCell,
         },
         new()
         {
-            labelKey = "Ordo_FloraTab_Count", tipKey = "Ordo_FloraTab_CountTip", width = 60f, descendingFirst = true,
+            labelKey = "Ordo_NatureTab_Count", tipKey = "Ordo_NatureTab_CountTip", width = 60f, descendingFirst = true,
             sortValue = r => r.plants.Count,
             draw = (rect, row) => NumberCell(rect, row.plants.Count.ToString(), Color.white),
         },
         new()
         {
-            labelKey = "Ordo_FloraTab_Ready", tipKey = "Ordo_FloraTab_ReadyTip", width = 60f, descendingFirst = true,
+            labelKey = "Ordo_NatureTab_Ready", tipKey = "Ordo_NatureTab_ReadyTip", width = 60f, descendingFirst = true,
             sortValue = r => r.ready,
             draw = (rect, row) => NumberCell(rect, row.ready.ToString(), row.ready > 0 ? Color.green : Color.gray),
         },
         new()
         {
-            labelKey = "Ordo_FloraTab_Next", tipKey = "Ordo_FloraTab_NextTip", width = 76f,
+            labelKey = "Ordo_NatureTab_Next", tipKey = "Ordo_NatureTab_NextTip", width = 76f,
             sortValue = r => r.nextReadyDays,
             draw = (rect, row) => NumberCell(rect, NextText(row),
                 float.IsPositiveInfinity(row.nextReadyDays) ? Color.gray : Color.white, NextTip(row)),
         },
         new()
         {
-            labelKey = "Ordo_FloraTab_Yield", tipKey = "Ordo_FloraTab_YieldTip", width = 80f, descendingFirst = true,
+            labelKey = "Ordo_NatureTab_Yield", tipKey = "Ordo_NatureTab_YieldTip", width = 80f, descendingFirst = true,
             sortValue = r => r.YieldValue,
             draw = (rect, row) =>
             {
@@ -65,21 +65,21 @@ public class PlantsPage : TablePage<FloraRow>
         },
         new()
         {
-            labelKey = "Ordo_FloraTab_Risk", tipKey = "Ordo_FloraTab_RiskTip", width = 60f, descendingFirst = true,
+            labelKey = "Ordo_NatureTab_Risk", tipKey = "Ordo_NatureTab_RiskTip", width = 60f, descendingFirst = true,
             sortValue = r => r.AtRisk,
             draw = (rect, row) => NumberCell(rect, row.AtRisk > 0 ? row.AtRisk.ToString() : "-",
                 row.AtRisk > 0 ? RiskColor : Color.gray, row.AtRisk > 0 ? RiskTip(row) : null),
         },
         new()
         {
-            labelKey = "Ordo_FloraTab_Near", tipKey = "Ordo_FloraTab_NearTip", width = 60f,
+            labelKey = "Ordo_NatureTab_Near", tipKey = "Ordo_NatureTab_NearTip", width = 60f,
             sortValue = r => r.nearest,
             draw = (rect, row) => NumberCell(rect, DistanceText(row.nearest), Color.white,
-                "Ordo_FloraTab_NearRowTip".Translate(Mathf.RoundToInt(row.nearest), row.def.label)),
+                "Ordo_NatureTab_NearRowTip".Translate(Mathf.RoundToInt(row.nearest), row.def.label)),
         },
         new()
         {
-            labelKey = "Ordo_FloraTab_Marked", tipKey = "Ordo_FloraTab_MarkedTip", width = 60f, descendingFirst = true,
+            labelKey = "Ordo_NatureTab_Marked", tipKey = "Ordo_NatureTab_MarkedTip", width = 60f, descendingFirst = true,
             sortValue = r => r.marked,
             draw = (rect, row) => CountCell(rect, row.marked, Color.yellow),
         },
@@ -88,13 +88,13 @@ public class PlantsPage : TablePage<FloraRow>
             width = 80f,
             draw = (rect, row) => ButtonCell(rect,
                 row.plants.Any(p => p.HarvestableNow && map.designationManager.DesignationOn(p, DesignationDefOf.HarvestPlant) == null),
-                "Ordo_FloraTab_HarvestAll", "Ordo_FloraTab_HarvestAllTip".Translate(row.def.label), () => HarvestAll(row)),
+                "Ordo_NatureTab_HarvestAll", "Ordo_NatureTab_HarvestAllTip".Translate(row.def.label), () => HarvestAll(row)),
         },
         new()
         {
             width = 70f,
-            draw = (rect, row) => ButtonCell(rect, row.marked > 0, "Ordo_FloraTab_Cancel",
-                "Ordo_FloraTab_CancelTip".Translate(row.def.label), () => CancelAll(row)),
+            draw = (rect, row) => ButtonCell(rect, row.marked > 0, "Ordo_NatureTab_Cancel",
+                "Ordo_NatureTab_CancelTip".Translate(row.def.label), () => CancelAll(row)),
         },
     };
 
@@ -103,10 +103,10 @@ public class PlantsPage : TablePage<FloraRow>
         Rect bar)
     {
         bool changed = false;
-        changed |= Toggle(ref x, bar, "Ordo_FloraTab_IncludeTrees", ref filter.includeTrees);
-        changed |= Toggle(ref x, bar, "Ordo_FloraTab_IncludeCultivated", ref filter.includeCultivated);
-        changed |= Toggle(ref x, bar, "Ordo_FloraTab_OnlyReady", ref filter.onlyReady);
-        changed |= Toggle(ref x, bar, "Ordo_FloraTab_HideYieldless", ref filter.hideYieldless);
+        changed |= Toggle(ref x, bar, "Ordo_NatureTab_IncludeTrees", ref filter.includeTrees);
+        changed |= Toggle(ref x, bar, "Ordo_NatureTab_IncludeCultivated", ref filter.includeCultivated);
+        changed |= Toggle(ref x, bar, "Ordo_NatureTab_OnlyReady", ref filter.onlyReady);
+        changed |= Toggle(ref x, bar, "Ordo_NatureTab_HideYieldless", ref filter.hideYieldless);
         return changed;
     }
 
@@ -141,9 +141,9 @@ public class PlantsPage : TablePage<FloraRow>
         if (row.yields.Count == 0)
         {
             GUI.color = Color.gray;
-            Widgets.Label(cell, "Ordo_FloraTab_NoYield".Translate());
+            Widgets.Label(cell, "Ordo_NatureTab_NoYield".Translate());
             GUI.color = Color.white;
-            TooltipHandler.TipRegion(cell, "Ordo_FloraTab_NoYieldTip".Translate());
+            TooltipHandler.TipRegion(cell, "Ordo_NatureTab_NoYieldTip".Translate());
             return;
         }
 
@@ -180,8 +180,8 @@ public class PlantsPage : TablePage<FloraRow>
         if (!source.primary)
         {
             tip += "\n" + (source.share < 1f
-                ? "Ordo_FloraTab_RandomYieldTip".Translate(source.amount, source.share.ToStringPercent())
-                : "Ordo_FloraTab_SecondaryYieldTip".Translate(source.amount));
+                ? "Ordo_NatureTab_RandomYieldTip".Translate(source.amount, source.share.ToStringPercent())
+                : "Ordo_NatureTab_SecondaryYieldTip".Translate(source.amount));
         }
         return tip + "\n\n" + source.thing.description;
     }
@@ -191,10 +191,10 @@ public class PlantsPage : TablePage<FloraRow>
 
     private static string YieldNowTip(FloraRow row)
     {
-        var lines = row.yields.Select(y => "Ordo_FloraTab_YieldNowRowTip".Translate(FloraYields.AmountText(y.now), y.Thing.label)
+        var lines = row.yields.Select(y => "Ordo_NatureTab_YieldNowRowTip".Translate(FloraYields.AmountText(y.now), y.Thing.label)
             .ToString()).ToList();
         if (row.yields.Count > 1)
-            lines.Add("\n" + "Ordo_FloraTab_YieldValueRowTip".Translate(row.YieldValue.ToStringMoney()));
+            lines.Add("\n" + "Ordo_NatureTab_YieldValueRowTip".Translate(row.YieldValue.ToStringMoney()));
         return string.Join("\n", lines);
     }
 
@@ -203,7 +203,7 @@ public class PlantsPage : TablePage<FloraRow>
         if (row.ready == row.plants.Count)
             return "-";
         if (float.IsPositiveInfinity(row.nextReadyDays))
-            return "Ordo_FloraTab_Stalled".Translate();
+            return "Ordo_NatureTab_Stalled".Translate();
         return Period(row.nextReadyDays);
     }
 
@@ -214,12 +214,12 @@ public class PlantsPage : TablePage<FloraRow>
             return null;
         var lines = new List<string>();
         if (!float.IsPositiveInfinity(row.nextReadyDays))
-            lines.Add("Ordo_FloraTab_NextRowTip".Translate(Period(row.nextReadyDays)));
-        lines.Add("Ordo_FloraTab_SoonRowTip".Translate(row.soon, growing));
+            lines.Add("Ordo_NatureTab_NextRowTip".Translate(Period(row.nextReadyDays)));
+        lines.Add("Ordo_NatureTab_SoonRowTip".Translate(row.soon, growing));
         if (row.stalled > 0)
-            lines.Add("Ordo_FloraTab_StalledRowTip".Translate(row.stalled));
+            lines.Add("Ordo_NatureTab_StalledRowTip".Translate(row.stalled));
         if (!float.IsPositiveInfinity(row.growthStopsDays))
-            lines.Add("Ordo_FloraTab_GrowthStopsRowTip".Translate(Period(row.growthStopsDays),
+            lines.Add("Ordo_NatureTab_GrowthStopsRowTip".Translate(Period(row.growthStopsDays),
                 row.def.plant.minGrowthTemperature.ToStringTemperature("F0")));
         return string.Join("\n", lines);
     }
@@ -228,12 +228,12 @@ public class PlantsPage : TablePage<FloraRow>
     {
         var lines = new List<string>();
         if (row.dying > 0)
-            lines.Add("Ordo_FloraTab_DyingRowTip".Translate(row.dying));
+            lines.Add("Ordo_NatureTab_DyingRowTip".Translate(row.dying));
         if (row.oldAge > 0)
-            lines.Add("Ordo_FloraTab_OldAgeRowTip".Translate(row.oldAge, Period(row.oldAgeDays)));
+            lines.Add("Ordo_NatureTab_OldAgeRowTip".Translate(row.oldAge, Period(row.oldAgeDays)));
         if (row.frost > 0)
-            lines.Add("Ordo_FloraTab_FrostRowTip".Translate(row.frost, Period(row.frostDays)));
-        lines.Add("Ordo_FloraTab_RiskHighlightTip".Translate());
+            lines.Add("Ordo_NatureTab_FrostRowTip".Translate(row.frost, Period(row.frostDays)));
+        lines.Add("Ordo_NatureTab_RiskHighlightTip".Translate());
         return string.Join("\n", lines);
     }
 
@@ -254,15 +254,15 @@ public class PlantsPage : TablePage<FloraRow>
         if (count == 0)
             return;
         (row.IsTree ? SoundDefOf.Designate_HarvestWood : SoundDefOf.Designate_HarvestPlants).PlayOneShotOnCamera();
-        Messages.Message("Ordo_FloraTab_Designated".Translate(count + " " + row.def.label), MessageTypeDefOf.SilentInput,
+        Messages.Message("Ordo_NatureTab_Designated".Translate(count + " " + row.def.label), MessageTypeDefOf.SilentInput,
             historical: false);
-        MainTabWindow_Flora.SurveyNow();
+        MainTabWindow_Nature.SurveyNow();
     }
 
     private void CancelAll(FloraRow row)
     {
         FloraDesignations.Cancel(row, map);
         SoundDefOf.Designate_Cancel.PlayOneShotOnCamera();
-        MainTabWindow_Flora.SurveyNow();
+        MainTabWindow_Nature.SurveyNow();
     }
 }

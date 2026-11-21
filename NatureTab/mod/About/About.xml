@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ModMetaData>
-  <name>Flora Tab</name>
+  <name>Nature Tab</name>
   <author>Ordoxous</author>
-  <url>https://github.com/Ordoxous/RimworldMods/tree/master/FloraTab</url>
+  <url>https://github.com/Ordoxous/RimworldMods/tree/master/NatureTab</url>
   <supportedVersions>
     <li>1.7</li>
   </supportedVersions>
-  <packageId>Ordo.FloraTab</packageId>
+  <packageId>Ordo.NatureTab</packageId>
   <description>Adds a Nature tab with four pages, in place of the Animals and Wildlife tabs. Plants lists the wild plants on the map you can harvest, such as berries, healroot and trees: how many there are, how many are ready, the yield you would get now, which are at risk, and how many are already marked. Minerals lists the ore you can see, such as steel, gold, plasteel and compacted machinery: how many cells and veins, the yield and its value, and how much sits under overhead mountain. Animals is the game's own animals table, moved in, with a search box; the Animals hotkey (F4) opens it. Wildlife is the game's wildlife table, moved in the same way; F5 opens it. Mark a whole kind in one click, or jump to the next one on the map.</description>
 </ModMetaData>

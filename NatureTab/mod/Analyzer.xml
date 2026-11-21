@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Gives the mod its own tab in Dubs Performance Analyzer, under Modder, which profiles every method listed here. DPA reads
+     this file from the mod's root folder; without DPA it does nothing.
+     Methods are named one by one: the 1.7 build of DPA only finds methods in a few types given as Types. It skips a name it
+     can't find without logging anything, so after renaming or adding methods, regenerate this list with the
+     ordo/profiling_targets bridge tool.
+     Everything here runs only while the Nature tab is open, from the window's drawing and update, never from game ticks.
+     DPA didn't record the drawing (OnGUI) when tested, only WindowUpdate and the highlight it draws; the perf scenario
+     suite times the survey and forecast instead (see the README). -->
+<Analyzer>
+  <NatureTab>
+    <Methods>
+      <li>Ordo.NatureTab.MainTabWindow_Nature:DoWindowContents</li>
+      <li>Ordo.NatureTab.MainTabWindow_Nature:WindowUpdate</li>
+      <li>Ordo.NatureTab.MainTabWindow_Nature:Survey</li>
+      <li>Ordo.NatureTab.MainTabWindow_Nature:DoToolbar</li>
+      <li>Ordo.NatureTab.MainTabWindow_Nature:SwitchTo</li>
+      <li>Ordo.NatureTab.PawnTablePage:Draw</li>
+      <li>Ordo.NatureTab.PawnTablePage:Survey</li>
+      <li>Ordo.NatureTab.PlantsPage:Build</li>
+      <li>Ordo.NatureTab.PlantsPage:DoYieldsCell</li>
+      <li>Ordo.NatureTab.PlantsPage:JumpToNext</li>
+      <li>Ordo.NatureTab.PlantsPage:HarvestAll</li>
+      <li>Ordo.NatureTab.PlantsPage:CancelAll</li>
+      <li>Ordo.NatureTab.MineralsPage:Build</li>
+      <li>Ordo.NatureTab.MineralsPage:MineAll</li>
+      <li>Ordo.NatureTab.MineralsPage:CancelAll</li>
+      <li>Ordo.NatureTab.FloraSurvey:Build</li>
+      <li>Ordo.NatureTab.FloraSurvey:ExpectedYield</li>
+      <li>Ordo.NatureTab.FloraSurvey:DaysUntilOldAge</li>
+      <li>Ordo.NatureTab.FloraSurvey:BaseCenter</li>
+      <li>Ordo.NatureTab.FloraYields:For</li>
+      <li>Ordo.NatureTab.FloraYields:Expected</li>
+      <li>Ordo.NatureTab.MapForecast:For</li>
+      <li>Ordo.NatureTab.MapForecast:DaysUntilReady</li>
+      <li>Ordo.NatureTab.MapForecast:DaysUntilKilled</li>
+      <li>Ordo.NatureTab.MapForecast:FirstHourBelow</li>
+      <li>Ordo.NatureTab.MapForecast:GrowthCurve</li>
+      <li>Ordo.NatureTab.FloraHighlight:Draw</li>
+      <li>Ordo.NatureTab.FloraDesignations:HarvestReady</li>
+      <li>Ordo.NatureTab.FloraDesignations:Cancel</li>
+      <li>Ordo.NatureTab.MineralSurvey:Build</li>
+      <li>Ordo.NatureTab.MineralSurvey:ExpectedYield</li>
+      <li>Ordo.NatureTab.MineralSurvey:FindVeins</li>
+      <li>Ordo.NatureTab.MineralHighlight:Draw</li>
+      <li>Ordo.NatureTab.MineralDesignations:MineAll</li>
+      <li>Ordo.NatureTab.MineralDesignations:Cancel</li>
+    </Methods>
+  </NatureTab>
+</Analyzer>

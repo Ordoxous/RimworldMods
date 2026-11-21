@@ -3,7 +3,7 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace Ordo.FloraTab;
+namespace Ordo.NatureTab;
 
 // Outlines a row's plants on the map while the row is hovered: marked for harvest in yellow, else at risk (dying or frost
 // coming) in red, else ready in green, else growing in white. When none are on screen, an arrow at the screen edge points to the nearest ready one.
