@@ -19,6 +19,7 @@ public static class ScenarioSets
         ("Ordo.ColonistBarJobs", () => ColonistBarJobsScenarios.All),
         ("Ordo.Saddlebound", () => SaddleboundScenarios.All),
         ("Ordo.NatureTab", () => NatureTabScenarios.All),
-        ("Ordo.DisallowedZone", () => DisallowedZoneScenarios.All)
+        ("Ordo.DisallowedZone", () => DisallowedZoneScenarios.All),
+        ("Ordo.TabGroups", () => TabGroupsScenarios.All)
     };
 }

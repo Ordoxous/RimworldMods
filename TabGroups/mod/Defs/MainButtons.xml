@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <!-- Each group's default members, by MainButtonDef defName. Names that aren't loaded are skipped, so mods' buttons can
+       be listed without depending on them. The player's choices in the settings override these. -->
+
+  <MainButtonDef Abstract="True" Name="Ordo_TabGroupBase">
+    <workerClass>Ordo.TabGroups.MainButtonWorker_TabGroup</workerClass>
+    <canBeTutorDenied>false</canBeTutorDenied>
+  </MainButtonDef>
+
+  <MainButtonDef ParentName="Ordo_TabGroupBase">
+    <defName>Ordo_TabGroup_Colonists</defName>
+    <label>colonists</label>
+    <description>Tables for managing your pawns: work, schedules, policies, mechs and more.</description>
+    <order>10</order>
+    <modExtensions>
+      <li Class="Ordo.TabGroups.TabGroupExtension">
+        <members>
+          <li>Work</li>
+          <li>Schedule</li>
+          <li>kNumbersOverviewTab</li>
+          <li>Assign</li>
+          <li>MF_FloorSettingButton</li>
+          <li>VQE_Drones</li>
+          <li>Mechs</li>
+          <li>SM_MechWork</li>
+          <li>WVC_MechsWork</li>
+          <li>MintGearMenu</li>
+          <li>MintNeedsMenu</li>
+          <li>MintHealthMenu</li>
+        </members>
+      </li>
+    </modExtensions>
+  </MainButtonDef>
+
+  <MainButtonDef ParentName="Ordo_TabGroupBase">
+    <defName>Ordo_TabGroup_Knowledge</defName>
+    <label>knowledge</label>
+    <description>Research, beliefs and reference: what your colony knows and what you can look up.</description>
+    <order>60</order>
+    <modExtensions>
+      <li Class="Ordo.TabGroups.TabGroupExtension">
+        <members>
+          <li>Research</li>
+          <li>Ideos</li>
+          <li>Bodlosh_WeaponStats</li>
+          <li>KeyzReferenceTools_MainButton</li>
+          <li>ModHelp</li>
+        </members>
+      </li>
+    </modExtensions>
+  </MainButtonDef>
+
+  <MainButtonDef ParentName="Ordo_TabGroupBase">
+    <defName>Ordo_TabGroup_World</defName>
+    <label>world</label>
+    <description>Everything beyond the map: the world, quests, factions and titles.</description>
+    <order>70</order>
+    <validWithoutMap>true</validWithoutMap>
+    <modExtensions>
+      <li Class="Ordo.TabGroups.TabGroupExtension">
+        <members>
+          <li>World</li>
+          <li>Quests</li>
+          <li>Factions</li>
+          <li>VFEE_Royalty</li>
+        </members>
+      </li>
+    </modExtensions>
+  </MainButtonDef>
+
+  <MainButtonDef ParentName="Ordo_TabGroupBase">
+    <defName>Ordo_TabGroup_Tools</defName>
+    <label>tools</label>
+    <description>Records, search and utilities: history, bills, finding things, performance and mod settings.</description>
+    <order>480</order>
+    <validWithoutMap>true</validWithoutMap>
+    <modExtensions>
+      <li Class="Ordo.TabGroups.TabGroupExtension">
+        <members>
+          <li>History</li>
+          <li>MintBillMenu</li>
+          <li>TD_Ctrl-F</li>
+          <li>VisibleWealth_MainButton</li>
+          <li>MintMinimap</li>
+          <li>PaintShop</li>
+          <li>AAAA_EmergencySpeaker</li>
+          <li>DubsOptimizer</li>
+          <li>XmlExtensions_MainButton_ModSettings</li>
+        </members>
+      </li>
+    </modExtensions>
+  </MainButtonDef>
+
+  <MainButtonDef ParentName="Ordo_TabGroupBase">
+    <defName>Ordo_TabGroup_Other</defName>
+    <label>other</label>
+    <description>Mod-specific extras that don't fit the other groups.</description>
+    <order>475</order>
+    <validWithoutMap>true</validWithoutMap>
+    <modExtensions>
+      <li Class="Ordo.TabGroups.TabGroupExtension">
+        <members>
+          <li>RJW_MainButton</li>
+          <li>OffsetManager</li>
+          <li>NLFaceSelectTab</li>
+          <li>RocketWindow</li>
+          <li>GunRecoil</li>
+        </members>
+      </li>
+    </modExtensions>
+  </MainButtonDef>
+
+</Defs>

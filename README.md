@@ -15,6 +15,7 @@ Ordoxous' RimWorld 1.7 mods, plus the tooling used to test them in a running gam
 | [NatureTab](NatureTab/README.md) | Nature Tab | `Ordo.NatureTab` | A Nature main tab, in place of Animals and Wildlife, with four pages: harvestable wild plants by kind (counts, days until ready, yields, plants at risk, one-click harvest), visible ore by kind (cells, veins, yield, value, overhead mountain, one-click mining), and the Animals and Wildlife tabs moved in, hosting Animal Tab's window when it's loaded | none | 27 scenarios |
 | [DisallowedZone](DisallowedZone/README.md) | Disallowed Zone | `Ordo.DisallowedZone` | A zone you switch on in danger: while on, it's taken out of every colonist's and animal's allowed area, Unrestricted included, so pawns leave it, skip work in it and route around it | Harmony | 8 scenarios |
 | [Saddlebound](Saddlebound/README.md) | Saddlebound | `Ordo.Saddlebound` | Ideology memes and precepts for Giddy-Up riders: riding as a cultural need, preferred mount species, mourning fallen mounts, glory for kills from the saddle, and Horde Riders factions that raid mounted | Harmony, Ideology, Giddy-Up 2 - Continued | 17 scenarios |
+| [TabGroups](TabGroups/README.md) | Tab Groups | `Ordo.TabGroups` | Folds the bottom bar's main buttons into group buttons (Colonists, Knowledge, World, Other, Tools): clicking a group lists its tabs, hotkeys still work, and any button can be moved between groups in the settings | Harmony | 8 scenarios |
 
 ## Layout
 

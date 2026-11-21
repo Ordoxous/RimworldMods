@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <Ordo_TabGroups_Contains>Click to choose:</Ordo_TabGroups_Contains>
+  <Ordo_TabGroups_Assignments>Which group each button is in. A button in a group is hidden from the bar; its hotkey still works.</Ordo_TabGroups_Assignments>
+  <Ordo_TabGroups_None>On the bar</Ordo_TabGroups_None>
+  <Ordo_TabGroups_Reset>Reset to defaults</Ordo_TabGroups_Reset>
+  <Ordo_TabGroups_Changed>changed</Ordo_TabGroups_Changed>
+</LanguageData>
