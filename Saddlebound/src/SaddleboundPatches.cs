@@ -4,12 +4,12 @@ using Verse;
 
 namespace Ordo.Saddlebound;
 
+[StaticConstructorOnStartup]
 public static class SaddleboundPatches
 {
-    public static void Apply(
-        Harmony harmony
-    )
+    static SaddleboundPatches()
     {
+        var harmony = new Harmony(typeof(SaddleboundPatches).Namespace);
         harmony.Patch(
             GiddyUpAdapter.MountMethod,
             postfix: new HarmonyMethod(typeof(SaddleboundPatches), nameof(Postfix_Mount))

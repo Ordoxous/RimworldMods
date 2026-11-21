@@ -1,141 +1,171 @@
-﻿<!--
-    Use Krafs.Rimworld.Ref in mod projects while letting the IDE display real method bodies
-    instead of stubs when navigating or decompiling.
-    Copy this file as Directory.Build.targets next to your .csproj or in any parent directory.
-    SDK-style projects auto-import the first Directory.Build.targets they find - place accordingly.
-    
-    Example uses:
-    - Place in root folder of all your mod projects, and every one will import this.
-    - Set RimWorldDirectory in your .csproj pointing to different RimWorld installs for different versions.
-    If Krafs.Rimworld.Ref is referenced, these targets compare its version to the locally installed
-    RimWorld version. If they match, the NuGet reference is removed and local assemblies are used.
-    To ignore patch version differences, set UseStrictRimWorldVersionComparison to false
-    (equivalent to e.g. 1.6.*), allowing local assemblies even if the patch number differs.
-    The RimWorld directory is detected from standard Steam install paths, but can be set manually
-    via RimWorldDirectory.
-    To see logs from these targets, build with detailed verbosity or higher:
-        dotnet build -v:detailed
--->
-
 <Project>
+    <!-- Targets for every project in the repo, read after the .csproj so they see its items and properties -->
 
-    <!-- User settings -->
+    <Import Project="$(MSBuildThisFileDirectory)build\LocalRimWorldReferences.targets" />
+
     <PropertyGroup>
-        <!-- Path to RimWorld root folder (optional, overrides auto-detection) -->
-        <RimWorldDirectory>$(SteamLibraryDirectory)\steamapps\common\RimWorld</RimWorldDirectory>
-
-        <!-- Require exact patch match? Set to false for wildcard match -->
-        <UseStrictRimWorldVersionComparison>true</UseStrictRimWorldVersionComparison>
-
-        <!-- Run this logic? Example: only enable in Debug builds -->
-        <EnableLocalRimWorldReferences Condition="'$(Configuration)' == 'Debug'">true</EnableLocalRimWorldReferences>
+        <!-- The game folder CopyToRimworld deploys into; CopyToRimworldDebug swaps in RimWorldDebugDirectory -->
+        <DeployGameDirectory Condition="'$(DeployGameDirectory)' == ''">$(RimWorldDirectory)</DeployGameDirectory>
+        <!-- What deploying does; a project that isn't a mod names its own target (BridgeTools) -->
+        <DeployTarget Condition="'$(DeployTarget)' == ''">DeployMod</DeployTarget>
+        <ModOutputDirectory>$(MSBuildProjectDirectory)\out\</ModOutputDirectory>
+        <ModRepositoryUrl>https://github.com/Ordoxous/RimworldMods/tree/master</ModRepositoryUrl>
+        <ModAuthor>Ordoxous</ModAuthor>
     </PropertyGroup>
 
-    <!-- Auto-detect RimWorld directory from known install locations -->
-    <PropertyGroup>
-        <!-- Windows: per-user install -->
-        <RimWorldDirectory Condition="'$(RimWorldDirectory)'=='' AND Exists('$(USERPROFILE)\AppData\Local\Steam\steamapps\common\RimWorld')">
-            $(USERPROFILE)\AppData\Local\Steam\steamapps\common\RimWorld
-        </RimWorldDirectory>
-
-        <!-- Windows: all users -->
-        <RimWorldDirectory Condition="'$(RimWorldDirectory)'=='' AND Exists('$(MSBuildProgramFiles32)\Steam\steamapps\common\RimWorld')">
-            $(MSBuildProgramFiles32)\Steam\steamapps\common\RimWorld
-        </RimWorldDirectory>
-
-        <!-- Linux: default -->
-        <RimWorldDirectory Condition="'$(RimWorldDirectory)'=='' AND Exists('$(HOME)/.local/share/Steam/steamapps/common/RimWorld')">
-            $(HOME)/.local/share/Steam/steamapps/common/RimWorld
-        </RimWorldDirectory>
-
-        <!-- Linux: legacy -->
-        <RimWorldDirectory Condition="'$(RimWorldDirectory)'=='' AND Exists('$(HOME)/.steam/steam/steamapps/common/RimWorld')">
-            $(HOME)/.steam/steam/steamapps/common/RimWorld
-        </RimWorldDirectory>
-
-        <!-- macOS -->
-        <RimWorldDirectory Condition="'$(RimWorldDirectory)'=='' AND Exists('$(HOME)/Library/Application Support/Steam/steamapps/common/RimWorld')">
-            $(HOME)/Library/Application Support/Steam/steamapps/common/RimWorld
-        </RimWorldDirectory>
-    </PropertyGroup>
-
-    <!-- Normalize path + set version file path -->
-    <PropertyGroup Condition="'$(RimWorldDirectory)' != ''">
-        <RimWorldDirectory>$([System.String]::Copy('$(RimWorldDirectory)').Trim())</RimWorldDirectory>
-        <RimWorldDirectory>$([MSBuild]::NormalizeDirectory('$(RimWorldDirectory)'))</RimWorldDirectory>
-        <RimWorldVersionFile Condition="Exists('$(RimWorldDirectory)Version.txt')">$(RimWorldDirectory)Version.txt</RimWorldVersionFile>
-    </PropertyGroup>
-
-    <Target Name="LogRimWorldScriptSettings" BeforeTargets="ResolveLocalRimWorldVersion">
-        <Message Text="RimWorld directory: $(RimWorldDirectory)" Importance="high"/>
-        <Message Text="Strict version comparison: $(UseStrictRimWorldVersionComparison)" Importance="high"/>
-    </Target>
-
-    <ItemGroup>
-        <LocalRimWorldAssembly Include="$(RimWorldDirectory)*/Managed/*.dll" Visible="false"/>
-    </ItemGroup>
-
-    <!-- Capture Krafs.Rimworld.Ref package reference -->
-    <Target Name="GetRimRef" AfterTargets="ResolvePackageReferences" Condition="'@(PackageReference->WithMetadataValue('Identity','Krafs.Rimworld.Ref'))' != ''">
+    <!--
+        Workshop mods to compile against, by assembly name:
+            <WorkshopReference Include="MechanoidUpgrades" WorkshopId="3365118555" />
+        Resolves to the mod's $(RimworldVersion) Assemblies folder, or its $(RimworldFallbackVersion) one when it has no
+        folder for this version yet. The game loads the mod itself, so the DLL stays out of the output.
+    -->
+    <Target Name="ResolveWorkshopReferences" BeforeTargets="ResolveAssemblyReferences" Condition="'@(WorkshopReference)' != ''">
         <ItemGroup>
-            <RimRefPackageReference Include="@(PackageReference)" Condition="'%(PackageReference.Identity)' == 'Krafs.Rimworld.Ref'"/>
+            <_WorkshopReference Include="@(WorkshopReference)">
+                <HintPath>$(WorkshopDirectory)\%(WorkshopReference.WorkshopId)\$(RimworldVersion)\Assemblies\%(WorkshopReference.Identity).dll</HintPath>
+                <FallbackHintPath>$(WorkshopDirectory)\%(WorkshopReference.WorkshopId)\$(RimworldFallbackVersion)\Assemblies\%(WorkshopReference.Identity).dll</FallbackHintPath>
+            </_WorkshopReference>
+            <_WorkshopReference Condition="!Exists('%(HintPath)')">
+                <HintPath>%(FallbackHintPath)</HintPath>
+            </_WorkshopReference>
+        </ItemGroup>
+
+        <Error Condition="'%(_WorkshopReference.WorkshopId)' == ''" Text="WorkshopReference %(_WorkshopReference.Identity) has no WorkshopId" />
+        <Error Condition="!Exists('%(_WorkshopReference.HintPath)')" Text="Workshop mod %(_WorkshopReference.WorkshopId) has no %(_WorkshopReference.Identity).dll for $(RimworldVersion) or $(RimworldFallbackVersion) under $(WorkshopDirectory). Subscribe to it in Steam, or set SteamLibraryDirectory in Directory.Build.local.props." />
+
+        <ItemGroup>
+            <Reference Include="@(_WorkshopReference)" Private="false" />
         </ItemGroup>
     </Target>
 
-    <Target Name="ResolveLocalRimWorldVersion" Condition="'$(RimWorldVersionFile)' != ''">
-        <ReadLinesFromFile File="$(RimWorldVersionFile)">
-            <Output TaskParameter="Lines" ItemName="VersionFileLine"/>
-        </ReadLinesFromFile>
-
-        <PropertyGroup>
-            <!-- Not RimWorldVersion: MSBuild names ignore case, so that would overwrite RimworldVersion from the props file -->
-            <InstalledRimWorldVersion>$([System.String]::Copy('%(VersionFileLine.Identity)').Split(' ')[0])</InstalledRimWorldVersion>
-            <RimWorldVersionMinor>$([System.String]::Copy('$(InstalledRimWorldVersion)').Split('.')[1])</RimWorldVersionMinor>
-            <RimWorldVersionPatch>$([System.String]::Copy('$(InstalledRimWorldVersion)').Split('.')[2])</RimWorldVersionPatch>
-        </PropertyGroup>
-
-        <Message Text="RimWorld version: $(InstalledRimWorldVersion)" Importance="high"/>
-    </Target>
-
-    <Target Name="ResolveRimRefVersion" DependsOnTargets="GetRimRef">
-        <PropertyGroup>
-            <RimRefVersion>%(RimRefPackageReference.Version)</RimRefVersion>
-            <RimRefVersionMinor>$([System.String]::Copy('$(RimRefVersion)').Split('.')[1])</RimRefVersionMinor>
-            <RimRefVersionPatch>$([System.String]::Copy('$(RimRefVersion)').Split('.')[2])</RimRefVersionPatch>
-            <RimRefVersionPatchComparable>$([System.String]::Copy('$(RimRefVersionPatch)').Split('-')[0])</RimRefVersionPatchComparable>
-        </PropertyGroup>
-
-        <Message Text="Krafs.Rimworld.Ref version: $(RimRefVersion)" Importance="high"/>
-    </Target>
-
-    <!-- Compare versions + decide whether to remove NuGet reference -->
-    <Target Name="RemoveRimRef" DependsOnTargets="ResolveLocalRimWorldVersion;ResolveRimRefVersion">
-        <PropertyGroup>
-            <MinorVersionsMatch Condition="'$(RimWorldVersionMinor)' == '$(RimRefVersionMinor)'">true</MinorVersionsMatch>
-            <IgnorePatchVersion Condition="'$(RimRefVersionPatchComparable)' == '*' OR '$(UseStrictRimWorldVersionComparison)' != 'true'">true</IgnorePatchVersion>
-            <PatchVersionsMatch Condition="'$(RimWorldVersionPatch)' == '$(RimRefVersionPatchComparable)' OR '$(IgnorePatchVersion)' == 'true'">true</PatchVersionsMatch>
-            <!-- Only swap when there are local assemblies to swap in. The 1.7 Waylith build has no */Managed folder, so the glob is empty;
-                 removing the package then leaves nothing to compile against, and Rider's restore drops the package entirely. -->
-            <ShouldRemoveRimRef Condition="'$(MinorVersionsMatch)' == 'true' AND '$(PatchVersionsMatch)' == 'true' AND '@(LocalRimWorldAssembly)' != ''">true</ShouldRemoveRimRef>
-            <ShouldRemoveRimRef Condition="'$(ShouldRemoveRimRef)' != 'true'">false</ShouldRemoveRimRef>
-        </PropertyGroup>
-
-        <ItemGroup Condition="'$(ShouldRemoveRimRef)' == 'true'">
-            <PackageReference Remove="@(RimRefPackageReference)"/>
+    <!-- Puts the mod's files next to its assembly in out/, and removes any that were deleted from mod/ -->
+    <Target Name="CopyModFiles" AfterTargets="PostBuildEvent" Condition="'$(IsRimWorldMod)' == 'true'">
+        <ItemGroup>
+            <_ModFile Include="$(MSBuildProjectDirectory)\mod\**\*" />
+            <_ModFileInOutput Include="@(_ModFile->'$(ModOutputDirectory)%(RecursiveDir)%(Filename)%(Extension)')" />
+            <_StaleModFile Include="$(ModOutputDirectory)**\*" Exclude="$(ModOutputDirectory)Assemblies\**\*;@(_ModFileInOutput)" />
         </ItemGroup>
+
+        <Delete Files="@(_StaleModFile)" />
+        <Copy SourceFiles="@(_ModFile)" DestinationFolder="$(ModOutputDirectory)%(RecursiveDir)" SkipUnchangedFiles="true" />
     </Target>
 
-    <!-- Swap in local RimWorld assemblies before assembly resolution -->
-    <Target Name="RemoveConflictingFrameworkReferenceAssemblies"
-            AfterTargets="GetReferenceAssemblyPaths"
-            BeforeTargets="ResolveAssemblyReferences"
-            DependsOnTargets="RemoveRimRef"
-            Condition="'$(EnableLocalRimWorldReferences)' == 'true'">
-        <ItemGroup Condition="'$(ShouldRemoveRimRef)' == 'true'">
-            <Reference Remove="@(LocalRimWorldAssembly->'%(Filename)')"/>
-            <Reference Include="@(LocalRimWorldAssembly)" Private="false"/>
+    <!-- Builds, then deploys into the game. Stop the game first if the DLL changed: mods load only at startup. -->
+    <Target Name="CopyToRimworld" DependsOnTargets="Build;$(DeployTarget)" />
+
+    <!-- As CopyToRimworld, into the install at RimWorldDebugDirectory -->
+    <Target Name="CopyToRimworldDebug" DependsOnTargets="UseRimWorldDebugDirectory;Build;$(DeployTarget)" />
+
+    <Target Name="UseRimWorldDebugDirectory">
+        <PropertyGroup>
+            <DeployGameDirectory>$(RimWorldDebugDirectory)</DeployGameDirectory>
+        </PropertyGroup>
+    </Target>
+
+    <Target Name="DeployMod">
+        <PropertyGroup>
+            <_ModDeployDirectory>$([MSBuild]::NormalizeDirectory('$(DeployGameDirectory)', 'Mods', '$(MSBuildProjectName)'))</_ModDeployDirectory>
+        </PropertyGroup>
+        <ItemGroup>
+            <_BuiltModFile Include="$(ModOutputDirectory)**\*" />
         </ItemGroup>
-        <Message Text="Local RimWorld referenced: $(ShouldRemoveRimRef)" Importance="high"/>
+
+        <RemoveDir Directories="$(_ModDeployDirectory)" />
+        <Copy SourceFiles="@(_BuiltModFile)" DestinationFolder="$(_ModDeployDirectory)%(RecursiveDir)" />
+        <Message Importance="high" Text="$(MSBuildProjectName) -> $(_ModDeployDirectory)" />
     </Target>
 
+    <!-- Fails the build when About.xml breaks one of the rules in the repo README's Conventions -->
+    <Target Name="CheckAboutXml" BeforeTargets="CoreCompile" Condition="'$(IsRimWorldMod)' == 'true' AND '$(DesignTimeBuild)' != 'true'">
+        <CheckAboutXml
+            AboutFile="$(MSBuildProjectDirectory)\mod\About\About.xml"
+            PackageId="Ordo.$(MSBuildProjectName)"
+            Url="$(ModRepositoryUrl)/$(MSBuildProjectName)"
+            Author="$(ModAuthor)"
+            RimworldVersion="$(RimworldVersion)"
+            SourceFiles="@(Compile)" />
+    </Target>
+
+    <UsingTask TaskName="CheckAboutXml" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+        <ParameterGroup>
+            <AboutFile Required="true" />
+            <PackageId Required="true" />
+            <Url Required="true" />
+            <Author Required="true" />
+            <RimworldVersion Required="true" />
+            <SourceFiles ParameterType="Microsoft.Build.Framework.ITaskItem[]" />
+        </ParameterGroup>
+        <Task>
+            <Using Namespace="System" />
+            <Using Namespace="System.Collections.Generic" />
+            <Using Namespace="System.IO" />
+            <Using Namespace="System.Linq" />
+            <Using Namespace="System.Xml" />
+            <Using Namespace="System.Xml.Linq" />
+            <Code Type="Fragment" Language="cs"><![CDATA[
+                void Problem(XObject at, string message)
+                {
+                    var line = at is IXmlLineInfo info && info.HasLineInfo() ? info.LineNumber : 0;
+                    var column = at is IXmlLineInfo info2 && info2.HasLineInfo() ? info2.LinePosition : 0;
+                    Log.LogError(null, "ORDO001", null, AboutFile, line, column, 0, 0, "About.xml: " + message);
+                }
+
+                if (!File.Exists(AboutFile))
+                {
+                    Log.LogError(null, "ORDO001", null, AboutFile, 0, 0, 0, 0, "Every mod needs mod/About/About.xml");
+                    return !Log.HasLoggedErrors;
+                }
+
+                var root = XDocument.Load(AboutFile, LoadOptions.SetLineInfo).Root;
+                string Text(XElement parent, string name) => parent.Element(name)?.Value.Trim() ?? "";
+                bool Same(string a, string b) => string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
+
+                foreach (var name in new[] { "name", "description" })
+                {
+                    if (Text(root, name) == "")
+                        Problem(root, $"<{name}> is missing or empty");
+                }
+
+                if (Text(root, "packageId") != PackageId)
+                    Problem(root.Element("packageId") ?? (XObject)root, $"<packageId> must be {PackageId}");
+                if (Text(root, "author") != Author)
+                    Problem(root.Element("author") ?? (XObject)root, $"<author> must be {Author}");
+                if (Text(root, "url") != Url)
+                    Problem(root.Element("url") ?? (XObject)root, $"<url> must be {Url}");
+
+                var versions = root.Element("supportedVersions")?.Elements("li").Select(li => li.Value.Trim()).ToList();
+                if (versions == null || !versions.Contains(RimworldVersion))
+                    Problem(root.Element("supportedVersions") ?? (XObject)root, $"<supportedVersions> must include {RimworldVersion}");
+
+                var loadAfter = root.Element("loadAfter")?.Elements("li").Select(li => li.Value.Trim()).ToList() ?? new List<string>();
+                var dependencies = root.Element("modDependencies")?.Elements("li").ToList() ?? new List<XElement>();
+                foreach (var dependency in dependencies)
+                {
+                    var id = Text(dependency, "packageId");
+                    if (id == "")
+                    {
+                        Problem(dependency, "a dependency has no <packageId>");
+                        continue;
+                    }
+                    if (Text(dependency, "displayName") == "")
+                        Problem(dependency, $"dependency {id} has no <displayName>");
+                    // DLCs come with the game; anything else needs somewhere to get it from
+                    if (!id.StartsWith("ludeon.", StringComparison.OrdinalIgnoreCase) && Text(dependency, "steamWorkshopUrl") == "" && Text(dependency, "downloadUrl") == "")
+                        Problem(dependency, $"dependency {id} needs a <steamWorkshopUrl> or <downloadUrl>");
+                    if (!loadAfter.Any(after => Same(after, id)))
+                        Problem(dependency, $"dependency {id} must also be in <loadAfter>");
+                }
+
+                // Harmony is in every project's references, so About.xml is the only thing saying whether the mod needs it
+                var usesHarmony = (SourceFiles ?? new Microsoft.Build.Framework.ITaskItem[0])
+                    .Select(item => item.GetMetadata("FullPath"))
+                    .Any(path => File.Exists(path) && File.ReadAllText(path).Contains("HarmonyLib"));
+                var dependsOnHarmony = dependencies.Any(dependency => Same(Text(dependency, "packageId"), "brrainz.harmony"));
+                if (usesHarmony && !dependsOnHarmony)
+                    Problem(root.Element("modDependencies") ?? (XObject)root, "the code uses HarmonyLib, so brrainz.harmony must be a dependency");
+                if (!usesHarmony && dependsOnHarmony)
+                    Problem(root.Element("modDependencies") ?? (XObject)root, "brrainz.harmony is a dependency, but no code uses HarmonyLib");
+            ]]></Code>
+        </Task>
+    </UsingTask>
 </Project>

@@ -1,47 +1,41 @@
 ﻿<Project>
-    <!-- Optional and git-ignored: override SteamLibraryDirectory or RimWorldDebugDirectory for this machine -->
+    <!-- Settings for every project in the repo. Targets are in Directory.Build.targets, which is read after the .csproj. -->
+
+    <!-- Optional and git-ignored: override SteamLibraryDirectory, RimWorldDirectory or RimWorldDebugDirectory for this machine -->
     <Import Project="$(MSBuildThisFileDirectory)Directory.Build.local.props" Condition="Exists('$(MSBuildThisFileDirectory)Directory.Build.local.props')" />
 
     <PropertyGroup>
         <SteamLibraryDirectory Condition="'$(SteamLibraryDirectory)' == ''">D:\SteamLibrary</SteamLibraryDirectory>
+        <RimWorldDirectory Condition="'$(RimWorldDirectory)' == ''">$(SteamLibraryDirectory)\steamapps\common\RimWorld</RimWorldDirectory>
         <RimWorldDebugDirectory Condition="'$(RimWorldDebugDirectory)' == ''">G:\RimWorld_Debug</RimWorldDebugDirectory>
         <WorkshopDirectory>$(SteamLibraryDirectory)\steamapps\workshop\content\294100</WorkshopDirectory>
+
+        <RimworldVersion>1.7</RimworldVersion>
+        <!-- Used for Workshop dependencies that do not ship a $(RimworldVersion) folder yet -->
+        <RimworldFallbackVersion>1.6</RimworldFallbackVersion>
+
+        <!-- A project that isn't a mod (BridgeTools) sets this to false: no About.xml check and no mod/ files in its output -->
+        <IsRimWorldMod Condition="'$(IsRimWorldMod)' == ''">true</IsRimWorldMod>
     </PropertyGroup>
 
     <PropertyGroup>
+        <!-- The SDK only defaults this after reading this file, so set it here for the settings below to see it -->
+        <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+
         <TargetFramework>net10.0</TargetFramework>
         <LangVersion>latest</LangVersion>
-        <Prefer32Bit>false</Prefer32Bit>
         <OutputType>Library</OutputType>
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <Prefer32Bit>false</Prefer32Bit>
+        <RootNamespace>Ordo.$(MSBuildProjectName)</RootNamespace>
+
+        <!-- Every configuration builds to out/Assemblies, the mod's layout, with the PDB embedded for hot reload and the debugger -->
+        <OutputPath>$(MSBuildProjectDirectory)\out\Assemblies</OutputPath>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-        <PlatformTarget>AnyCPU</PlatformTarget>
-        <DebugSymbols>true</DebugSymbols>
         <DebugType>embedded</DebugType>
-        <Optimize>false</Optimize>
-        <OutputPath>$(MSBuildProjectDirectory)\out\Assemblies</OutputPath>
-        <DefineConstants>DEBUG;TRACE</DefineConstants>
-        <ErrorReport>prompt</ErrorReport>
+        <!-- The SDK default is higher, which would surface warnings the code has never been built with -->
         <WarningLevel>4</WarningLevel>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-        <PlatformTarget>AnyCPU</PlatformTarget>
-        <DebugType>embedded</DebugType>
-        <Optimize>true</Optimize>
-        <OutputPath>$(MSBuildProjectDirectory)\out\Assemblies</OutputPath>
-        <DefineConstants>TRACE</DefineConstants>
-        <ErrorReport>prompt</ErrorReport>
-        <WarningLevel>4</WarningLevel>
-    </PropertyGroup>
-
-    <PropertyGroup>
-      <RimworldVersion>1.7</RimworldVersion>
-      <!-- Used for workshop dependencies that do not ship a $(RimworldVersion) folder yet -->
-      <RimworldFallbackVersion>1.6</RimworldFallbackVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -51,40 +45,10 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Publicize Include="Assembly-CSharp"/>
+        <Publicize Include="Assembly-CSharp" />
     </ItemGroup>
 
     <ItemGroup>
         <Content Include="mod\**" />
     </ItemGroup>
-
-    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-        <ItemGroup>
-            <MyMod Include="$(MSBuildProjectDirectory)\mod\**\*.*" />
-        </ItemGroup>
-
-        <RemoveDir Directories="$(MSBuildProjectDirectory)\out\About" />
-        <RemoveDir Directories="$(MSBuildProjectDirectory)\out\Defs" />
-        <RemoveDir Directories="$(MSBuildProjectDirectory)\out\Patches" />
-        <RemoveDir Directories="$(MSBuildProjectDirectory)\out\Languages" />
-        <Copy SourceFiles="@(MyMod)" DestinationFolder="$(MSBuildProjectDirectory)\out\%(RecursiveDir)" />
-    </Target>
-
-    <Target Name="CopyToRimworldDebug">
-        <ItemGroup>
-            <BuiltMod Include="$(MSBuildProjectDirectory)\out\**\*.*" />
-        </ItemGroup>
-
-        <RemoveDir Directories="$(RimWorldDebugDirectory)\Mods\$(MSBuildProjectName)" />
-        <Copy SourceFiles="@(BuiltMod)" DestinationFolder="$(RimWorldDebugDirectory)\Mods\$(MSBuildProjectName)\%(RecursiveDir)" />
-    </Target>
-
-    <Target Name="CopyToRimworld">
-        <ItemGroup>
-            <BuiltMod Include="$(MSBuildProjectDirectory)\out\**\*.*" />
-        </ItemGroup>
-
-        <RemoveDir Directories="$(SteamLibraryDirectory)\steamapps\common\RimWorld\Mods\$(MSBuildProjectName)" />
-        <Copy SourceFiles="@(BuiltMod)" DestinationFolder="$(SteamLibraryDirectory)\steamapps\common\RimWorld\Mods\$(MSBuildProjectName)\%(RecursiveDir)" />
-    </Target>
 </Project>

@@ -1,23 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
-
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-        <OutputType>Library</OutputType>
-        <AppDesignerFolder>Properties</AppDesignerFolder>
-        <AssemblyName>MechUpgradesUi</AssemblyName>
-        <RootNamespace>Ordo.MechUpgradesUi</RootNamespace>
-        <FileAlignment>512</FileAlignment>
-    </PropertyGroup>
-
     <ItemGroup>
-        <Reference Include="MechanoidUpgrades">
-            <HintPath Condition="Exists('$(WorkshopDirectory)\3365118555\$(RimworldVersion)\Assemblies\MechanoidUpgrades.dll')">$(WorkshopDirectory)\3365118555\$(RimworldVersion)\Assemblies\MechanoidUpgrades.dll</HintPath>
-            <HintPath Condition="!Exists('$(WorkshopDirectory)\3365118555\$(RimworldVersion)\Assemblies\MechanoidUpgrades.dll')">$(WorkshopDirectory)\3365118555\$(RimworldFallbackVersion)\Assemblies\MechanoidUpgrades.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
+        <WorkshopReference Include="MechanoidUpgrades" WorkshopId="3365118555" />
     </ItemGroup>
 
 </Project>

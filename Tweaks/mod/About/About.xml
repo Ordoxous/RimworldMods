@@ -31,6 +31,7 @@
   </modDependencies>
   <loadAfter>
     <li>brrainz.harmony</li>
+    <li>Ludeon.RimWorld.Biotech</li>
     <li>wvc.sergkart.biotech.MoreMechanoidsWorkModes</li>
     <li>imranfish.xmlextensions</li>
     <li>VanillaExpanded.VFEPower</li>

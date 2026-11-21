@@ -53,7 +53,7 @@ public static class ActivityRow
             }
         }
 
-        var harmony = new Harmony(typeof(ActivityRow).FullName);
+        var harmony = new Harmony(typeof(ActivityRow).Namespace);
         harmony.Patch(
             AccessTools.Method(typeof(ColonistBarColonistDrawer), "DrawIcons"),
             transpiler: new HarmonyMethod(typeof(ActivityRow), nameof(Transpile_DrawIcons))

@@ -1,45 +1,33 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
         <AssemblyName>Ordo.BridgeTools</AssemblyName>
-        <RootNamespace>Ordo.BridgeTools</RootNamespace>
-        <RimWorldDirectory>$(SteamLibraryDirectory)\steamapps\common\RimWorld</RimWorldDirectory>
+        <!-- A RimBridgeServer companion, not a mod: no About.xml, and it deploys with DeployCompanion -->
+        <IsRimWorldMod>false</IsRimWorldMod>
+        <DeployTarget>DeployCompanion</DeployTarget>
     </PropertyGroup>
 
     <!-- The host bridge supplies this at runtime, and NuGet doesn't carry the version it ships, so compile against its copy -->
     <ItemGroup>
         <Reference Include="RimBridgeServer.Sdk">
-            <HintPath>$(RimWorldDirectory)\Mods\RimBridgeServer\1.6\Assemblies\RimBridgeServer.Sdk.dll</HintPath>
+            <HintPath>$(RimWorldDirectory)Mods\RimBridgeServer\1.6\Assemblies\RimBridgeServer.Sdk.dll</HintPath>
             <Private>false</Private>
         </Reference>
     </ItemGroup>
 
-    <!-- The scenarios read the mod's types; the game loads the mod itself, so the DLL stays out of this output -->
+    <!-- The scenarios read every mod's types; the game loads the mods itself, so their DLLs stay out of this output -->
     <ItemGroup>
-        <ProjectReference Include="..\..\SillyAnimalThings\SillyAnimalThings.csproj" Private="false" />
-        <ProjectReference Include="..\..\MechUpgradesUi\MechUpgradesUi.csproj" Private="false" />
-        <ProjectReference Include="..\..\BlueprintMaterials\BlueprintMaterials.csproj" Private="false" />
-        <ProjectReference Include="..\..\LegendaryIsUnique\LegendaryIsUnique.csproj" Private="false" />
-        <ProjectReference Include="..\..\ColonistBarJobs\ColonistBarJobs.csproj" Private="false" />
-        <ProjectReference Include="..\..\Saddlebound\Saddlebound.csproj" Private="false" />
-        <ProjectReference Include="..\..\FloraTab\FloraTab.csproj" Private="false" />
-        <ProjectReference Include="..\..\DisallowedZone\DisallowedZone.csproj" Private="false" />
+        <ProjectReference Include="..\..\*\*.csproj" Private="false" />
     </ItemGroup>
 
-    <!-- MechUpgradesUi's scenarios read Mechanoid Upgrades' types. It has no 1.7 folder yet, so fall back as MechUpgradesUi.csproj does -->
+    <!-- MechUpgradesUi's scenarios read Mechanoid Upgrades' types -->
     <ItemGroup>
-        <Reference Include="MechanoidUpgrades">
-            <HintPath Condition="Exists('$(WorkshopDirectory)\3365118555\$(RimworldVersion)\Assemblies\MechanoidUpgrades.dll')">$(WorkshopDirectory)\3365118555\$(RimworldVersion)\Assemblies\MechanoidUpgrades.dll</HintPath>
-            <HintPath Condition="!Exists('$(WorkshopDirectory)\3365118555\$(RimworldVersion)\Assemblies\MechanoidUpgrades.dll')">$(WorkshopDirectory)\3365118555\$(RimworldFallbackVersion)\Assemblies\MechanoidUpgrades.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
+        <WorkshopReference Include="MechanoidUpgrades" WorkshopId="3365118555" />
     </ItemGroup>
 
     <!-- Companions load from the game's BridgeTools folder, not Mods -->
-    <Target Name="CopyToRimworld">
-        <Copy SourceFiles="$(MSBuildProjectDirectory)\out\Assemblies\Ordo.BridgeTools.dll" DestinationFolder="$(RimWorldDirectory)\BridgeTools\Ordo" />
+    <Target Name="DeployCompanion">
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$([MSBuild]::NormalizeDirectory('$(DeployGameDirectory)', 'BridgeTools', 'Ordo'))" />
     </Target>
 
 </Project>

@@ -1,6 +1,13 @@
 # Setting up a mod for live testing
 
-Everything in `tools/` works for any mod in the repo. A mod needs four things: GABS profiles, a test save, scenarios, and optionally a showcase.
+Everything in `tools/` works for any mod in the repo. A mod needs a project, GABS profiles, a test save, scenarios, and optionally a showcase.
+
+## 0. The project
+
+1. Create `<Mod>/<Mod>.csproj` containing only `<Project Sdk="Microsoft.NET.Sdk" />`, and add it to `RimworldMods.slnx`. The root build files supply everything else, including the `Ordo.<Mod>` namespace.
+2. If it compiles against another mod, add `<WorkshopReference Include="<AssemblyName>" WorkshopId="<id>" />` items to the project, not `HintPath` references.
+3. Write `mod/About/About.xml` by copying another mod's and changing it. The build checks it against the About.xml rules in the repo README's Conventions, and fails with `ORDO001` errors until it passes.
+4. C# goes under `src/`, and everything that ships under `mod/`.
 
 ## 1. GABS profiles
 
@@ -22,8 +29,8 @@ If the copied save doesn't load with the new mod list, make a fresh one; see "Th
 
 1. Create `tools/BridgeTools/Scenarios/<Mod>Scenarios.cs`: a `public static class <Mod>Scenarios` with `public static readonly List<Scenario> All`. Model it on `SillyAnimalThingsScenarios.cs`.
 2. Add a line to `ScenarioSets.All`: `("Ordo.<Mod>", () => <Mod>Scenarios.All)`.
-3. If the scenarios use the mod's types, add `<ProjectReference Include="..\..\<Mod>\<Mod>.csproj" Private="false" />` to `tools/BridgeTools/BridgeTools.csproj`. `Private="false"` keeps the mod's DLL out of BridgeTools' output, because the game loads the mod itself.
-4. Build and deploy BridgeTools (`-c Debug`, two commands), restart the game, and check that `ordo/list_scenarios` shows them.
+3. BridgeTools already references every mod project at the repo root through a glob, with `Private="false"`, so the scenarios can use the mod's types. If they also use a Workshop mod's types, add its `WorkshopReference` to `tools/BridgeTools/BridgeTools.csproj`.
+4. Deploy BridgeTools (`dotnet build tools/BridgeTools/BridgeTools.csproj -t:CopyToRimworld`), restart the game, and check that `ordo/list_scenarios` shows them.
 
 Scenarios for a mod that isn't loaded never run, so one BridgeTools build serves every profile.
 

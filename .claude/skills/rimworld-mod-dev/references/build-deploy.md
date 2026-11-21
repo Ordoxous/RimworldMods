@@ -9,14 +9,18 @@
 ## Building
 
 ```
-dotnet build <Mod>/<Mod>.csproj -c Debug
-dotnet build <Mod>/<Mod>.csproj -c Debug -t:CopyToRimworld
+dotnet build <Mod>/<Mod>.csproj                      # build into <Mod>/out
+dotnet build <Mod>/<Mod>.csproj -t:CopyToRimworld    # build, then deploy
 ```
 
-- **Always `-c Debug`.** `Directory.Build.props` is read before the SDK sets the default configuration, so without `-c Debug` its Debug group doesn't apply. The build then goes to `bin/Debug` instead of `out/Assemblies`, and `CopyToRimworld` deploys whatever was in `out/` already, often an older DLL from one of Rider's background builds. The symptom in game is "Could not find a type named Ordo..." for anything new.
-- **Build and copy as two commands.** `CopyToRimworld` only copies `out/`; it doesn't build.
-- The Debug build embeds its PDB and isn't optimized, which is what hot reload and the debugger need.
-- With the installed game's version matching `Krafs.Rimworld.Ref`, `Directory.Build.targets` swaps in the real game assemblies ("Local RimWorld referenced: true"), so Rider shows real method bodies.
+- The configuration defaults to Debug, and every configuration builds to `out/Assemblies`, so `-c` isn't needed. (Before 2026-11-21 the props file only set the output path for an explicit `-c Debug`, and a build without it deployed a stale DLL. Old notes may still say "always `-c Debug`".) The Debug build embeds its PDB and isn't optimized, which is what hot reload and the debugger need.
+- `CopyToRimworld` depends on `Build`, then replaces `RimWorld\Mods\<Mod>` with `out/`. `CopyToRimworldDebug` does the same into `RimWorldDebugDirectory`. Pass `-p:DeployGameDirectory=<dir>` to deploy somewhere else, such as a scratch folder when testing the build files.
+- Building copies `mod/` into `out/` and deletes files from `out/` that are no longer in `mod/`, except `Assemblies`.
+- Building checks `mod/About/About.xml` (target `CheckAboutXml` in `Directory.Build.targets`) and fails with `ORDO001` errors naming the line. The rules are in the repo README's Conventions.
+- Other mods' DLLs come in as `<WorkshopReference Include="<AssemblyName>" WorkshopId="<id>" />`, resolved before compiling to the 1.7 `Assemblies` folder, or the 1.6 one. A missing Workshop mod fails the build with its ID.
+- With the installed game's version matching `Krafs.Rimworld.Ref`, `build/LocalRimWorldReferences.targets` swaps in the real game assemblies ("Local RimWorld referenced: true"), so Rider shows real method bodies.
+- `Krafs.Rimworld.Ref` floats (`1.7.*-*`), so projects restored at different times can compile against different game builds. `dotnet restore --force-evaluate` brings them in line.
+- BridgeTools sets `IsRimWorldMod` false (no About.xml check, no `mod/` copy) and a `DeployTarget` of its own. It references every mod project through a glob, so a new mod needs no change there.
 - Mods compile against a publicized `Assembly-CSharp` (`Krafs.Publicizer`), so protected and private game members are reachable. Overrides of protected methods must then be declared `public override`.
 
 ## Checking a deploy
@@ -32,7 +36,8 @@ dotnet build <Mod>/<Mod>.csproj -c Debug -t:CopyToRimworld
 
 ## Conventions
 
-- Formatting is in the repo's `.editorconfig`: spaces, 4 for C#, project files, JSON and PowerShell, 2 for XML and Markdown, LF line endings. Run `dotnet format whitespace <project>` after writing C#; it fixes indentation and braces but doesn't wrap parameters.
-- C#: a file-scoped namespace `Ordo.<Mod>`, braces on their own line, and one parameter per line in method signatures.
-- XML: defNames use the `Ordo_` prefix. Guard DLC content with `MayRequire="Ludeon.RimWorld.<DLC>"`.
+The repo's rules are in the Conventions section of the root `README.md`: names, project files, About.xml, Harmony, other mods, code and XML. Read it before adding a mod or a dependency. The About.xml rules fail the build; nothing else checks the others. A few that matter for the tooling here:
+
+- Run `dotnet format whitespace <project>` after writing C#; it fixes indentation and braces but doesn't wrap parameters.
 - Package IDs are `Ordo.<Mod>`. The bridge tools treat any running mod with code whose packageId starts with `Ordo.` as "ours".
+- A mod's `.csproj` holds only `WorkshopReference` items (and comments on them). Put any build setting in the root files instead.

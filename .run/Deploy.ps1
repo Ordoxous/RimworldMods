@@ -30,8 +30,8 @@ foreach ($name in $projects) {
     }
 
     Write-Host "=== Deploying $name"
-    # Without an explicit configuration the build goes to bin\ rather than out\, and CopyToRimworld would deploy a stale out\
-    & $dotnet build $csproj -c Debug '-t:Build;CopyToRimworld' --nologo -v:minimal
+    # CopyToRimworld builds first; Debug is the default, but say so since hot reload and the debugger need it
+    & $dotnet build $csproj -c Debug -t:CopyToRimworld --nologo -v:minimal
     if ($LASTEXITCODE -ne 0) {
         Write-Host "=== Deploy failed: $name"
         exit $LASTEXITCODE

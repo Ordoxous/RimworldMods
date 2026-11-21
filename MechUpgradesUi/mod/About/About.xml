@@ -18,6 +18,7 @@
     </li>
   </modDependencies>
   <loadAfter>
+    <li>Ludeon.RimWorld.Biotech</li>
     <li>GoGaTio.MechanoidUpgrades</li>
     <li>Fluffy.WorkTab</li>
   </loadAfter>

@@ -19,10 +19,9 @@ Each mod's `README.md` is its developer documentation: design, how to test it, t
 
 ## The everyday loop
 
-1. **Build and deploy**, with the game stopped if the DLL changed (see [build-deploy.md](references/build-deploy.md)). Always pass `-c Debug`, as two separate commands:
+1. **Build and deploy**, with the game stopped if the DLL changed (see [build-deploy.md](references/build-deploy.md)). `CopyToRimworld` builds first, so one command does both:
    ```
-   dotnet build <Mod>/<Mod>.csproj -c Debug
-   dotnet build <Mod>/<Mod>.csproj -c Debug -t:CopyToRimworld
+   dotnet build <Mod>/<Mod>.csproj -t:CopyToRimworld
    ```
    Do the same for `tools/BridgeTools/BridgeTools.csproj` when the tools changed. `dotnet` may not be on `PATH`; it's at `~/.dotnet/dotnet.exe`.
 2. **Start the game** through the `gabs` MCP server (`games_start`, game id `rimworld`, with the mod's profile), then `games_connect`. Profiles open straight into a blank 33x33 test map. Prefer a `-headless` profile unless you need to see the game. Before starting a windowed profile, start `pwsh -NoProfile -File tools/return_focus.ps1` in the background: the user works or plays while tests run, and it gives focus back if the game's window takes it. See [live-testing.md](references/live-testing.md).
@@ -36,17 +35,17 @@ The running game is the fixture: keep one running and run suites one after anoth
 
 Load what the task needs:
 
-- [build-deploy.md](references/build-deploy.md): build configuration traps, deploying, checking that the deployed DLL is the new one, decompiling the game.
+- [build-deploy.md](references/build-deploy.md): how the shared build files work, deploying, checking that the deployed DLL is the new one, decompiling the game, and where the repo's conventions are.
 - [live-testing.md](references/live-testing.md): GABS and its profiles, the test save, the `ordo/*` tools, the scenario suite and how to write scenarios, and every known pitfall when driving the game.
 - [new-mod-setup.md](references/new-mod-setup.md): setting up a new or existing mod for live testing, with its own GABS profiles, scenarios and showcase.
 - [reload-and-debug.md](references/reload-and-debug.md): def hot reload, C# hot reload and its limits, attaching Rider's debugger.
 - [profiling.md](references/profiling.md): timing a mod with Dubs Performance Analyzer during a scenario run, and the mod's own `Analyzer.xml` tab.
 - [showcase.md](references/showcase.md): recording captioned clips and a highlight reel with the game's sound.
-- [rimworld-gotchas.md](references/rimworld-gotchas.md): RimWorld 1.7 and Waylith API behaviour that looks like a bug but isn't, and C# and XML conventions for this repo.
+- [rimworld-gotchas.md](references/rimworld-gotchas.md): RimWorld 1.7 and Waylith API behaviour that looks like a bug but isn't.
 
 ## Rules that save the most time
 
-- Always build with `-c Debug`. Without it, `CopyToRimworld` deploys whatever stale DLL was already in `out/`.
+- Follow the repo README's Conventions. The build enforces the About.xml rules (`ORDO001` errors); the rest, such as one Harmony ID per mod and `WorkshopReference` for other mods' DLLs, are up to you.
 - Stop the game before deploying a DLL or the bridge tools; companions and mod DLLs load only at startup.
 - Have the Steam client running before starting the game. Without it, Harmony failed to load and the bridge never came up. When `games_connect` times out, read `~/.gabs/rimworld/launch.log` before anything else. The project's `.claude/settings.json` has a PreToolUse hook that blocks `games_start` while `steam.exe` isn't running.
 - A failed bridge call leaves a blocking "attention" item: clear it with `games_ack_attention` before carrying on.

@@ -1,4 +1,3 @@
-using HarmonyLib;
 using UnityEngine;
 using Verse;
 
@@ -13,7 +12,6 @@ public class SaddleboundMod : Mod
     ) : base(content)
     {
         Settings = GetSettings<SaddleboundSettings>();
-        SaddleboundPatches.Apply(new Harmony("Ordo.Saddlebound"));
     }
 
     public override string SettingsCategory() => "Saddlebound";

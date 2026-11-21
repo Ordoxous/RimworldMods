@@ -1,15 +1,1 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-
-<Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-        <OutputType>Library</OutputType>
-        <AppDesignerFolder>Properties</AppDesignerFolder>
-        <RootNamespace>Ordo.BlueprintMaterials</RootNamespace>
-        <FileAlignment>512</FileAlignment>
-    </PropertyGroup>
-
-</Project>
+<Project Sdk="Microsoft.NET.Sdk" />
