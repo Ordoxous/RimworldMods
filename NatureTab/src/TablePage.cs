@@ -60,6 +60,9 @@ public interface IResourcePage
 
     void WindowUpdate(Map map);
 
+    // Called when the page comes into view, as the window opens on it or switches to it
+    void Shown();
+
     // Drops the rows, so a closed tab doesn't keep a map's things alive
     void Clear();
 }
@@ -133,6 +136,10 @@ public abstract class TablePage<TRow> : IResourcePage
         this.map = map;
         rows = map == null ? new List<TRow>() : Build(map, area, maxDistance);
         Sort();
+    }
+
+    public void Shown()
+    {
     }
 
     public void Clear()

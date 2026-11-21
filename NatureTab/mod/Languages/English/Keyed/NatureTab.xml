@@ -51,7 +51,7 @@
   <Ordo_NatureTab_AreaTip>Only list plants inside this area. Harvest then marks only those.</Ordo_NatureTab_AreaTip>
   <Ordo_NatureTab_Anywhere>anywhere</Ordo_NatureTab_Anywhere>
   <Ordo_NatureTab_Within>Within: {0}</Ordo_NatureTab_Within>
-  <Ordo_NatureTab_WithinTip>Only list plants this close to your base, in a straight line. Harvest then marks only those.</Ordo_NatureTab_WithinTip>
+  <Ordo_NatureTab_WithinTip>Only list what's within this many cells of the middle of your home area, in a straight line, or of your colonists if there's no home area. The circle on the map shows the reach. Harvest and Mine then mark only those.</Ordo_NatureTab_WithinTip>
   <Ordo_NatureTab_AnyDistance>any distance</Ordo_NatureTab_AnyDistance>
   <Ordo_NatureTab_Cells>{0} cells</Ordo_NatureTab_Cells>
   <Ordo_NatureTab_None>No harvestable plants found.</Ordo_NatureTab_None>

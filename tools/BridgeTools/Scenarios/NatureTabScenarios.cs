@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Ordo.NatureTab;
 using RimWorld;
+using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 
@@ -33,6 +34,8 @@ public static class NatureTabScenarios
         new("growth_days_until_ready_matches_a_day", "growth", DaysUntilReadyMatchesADay),
         new("filter_area", "filter area", AreaFilter),
         new("filter_distance_and_nearest", "filter area", DistanceAndNearest),
+        new("filter_area_per_page", "filter area", AreaPerPage),
+        new("filter_area_follows_the_map", "filter area", AreaFollowsTheMap),
         new("perf_survey_and_forecast", "perf", SurveyAndForecastCost),
         new("minerals_ore_kinds", "minerals", MineralsSetup),
         new("minerals_counts_veins_yield_and_overhead", "minerals", MineralsCountsVeinsYieldAndOverhead),
@@ -45,7 +48,8 @@ public static class NatureTabScenarios
         new("animals_hotkey_opens_the_page", "animals", AnimalsHotkey),
         new("animals_hosts_animal_tab", "animals", HostsAnimalTab, requiresMod: "fluffy.animaltab"),
         new("wildlife_lists_wild_animals_and_searches", "animals", WildlifeListAndSearch),
-        new("wildlife_hotkey_opens_the_page", "animals", WildlifeHotkey)
+        new("wildlife_hotkey_opens_the_page", "animals", WildlifeHotkey),
+        new("numbers_wildlife_and_animals_pages_show_their_tables", "animals", HostsNumbers, requiresMod: "mehni.numbers")
     };
 
     private static readonly FloraFilter Wild = new();
@@ -556,6 +560,103 @@ public static class NatureTabScenarios
         return Task.CompletedTask;
     }
 
+    // Plants and Minerals each keep their own area: one set on Plants isn't used by Minerals, and is back on Plants
+    private static Task AreaPerPage(
+        ScenarioContext context
+    )
+    {
+        var nature = DefDatabase<MainButtonDef>.GetNamed("Ordo_Nature");
+        var tabs = Find.MainTabsRoot;
+        tabs.EscapeCurrentTab(false);
+        tabs.SetCurrentTab(nature, false);
+        var window = (MainTabWindow_Nature)nature.TabWindow;
+        Area home = context.Map.areaManager.Home;
+        try
+        {
+            window.SwitchTo(1);
+            window.SetArea(null);
+            window.SwitchTo(0);
+            window.SetArea(home);
+            context.Check($"Plants uses the home area: {MainTabWindow_Nature.CurrentArea?.Label}", MainTabWindow_Nature.CurrentArea == home);
+            window.SwitchTo(1);
+            context.Check($"Minerals still lists anywhere: {MainTabWindow_Nature.CurrentArea?.Label}", MainTabWindow_Nature.CurrentArea == null);
+            window.SwitchTo(0);
+            context.Check($"back on Plants it's the home area again: {MainTabWindow_Nature.CurrentArea?.Label}",
+                MainTabWindow_Nature.CurrentArea == home);
+        }
+        finally
+        {
+            window.SwitchTo(0);
+            window.SetArea(null);
+            tabs.EscapeCurrentTab(false);
+        }
+        return Task.CompletedTask;
+    }
+
+    // An area choice carries to another map by name, as the game itself carries areas on a gravship, and comes back on
+    // the first map; a map without that area lists anywhere
+    private static Task AreaFollowsTheMap(
+        ScenarioContext context
+    )
+    {
+        Map first = context.Map;
+        const string name = "Ordo test pasture";
+        var pasture = new Area_Allowed(first.areaManager, name);
+        first.areaManager.AllAreas.Add(pasture);
+        // An empty pocket map: no gen steps, just a biome, which a pocket map needs
+        var generator = new MapGeneratorDef
+        {
+            defName = "Ordo_NatureTabTestMap",
+            genSteps = new List<GenStepDef>(),
+            pocketMapProperties = new PocketMapProperties { biome = first.Biome }
+        };
+        Map second = null;
+        try
+        {
+            // A test map left by a run that failed part way is removed first
+            foreach (Map left in Find.Maps.Where(m => m.generatorDef?.defName == generator.defName).ToList())
+                Current.Game.DeinitAndRemoveMap(left, false);
+            try
+            {
+                // As PocketMapUtility.GeneratePocketMap, but on the first map's tile, which the weather and growth need
+                var parent = (PocketMapParent)WorldObjectMaker.MakeWorldObject(WorldObjectDefOf.PocketMap);
+                parent.sourceMap = first;
+                parent.Tile = first.Tile;
+                parent.mapGenerator = generator;
+                second = MapGenerator.GenerateMap(new IntVec3(15, 1, 15), parent, generator, null, null, isPocketMap: true);
+                Find.World.pocketMaps.Add(parent);
+            }
+            catch (System.Exception e)
+            {
+                context.Check($"making a second map threw {e}", false);
+                return Task.CompletedTask;
+            }
+            context.Check("a second map is made", second != null && second != first);
+
+            var choice = new AreaChoice();
+            choice.Set(pasture);
+            context.Check("on its own map it's the area chosen", choice.On(first) == pasture);
+            context.Check("on a map without one of that name, anywhere", choice.On(second) == null);
+
+            var other = new Area_Allowed(second.areaManager, name);
+            second.areaManager.AllAreas.Add(other);
+            context.Check("on a map with one of that name, that one", choice.On(second) == other);
+            context.Check("and back on the first map, the first", choice.On(first) == pasture);
+
+            choice.Set(first.areaManager.Home);
+            context.Check("the home area is the other map's home area", choice.On(second) == second.areaManager.Home);
+            choice.Set(null);
+            context.Check("anywhere stays anywhere", choice.On(first) == null && choice.On(second) == null);
+        }
+        finally
+        {
+            pasture.Delete();
+            if (second != null)
+                PocketMapUtility.DestroyPocketMap(second);
+        }
+        return Task.CompletedTask;
+    }
+
     private static Task DistanceAndNearest(
         ScenarioContext context
     )
@@ -754,7 +855,9 @@ public static class NatureTabScenarios
         ScenarioContext context
     )
     {
+        // Shown as the window shows it, which a hosted window such as Numbers' needs to pick its table
         var page = new WildlifePage();
+        page.Shown();
         page.Survey(context.Map, null, 0);
         int before = page.Listed.Count;
 
@@ -798,6 +901,87 @@ public static class NatureTabScenarios
             tabs.OpenTab == nature && MainTabWindow_Nature.Page is WildlifePage);
         wildlife.Worker.Activate();
         context.Check($"pressing it again closes it: {tabs.OpenTab?.defName}", tabs.OpenTab == null);
+        return Task.CompletedTask;
+    }
+
+    // Numbers gives the Wildlife button its own window when a game loads, and the Animals button too if its setting is
+    // on. Those windows pick their table in PostOpen, showing Numbers' colonist table until then, and share one pawn
+    // filter, so each page must show its own table and pawns, also after switching between them.
+    private static Task HostsNumbers(
+        ScenarioContext context
+    )
+    {
+        var tabs = Find.MainTabsRoot;
+        var animals = DefDatabase<MainButtonDef>.GetNamed("Animals");
+        var wildlife = DefDatabase<MainButtonDef>.GetNamed("Wildlife");
+        var settings = GenTypes.GetTypeInAnyAssembly("Numbers.Numbers_Settings");
+        var wildSetting = settings.GetField("coolerThanTheWildlifeTab", BindingFlags.Public | BindingFlags.Static)!;
+        var animalSetting = settings.GetField("coolerThanTheAnimalTab", BindingFlags.Public | BindingFlags.Static)!;
+        var component = Find.World.components.First(c => c.GetType().FullName == "Numbers.WorldComponent_Numbers");
+        var notify = component.GetType().GetMethod("NotifySettingsChanged", BindingFlags.NonPublic | BindingFlags.Instance)!;
+        object wildWas = wildSetting.GetValue(null), animalWas = animalSetting.GetValue(null);
+        var animalsWindowWas = animals.tabWindowInt;
+
+        var wild = context.Spawn("Muffalo", 0, 0, PawnMode.Wild);
+        var tame = context.Spawn("Muffalo", 2, 0, PawnMode.Tamed);
+
+        string TableOf(PawnTablePage page) => page.HostedWindow?.PawnTableDef?.defName;
+
+        PawnTablePage Show(MainButtonDef button)
+        {
+            button.Worker.Activate();
+            var page = (PawnTablePage)MainTabWindow_Nature.Page;
+            page.Survey(context.Map, null, 0);
+            return page;
+        }
+
+        try
+        {
+            tabs.EscapeCurrentTab(false);
+            wildSetting.SetValue(null, true);
+            animalSetting.SetValue(null, true);
+            notify.Invoke(component, null);
+            // As at a game's load, before anything has made the Animals window
+            animals.tabWindowInt = null;
+
+            var page = Show(wildlife);
+            context.Check($"the Wildlife page hosts Numbers' window: {page.HostedWindow?.GetType().Name}",
+                page.HostedWindow?.GetType().FullName == "Numbers.MainTabWindow_NumbersWildLife");
+            context.Check($"with its wild animals table: {TableOf(page)}", TableOf(page) == "Numbers_WildAnimals");
+            context.Check($"listing the wild muffalo and not the tame one: {page.Listed.Count}",
+                page.Listed.Contains(wild) && !page.Listed.Contains(tame));
+
+            page = Show(animals);
+            context.Check($"the Animals page hosts Numbers' window: {page.HostedWindow?.GetType().Name}",
+                page.HostedWindow?.GetType().FullName == "Numbers.MainTabWindow_NumbersAnimals");
+            context.Check($"with its animals table: {TableOf(page)}", TableOf(page) == "Numbers_Animals");
+            context.Check($"listing the tame muffalo and not the wild one: {page.Listed.Count}",
+                page.Listed.Contains(tame) && !page.Listed.Contains(wild));
+
+            page = Show(wildlife);
+            context.Check($"back on Wildlife, its own table and pawns again: {TableOf(page)}, {page.Listed.Count}",
+                TableOf(page) == "Numbers_WildAnimals" && page.Listed.Contains(wild) && !page.Listed.Contains(tame));
+
+            // With Numbers' Animals setting off again, the button goes back to the window it had before Numbers, vanilla's
+            // or Animal Tab's, and so does the page
+            animalSetting.SetValue(null, false);
+            notify.Invoke(component, null);
+            animals.tabWindowInt = animalsWindowWas;
+            var before = (System.Type)GenTypes.GetTypeInAnyAssembly("Numbers.StaticConstructorOnGameStart")
+                .GetField("animalTab", BindingFlags.Public | BindingFlags.Static)!.GetValue(null);
+            page = Show(animals);
+            context.Check($"with the setting off, Animals hosts what it did before: {page.HostedWindow?.GetType().Name}, {before.Name}",
+                before == typeof(MainTabWindow_Animals) ? page.HostedWindow == null : page.HostedWindow?.GetType() == before);
+            context.Check($"and lists the tame muffalo: {page.Listed.Count}", page.Listed.Contains(tame));
+        }
+        finally
+        {
+            tabs.EscapeCurrentTab(false);
+            wildSetting.SetValue(null, wildWas);
+            animalSetting.SetValue(null, animalWas);
+            notify.Invoke(component, null);
+            animals.tabWindowInt = animalsWindowWas;
+        }
         return Task.CompletedTask;
     }
 }

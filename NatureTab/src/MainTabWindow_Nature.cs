@@ -8,8 +8,8 @@ using Verse;
 namespace Ordo.NatureTab;
 
 // The Nature main tab: a page for the map's harvestable wild plants and one for its ore, each a table of kinds, like
-// Wildlife is for animals, and the Animals and Wildlife tabs moved in. The area and distance are shared by the plants and
-// minerals pages, the search by all four.
+// Wildlife is for animals, and the Animals and Wildlife tabs moved in. The plants and minerals pages each have their own area
+// and share the distance; the search is shared by all four.
 public class MainTabWindow_Nature : MainTabWindow
 {
     private const float ToolbarHeight = 32f;
@@ -21,8 +21,11 @@ public class MainTabWindow_Nature : MainTabWindow
     private static readonly IResourcePage[] Pages =
         { new PlantsPage(), new MineralsPage(), new AnimalsPage(), new WildlifePage() };
     private static int currentPage;
-    private static Area area;
     private static int maxDistance;
+
+    // Each page's own area
+    private static readonly AreaChoice[] Areas = Pages.Select(_ => new AreaChoice()).ToArray();
+    private static Area area;
 
     // Set by a page's buttons, so the window surveys again on its next frame
     private static bool surveyRequested;
@@ -33,6 +36,9 @@ public class MainTabWindow_Nature : MainTabWindow
     private float lastSurvey = -999f;
 
     public static IResourcePage Page => Pages[currentPage];
+
+    // The current page's area on the map last surveyed, or null for anywhere
+    public static Area CurrentArea => area;
 
     public override Vector2 RequestedTabSize => new(
         Page.Width + 70f,
@@ -63,6 +69,7 @@ public class MainTabWindow_Nature : MainTabWindow
     public override void PostOpen()
     {
         base.PostOpen();
+        Page.Shown();
         Survey();
         SetInitialSizeAndPosition();
     }
@@ -101,6 +108,31 @@ public class MainTabWindow_Nature : MainTabWindow
     {
         base.WindowUpdate();
         Page.WindowUpdate(Find.CurrentMap);
+        DrawReach(Find.CurrentMap);
+    }
+
+    // While the Within button or one of its choices is hovered, the map shows the base's middle and, for a distance, the
+    // circle it reaches. Like a row's hover, it's noted in OnGUI by frame and drawn in the update loop.
+    private static int reachHoverFrame = -1;
+    private static int reachHoverCells;
+
+    private static void HoverReach(int cells)
+    {
+        reachHoverFrame = Time.frameCount;
+        reachHoverCells = cells;
+    }
+
+    private static void DrawReach(Map map)
+    {
+        if (map == null || Time.frameCount - reachHoverFrame > 1)
+            return;
+        IntVec3 center = FloraSurvey.BaseCenter(map);
+        GenDraw.DrawTargetHighlightWithLayer(center, AltitudeLayer.MetaOverlays);
+        if (reachHoverCells <= 0)
+            return;
+        Vector3 at = center.ToVector3Shifted();
+        at.y = AltitudeLayer.MetaOverlays.AltitudeFor();
+        GenDraw.DrawCircleOutline(at, reachHoverCells, SimpleColor.White);
     }
 
     public void SwitchTo(int page)
@@ -108,6 +140,7 @@ public class MainTabWindow_Nature : MainTabWindow
         if (page == currentPage)
             return;
         currentPage = page;
+        Page.Shown();
         Survey();
         SetInitialSizeAndPosition();
     }
@@ -117,9 +150,7 @@ public class MainTabWindow_Nature : MainTabWindow
         surveyRequested = false;
         surveyedMap = Find.CurrentMap;
         lastSurvey = Time.realtimeSinceStartup;
-        // An area that was deleted, or belongs to another map, is dropped
-        if (area != null && (surveyedMap == null || !surveyedMap.areaManager.AllAreas.Contains(area)))
-            area = null;
+        area = Areas[currentPage].On(surveyedMap);
         Page.Survey(surveyedMap, area, maxDistance);
     }
 
@@ -168,9 +199,9 @@ public class MainTabWindow_Nature : MainTabWindow
         Find.WindowStack.Add(new FloatMenu(options));
     }
 
-    private void SetArea(Area chosen)
+    public void SetArea(Area chosen)
     {
-        area = chosen;
+        Areas[currentPage].Set(chosen);
         Survey();
     }
 
@@ -184,6 +215,8 @@ public class MainTabWindow_Nature : MainTabWindow
             ? "Ordo_NatureTab_Cells".Translate(maxDistance).ToString()
             : "Ordo_NatureTab_AnyDistance".Translate().ToString();
         TooltipHandler.TipRegion(rect, "Ordo_NatureTab_WithinTip".Translate());
+        if (Mouse.IsOver(rect))
+            HoverReach(maxDistance);
         if (!Widgets.ButtonText(rect, "Ordo_NatureTab_Within".Translate(current).Truncate(rect.width - 10f)))
             return;
 
@@ -193,7 +226,8 @@ public class MainTabWindow_Nature : MainTabWindow
             {
                 maxDistance = cells;
                 Survey();
-            })).ToList();
+            },
+            mouseoverGuiAction: _ => HoverReach(cells))).ToList();
         Find.WindowStack.Add(new FloatMenu(options));
     }
 }

@@ -35,8 +35,8 @@ The mod was called Flora Tab (`Ordo.FloraTab`) until 2026-11-21. Classes about p
 - **Cultivated plants** are hidden by default. "Cultivated" uses vanilla's `Plant.DeliberatelyCultivated()`: the plant is in a growing zone set to that plant, or on a building that supports plants.
 - **Only ready** hides kinds with nothing ready now.
 - **Hide yieldless** is on by default. It hides kinds that give nothing when harvested: no `harvestedThingDef` and no secondary output. Every vanilla plant in the group has a product, so this only affects modded plants with a harvest yield but no product.
-- **Area** limits the list to plants in the home area or an allowed area.
-- **Within** limits the list to plants within N cells of the base, in a straight line. The base is the middle of the home area, or of the free colonists if there's no home area, or else the middle of the map.
+- **Area** limits the list to plants in the home area or an allowed area. Plants and Minerals each keep their own area; Within is shared. The choice is kept by name, since each map has its own areas: on another map, such as after a gravship flight, it picks that map's home area or its area of the same name, and lists plants anywhere if there isn't one.
+- **Within** limits the list to plants within N cells of the base, in a straight line. The base is the middle of the home area, or of the free colonists if there's no home area, or else the middle of the map. Hovering the button or one of its choices marks that middle on the map and draws the circle it reaches (`GenDraw.DrawCircleOutline`, which has no radius limit, unlike `DrawRadiusRing`).
 - Harvest marks only the plants listed, so an area or distance limit also limits what it marks.
 
 **Columns:**
@@ -105,7 +105,7 @@ The mod was called Flora Tab (`Ordo.FloraTab`) until 2026-11-21. Classes about p
 Both are a `PawnTablePage`, which takes over one main button: `AnimalsPage` for `Animals` and `PawnTableDefOf.Animals`, `WildlifePage` for `Wildlife` and `PawnTableDefOf.Wildlife`. The Wildlife page lists what `MainTabWindow_Wildlife` lists: spawned, unfogged wild animals and wild men, not in a prison cell. Animal Tab doesn't replace the Wildlife window, only adds a Handler column to its table, so Wildlife draws the vanilla table with that column.
 
 **Two modes:**
-- **Hosting a mod's window:** when the `Animals` button's `tabWindowClass` is a `MainTabWindow_PawnTable` other than vanilla's, as with Animal Tab (`Fluffy.AnimalTab`, `AnimalTab.MainTabWindow_Animals`), the page draws that window's `DoWindowContents` in its own rect, so its filter bar and buttons come along. It uses the button def's own `TabWindow` instance, because Animal Tab's filters reach the window through its static `Instance`, which its constructor sets. The page makes the window's table as its `PostOpen` would (`CreateTable`, via the publicized assembly), then fits each table the window makes (`SetMinMaxSize`) below the tabs and toolbar and wraps its `pawnsGetter` with the search. Animal Tab makes a new table whenever its filter bar opens or closes, so the page checks for a new table each time it uses it. The window resizes every frame, to follow the filter bar.
+- **Hosting a mod's window:** when the `Animals` button's `tabWindowClass` is a `MainTabWindow_PawnTable` other than vanilla's, as with Animal Tab (`Fluffy.AnimalTab`, `AnimalTab.MainTabWindow_Animals`), the page draws that window's `DoWindowContents` in its own rect, so its filter bar and buttons come along. It uses the button def's own `TabWindow` instance, because Animal Tab's filters reach the window through its static `Instance`, which its constructor sets. The page makes the window's table as its `PostOpen` would (`CreateTable`, via the publicized assembly), then fits each table the window makes (`SetMinMaxSize`) below the tabs and toolbar and wraps its `pawnsGetter` with the search. Animal Tab makes a new table whenever its filter bar opens or closes, so the page checks for a new table each time it uses it. The window resizes every frame, to follow the filter bar. Each time its page is shown, by opening the tab on it or switching to it, the page calls the window's `PostOpen`, as the game does when the window's own tab opens. Numbers (`Mehni.Numbers`) replaces the Wildlife window with `MainTabWindow_NumbersWildLife` when a game loads (on by default), and the Animals one with `MainTabWindow_NumbersAnimals` if its "cooler than the Animal tab" setting is on. Those windows pick their table def in `PostOpen` and show Numbers' colonist table until then. Their pawn filter is static and shared by all of Numbers' windows, so it has to be set again on every switch between the two pages. Since the class can change after startup, the page looks the window up again whenever the button's `tabWindowClass` changes, and never hosts a vanilla window the game made before the change. Numbers draws its buttons from (0, 0) rather than from the rect it's given, so the page draws a hosted window inside a `GUI.BeginGroup` at the page's rect.
 - **Vanilla:** otherwise it draws the vanilla `PawnTable` for `PawnTableDefOf.Animals`, made just as `MainTabWindow_PawnTable` makes it, over `mapPawns.ColonyAnimals`. Columns that other mods add to that table def show up here too. In this mode the Manage auto-slaughter button sits in the toolbar; a hosted window draws its own. Area and Within don't apply in either mode.
 
 - **Search** filters by the animal's name, its gendered kind label ("hen") or its race ("chicken").
@@ -119,6 +119,7 @@ Both are a `PawnTablePage`, which takes over one main button: `AnimalsPage` for 
 - `naturetab`: Harmony, Core, RimBridgeServer and the mod.
 - `naturetab-headless`: the same with no window.
 - `naturetab-animaltab` and `naturetab-animaltab-headless`: as `naturetab`, plus Ideology and Animal Tab, for the hosted mode. Without Ideology, Animal Tab logs an error the first time its window is made: its static `MemeDef_Rancher` field looks up Ideology's Rancher meme. `animals_hosts_animal_tab` only runs when Animal Tab is loaded.
+- `naturetab-numbers` and `naturetab-numbers-headless`: as `naturetab-animaltab`, plus Numbers, which replaces the Wildlife window (and the Animals one, if its setting is on). Its scenario only runs when Numbers is loaded.
 - **Run the whole suite headless.** Steps advance one tick per frame, and windowed frames are capped, so the growth scenario's 60,000 ticks take many minutes windowed and the bridge stops answering until they're done. Windowed, run only `suite=animals` or another short suite.
 - `naturetab-profiling`: as `naturetab`, plus Dubs Performance Analyzer. It's windowed, because DPA fails headless.
 
@@ -165,6 +166,8 @@ That's about 1 ms once a second while the tab is open, and nothing while it's cl
 | | `filter_only_ready` | A kind with nothing ready is hidden, and shown once one plant is grown |
 | `filter area` | `filter_area` | Only the bush in the home area is listed, and Harvest marks only it |
 | | `filter_distance_and_nearest` | An agave 1 cell from the base is the row's nearest. Within 5 cells lists it but not one 12 cells away. |
+| | `filter_area_per_page` | The home area set on Plants isn't used by Minerals, and is back on returning to Plants |
+| | `filter_area_follows_the_map` | On a second (pocket) map, a chosen area is that map's area of the same name, or anywhere if it has none, and the home area is that map's home; back on the first map it's the first area again |
 | `designate` | `designate_ready_and_cancel` | Harvest marks the grown bush and not the young one, and replaces a cut designation. A second press marks nothing. Cancel clears the designations. |
 | | `designate_trees` | A grown oak is marked for wood |
 | `risk` | `risk_old_age_and_dying` | A bush 2 days from its lifespan counts as old age, with old age in 2 days. A bush past its lifespan is dying. |
@@ -178,8 +181,11 @@ That's about 1 ms once a second while the tab is open, and nothing while it's cl
 | | `animals_hosts_animal_tab` | Only with Animal Tab: hosts its window (the same instance as its `Instance`), lists a tame muffalo, and keeps the search after its filter bar rebuilds the table |
 | | `wildlife_lists_wild_animals_and_searches` | Lists wild animals and not tame ones; "hare" finds the hare |
 | | `wildlife_hotkey_opens_the_page` | F5 opens Wildlife, F4 switches to Animals, F5 back, and F5 again closes |
+| | `numbers_wildlife_and_animals_pages_show_their_tables` | Only with Numbers: with both its settings on, Wildlife hosts its wild animals table and Animals its animals table, each with the right pawns, also after switching back; with the Animals setting off, Animals hosts what it had before |
 
 **Stepping time:** one `context.Step(60000)` grew a bush only about half as much as 30 steps of 2000 ticks did. That was seen twice, against two different estimates. A diagnostic stepping 2000 ticks at a time saw growth match the game's own `GrowthPerTick × 2000` to within 10%. Step in chunks when a test depends on ticking over a long time.
+
+**Results:** 2026-11-21, after the Numbers, per-page area and Within fixes: `naturetab-numbers-headless` 30/30 passed and `naturetab-headless` 28/28 with the two mod scenarios skipped, with no errors in the log. In `naturetab-numbers` windowed, F5 showed Numbers' wild animals table inside the Wildlife page, below the page tabs and toolbar, once the hosted window was drawn in a group (before that, Numbers' buttons covered the tabs). Hovering a Within choice marked the base's middle and drew the circle; on the 33x33 test map a 25-cell circle lies wholly off the map, where the game doesn't draw, so it was checked with the radius scaled down. Checked by eye from screenshots.
 
 **Results:** 2026-11-21, after adding the Wildlife page: `naturetab-headless` 26/26 passed with the Animal Tab scenario skipped, and `naturetab-animaltab-headless` 27/27. In `naturetab-animaltab` windowed, F5 opened the Wildlife page with a wild muffalo and hare, the hunt and tame columns and Animal Tab's Handler column, and Wildlife was gone from the bottom bar. That was checked by eye from a screenshot.
 
@@ -201,6 +207,7 @@ That's about 1 ms once a second while the tab is open, and nothing while it's cl
 - 2026-11-21: the Wildlife tab moved in as a fourth page.
 - 2026-11-21: the tab became Nature, since it holds animals as well as resources.
 - 2026-11-21: the mod became Nature Tab: package `Ordo.NatureTab` (was `Ordo.FloraTab`), folder and project `NatureTab`, button def `Ordo_Nature`, window `MainTabWindow_Nature`, keys `Ordo_NatureTab_*`, and the `naturetab*` test profiles. It was never published, so no one's mod list or saves depended on the old names.
+- 2026-11-21: a hosted window is told it opened when its page is shown, so Numbers' Wildlife and Animals windows show their own tables instead of Numbers' colonist table. The area choice carries over to another map by name, and each page has its own. Not tested in game yet: no test profile loads Numbers.
 
 ## Open questions
 

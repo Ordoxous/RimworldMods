@@ -29,6 +29,8 @@ public abstract class PawnTablePage : IResourcePage
     private string searchedText = "";
 
     private bool hostedLooked;
+    private MainButtonDef buttonDef;
+    private Type lookedClass;
     private MainTabWindow_PawnTable hosted;
     private PawnTable hostedTable;
 
@@ -60,19 +62,26 @@ public abstract class PawnTablePage : IResourcePage
 
     // The window a mod gave the button in place of the game's, if it is a pawn table window this page can host. It is
     // the button def's own instance, so a mod that keeps a static reference to its window, as Animal Tab's filters do,
-    // finds this one.
+    // finds this one. It is looked up again when the button's window class changes, as Numbers changes Wildlife's (and,
+    // if set to, Animals') when a game loads or its settings change.
     public MainTabWindow_PawnTable HostedWindow
     {
         get
         {
-            if (hostedLooked)
+            buttonDef ??= DefDatabase<MainButtonDef>.GetNamedSilentFail(ButtonDefName);
+            Type windowClass = buttonDef?.tabWindowClass;
+            if (hostedLooked && windowClass == lookedClass)
                 return hosted;
             hostedLooked = true;
-            MainButtonDef def = DefDatabase<MainButtonDef>.GetNamedSilentFail(ButtonDefName);
-            Type windowClass = def?.tabWindowClass;
+            lookedClass = windowClass;
+            hosted = null;
+            hostedTable = null;
             if (windowClass != null && windowClass != VanillaWindowClass
                 && typeof(MainTabWindow_PawnTable).IsAssignableFrom(windowClass))
-                hosted = def.TabWindow as MainTabWindow_PawnTable;
+                hosted = buttonDef.TabWindow as MainTabWindow_PawnTable;
+            // The game keeps the window it made first, which may be the vanilla one from before the class changed
+            if (hosted != null && hosted.GetType() == VanillaWindowClass)
+                hosted = null;
             return hosted;
         }
     }
@@ -157,7 +166,20 @@ public abstract class PawnTablePage : IResourcePage
     {
         SearchFor(search);
         if (HostedWindow != null)
-            HostedWindow.DoWindowContents(new Rect(rect.x, rect.y, rect.width, Height));
+        {
+            // In a group, so a window that draws from its own corner rather than the rect it's given, as Numbers does,
+            // draws in the page and not over the tabs and toolbar
+            var page = new Rect(rect.x, rect.y, rect.width, Height);
+            GUI.BeginGroup(page);
+            try
+            {
+                HostedWindow.DoWindowContents(page.AtZero());
+            }
+            finally
+            {
+                GUI.EndGroup();
+            }
+        }
         else
             Table.PawnTableOnGUI(rect.position);
 
@@ -183,6 +205,11 @@ public abstract class PawnTablePage : IResourcePage
     public void WindowUpdate(Map currentMap)
     {
     }
+
+    // The hosted window is told it opened each time its page is shown, as the game tells it when its own tab opens.
+    // Numbers' Animals and Wildlife windows only pick their table there, showing its colonist table until then, and the
+    // filter they pick it with is shared by all of Numbers' windows, so it must be picked again on each switch.
+    public void Shown() => HostedWindow?.PostOpen();
 
     public void Clear()
     {
