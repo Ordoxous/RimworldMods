@@ -7,5 +7,5 @@
     <li>1.7</li>
   </supportedVersions>
   <packageId>Ordo.FloraTab</packageId>
-  <description>Adds a Flora tab next to Wildlife that lists the wild plants on the map you can harvest, such as berries, healroot and trees. For each kind it shows how many there are, how many are ready, the yield you'd get now and how many are already marked. Mark a whole kind for harvest in one click, or jump to the next one on the map.</description>
+  <description>Adds a Resources tab next to Wildlife with two pages. Plants lists the wild plants on the map you can harvest, such as berries, healroot and trees: how many there are, how many are ready, the yield you would get now, which are at risk, and how many are already marked. Minerals lists the ore you can see, such as steel, gold, plasteel and compacted machinery: how many cells and veins, the yield and its value, and how much sits under overhead mountain. Mark a whole kind in one click, or jump to the next one on the map.</description>
 </ModMetaData>

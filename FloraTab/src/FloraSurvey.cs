@@ -13,7 +13,10 @@ public class FloraRow
     public int ready;
     public int soon;
     public int marked;
+
+    // Of the plant's own harvestedThingDef, from the ready plants; yields also holds any secondary outputs
     public float yieldNow;
+    public readonly List<FloraYield> yields = new();
 
     // Growing plants: the soonest one to be ready, in days (infinity when none will be), and how many aren't growing now
     public float nextReadyDays = float.PositiveInfinity;
@@ -38,6 +41,18 @@ public class FloraRow
     public bool IsTree => def.plant.IsTree;
     public ThingDef Product => def.plant.harvestedThingDef;
     public int AtRisk => dying + oldAge + frost;
+
+    // What the ready plants' yields would sell for, all together, so rows giving different things can be sorted
+    public float YieldValue
+    {
+        get
+        {
+            float value = 0f;
+            foreach (FloraYield y in yields)
+                value += y.now * y.Thing.BaseMarketValue;
+            return value;
+        }
+    }
 }
 
 public struct FloraFilter
@@ -45,6 +60,9 @@ public struct FloraFilter
     public bool includeTrees;
     public bool includeCultivated;
     public bool onlyReady;
+
+    // Hide kinds that give nothing when harvested: no harvestedThingDef and no secondary output
+    public bool hideYieldless;
 
     // Only plants in this area, when set. It must belong to the surveyed map.
     public Area area;
@@ -64,7 +82,6 @@ public static class FloraSurvey
         FloraFilter filter)
     {
         RowsByDef.Clear();
-        bool godMode = DebugSettings.godMode;
         DesignationManager designations = map.designationManager;
         Area area = filter.area?.Map == map ? filter.area : null;
         IntVec3 baseCenter = BaseCenter(map);
@@ -80,8 +97,11 @@ public static class FloraSurvey
                 continue;
             if (!filter.includeTrees && def.plant.IsTree)
                 continue;
+            if (filter.hideYieldless && FloraYields.For(def).Count == 0)
+                continue;
             IntVec3 cell = plant.Position;
-            if (!godMode && cell.Fogged(map))
+            // Never list what the player can't see, god mode or not
+            if (cell.Fogged(map))
                 continue;
             if (area != null && !area[cell])
                 continue;
@@ -94,6 +114,8 @@ public static class FloraSurvey
             if (!RowsByDef.TryGetValue(def, out FloraRow row))
             {
                 row = new FloraRow { def = def };
+                foreach (YieldSource source in FloraYields.For(def))
+                    row.yields.Add(new FloraYield { source = source });
                 int stopHour = forecast.FirstHourBelow(def.plant.minGrowthTemperature);
                 if (stopHour >= 0)
                     row.growthStopsDays = stopHour / 24f;
@@ -108,7 +130,13 @@ public static class FloraSurvey
             if (plant.HarvestableNow)
             {
                 row.ready++;
-                row.yieldNow += ExpectedYield(plant);
+                foreach (FloraYield y in row.yields)
+                {
+                    float amount = FloraYields.Expected(plant, y.source);
+                    y.now += amount;
+                    if (y.source.primary)
+                        row.yieldNow += amount;
+                }
             }
             else
             {

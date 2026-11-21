@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Ordo.FloraTab;
 using RimWorld;
+using UnityEngine;
 using Verse;
 
 namespace Ordo.BridgeTools.Scenarios;
@@ -32,7 +33,14 @@ public static class FloraTabScenarios
         new("growth_days_until_ready_matches_a_day", "growth", DaysUntilReadyMatchesADay),
         new("filter_area", "filter area", AreaFilter),
         new("filter_distance_and_nearest", "filter area", DistanceAndNearest),
-        new("perf_survey_and_forecast", "perf", SurveyAndForecastCost)
+        new("perf_survey_and_forecast", "perf", SurveyAndForecastCost),
+        new("minerals_ore_kinds", "minerals", MineralsSetup),
+        new("minerals_counts_veins_yield_and_overhead", "minerals", MineralsCountsVeinsYieldAndOverhead),
+        new("minerals_fogged_hidden", "minerals", MineralsFoggedHidden),
+        new("minerals_designate_and_cancel", "minerals", MineralsDesignateAndCancel),
+        new("minerals_area", "minerals", MineralsArea),
+        new("minerals_distance_and_nearest", "minerals", MineralsDistanceAndNearest),
+        new("perf_mineral_survey", "perf", MineralSurveyCost)
     };
 
     private static readonly FloraFilter Wild = new();
@@ -70,7 +78,7 @@ public static class FloraTabScenarios
     {
         var def = DefDatabase<MainButtonDef>.GetNamedSilentFail("Ordo_Flora");
         context.Check("the Ordo_Flora main button loaded", def != null);
-        context.Check($"it opens the Flora window: {def?.tabWindowClass}", def?.tabWindowClass == typeof(MainTabWindow_Flora));
+        context.Check($"it opens the Resources window: {def?.tabWindowClass}", def?.tabWindowClass == typeof(MainTabWindow_Flora));
         context.Check($"it sits just after Wildlife: {def?.order}", def != null && def.order > DefDatabase<MainButtonDef>.GetNamed("Wildlife").order);
         context.Check("the window is made", def?.TabWindow is MainTabWindow_Flora);
         return Task.CompletedTask;
@@ -112,13 +120,210 @@ public static class FloraTabScenarios
         var plant = PlacePlant(context, healroot, 1, 0, 1f);
         context.Check("visible wild healroot is listed", Count(Row(context, healroot, Wild)) == before + 1);
 
+        // Hidden even in god mode, which shows the fogged map
         bool godMode = DebugSettings.godMode;
-        DebugSettings.godMode = false;
+        DebugSettings.godMode = true;
         context.Map.fogGrid.Refog(CellRect.SingleCell(plant.Position));
         int fogged = Count(Row(context, healroot, Wild));
         context.Map.fogGrid.Unfog(plant.Position);
         DebugSettings.godMode = godMode;
-        context.Check($"fogged healroot is hidden: {before} -> {fogged}", fogged == before);
+        context.Check($"fogged healroot is hidden, even in god mode: {before} -> {fogged}", fogged == before);
+        return Task.CompletedTask;
+    }
+
+    private static readonly MineralFilter AllMinerals = new();
+
+    private static MineralRow MineralRow(
+        ScenarioContext context,
+        ThingDef def,
+        MineralFilter filter
+    ) => MineralSurvey.Build(context.Map, filter).FirstOrDefault(row => row.def == def);
+
+    private static Task MineralsSetup(
+        ScenarioContext context
+    )
+    {
+        var defs = MineralSurvey.OreDefs.Select(d => d.defName).ToList();
+        foreach (var expected in new[] { "MineableSteel", "MineableGold", "MineablePlasteel", "MineableComponentsIndustrial" })
+            context.Check($"{expected} is an ore kind", defs.Contains(expected));
+        context.Check("granite isn't", !defs.Contains("Granite"));
+        return Task.CompletedTask;
+    }
+
+    // Two touching cells and one apart make two veins; full-health cells give the def's whole yield; one is under overhead
+    // mountain
+    private static Task MineralsCountsVeinsYieldAndOverhead(
+        ScenarioContext context
+    )
+    {
+        var steel = Def("MineableSteel");
+        var before = MineralRow(context, steel, AllMinerals);
+        var a = context.Place(steel, 0, 0);
+        context.Place(steel, 1, 0);
+        context.Place(steel, 4, 0);
+        var roofGrid = context.Map.roofGrid;
+        RoofDef roofWas = roofGrid.RoofAt(a.Position);
+        roofGrid.SetRoof(a.Position, RoofDefOf.RoofRockThick);
+        try
+        {
+            var after = MineralRow(context, steel, AllMinerals);
+            int cells = (after?.cells.Count ?? 0) - (before?.cells.Count ?? 0);
+            int veins = (after?.veins.Count ?? 0) - (before?.veins.Count ?? 0);
+            context.Check($"three more cells: {cells}", cells == 3);
+            context.Check($"two more veins: {veins}", veins == 2);
+
+            float expected = 3 * Mathf.Max(1, steel.building.EffectiveMineableYield) * steel.building.mineableDropChance;
+            float gained = (after?.yield ?? 0f) - (before?.yield ?? 0f);
+            context.Check($"yield grew by three cells' worth: {gained:F2}, expected {expected:F2}", Mathf.Abs(gained - expected) < 0.01f);
+            context.Check($"the product is steel: {after?.Product}", after?.Product == ThingDefOf.Steel);
+            context.Check($"one more under overhead mountain: {before?.overhead ?? 0} -> {after?.overhead}",
+                (after?.overhead ?? 0) - (before?.overhead ?? 0) == 1 && after.overheadCells.Contains((Mineable)a));
+
+            // A cell half mined by a 100% miner has half its yield banked and half still in the rock
+            var mineable = (Mineable)a;
+            mineable.HitPoints = mineable.MaxHitPoints / 2;
+            mineable.yieldPct = 0.5f;
+            context.Check($"a half-mined cell still expects its whole yield: {MineralSurvey.ExpectedYield(mineable):F2}",
+                Mathf.Abs(MineralSurvey.ExpectedYield(mineable) - expected / 3) < 0.5f);
+        }
+        finally
+        {
+            roofGrid.SetRoof(a.Position, roofWas);
+        }
+        return Task.CompletedTask;
+    }
+
+    private static Task MineralsFoggedHidden(
+        ScenarioContext context
+    )
+    {
+        var gold = Def("MineableGold");
+        int before = MineralRow(context, gold, AllMinerals)?.cells.Count ?? 0;
+        var cell = context.Place(gold, 0, 0);
+        context.Check("visible gold is listed", MineralRow(context, gold, AllMinerals)?.cells.Count == before + 1);
+
+        bool godMode = DebugSettings.godMode;
+        DebugSettings.godMode = true;
+        context.Map.fogGrid.Refog(CellRect.SingleCell(cell.Position));
+        int fogged = MineralRow(context, gold, AllMinerals)?.cells.Count ?? 0;
+        context.Map.fogGrid.Unfog(cell.Position);
+        DebugSettings.godMode = godMode;
+        context.Check($"fogged gold is hidden, even in god mode: {before} -> {fogged}", fogged == before);
+        return Task.CompletedTask;
+    }
+
+    private static Task MineralsDesignateAndCancel(
+        ScenarioContext context
+    )
+    {
+        var silver = Def("MineableSilver");
+        var a = context.Place(silver, 0, 0);
+        var b = context.Place(silver, 1, 0);
+        var designations = context.Map.designationManager;
+        // A cell marked for vein mining already counts as marked, and isn't marked again
+        designations.AddDesignation(new Designation(b.Position, DesignationDefOf.MineVein));
+
+        bool godMode = DebugSettings.godMode;
+        DebugSettings.godMode = false;
+        int marked = MineralDesignations.MineAll(MineralRow(context, silver, AllMinerals), context.Map);
+        DebugSettings.godMode = godMode;
+        context.Check($"marked at least the unmarked cell: {marked}", marked >= 1);
+        context.Check("it is marked to mine", designations.DesignationAt(a.Position, DesignationDefOf.Mine) != null);
+        context.Check("the vein-marked cell keeps its vein designation only",
+            designations.DesignationAt(b.Position, DesignationDefOf.MineVein) != null
+            && designations.DesignationAt(b.Position, DesignationDefOf.Mine) == null);
+        context.Check("the cells are still there", a.Spawned && b.Spawned);
+        var row = MineralRow(context, silver, AllMinerals);
+        context.Check($"the row counts both as marked: {row?.marked}", row?.marked >= 2);
+
+        int again = MineralDesignations.MineAll(row, context.Map);
+        context.Check($"a second click marks nothing new: {again}", again == 0);
+
+        int cancelled = MineralDesignations.Cancel(row, context.Map);
+        context.Check($"cancel removed both kinds: {cancelled}", cancelled >= 2);
+        context.Check("nothing left marked", !MineralSurvey.IsMarked(designations, a.Position) && !MineralSurvey.IsMarked(designations, b.Position));
+        return Task.CompletedTask;
+    }
+
+    private static Task MineralsArea(
+        ScenarioContext context
+    )
+    {
+        var jade = Def("MineableJade");
+        var inside = context.Place(jade, 0, 0);
+        var outside = context.Place(jade, 3, 0);
+        Area home = context.Map.areaManager.Home;
+        bool insideWas = home[inside.Position], outsideWas = home[outside.Position];
+        try
+        {
+            home[inside.Position] = true;
+            home[outside.Position] = false;
+            var row = MineralRow(context, jade, new MineralFilter { area = home });
+            context.Check("the jade in the home area is listed", row != null && row.cells.Contains((Mineable)inside));
+            context.Check("the jade outside isn't", row == null || !row.cells.Contains((Mineable)outside));
+        }
+        finally
+        {
+            home[inside.Position] = insideWas;
+            home[outside.Position] = outsideWas;
+        }
+        return Task.CompletedTask;
+    }
+
+    private static Task MineralsDistanceAndNearest(
+        ScenarioContext context
+    )
+    {
+        var jade = Def("MineableJade");
+
+        // Place takes offsets from the scenario's origin; these go 1 and 12 cells from the base
+        var map = context.Map;
+        IntVec3 center = FloraSurvey.BaseCenter(map);
+        IntVec3 nearCell = center + new IntVec3(1, 0, 0);
+        IntVec3 farCell = center + new IntVec3(12, 0, 0);
+        if (!nearCell.InBounds(map) || !farCell.InBounds(map) || nearCell.GetEdifice(map) != null || farCell.GetEdifice(map) != null)
+        {
+            context.Check($"the cells 1 and 12 east of the base at {center} aren't free", false);
+            return Task.CompletedTask;
+        }
+        IntVec3 origin = context.Cell(0, 0);
+        var near = (Mineable)context.Place(jade, nearCell.x - origin.x, nearCell.z - origin.z);
+        var far = (Mineable)context.Place(jade, farCell.x - origin.x, farCell.z - origin.z);
+
+        // Rock spawned beside a colonist pushes them aside, and with no home area the base is the colonists' middle, so
+        // distances are taken from where the base is now
+        IntVec3 now = FloraSurvey.BaseCenter(map);
+        float nearDistance = (near.Position - now).LengthHorizontal;
+        var all = MineralRow(context, jade, AllMinerals);
+        context.Check($"nearest is the near jade's {nearDistance:F2} cells: {all?.nearest:F2}",
+            all != null && all.nearest <= nearDistance + 0.01f);
+        var close = MineralRow(context, jade, new MineralFilter { maxDistance = Mathf.CeilToInt(nearDistance) + 2 });
+        context.Check("within 5 cells lists the near jade", close != null && close.cells.Contains(near));
+        context.Check("but not the far one", close == null || !close.cells.Contains(far));
+        return Task.CompletedTask;
+    }
+
+    // Like the plant survey's timing: the mineral survey runs once a second while its page is open
+    private static Task MineralSurveyCost(
+        ScenarioContext context
+    )
+    {
+        const int runs = 20;
+        var rows = MineralSurvey.Build(context.Map, AllMinerals);
+        int cells = rows.Sum(row => row.cells.Count);
+        double avg = 0, max = 0;
+        var watch = new Stopwatch();
+        for (var i = 0; i < runs; i++)
+        {
+            watch.Restart();
+            MineralSurvey.Build(context.Map, AllMinerals);
+            var ms = watch.Elapsed.TotalMilliseconds;
+            avg += ms / runs;
+            max = System.Math.Max(max, ms);
+        }
+        string line = $"mineral survey of {cells} visible ore cells in {rows.Count} kinds: avg {avg:F2} ms, max {max:F2} ms";
+        Log.Message("[FloraTab perf] " + line);
+        context.Check(line, avg < 10);
         return Task.CompletedTask;
     }
 

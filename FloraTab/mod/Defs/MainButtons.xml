@@ -3,8 +3,8 @@
 
   <MainButtonDef>
     <defName>Ordo_Flora</defName>
-    <label>flora</label>
-    <description>List the wild plants in the area that can be harvested, and designate them for harvest.</description>
+    <label>resources</label>
+    <description>List the wild plants you can harvest and the ore you can mine on the map, and designate them in one click.</description>
     <tabWindowClass>Ordo.FloraTab.MainTabWindow_Flora</tabWindowClass>
     <order>51</order>
     <closesWorldView>true</closesWorldView>

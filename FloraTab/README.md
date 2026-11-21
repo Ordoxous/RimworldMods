@@ -1,6 +1,10 @@
 # FloraTab
 
-Shows "Flora Tab" in game, package ID `Ordo.FloraTab`. It adds a **Flora** main tab next to Wildlife that lists the harvestable wild plants on the current map, one row per kind: berry bushes, wild healroot, agave and, if you turn it on, trees.
+Shows "Flora Tab" in game, package ID `Ordo.FloraTab`. It adds a **Resources** main tab next to Wildlife with two pages, each a table with one row per kind:
+- **Plants:** the harvestable wild plants on the current map, such as berry bushes, wild healroot, agave and, if you turn it on, trees.
+- **Minerals:** the visible ore, such as steel, gold, plasteel, jade, uranium and compacted machinery.
+
+The mod and the button def keep their Flora names (`Ordo.FloraTab`, `Ordo_Flora`, `MainTabWindow_Flora`) so saves and mod lists aren't affected.
 
 ## Dependencies
 
@@ -15,13 +19,17 @@ Shows "Flora Tab" in game, package ID `Ordo.FloraTab`. It adds a **Flora** main 
 | The survey: one row per plant kind, with its counts, readiness, risk and distance | `src/FloraSurvey.cs` |
 | The forecast: the map's next 7 days hour by hour, used for frost and days until ready | `src/MapForecast.cs` |
 | Harvest and Cancel for a whole row | `src/FloraDesignations.cs` |
-| The window: a toolbar of toggles, area and distance dropdowns and a search box, sortable column headers, and the rows | `src/MainTabWindow_Flora.cs` |
+| The window: the Plants and Minerals tabs, and the shared toolbar with area and distance dropdowns and a search box. Each page adds its own toggles. | `src/MainTabWindow_Flora.cs` |
+| The table both pages use: columns that each say how they sort and draw, the header, scrolling, hover and jump-to-next | `src/TablePage.cs` |
+| The pages: their columns, toggles and row buttons | `src/PlantsPage.cs`, `src/MineralsPage.cs` |
+| Minerals: the survey, Mine and Cancel, and the hover highlight | `src/MineralSurvey.cs`, `src/MineralDesignations.cs`, `src/MineralHighlight.cs` |
 | Hover highlight: hovering a row outlines its plants on the map. Yellow is marked for harvest, red at risk, green ready and white growing. If none are on screen, an arrow at the screen edge points to the nearest ready one. | `src/FloraHighlight.cs` |
 
-**What's listed:** plants in the map's `ThingRequestGroup.HarvestablePlant` lister group, meaning plants whose def has a harvest product. Stumps aren't listed. Plants in fog aren't listed unless god mode is on, which matches the Wildlife tab.
+**What's listed:** plants in the map's `ThingRequestGroup.HarvestablePlant` lister group, meaning plants whose def has a harvest product. Stumps aren't listed. Plants in fog are never listed, even in god mode, which shows the fogged map.
 - **Trees** are hidden by default.
 - **Cultivated plants** are hidden by default. "Cultivated" uses vanilla's `Plant.DeliberatelyCultivated()`: the plant is in a growing zone set to that plant, or on a building that supports plants.
 - **Only ready** hides kinds with nothing ready now.
+- **Hide yieldless** is on by default. It hides kinds that give nothing when harvested: no `harvestedThingDef` and no secondary output. Every vanilla plant in the group has a product, so this only affects modded plants with a harvest yield but no product.
 - **Area** limits the list to plants in the home area or an allowed area.
 - **Within** limits the list to plants within N cells of the base, in a straight line. The base is the middle of the home area, or of the free colonists if there's no home area, or else the middle of the map.
 - Harvest marks only the plants listed, so an area or distance limit also limits what it marks.
@@ -30,12 +38,15 @@ Shows "Flora Tab" in game, package ID `Ordo.FloraTab`. It adds a **Flora** main 
 
 | Column | What it shows |
 |---|---|
+| Yields | Everything harvesting gives (see below), as icons that open info cards, plus their names. Sorts by the first one's name. |
 | Count, Ready | Plants listed, and how many are `HarvestableNow` |
 | Next ready | How long until the soonest growing plant is ready, or "stalled" if none will grow. The tooltip adds how many are ready within about 10 days (vanilla's `HarvestableSoon`), how many aren't growing, and when the cold stops growth if that falls within the forecast. |
-| Yield now | The deterministic part of `Plant.YieldNow()`: growth, health and the difficulty's crop yield factor, without the random rounding |
+| Yield now | The deterministic part of `Plant.YieldNow()`: growth, health and the difficulty's crop yield factor, without the random rounding. With several yields it shows each amount, like `125 + 2`. It sorts by what all the yields are worth together (`BaseMarketValue`), so rows giving different things compare. |
 | At risk | Plants dying now (`Plant.Dying`, or blighted), plants reaching old age within 7 days, and plants frost kills within 7 days. Sort by it to harvest these first. |
 | Nearest | Straight-line cells from the base to the nearest plant of that kind |
 | Marked | Plants designated for harvest |
+
+**Several yields** (`src/FloraYields.cs`): vanilla plants give only `plant.harvestedThingDef`. Mods add more with Vanilla Expanded Framework's `VEF.Plants.DualCropExtension`, for example Alpha Biomes' techno tree, which also gives components. VEF's `Plant.PlantCollected` prefix gives `secondaryOutput`, or one of `randomSecondaryOutput` picked evenly when `randomOutput` is set, as `(int)(outPutAmount × Growth)`. It gives this only if the plant `CanYieldNow`, the harvester is humanlike or a mechanoid, and `Rand.Value` is under the harvester's `PlantHarvestYield`. The tab reads the extension by reflection and caches it per def, so it needs no VEF dependency. The estimate assumes a 100% harvester, and a random output counts at its share (1/n). This is untested in game, since the test profiles don't load VEF.
 
 **Frost doesn't kill wild plants.** Plants that freeze go leafless (`Plant.CheckMakeLeafless`, below a threshold set for each plant, `LeaflessTemperatureThresh`), but only those with `dieIfLeafless` die. In vanilla those are crops, roses and daylilies, glowstool and bryolux. No vanilla wild plant has it: wild plants just stop growing in the cold, and old age is what kills them. A berry bush lives 6 grow-days × 8, so 48 days.
 
@@ -51,7 +62,7 @@ Shows "Flora Tab" in game, package ID `Ordo.FloraTab`. It adds a **Flora** main 
 
 **Row actions:**
 - **Click the plant name** to jump to and select the next plant of that kind. At-risk plants come first, then ready ones, then the order goes by position.
-- **Click the product** to open its info card.
+- **Click a product's icon** to open its info card. Clicking the names opens the first product's card.
 - **Harvest** checks every listed plant with vanilla's `CanDesignateThing`, using `Designator_PlantsHarvest`, or `Designator_PlantsHarvestWood` for trees. It then designates the plant the way `Designator_Plants.DesignateThing` does: an existing cut designation becomes a harvest designation. It skips the wood designator's per-tree messages.
 - **Cancel** removes the row's harvest designations.
 
@@ -60,6 +71,29 @@ Shows "Flora Tab" in game, package ID `Ordo.FloraTab`. It adds a **Flora** main 
 - **The lister does the work:** the game keeps the `HarvestablePlant` group up to date as plants spawn and despawn, so a survey walks only that group.
 - **Only while open:** the survey runs only while the tab is open. That's when it opens, when the map changes, after a button press, and at most once a second of real time.
 - **The forecast is shared:** it costs 168 samples an hour, and each plant kind's growth curve is built once per forecast.
+
+## Minerals page
+
+**What's listed:** cells of every def with `building.isResourceRock` and a `mineableThing`. That's vanilla's steel, silver, gold, uranium, plasteel, jade and compacted machinery, Odyssey's obsidian, and any modded ore that sets the flag. Plain stone (granite, marble and the rest) isn't listed. Fogged cells are never listed, even in god mode, so ore inside unexplored rock shows up only once it's uncovered. Area and Within limit it just as on Plants.
+
+**Cost:** there's no lister group for mineables, but `listerThings.ThingsOfDef` indexes by def. So a survey walks only the ore kinds' own cells, never the map's ordinary rock.
+
+**Columns:** every column with data sorts.
+
+| Column | What it shows |
+|---|---|
+| Mineral, Yields | The rock and what mining it gives. Click the rock to jump to its next vein, nearest the base first. Click the product for its info card. |
+| Cells | Visible cells |
+| Veins | Groups of cardinally touching cells, the way vein mining spreads |
+| Yield | `Mineable.TrySpawnYield` without its randomness: at least 1 of `EffectiveMineableYield` (difficulty's mine yield factor), times `mineableDropChance`. Wasteable yields scale with `yieldPct`, which mining damage adds to as HitPoints / MaxHitPoints × the miner's MiningYield. So the estimate assumes a 100% miner, and a part-mined cell counts what it has banked plus what's left. |
+| Value | Yield × the product's `BaseMarketValue`. This is the default sort. |
+| Overhead | Cells under thick (overhead mountain) roof. That roof collapses if it ends up more than 6 cells from a support. |
+| Nearest, Marked | As on Plants. Marked counts both Mine and Mine vein designations. |
+
+**Row actions:**
+- **Mine** checks each listed cell with vanilla's `Designator_Mine.CanDesignateThing`, then adds a Mine designation and removes any smoothing designation, as `DesignateSingleCell` does. It skips that method's ideoligion warning for each cell and gives it once per click instead. It also skips its god-mode instant mining. Cells already marked, including for vein mining, are left alone.
+- **Cancel** removes both Mine and Mine vein designations from the row's cells.
+- **The hover highlight** outlines marked cells in yellow, overhead cells in orange and the rest in white. If none are on screen, an arrow points to the vein nearest the base.
 
 ## Testing
 

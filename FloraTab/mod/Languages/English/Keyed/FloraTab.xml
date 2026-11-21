@@ -3,6 +3,13 @@
 
   <Ordo_FloraTab_Plant>Plant</Ordo_FloraTab_Plant>
   <Ordo_FloraTab_Yields>Yields</Ordo_FloraTab_Yields>
+  <Ordo_FloraTab_YieldsTip>What harvesting it gives. Click an icon for its info card.</Ordo_FloraTab_YieldsTip>
+  <Ordo_FloraTab_NoYield>nothing</Ordo_FloraTab_NoYield>
+  <Ordo_FloraTab_NoYieldTip>Harvesting this plant gives nothing.</Ordo_FloraTab_NoYieldTip>
+  <Ordo_FloraTab_SecondaryYieldTip>Also given when harvested: up to {0} at full growth, less when it is less grown. Only people and mechanoids get it, and a harvester with less than 100% plant harvest yield may not.</Ordo_FloraTab_SecondaryYieldTip>
+  <Ordo_FloraTab_RandomYieldTip>Sometimes given when harvested ({1} of the time, picked at random): up to {0} at full growth, less when it is less grown. Only people and mechanoids get it.</Ordo_FloraTab_RandomYieldTip>
+  <Ordo_FloraTab_YieldNowRowTip>About {0} {1}</Ordo_FloraTab_YieldNowRowTip>
+  <Ordo_FloraTab_YieldValueRowTip>Worth about {0} in all. The column sorts by this.</Ordo_FloraTab_YieldValueRowTip>
   <Ordo_FloraTab_Count>Count</Ordo_FloraTab_Count>
   <Ordo_FloraTab_CountTip>How many of this plant you can see on the map.</Ordo_FloraTab_CountTip>
   <Ordo_FloraTab_Ready>Ready</Ordo_FloraTab_Ready>
@@ -24,7 +31,7 @@
   <Ordo_FloraTab_NearTip>Cells from your base to the nearest one, in a straight line. The base is the middle of the home area.</Ordo_FloraTab_NearTip>
   <Ordo_FloraTab_NearRowTip>The nearest {1} is {0} cells from your base.</Ordo_FloraTab_NearRowTip>
   <Ordo_FloraTab_Yield>Yield now</Ordo_FloraTab_Yield>
-  <Ordo_FloraTab_YieldTip>About how much harvesting every ready plant would give, after growth, damage and difficulty.</Ordo_FloraTab_YieldTip>
+  <Ordo_FloraTab_YieldTip>About how much harvesting every ready plant would give, after growth, damage and difficulty. Plants that give more than one thing show each amount. Sorting goes by what it is all worth.</Ordo_FloraTab_YieldTip>
   <Ordo_FloraTab_Marked>Marked</Ordo_FloraTab_Marked>
   <Ordo_FloraTab_MarkedTip>How many are already designated for harvest.</Ordo_FloraTab_MarkedTip>
   <Ordo_FloraTab_HarvestAll>Harvest</Ordo_FloraTab_HarvestAll>
@@ -38,6 +45,8 @@
   <Ordo_FloraTab_IncludeCultivatedTip>Also list plants in growing zones and hydroponics basins.</Ordo_FloraTab_IncludeCultivatedTip>
   <Ordo_FloraTab_OnlyReady>Only ready</Ordo_FloraTab_OnlyReady>
   <Ordo_FloraTab_OnlyReadyTip>Hide plants with nothing ready to harvest.</Ordo_FloraTab_OnlyReadyTip>
+  <Ordo_FloraTab_HideYieldless>Hide yieldless</Ordo_FloraTab_HideYieldless>
+  <Ordo_FloraTab_HideYieldlessTip>Hide plants that give nothing when harvested.</Ordo_FloraTab_HideYieldlessTip>
   <Ordo_FloraTab_Area>Area: {0}</Ordo_FloraTab_Area>
   <Ordo_FloraTab_AreaTip>Only list plants inside this area. Harvest then marks only those.</Ordo_FloraTab_AreaTip>
   <Ordo_FloraTab_Anywhere>anywhere</Ordo_FloraTab_Anywhere>
@@ -47,5 +56,29 @@
   <Ordo_FloraTab_Cells>{0} cells</Ordo_FloraTab_Cells>
   <Ordo_FloraTab_None>No harvestable plants found.</Ordo_FloraTab_None>
   <Ordo_FloraTab_Designated>Designated {0} for harvest.</Ordo_FloraTab_Designated>
+
+  <Ordo_FloraTab_PlantsPage>Plants</Ordo_FloraTab_PlantsPage>
+  <Ordo_FloraTab_MineralsPage>Minerals</Ordo_FloraTab_MineralsPage>
+
+  <Ordo_FloraTab_Mineral>Mineral</Ordo_FloraTab_Mineral>
+  <Ordo_FloraTab_MineralYieldsTip>What mining it gives. Click for its info card.</Ordo_FloraTab_MineralYieldsTip>
+  <Ordo_FloraTab_JumpVeinTip>Click to jump to the next vein of {0} on the map, nearest your base first.</Ordo_FloraTab_JumpVeinTip>
+  <Ordo_FloraTab_CellCount>Cells</Ordo_FloraTab_CellCount>
+  <Ordo_FloraTab_CellCountTip>How many cells of it you can see on the map. Ore hidden inside unexplored rock is not counted.</Ordo_FloraTab_CellCountTip>
+  <Ordo_FloraTab_Veins>Veins</Ordo_FloraTab_Veins>
+  <Ordo_FloraTab_VeinsTip>How many separate lumps the cells form, counting cells that touch side by side.</Ordo_FloraTab_VeinsTip>
+  <Ordo_FloraTab_MineYield>Yield</Ordo_FloraTab_MineYield>
+  <Ordo_FloraTab_MineYieldTip>About how much mining every cell would give, for a miner with 100% mining yield, after difficulty. Cells already part-mined count what they have left.</Ordo_FloraTab_MineYieldTip>
+  <Ordo_FloraTab_Value>Value</Ordo_FloraTab_Value>
+  <Ordo_FloraTab_ValueTip>What that yield is worth at base market value.</Ordo_FloraTab_ValueTip>
+  <Ordo_FloraTab_Overhead>Overhead</Ordo_FloraTab_Overhead>
+  <Ordo_FloraTab_OverheadTip>How many cells are under overhead mountain. Overhead mountain collapses onto anyone below if it ends up more than 6 cells from a support, so mine these with care.</Ordo_FloraTab_OverheadTip>
+  <Ordo_FloraTab_OverheadRowTip>{0} of the {1} cells are under overhead mountain. Hover the row to see them outlined in orange on the map.</Ordo_FloraTab_OverheadRowTip>
+  <Ordo_FloraTab_MarkedMineTip>How many cells are already designated for mining.</Ordo_FloraTab_MarkedMineTip>
+  <Ordo_FloraTab_MineAll>Mine</Ordo_FloraTab_MineAll>
+  <Ordo_FloraTab_MineAllTip>Designate every {0} cell listed for mining.</Ordo_FloraTab_MineAllTip>
+  <Ordo_FloraTab_CancelMineTip>Remove the mining designation from every {0} cell.</Ordo_FloraTab_CancelMineTip>
+  <Ordo_FloraTab_NoMinerals>No minerals found. Ore inside unexplored rock shows up once it's uncovered.</Ordo_FloraTab_NoMinerals>
+  <Ordo_FloraTab_DesignatedMine>Designated {0} cells of {1} for mining.</Ordo_FloraTab_DesignatedMine>
 
 </LanguageData>
