@@ -45,7 +45,7 @@ Load what the task needs:
 
 ## Rules that save the most time
 
-- Follow the repo README's Conventions. The build enforces the About.xml rules (`ORDO001` errors); the rest, such as one Harmony ID per mod and `WorkshopReference` for other mods' DLLs, are up to you.
+- Follow the repo README's Conventions. The build enforces the About.xml rules (`ORDO001` errors); the rest, such as one Harmony ID per mod, patching through `TryPatch` and `WorkshopReference` for other mods' DLLs, are up to you.
 - Stop the game before deploying a DLL or the bridge tools; companions and mod DLLs load only at startup.
 - Have the Steam client running before starting the game. Without it, Harmony failed to load and the bridge never came up. When `games_connect` times out, read `~/.gabs/rimworld/launch.log` before anything else. The project's `.claude/settings.json` has a PreToolUse hook that blocks `games_start` while `steam.exe` isn't running.
 - A failed bridge call leaves a blocking "attention" item: clear it with `games_ack_attention` before carrying on.

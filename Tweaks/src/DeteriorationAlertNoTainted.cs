@@ -19,15 +19,10 @@ public static class DeteriorationAlertNoTainted
             return;
 
         // By name, so Tweaks needs no reference to TD Enhancement Pack's assembly
-        var getReport = AccessTools.Method(AccessTools.TypeByName(AlertTypeName), nameof(Alert.GetReport));
-        if (getReport == null)
-        {
-            Log.Warning($"[Tweaks] {AlertTypeName}.GetReport not found; tainted apparel stays in the deterioration alert.");
-            return;
-        }
-
-        new Harmony(typeof(DeteriorationAlertNoTainted).Namespace).Patch(
-            getReport,
+        new Harmony(typeof(DeteriorationAlertNoTainted).Namespace).TryPatch(
+            AccessTools.Method(AccessTools.TypeByName(AlertTypeName), nameof(Alert.GetReport)),
+            $"{AlertTypeName}.GetReport",
+            "tainted apparel stays in the deterioration alert",
             postfix: new HarmonyMethod(Postfix_GetReport)
         );
     }

@@ -40,6 +40,16 @@
     <li>setosa.power.tools</li>
     <li>ReGrowth.BOTR.Core</li>
     <li>Mlie.ReGrowthExtinctAnimals</li>
+    <li>MemeGoddess.TDPack</li>
+    <li>GoGaTio.MechanoidUpgrades</li>
+    <li>Zei33.SimpleImprove</li>
+    <li>biotechpatch.1trickPwnyta</li>
+    <li>vanillaexpanded.skills</li>
+    <li>drilledhead.MechaWeaponChanger</li>
+    <li>ReSplice.XOTR.Core</li>
+    <li>VanillaExpanded.VFEProduction</li>
+    <li>VanillaExpanded.Temperature</li>
+    <li>dubwise.dubsbadhygiene</li>
   </loadAfter>
   <packageId>Ordo.Tweaks</packageId>
   <description>Various configurable tweaks</description>

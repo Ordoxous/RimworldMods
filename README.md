@@ -32,6 +32,7 @@ The project name, assembly name and deployed folder under `RimWorld\Mods` are th
 | `Directory.Build.props` | Settings for every project: .NET 10, `Ordo.<Mod>` namespaces, the RimWorld reference packages, publicizing `Assembly-CSharp`, and the `out/Assemblies` output in every configuration. `SteamLibraryDirectory` defaults to `D:\SteamLibrary`; override it (or `RimWorldDirectory`) in a git-ignored `Directory.Build.local.props` |
 | `Directory.Build.targets` | Targets for every project: `WorkshopReference`, copying `mod/` into `out/`, the `CopyToRimworld` deploy target, and the About.xml check |
 | `build/LocalRimWorldReferences.targets` | In Debug builds, swaps the `Krafs.Rimworld.Ref` assemblies for the installed game's when the versions match, so the IDE shows real method bodies |
+| `shared/` | C# compiled into every mod as internal types, so no mod depends on another's DLL. `shared/Harmony` (`TryPatch`) goes into each mod whose About.xml depends on Harmony |
 | `tools/BridgeTools` | A companion DLL for RimBridgeServer that adds the `ordo/*` tools: spawning, scenarios, def and C# reloading, profiling, and showcase recording. Not a mod |
 | `tools/BridgeTools/Scenarios` | The in-game regression suites, one `<Mod>Scenarios.cs` per mod |
 | `tools/BridgeTools/Showcase` | Records captioned clips with the game's sound, one `<Mod>Showcase.cs` per mod |
@@ -83,19 +84,22 @@ Rules marked **(checked)** fail the build when broken.
 
 - **(checked)** `packageId` is `Ordo.<Mod>`, `author` is `Ordoxous`, `url` is the mod's folder on GitHub, `supportedVersions` includes the current RimWorld version, and `name` and `description` aren't empty.
 - **(checked)** Every dependency has a `displayName`, and every dependency other than a DLC has a `steamWorkshopUrl` or `downloadUrl`.
-- **(checked)** Every dependency, DLCs included, is also in `loadAfter`. Optional integrations go in `loadAfter` too.
-- **(checked)** `brrainz.harmony` is a dependency if and only if the code uses `HarmonyLib`. Every project compiles against Harmony, so About.xml is the only place that says whether a mod needs it.
+- **(checked)** Every dependency, DLCs included, is also in `loadAfter`.
+- **(checked)** So is every optional integration: each mod named in a `MayRequire` or `MayRequireAnyOf` in `mod/`, or in a `ModsConfig.IsActive("…")` in the code. DLCs are exempt, since they always load first. An integration found only by type name, such as ColonistBarJobs' CM Mood Bar, isn't caught, so add it by hand.
+- **(checked)** `brrainz.harmony` is a dependency if and only if the mod's own code uses `HarmonyLib` (`shared/` doesn't count). Every project compiles against Harmony, so About.xml is the only place that says whether a mod needs it.
 
 ### Harmony
 
 - One Harmony ID per mod: its package ID, `Ordo.<Mod>`. `typeof(X).Namespace` gives it from any class in the root namespace.
 - Patch from a `[StaticConstructorOnStartup]` class. Use the `Mod` constructor only when a patch must be in place before defs finish loading, and say why in a comment.
-- Patch by hand with `AccessTools` lookups, not `[HarmonyPatch]` attributes. When a target isn't found, log a warning naming what stops working, and skip that feature rather than throw.
+- Patch by hand with `AccessTools` lookups, not `[HarmonyPatch]` attributes, and through `harmony.TryPatch(original, "Type.Method", "what stops working", prefix: …)` from `shared/Harmony`. When `original` is null it logs a warning and returns false, and it logs an error if patching throws. Either way the patches after it still apply. A throw in a `[StaticConstructorOnStartup]` constructor would skip them, and leave the class unusable.
+- Null-check every other lookup (fields, inner types, another mod's types) before using it, and skip the feature that needs it. When one patch only makes sense with another, apply it only if `TryPatch` returned true for the first, as DisallowedZone does.
 
 ### Other mods
 
 - A hard dependency is a `WorkshopReference`, and the calls into it go through one adapter class, as Saddlebound's `GiddyUpAdapter` does.
 - An optional mod's types are touched only inside a `[MethodImpl(MethodImplOptions.NoInlining)]` method that runs when the mod is active, as Tweaks does for BiotechPatch, so they're never resolved when it's missing. Its XML is guarded with `MayRequire`.
+- A Harmony patch method whose signature names an optional mod's type is passed by name, `new HarmonyMethod(typeof(X), nameof(Prefix))`, never as a delegate (`new HarmonyMethod(Prefix)`). C# caches a method group's delegate in a hidden static field of that delegate's type, and dev mode's `ReportProbablyMissingAttributes` reads the type of every static field of every type, so a missing mod logs a `TypeLoadException`. The same goes for any static field or lambda that names its types.
 - Each optional integration gets its own GABS profile pair, so its scenarios run.
 
 ### Code and XML

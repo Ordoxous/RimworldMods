@@ -141,6 +141,7 @@ Every scenario was seen to fail:
 
 ## History
 
+- **2026-11-21, patching that can't take the rest down.** Every patch goes through `TryPatch` (repo `shared/Harmony`), so a missing target logs what stops working and the other patches still apply. Found while testing it: without BiotechPatch, dev mode logged a `TypeLoadException` for `Comp_HemogenFarm`, because `new HarmonyMethod(Prefix_Comp_HemogenFarm_CompTick)` cached the prefix as a delegate in a static field that `ReportProbablyMissingAttributes` reads. The prefix is now passed by name, and `setup_no_load_errors` fails on any type from a referenced mod that can't load. About.xml now lists every optional mod in `loadAfter`. 17/17 on `tweaks-headless` (18 skipped for missing mods) and 35/35 on `tweaks-mods-headless`.
 - **2026-11-14, tests and the review's follow-up.** A review checked every tweak against its parent mod's installed version and RimWorld 1.7, then the new suite checked them in game.
   - Removed `UnlockAllTrees`: Progression: Agriculture already leaves trees unlocked (its `sowableCrops` excludes `IsTree`), so only VE Mushrooms' Timbercap was affected. Unlocks it made stay in existing saves.
   - Removed `VfeFactoryComponentResearchFix`: it now only let advanced components be made without Advanced Fabrication.

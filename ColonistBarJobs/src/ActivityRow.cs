@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 using RimWorld;
@@ -30,9 +31,13 @@ public static class ActivityRow
 
     private static readonly HashSet<Texture2D> Calm = new();
 
+    // Null if vanilla renames them; DrawIcons is then left alone
     private static readonly Type VanillaCall = AccessTools.Inner(typeof(ColonistBarColonistDrawer), "IconDrawCall");
     private static readonly IList VanillaIcons =
-        (IList)AccessTools.Field(typeof(ColonistBarColonistDrawer), "tmpIconsToDraw").GetValue(null);
+        AccessTools.Field(typeof(ColonistBarColonistDrawer), "tmpIconsToDraw")?.GetValue(null) as IList;
+
+    // Each draw call type's texture field, looked up once rather than every frame
+    private static readonly Dictionary<Type, FieldInfo> TextureFields = new();
 
     private static Type _moodBarCall;
     private static AccessTools.FieldRef<object, IList> _moodBarIcons;
@@ -54,11 +59,39 @@ public static class ActivityRow
         }
 
         var harmony = new Harmony(typeof(ActivityRow).Namespace);
-        harmony.Patch(
-            AccessTools.Method(typeof(ColonistBarColonistDrawer), "DrawIcons"),
-            transpiler: new HarmonyMethod(typeof(ActivityRow), nameof(Transpile_DrawIcons))
-        );
+        if (VanillaIcons == null || TextureField(VanillaCall) == null)
+        {
+            Log.Warning("[ColonistBarJobs] ColonistBarColonistDrawer's icon list has changed; job icons go in the corner instead.");
+        }
+        else
+        {
+            harmony.TryPatch(
+                AccessTools.Method(typeof(ColonistBarColonistDrawer), "DrawIcons"),
+                "ColonistBarColonistDrawer.DrawIcons",
+                "job icons go in the corner instead",
+                transpiler: new HarmonyMethod(typeof(ActivityRow), nameof(Transpile_DrawIcons))
+            );
+        }
+
         Hooked = _vanillaHooked && HookMoodBar(harmony);
+    }
+
+    private static FieldInfo TextureField(
+        Type callType
+    )
+    {
+        if (callType == null)
+        {
+            return null;
+        }
+
+        if (!TextureFields.TryGetValue(callType, out var field))
+        {
+            field = AccessTools.Field(callType, "texture");
+            TextureFields[callType] = field;
+        }
+
+        return field;
     }
 
     private static bool _vanillaHooked;
@@ -93,7 +126,7 @@ public static class ActivityRow
         Pawn colonist
     )
     {
-        if (ColonistBarJobsMod.Settings.Placement != IconPlacement.ActivityRow)
+        if (ColonistBarJobsMod.Settings.Placement != IconPlacement.ActivityRow || !Hooked)
         {
             return;
         }
@@ -112,7 +145,7 @@ public static class ActivityRow
         bool hasJobIcon
     )
     {
-        var texture = AccessTools.Field(callType, "texture");
+        var texture = TextureField(callType);
         for (var i = icons.Count - 1; i >= 0; i--)
         {
             var entry = (Texture2D)texture.GetValue(icons[i]);
@@ -145,7 +178,7 @@ public static class ActivityRow
     public static bool IsPlaceholderFirst(
         IList icons,
         Type callType
-    ) => icons.Count > 0 && (Texture2D)AccessTools.Field(callType, "texture").GetValue(icons[0]) == Placeholder;
+    ) => icons.Count > 0 && (Texture2D)TextureField(callType).GetValue(icons[0]) == Placeholder;
 
     // CM Color Coded Mood Bar: true when it isn't loaded, or its icon list and drawing are both hooked
     private static bool HookMoodBar(
@@ -161,18 +194,23 @@ public static class ActivityRow
         var build = AccessTools.Method(cache, "DoIconVars");
         var draw = AccessTools.Method("ColoredMoodBar13.MoodPatch:DrawIcons");
         _moodBarCall = AccessTools.TypeByName("ColoredMoodBar13.IconDrawCall");
-        if (build == null || draw == null || _moodBarCall == null)
+        var icons = AccessTools.Field(cache, "IconsToDraw");
+        var scale = AccessTools.Field(cache, "Scale");
+        var pawnId = AccessTools.Field(cache, "PawnId");
+        if (build == null || draw == null || TextureField(_moodBarCall) == null || icons == null || scale == null || pawnId == null)
         {
             Log.Warning("[ColonistBarJobs] CM Color Coded Mood Bar has changed; job icons go in the corner instead of its icon row.");
             return false;
         }
 
-        _moodBarIcons = AccessTools.FieldRefAccess<object, IList>(AccessTools.Field(cache, "IconsToDraw"));
-        _moodBarScale = AccessTools.FieldRefAccess<object, float>(AccessTools.Field(cache, "Scale"));
-        _moodBarPawnId = AccessTools.FieldRefAccess<object, int>(AccessTools.Field(cache, "PawnId"));
-        harmony.Patch(build, postfix: new HarmonyMethod(typeof(ActivityRow), nameof(Postfix_MoodBarBuild)));
-        harmony.Patch(draw, postfix: new HarmonyMethod(typeof(ActivityRow), nameof(Postfix_MoodBarDraw)));
-        return true;
+        _moodBarIcons = AccessTools.FieldRefAccess<object, IList>(icons);
+        _moodBarScale = AccessTools.FieldRefAccess<object, float>(scale);
+        _moodBarPawnId = AccessTools.FieldRefAccess<object, int>(pawnId);
+        const string lost = "job icons go in the corner instead of its icon row";
+        return harmony.TryPatch(build, "CM Color Coded Mood Bar's MoodCache.DoIconVars", lost,
+                   postfix: new HarmonyMethod(typeof(ActivityRow), nameof(Postfix_MoodBarBuild)))
+               && harmony.TryPatch(draw, "CM Color Coded Mood Bar's MoodPatch.DrawIcons", lost,
+                   postfix: new HarmonyMethod(typeof(ActivityRow), nameof(Postfix_MoodBarDraw)));
     }
 
     private static void Postfix_MoodBarBuild(
@@ -180,7 +218,7 @@ public static class ActivityRow
         Pawn colonist
     )
     {
-        if (ColonistBarJobsMod.Settings.Placement != IconPlacement.ActivityRow || colonist.Dead)
+        if (ColonistBarJobsMod.Settings.Placement != IconPlacement.ActivityRow || !Hooked || colonist.Dead)
         {
             return;
         }

@@ -140,6 +140,17 @@ public static class TweaksScenarios
             .Distinct()
             .ToList();
         context.Check($"no load errors about a def Tweaks touches: [{string.Join(" | ", errors.Take(6))}]", errors.Count == 0);
+
+        // An optional mod's type reached while the mod is missing, such as a cached delegate's static field that dev mode's
+        // ReportProbablyMissingAttributes reads. The error names only the other mod's assembly, not Tweaks.
+        var referenced = typeof(Ordo.Tweaks.ShowArmorIndicators).Assembly.GetReferencedAssemblies().Select(name => $"from assembly '{name.Name},").ToList();
+        var typeLoads = Log.Messages
+            .Where(message => message.type == LogMessageType.Error)
+            .Select(message => message.text)
+            .Where(text => text.Contains("Could not load type") && referenced.Any(text.Contains))
+            .Distinct()
+            .ToList();
+        context.Check($"no type from a mod Tweaks references failed to load: [{string.Join(" | ", typeLoads.Take(3))}]", typeLoads.Count == 0);
         context.Check("the log still holds its first messages, so nothing from startup was dropped", !Log.reachedMaxMessagesLimit);
         return Task.CompletedTask;
     }

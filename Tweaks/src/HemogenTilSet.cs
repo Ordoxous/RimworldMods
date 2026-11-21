@@ -19,13 +19,17 @@ public class HemogenTilSet
         Patch(new Harmony(typeof(HemogenTilSet).Namespace));
     }
 
-    // Kept out of the static constructor so BiotechPatch types are only resolved when the mod is active
+    // Kept out of the static constructor so BiotechPatch types are only resolved when the mod is active. The prefix is
+    // named, not passed as a delegate: C# caches a method group's delegate in a static field of its type
+    // (Func<Comp_HemogenFarm, bool>), and dev mode's ReportProbablyMissingAttributes reads every static field's type.
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static void Patch(Harmony harmony)
     {
-        harmony.Patch(
+        harmony.TryPatch(
             AccessTools.Method(typeof(Comp_HemogenFarm), nameof(Comp_HemogenFarm.CompTick)),
-            prefix: new HarmonyMethod(Prefix_Comp_HemogenFarm_CompTick)
+            "BiotechPatch's Comp_HemogenFarm.CompTick",
+            "hemogen farming isn't capped at the pack limit set in Tweaks",
+            prefix: new HarmonyMethod(typeof(HemogenTilSet), nameof(Prefix_Comp_HemogenFarm_CompTick))
         );
     }
 

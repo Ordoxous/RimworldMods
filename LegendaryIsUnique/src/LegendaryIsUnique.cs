@@ -24,27 +24,34 @@ public class LegendaryIsUnique
     {
         var harmony = new Harmony(typeof(LegendaryIsUnique).Namespace);
 
-        harmony.Patch(
+        harmony.TryPatch(
             AccessTools.Method(typeof(GenRecipe), nameof(GenRecipe.PostProcessProduct)),
+            "GenRecipe.PostProcessProduct",
+            "crafted weapons never become unique",
             prefix: new HarmonyMethod(Prefix_GenRecipe_PostProcessProduct),
             finalizer: new HarmonyMethod(Finalizer_GenRecipe_PostProcessProduct)
         );
 
-        harmony.Patch(
+        harmony.TryPatch(
             AccessTools.Method(typeof(QualityUtility), nameof(QualityUtility.GenerateQualityCreatedByPawn), [typeof(Pawn), typeof(SkillDef), typeof(bool)]),
+            "QualityUtility.GenerateQualityCreatedByPawn",
+            "a unique weapon's quality is rolled again after the roll that picked it, and can come out below the minimum",
             prefix: new HarmonyMethod(Prefix_QualityUtility_GenerateQualityCreatedByPawn)
         );
 
         if (ModsConfig.IsActive("vanillaexpanded.skills"))
         {
+            // The pre-roll calls it only once its patch is in, so the roll it makes is the one the game keeps
             var generateVseQuality = AccessTools.Method("VSE.Stats.QualityUtility:GenerateQuality");
-
-            harmony.Patch(
-                generateVseQuality,
-                prefix: new HarmonyMethod(Prefix_VES_QualityUtility_GenerateQuality)
-            );
-
-            _generateVseQuality = AccessTools.MethodDelegate<Func<Pawn, SkillDef, bool, Thing, QualityCategory>>(generateVseQuality);
+            if (harmony.TryPatch(
+                    generateVseQuality,
+                    "Vanilla Skills Expanded's QualityUtility.GenerateQuality",
+                    "with Vanilla Skills Expanded a unique weapon's quality is rolled again after the roll that picked it",
+                    prefix: new HarmonyMethod(Prefix_VES_QualityUtility_GenerateQuality)
+                ))
+            {
+                _generateVseQuality = AccessTools.MethodDelegate<Func<Pawn, SkillDef, bool, Thing, QualityCategory>>(generateVseQuality);
+            }
         }
 
         foreach (var uniqueThingDef in DefDatabase<ThingDef>.AllDefs)

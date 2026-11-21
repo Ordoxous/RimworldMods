@@ -8,6 +8,8 @@ Behaviour found while building and testing mods here. Each one cost time once.
 - Without a window, a synchronous long event never runs, because it waits for its loading screen to be drawn. Anything that queues one headless (hot reloading defs, for example) needs `alreadyDisplayed` set by hand; `ordo/long_events markDisplayed` does that.
 - `rimworld/click_cell` presses at the cell but releases at the real cursor, so it never selects. Use `ordo/select`.
 
+- In dev mode, `StaticConstructorOnStartupUtility.ReportProbablyMissingAttributes` reads the type of every static field of every loaded type. A field typed with an optional mod's type logs a `TypeLoadException` ("Could not load type ... from assembly ...") when that mod is missing, even behind `ModsConfig.IsActive` and `NoInlining`. C# 11+ adds such fields itself: `new HarmonyMethod(Prefix)` caches `Prefix` as a `Func<TheirType, bool>` in a hidden static field. Pass the method by name instead (found in Tweaks on 2026-11-21).
+
 ## Defs and XML
 
 - Give every ability comp entry a `Class`. A bare `<li>` with only `compClass` loads as the base properties type, and `CompAbilityEffect.Props` then throws an invalid cast. Use `Class="CompProperties_AbilityEffect"` when there are no custom properties.

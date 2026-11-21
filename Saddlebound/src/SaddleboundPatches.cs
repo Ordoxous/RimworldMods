@@ -10,29 +10,41 @@ public static class SaddleboundPatches
     static SaddleboundPatches()
     {
         var harmony = new Harmony(typeof(SaddleboundPatches).Namespace);
-        harmony.Patch(
+        harmony.TryPatch(
             GiddyUpAdapter.MountMethod,
+            "Giddy-Up's MountUtility.Mount",
+            "riding isn't tracked and the riding precepts never fire",
             postfix: new HarmonyMethod(typeof(SaddleboundPatches), nameof(Postfix_Mount))
         );
-        harmony.Patch(
+        harmony.TryPatch(
             GiddyUpAdapter.DismountMethod,
+            "Giddy-Up's MountUtility.Dismount",
+            "a rider's last ride is dated from when they mounted, not when they got off",
             postfix: new HarmonyMethod(typeof(SaddleboundPatches), nameof(Postfix_Dismount))
         );
-        harmony.Patch(
+        harmony.TryPatch(
             AccessTools.Method(typeof(Pawn), nameof(Pawn.Kill)),
+            "Pawn.Kill",
+            "deaths of mounts and kills by mounted pawns go unnoticed",
             prefix: new HarmonyMethod(typeof(SaddleboundPatches), nameof(Prefix_Kill)),
             postfix: new HarmonyMethod(typeof(SaddleboundPatches), nameof(Postfix_Kill))
         );
-        harmony.Patch(
+        harmony.TryPatch(
             AccessTools.Method(typeof(IdeoFoundation), nameof(IdeoFoundation.RandomizePrecepts)),
+            "IdeoFoundation.RandomizePrecepts",
+            "new ideoligions get no preferred mounts",
             postfix: new HarmonyMethod(typeof(SaddleboundPatches), nameof(Postfix_RandomizePrecepts))
         );
-        harmony.Patch(
+        harmony.TryPatch(
             AccessTools.Method(typeof(IdeoUIUtility), nameof(IdeoUIUtility.DoPrecepts)),
+            "IdeoUIUtility.DoPrecepts",
+            "the ideoligion editor doesn't show preferred mounts",
             postfix: new HarmonyMethod(typeof(SaddleboundPatches), nameof(Postfix_DoPrecepts))
         );
-        harmony.Patch(
+        harmony.TryPatch(
             GiddyUpAdapter.GenerateMountsMethod,
+            "Giddy-Up's MountUtility.GenerateMounts",
+            "Horde Riders raids are mounted no more often than others",
             prefix: new HarmonyMethod(typeof(SaddleboundPatches), nameof(Prefix_GenerateMounts)),
             finalizer: new HarmonyMethod(typeof(SaddleboundPatches), nameof(Finalizer_GenerateMounts))
         );

@@ -12,32 +12,50 @@ public static class Patches
     {
         var harmony = new Harmony("Ordo.DisallowedZone");
 
-        harmony.Patch(
-            AccessTools.PropertyGetter(typeof(Pawn_PlayerSettings), nameof(Pawn_PlayerSettings.EffectiveAreaRestrictionInPawnCurrentMap)),
-            postfix: new HarmonyMethod(EffectiveAreaRestriction_Postfix)
-        );
-        harmony.Patch(
-            AccessTools.Method(typeof(AreaSource), nameof(AreaSource.DataForArea)),
-            prefix: new HarmonyMethod(DataForArea_Prefix)
-        );
-        harmony.Patch(
+        // The path finder must know the effective area before any pawn is given one, so the restriction waits on it
+        if (harmony.TryPatch(
+                AccessTools.Method(typeof(AreaSource), nameof(AreaSource.DataForArea)),
+                "AreaSource.DataForArea",
+                "the zone does nothing",
+                prefix: new HarmonyMethod(DataForArea_Prefix)
+            ))
+        {
+            harmony.TryPatch(
+                AccessTools.PropertyGetter(typeof(Pawn_PlayerSettings), nameof(Pawn_PlayerSettings.EffectiveAreaRestrictionInPawnCurrentMap)),
+                "Pawn_PlayerSettings.EffectiveAreaRestrictionInPawnCurrentMap",
+                "the zone does nothing",
+                postfix: new HarmonyMethod(EffectiveAreaRestriction_Postfix)
+            );
+        }
+
+        harmony.TryPatch(
             AccessTools.Method(typeof(Area), nameof(Area.MarkDirty)),
+            "Area.MarkDirty",
+            "the zone doesn't update when cells are added to or removed from an allowed area",
             postfix: new HarmonyMethod(AreaMarkDirty_Postfix)
         );
-        harmony.Patch(
+        harmony.TryPatch(
             AccessTools.Method(typeof(Area), nameof(Area.Invert)),
+            "Area.Invert",
+            "the zone doesn't update when an allowed area is inverted",
             postfix: new HarmonyMethod(AreaChanged_Postfix)
         );
-        harmony.Patch(
+        harmony.TryPatch(
             AccessTools.Method(typeof(Area), nameof(Area.Clear)),
+            "Area.Clear",
+            "the zone doesn't update when an allowed area is cleared",
             postfix: new HarmonyMethod(AreaChanged_Postfix)
         );
-        harmony.Patch(
+        harmony.TryPatch(
             AccessTools.Method(typeof(AreaManager), nameof(AreaManager.Remove)),
+            "AreaManager.Remove",
+            "the zone doesn't notice when an allowed area is deleted",
             postfix: new HarmonyMethod(AreaRemoved_Postfix)
         );
-        harmony.Patch(
+        harmony.TryPatch(
             AccessTools.Method(typeof(PlaySettings), nameof(PlaySettings.DoPlaySettingsGlobalControls)),
+            "PlaySettings.DoPlaySettingsGlobalControls",
+            "there's no button to show or hide the zone",
             postfix: new HarmonyMethod(PlaySettings_Postfix)
         );
     }

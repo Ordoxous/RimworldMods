@@ -20,6 +20,7 @@ Waylith's runtime (`.NET 10.0.15-waylithclr`) accepts hot reload updates for a m
 - **Applies:** changed method bodies, new methods, new fields, and new types (whose static initializer runs on first use).
 - **Needs a restart** (the script says so and writes nothing): removed methods, changed signatures, and new constructors or virtual methods on existing types. Removed types and fields are only noted, since they stay loaded harmlessly.
 - **Not rerun:** static constructors, such as `[StaticConstructorOnStartup]` Harmony patching. A new or changed Harmony patch needs a restart.
+- **Not reloaded:** files outside the project folder, such as `shared/`. The tool treats them as unchanged, so a change there needs a rebuild, deploy and restart.
 - **Lost on restart:** the deployed DLL on disk is unchanged, so after a restart deploy a fresh build and `-Reset`.
 - `ordo/apply_update` with no delta paths fails for every assembly ("The assembly update failed."): the runtime rejects an empty delta. It says nothing about whether real deltas will apply; try a real one.
 

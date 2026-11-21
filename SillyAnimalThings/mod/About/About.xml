@@ -22,6 +22,20 @@
     <li>brrainz.harmony</li>
     <li>ludeon.rimworld.biotech</li>
     <li>ludeon.rimworld.odyssey</li>
+    <li>spino.megafauna</li>
+    <li>mlie.regrowthextinctanimals</li>
+    <li>vanillaexpanded.vanillaanimalsexpanded</li>
+    <li>sarg.alphaanimals</li>
+    <li>biomesteam.biomesprehistoric</li>
+    <li>oskarpotocki.vfe.insectoid2</li>
+    <li>van.beasts</li>
+    <li>vanillaexpanded.vaeroy</li>
+    <li>vanillaexpanded.vaewaste</li>
+    <li>biomesteam.oasis</li>
+    <li>vanillaexpanded.vaeendandext</li>
+    <li>biomesteam.biomespollutedlands</li>
+    <li>regrowth.botr.core</li>
+    <li>vanillaexpanded.gravship2</li>
   </loadAfter>
   <packageId>Ordo.SillyAnimalThings</packageId>
   <description>Gives animals silly abilities, using the same special-training system as Odyssey's war trumpet. Wild and hostile animals use most of them on their own; tamed animals use them once trained.

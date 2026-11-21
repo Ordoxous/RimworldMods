@@ -11,7 +11,16 @@
         <ModOutputDirectory>$(MSBuildProjectDirectory)\out\</ModOutputDirectory>
         <ModRepositoryUrl>https://github.com/Ordoxous/RimworldMods/tree/master</ModRepositoryUrl>
         <ModAuthor>Ordoxous</ModAuthor>
+        <ModAboutFile>$(MSBuildProjectDirectory)\mod\About\About.xml</ModAboutFile>
+        <SharedSourceDirectory>$(MSBuildThisFileDirectory)shared\</SharedSourceDirectory>
+        <!-- About.xml says whether the mod needs Harmony, so it also decides whether the Harmony helpers are compiled in -->
+        <ModUsesHarmony Condition="'$(IsRimWorldMod)' == 'true' AND Exists('$(ModAboutFile)') AND $([System.IO.File]::ReadAllText('$(ModAboutFile)').Contains('brrainz.harmony'))">true</ModUsesHarmony>
     </PropertyGroup>
+
+    <!-- Source files shared by the mods, compiled into each as internal types; see shared/ -->
+    <ItemGroup Condition="'$(ModUsesHarmony)' == 'true'">
+        <Compile Include="$(SharedSourceDirectory)Harmony\*.cs" Link="shared\%(Filename)%(Extension)" Shared="true" />
+    </ItemGroup>
 
     <!--
         Workshop mods to compile against, by assembly name:
@@ -78,13 +87,18 @@
     <!-- Fails the build when About.xml breaks one of the rules in the repo README's Conventions -->
     <Target Name="CheckAboutXml" BeforeTargets="CoreCompile" Condition="'$(IsRimWorldMod)' == 'true' AND '$(DesignTimeBuild)' != 'true'">
         <CheckAboutXml
-            AboutFile="$(MSBuildProjectDirectory)\mod\About\About.xml"
+            AboutFile="$(ModAboutFile)"
             PackageId="Ordo.$(MSBuildProjectName)"
             Url="$(ModRepositoryUrl)/$(MSBuildProjectName)"
             Author="$(ModAuthor)"
             RimworldVersion="$(RimworldVersion)"
-            SourceFiles="@(Compile)" />
+            SourceFiles="@(Compile->WithMetadataValue('Shared', ''))"
+            XmlFiles="@(_ModXmlFile)" />
     </Target>
+
+    <ItemGroup>
+        <_ModXmlFile Include="$(MSBuildProjectDirectory)\mod\**\*.xml" Exclude="$(MSBuildProjectDirectory)\mod\About\**" />
+    </ItemGroup>
 
     <UsingTask TaskName="CheckAboutXml" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
         <ParameterGroup>
@@ -94,6 +108,7 @@
             <Author Required="true" />
             <RimworldVersion Required="true" />
             <SourceFiles ParameterType="Microsoft.Build.Framework.ITaskItem[]" />
+            <XmlFiles ParameterType="Microsoft.Build.Framework.ITaskItem[]" />
         </ParameterGroup>
         <Task>
             <Using Namespace="System" />
@@ -156,10 +171,46 @@
                         Problem(dependency, $"dependency {id} must also be in <loadAfter>");
                 }
 
-                // Harmony is in every project's references, so About.xml is the only thing saying whether the mod needs it
-                var usesHarmony = (SourceFiles ?? new Microsoft.Build.Framework.ITaskItem[0])
+                var sources = (SourceFiles ?? new Microsoft.Build.Framework.ITaskItem[0])
                     .Select(item => item.GetMetadata("FullPath"))
-                    .Any(path => File.Exists(path) && File.ReadAllText(path).Contains("HarmonyLib"));
+                    .Where(File.Exists)
+                    .Select(path => (path, text: File.ReadAllText(path)))
+                    .ToList();
+
+                // Optional integrations: mods the XML guards with MayRequire(AnyOf), or the code checks with ModsConfig.IsActive.
+                // They load in any order without this, but a patch of their defs needs them loaded first.
+                var optional = new List<(string id, string file, int line)>();
+                foreach (var item in XmlFiles ?? new Microsoft.Build.Framework.ITaskItem[0])
+                {
+                    var path = item.GetMetadata("FullPath");
+                    XDocument xml;
+                    try { xml = XDocument.Load(path, LoadOptions.SetLineInfo); }
+                    catch (XmlException) { continue; }
+                    foreach (var attribute in xml.Descendants().Attributes().Where(a => a.Name.LocalName == "MayRequire" || a.Name.LocalName == "MayRequireAnyOf"))
+                    {
+                        var line = ((IXmlLineInfo)attribute).LineNumber;
+                        foreach (var id in attribute.Value.Split(','))
+                            optional.Add((id.Trim(), path, line));
+                    }
+                }
+                foreach (var (path, text) in sources)
+                {
+                    foreach (System.Text.RegularExpressions.Match match in System.Text.RegularExpressions.Regex.Matches(text, @"ModsConfig\.IsActive\(\s*""([^""]+)""\s*\)"))
+                    {
+                        var line = text.Take(match.Index).Count(c => c == '\n') + 1;
+                        optional.Add((match.Groups[1].Value, path, line));
+                    }
+                }
+                // DLCs always load before mods
+                foreach (var group in optional.Where(o => o.id != "" && !o.id.StartsWith("ludeon.", StringComparison.OrdinalIgnoreCase) && !loadAfter.Any(after => Same(after, o.id))).GroupBy(o => o.id.ToLowerInvariant()))
+                {
+                    var first = group.First();
+                    Log.LogError(null, "ORDO001", null, AboutFile, ((IXmlLineInfo)(root.Element("loadAfter") ?? root)).LineNumber, 0, 0, 0,
+                        $"About.xml: {first.id} must be in <loadAfter>, since {Path.GetFileName(first.file)}:{first.line} integrates with it");
+                }
+
+                // Harmony is in every project's references, so About.xml is the only thing saying whether the mod needs it
+                var usesHarmony = sources.Any(source => source.text.Contains("HarmonyLib"));
                 var dependsOnHarmony = dependencies.Any(dependency => Same(Text(dependency, "packageId"), "brrainz.harmony"));
                 if (usesHarmony && !dependsOnHarmony)
                     Problem(root.Element("modDependencies") ?? (XObject)root, "the code uses HarmonyLib, so brrainz.harmony must be a dependency");

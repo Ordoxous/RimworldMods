@@ -14,8 +14,10 @@ public static class ShowArmorIndicators
     {
         var harmony = new Harmony(typeof(ShowArmorIndicators).Namespace);
 
-        harmony.Patch(
+        harmony.TryPatch(
             AccessTools.Method(typeof(Thing), nameof(Thing.TakeDamage)),
+            "Thing.TakeDamage",
+            "hits that armour deflects or reduces show no text",
             postfix: new HarmonyMethod(Postfix_Thing_TakeDamage)
         );
     }

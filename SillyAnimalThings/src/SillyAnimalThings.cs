@@ -15,61 +15,76 @@ public static class SillyAnimalThings
 
         var harmony = new Harmony(typeof(SillyAnimalThings).Namespace);
 
-        harmony.Patch(
+        harmony.TryPatch(
             AccessTools.Method(typeof(Pawn), nameof(Pawn.SpawnSetup)),
+            "Pawn.SpawnSetup",
+            "animals that existed before the mod was added don't get its abilities",
             postfix: new HarmonyMethod(Postfix_Pawn_SpawnSetup)
         );
 
-        harmony.Patch(
+        harmony.TryPatch(
             AccessTools.Method(typeof(JobGiver_GetFood), nameof(JobGiver_GetFood.TryGiveJob)),
+            "JobGiver_GetFood.TryGiveJob",
+            "hungry animals don't gnaw wooden buildings",
             prefix: new HarmonyMethod(HungryGnawing.Prefix_JobGiver_GetFood_TryGiveJob)
         );
 
-        harmony.Patch(
+        harmony.TryPatch(
             AccessTools.Method(typeof(Pawn), nameof(Pawn.PostApplyDamage)),
+            "Pawn.PostApplyDamage",
+            "animals don't use their self-buffs when hurt",
             postfix: new HarmonyMethod(SelfBuffAutoCast.Postfix_Pawn_PostApplyDamage)
         );
 
-        harmony.Patch(
+        harmony.TryPatch(
             AccessTools.Method(typeof(JobGiver_AIFightEnemy), nameof(JobGiver_AIFightEnemy.GetAbilityJob)),
+            "JobGiver_AIFightEnemy.GetAbilityJob",
+            "fighting animals choose their abilities with vanilla's AI instead of this mod's",
             prefix: new HarmonyMethod(AnimalCombatPatches.Prefix_JobGiver_AIFightEnemy_GetAbilityJob)
         );
 
-        harmony.Patch(
+        harmony.TryPatch(
             AccessTools.Method(typeof(CompAbilityEffect_RequiresTrainable), nameof(CompAbilityEffect_RequiresTrainable.AICanTargetNow)),
+            "CompAbilityEffect_RequiresTrainable.AICanTargetNow",
+            "the player's animals use abilities they haven't been trained in, and not the ones they have",
             postfix: new HarmonyMethod(AnimalCombatPatches.Postfix_CompAbilityEffect_RequiresTrainable_AICanTargetNow)
         );
 
-        harmony.Patch(
+        harmony.TryPatch(
             AccessTools.Method(typeof(JobGiver_ReactToCloseMeleeThreat), "TryGiveJob"),
+            "JobGiver_ReactToCloseMeleeThreat.TryGiveJob",
+            "animals fighting back in melee don't use abilities",
             postfix: new HarmonyMethod(AnimalCombatPatches.Postfix_JobGiver_ReactToCloseMeleeThreat_TryGiveJob)
         );
 
-        harmony.Patch(
+        harmony.TryPatch(
             AccessTools.Method(typeof(JobGiver_Manhunter), "TryGiveJob"),
+            "JobGiver_Manhunter.TryGiveJob",
+            "manhunters chase for longer before checking for an ability",
             postfix: new HarmonyMethod(AnimalCombatPatches.Postfix_JobGiver_Manhunter_TryGiveJob)
         );
 
-        harmony.Patch(
+        harmony.TryPatch(
             AccessTools.Method(typeof(JobGiver_AIFightEnemy), "MeleeAttackJob"),
+            "JobGiver_AIFightEnemy.MeleeAttackJob",
+            "fighting animals chase for longer before checking for an ability",
             postfix: new HarmonyMethod(AnimalCombatPatches.Postfix_JobGiver_AIFightEnemy_MeleeAttackJob)
         );
 
-        harmony.Patch(
+        harmony.TryPatch(
             AccessTools.Method(typeof(JobDriver_PredatorHunt), "CheckWarnPlayerInterval"),
+            "JobDriver_PredatorHunt.CheckWarnPlayerInterval",
+            "hunting predators don't use abilities on their prey",
             postfix: new HarmonyMethod(AnimalCombatPatches.Postfix_JobDriver_PredatorHunt_CheckWarnPlayerInterval)
         );
 
         // Dev mode's "Hot reload Defs" rebuilds every def from XML, which drops the abilities and trainables the tags add in code
-        var hotReloadDefs = AccessTools.Method(typeof(PlayDataLoader), "HotReloadDefs");
-        if (hotReloadDefs != null)
-        {
-            harmony.Patch(hotReloadDefs, postfix: new HarmonyMethod(Postfix_PlayDataLoader_HotReloadDefs));
-        }
-        else
-        {
-            Log.Warning("[SillyAnimalThings] Couldn't find PlayDataLoader.HotReloadDefs, so hot reloading defs will lose the animals' abilities");
-        }
+        harmony.TryPatch(
+            AccessTools.Method(typeof(PlayDataLoader), "HotReloadDefs"),
+            "PlayDataLoader.HotReloadDefs",
+            "hot reloading defs will lose the animals' abilities",
+            postfix: new HarmonyMethod(Postfix_PlayDataLoader_HotReloadDefs)
+        );
     }
 
     // HotReloadDefs only queues the reload, so this queues the tags after it. ExecuteWhenFinished would run them straight away,

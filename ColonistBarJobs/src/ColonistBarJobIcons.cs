@@ -20,8 +20,10 @@ public static class ColonistBarJobIcons
     static ColonistBarJobIcons()
     {
         var harmony = new Harmony(typeof(ColonistBarJobIcons).Namespace);
-        harmony.Patch(
+        harmony.TryPatch(
             AccessTools.Method(typeof(ColonistBarColonistDrawer), nameof(ColonistBarColonistDrawer.DrawColonist)),
+            "ColonistBarColonistDrawer.DrawColonist",
+            "the colonist bar shows no job icons",
             postfix: new HarmonyMethod(typeof(ColonistBarJobIcons), nameof(Postfix_DrawColonist))
         );
     }

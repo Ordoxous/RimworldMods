@@ -19,8 +19,10 @@ public class ReplaceBlueprintMaterials
     {
         var harmony = new Harmony(typeof(ReplaceBlueprintMaterials).Namespace);
 
-        harmony.Patch(
+        harmony.TryPatch(
             AccessTools.Method(typeof(Blueprint_Build), nameof(Blueprint_Build.GetGizmos)),
+            "Blueprint_Build.GetGizmos",
+            "blueprints have no button to change their material",
             postfix: new HarmonyMethod(Postfix_Blueprint_Build_GetGizmos)
         );
     }
