@@ -83,13 +83,13 @@ public static class FloraTabScenarios
     {
         var def = DefDatabase<MainButtonDef>.GetNamedSilentFail("Ordo_Flora");
         context.Check("the Ordo_Flora main button loaded", def != null);
-        context.Check($"it opens the Resources window: {def?.tabWindowClass}", def?.tabWindowClass == typeof(MainTabWindow_Flora));
+        context.Check($"it opens the Nature window: {def?.tabWindowClass}", def?.tabWindowClass == typeof(MainTabWindow_Flora));
         var animals = DefDatabase<MainButtonDef>.GetNamed("Animals");
         context.Check($"it takes the Animals button's place: {def?.order} vs {animals.order}", def != null && def.order == animals.order);
         foreach (var moved in new[] { animals, DefDatabase<MainButtonDef>.GetNamed("Wildlife") })
         {
             context.Check($"the {moved.defName} button is hidden", !moved.buttonVisible);
-            context.Check($"the {moved.defName} hotkey opens its page: {moved.workerClass}", moved.Worker is MainButtonWorker_ResourcesPage);
+            context.Check($"the {moved.defName} hotkey opens its page: {moved.workerClass}", moved.Worker is MainButtonWorker_NaturePage);
         }
         context.Check("the window is made", def?.TabWindow is MainTabWindow_Flora);
         return Task.CompletedTask;
@@ -676,30 +676,30 @@ public static class FloraTabScenarios
         return Task.CompletedTask;
     }
 
-    // F4 goes to the hidden Animals button, whose worker opens the Resources tab on the Animals page and closes it again
+    // F4 goes to the hidden Animals button, whose worker opens the Nature tab on the Animals page and closes it again
     private static Task AnimalsHotkey(
         ScenarioContext context
     )
     {
-        var resources = DefDatabase<MainButtonDef>.GetNamed("Ordo_Flora");
+        var nature = DefDatabase<MainButtonDef>.GetNamed("Ordo_Flora");
         var animals = DefDatabase<MainButtonDef>.GetNamed("Animals");
         var tabs = Find.MainTabsRoot;
         tabs.EscapeCurrentTab(false);
 
         animals.Worker.Activate();
-        context.Check($"opens the Resources tab: {tabs.OpenTab?.defName}", tabs.OpenTab == resources);
+        context.Check($"opens the Nature tab: {tabs.OpenTab?.defName}", tabs.OpenTab == nature);
         context.Check($"on the Animals page: {MainTabWindow_Flora.Page.GetType().Name}", MainTabWindow_Flora.Page is AnimalsPage);
 
         animals.Worker.Activate();
         context.Check($"pressing it again closes it: {tabs.OpenTab?.defName}", tabs.OpenTab == null);
 
         // Open on another page, the hotkey switches to Animals rather than closing
-        tabs.SetCurrentTab(resources, false);
-        ((MainTabWindow_Flora)resources.TabWindow).SwitchTo(0);
+        tabs.SetCurrentTab(nature, false);
+        ((MainTabWindow_Flora)nature.TabWindow).SwitchTo(0);
         context.Check($"another page shows first: {MainTabWindow_Flora.Page.GetType().Name}", MainTabWindow_Flora.Page is PlantsPage);
         animals.Worker.Activate();
         context.Check($"from another page it switches to Animals: {MainTabWindow_Flora.Page.GetType().Name}, open {tabs.OpenTab?.defName}",
-            tabs.OpenTab == resources && MainTabWindow_Flora.Page is AnimalsPage);
+            tabs.OpenTab == nature && MainTabWindow_Flora.Page is AnimalsPage);
 
         tabs.EscapeCurrentTab(false);
         return Task.CompletedTask;
@@ -776,12 +776,12 @@ public static class FloraTabScenarios
         return Task.CompletedTask;
     }
 
-    // F5 goes to the hidden Wildlife button, which opens the Resources tab on the Wildlife page, and from Animals switches
+    // F5 goes to the hidden Wildlife button, which opens the Nature tab on the Wildlife page, and from Animals switches
     private static Task WildlifeHotkey(
         ScenarioContext context
     )
     {
-        var resources = DefDatabase<MainButtonDef>.GetNamed("Ordo_Flora");
+        var nature = DefDatabase<MainButtonDef>.GetNamed("Ordo_Flora");
         var animals = DefDatabase<MainButtonDef>.GetNamed("Animals");
         var wildlife = DefDatabase<MainButtonDef>.GetNamed("Wildlife");
         var tabs = Find.MainTabsRoot;
@@ -789,13 +789,13 @@ public static class FloraTabScenarios
 
         wildlife.Worker.Activate();
         context.Check($"opens the Wildlife page: {tabs.OpenTab?.defName}, {MainTabWindow_Flora.Page.GetType().Name}",
-            tabs.OpenTab == resources && MainTabWindow_Flora.Page is WildlifePage);
+            tabs.OpenTab == nature && MainTabWindow_Flora.Page is WildlifePage);
         animals.Worker.Activate();
         context.Check($"the Animals hotkey switches to Animals: {MainTabWindow_Flora.Page.GetType().Name}",
-            tabs.OpenTab == resources && MainTabWindow_Flora.Page is AnimalsPage);
+            tabs.OpenTab == nature && MainTabWindow_Flora.Page is AnimalsPage);
         wildlife.Worker.Activate();
         context.Check($"and F5 back to Wildlife: {MainTabWindow_Flora.Page.GetType().Name}",
-            tabs.OpenTab == resources && MainTabWindow_Flora.Page is WildlifePage);
+            tabs.OpenTab == nature && MainTabWindow_Flora.Page is WildlifePage);
         wildlife.Worker.Activate();
         context.Check($"pressing it again closes it: {tabs.OpenTab?.defName}", tabs.OpenTab == null);
         return Task.CompletedTask;

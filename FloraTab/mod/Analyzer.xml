@@ -4,7 +4,7 @@
      Methods are named one by one: the 1.7 build of DPA only finds methods in a few types given as Types. It skips a name it
      can't find without logging anything, so after renaming or adding methods, regenerate this list with the
      ordo/profiling_targets bridge tool.
-     Everything here runs only while the Resources tab is open, from the window's drawing and update, never from game ticks.
+     Everything here runs only while the Nature tab is open, from the window's drawing and update, never from game ticks.
      DPA didn't record the drawing (OnGUI) when tested, only WindowUpdate and the highlight it draws; the perf scenario
      suite times the survey and forecast instead (see the README). -->
 <Analyzer>

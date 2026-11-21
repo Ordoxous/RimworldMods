@@ -7,7 +7,7 @@ using Verse;
 
 namespace Ordo.FloraTab;
 
-// The Resources main tab: a page for the map's harvestable wild plants and one for its ore, each a table of kinds, like
+// The Nature main tab: a page for the map's harvestable wild plants and one for its ore, each a table of kinds, like
 // Wildlife is for animals, and the Animals and Wildlife tabs moved in. The area and distance are shared by the plants and
 // minerals pages, the search by all four.
 public class MainTabWindow_Flora : MainTabWindow

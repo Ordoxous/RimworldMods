@@ -1,6 +1,6 @@
 # FloraTab
 
-Shows "Flora Tab" in game, package ID `Ordo.FloraTab`. It adds a **Resources** main tab, in the Animals button's place, with four pages:
+Shows "Flora Tab" in game, package ID `Ordo.FloraTab`. It adds a **Nature** main tab, in the Animals button's place, with four pages:
 - **Plants:** the harvestable wild plants on the current map, such as berry bushes, wild healroot, agave and, if you turn it on, trees.
 - **Minerals:** the visible ore, such as steel, gold, plasteel, jade, uranium and compacted machinery.
 - **Animals:** the Animals tab, moved in: the game's, or a mod's replacement such as Animal Tab. Its button is hidden, and its hotkey (F4) opens this page.
@@ -20,7 +20,7 @@ The mod and the button def keep their Flora names (`Ordo.FloraTab`, `Ordo_Flora`
 | Part | Where |
 |---|---|
 | The main button: `Ordo_Flora`, order 40, the same as vanilla's Animals button, which it replaces | `mod/Defs/MainButtons.xml` |
-| The Animals and Wildlife buttons: hidden (`buttonVisible`), and given `MainButtonWorker_ResourcesPage`, so each hotkey opens its page, switches to it, or closes the window if that page is showing | `mod/Patches/MovedTabs.xml`, `src/MainButtonWorker_ResourcesPage.cs` |
+| The Animals and Wildlife buttons: hidden (`buttonVisible`), and given `MainButtonWorker_NaturePage`, so each hotkey opens its page, switches to it, or closes the window if that page is showing | `mod/Patches/MovedTabs.xml`, `src/MainButtonWorker_NaturePage.cs` |
 | The survey: one row per plant kind, with its counts, readiness, risk and distance | `src/FloraSurvey.cs` |
 | The forecast: the map's next 7 days hour by hour, used for frost and days until ready | `src/MapForecast.cs` |
 | Harvest and Cancel for a whole row | `src/FloraDesignations.cs` |
@@ -199,6 +199,7 @@ That's about 1 ms once a second while the tab is open, and nothing while it's cl
 - 2026-11-21: the Animals tab moved in as a third page.
 - 2026-11-21: with Animal Tab loaded, the Animals page hosts its window.
 - 2026-11-21: the Wildlife tab moved in as a fourth page.
+- 2026-11-21: the tab became Nature, since it holds animals as well as resources.
 
 ## Open questions
 
@@ -208,4 +209,3 @@ That's about 1 ms once a second while the tab is open, and nothing while it's cl
 - **Truncated label:** "Within: Any distance" is cut off to "Within: Any dista..." on its 130 px button.
 - Should rows be grouped by product, for example several berry-like plants from mods all giving berries?
 - **Hotkeys:** F4 and F5 (the Animals and Wildlife hotkeys) open their pages. Plants and Minerals have no hotkey of their own.
-- **Name:** the tab is still called Resources, though it now holds Animals and Wildlife too.
