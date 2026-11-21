@@ -20,6 +20,8 @@ public static class TweaksScenarios
 
     private const string HarmonyId = "Ordo.BridgeTools.TweaksScenarios";
 
+    private const string MultiFloorsId = "telardo.MultiFloors";
+
     // Every def a tweak adds or patches, and the mod's own names, for finding the load errors a tweak caused
     private static readonly string[] Touched =
     {
@@ -33,7 +35,7 @@ public static class TweaksScenarios
     };
 
     // Suites: "setup" for loading, "patches" for the XML patches, one per C# tweak ("armor", "haul_mechs", "tools", "hemogen", "deterioration"),
-    // and "settings" for the scenarios that turn a tweak off
+    // "levels" for shutdown zones across MultiFloors levels, and "settings" for the scenarios that turn a tweak off
     public static readonly List<Scenario> All = new()
     {
         new("setup_no_load_errors", "setup", NoLoadErrors),
@@ -65,6 +67,20 @@ public static class TweaksScenarios
         new("haul_unpowered_mech_near_charger", "haul_mechs", HaulUnpoweredMechNearCharger),
         new("haul_unpowered_mech_charger_free", "haul_mechs", HaulUnpoweredMechChargerFree),
         new("haul_unpowered_mech_off", "haul_mechs settings", HaulUnpoweredMechOff),
+        new("levels_downed_mech_carried_upstairs", "haul_mechs levels", LevelsDownedMechCarriedUpstairs, requiresMod: MultiFloorsId),
+        new("levels_unpowered_mech_carried_upstairs", "haul_mechs levels", LevelsUnpoweredMechCarriedUpstairs, requiresMod: MultiFloorsId),
+        new("levels_own_level_first", "haul_mechs levels", LevelsOwnLevelFirst, requiresMod: MultiFloorsId),
+        new("levels_haul_off", "haul_mechs levels settings", LevelsHaulOff, requiresMod: MultiFloorsId),
+        new("levels_wvc_mode_walks_upstairs", "levels", context => LevelsWorkModeWalks(context, on: true), requiresMod: MultiFloorsId),
+        new("levels_wvc_mode_off_stays", "levels settings", context => LevelsWorkModeWalks(context, on: false), requiresMod: MultiFloorsId),
+        new("levels_unpowered_mech_to_charger_upstairs", "haul_mechs levels", LevelsUnpoweredMechToCharger, requiresMod: MultiFloorsId),
+        new("levels_downed_mech_to_charger_upstairs", "haul_mechs levels", LevelsDownedMechToCharger, requiresMod: MultiFloorsId),
+        new("levels_charger_upstairs_beats_zone", "haul_mechs levels", LevelsChargerBeatsZone, requiresMod: MultiFloorsId),
+        new("levels_parked_mech_to_charger_upstairs", "haul_mechs levels", LevelsParkedMechToCharger, requiresMod: MultiFloorsId),
+        new("levels_charger_off", "haul_mechs levels settings", LevelsChargerOff, requiresMod: MultiFloorsId),
+        new("levels_downed_mech_carried_downstairs", "haul_mechs levels", LevelsDownedMechCarriedDownstairs, requiresMod: MultiFloorsId),
+        new("levels_hauler_fetches_mech_upstairs", "haul_mechs levels", context => LevelsHaulerFetchesMech(context, zoneUpstairs: true), requiresMod: MultiFloorsId),
+        new("levels_hauler_fetches_mech_down", "haul_mechs levels", context => LevelsHaulerFetchesMech(context, zoneUpstairs: false), requiresMod: MultiFloorsId),
         new("tools_category", "tools", context => ToolsCategory(context, requireTools: false)),
         new("tools_category_power_tools", "tools", context => ToolsCategory(context, requireTools: true), requiresMod: "setosa.power.tools"),
         new("hemogen_below_cap_queues", "hemogen", context => Hemogen(context, packs: 0, limit: true, expectBill: true), requiresMod: "biotechpatch.1trickPwnyta"),
@@ -167,6 +183,8 @@ public static class TweaksScenarios
             ["DeteriorationAlertSkipTainted"] = "true",
             ["HaulDownedMechs"] = "true",
             ["HaulUnpoweredMechs"] = "true",
+            ["ShutdownZonesAcrossLevels"] = "true",
+            ["ChargersAcrossLevels"] = "true",
             ["ToolsCategory"] = "true",
             ["LimitHemogenFarming"] = "true",
             ["HemogenPackCap"] = "30"
@@ -185,6 +203,11 @@ public static class TweaksScenarios
             }
 
             if (key == "DeteriorationAlertSkipTainted" && !ModsConfig.IsActive("MemeGoddess.TDPack"))
+            {
+                continue;
+            }
+
+            if (key is "ShutdownZonesAcrossLevels" or "ChargersAcrossLevels" && !ModsConfig.IsActive(MultiFloorsId))
             {
                 continue;
             }
@@ -564,12 +587,14 @@ public static class TweaksScenarios
     // doesn't remove zones.
     private static Zone ShutdownZone(
         ScenarioContext context,
-        IEnumerable<IntVec3> cells
+        IEnumerable<IntVec3> cells,
+        Map map = null
     )
     {
+        map ??= context.Map;
         var type = AccessTools.TypeByName("WVC_WorkModes.Zone_MechanoidShutdown");
-        var zone = (Zone)Activator.CreateInstance(type, context.Map.zoneManager);
-        context.Map.zoneManager.RegisterZone(zone);
+        var zone = (Zone)Activator.CreateInstance(type, map.zoneManager);
+        map.zoneManager.RegisterZone(zone);
         foreach (var cell in cells)
         {
             zone.AddCell(cell);
@@ -851,6 +876,451 @@ public static class TweaksScenarios
         {
             zone.Delete();
         }
+    }
+
+    // A MultiFloors level above the test map, reached by reflection. Spawning an up-stair makes the level, which is void apart
+    // from the cells around its exit, so the exit's floor is laid over the rest of the scenario's corner. A level is its own
+    // map: Dispose destroys what's on it, since removing the level would pass its pawns to the world, then removes it.
+    private sealed class UpperLevel : IDisposable
+    {
+        // The stair's cell, relative to the scenario's origin. The floor on the level covers (2, 2) to (13, 13) around it.
+        private const int StairX = 6, StairZ = 6;
+
+        public readonly Map Map;
+
+        private readonly Thing _entrance;
+
+        public UpperLevel(
+            ScenarioContext context
+        )
+        {
+            _entrance = context.Build(ThingDef.Named("MF_BrickStairsMUpA"), StairX, StairZ);
+            Map = (Map)AccessTools.Property(_entrance.GetType(), "ConnectedMap").GetValue(_entrance);
+            context.Check($"the stair made a level above: {Map}", Map != null && Map != context.Map);
+            if (Map == null)
+            {
+                return;
+            }
+
+            var exit = (Thing)AccessTools.Field(_entrance.GetType(), "Exit").GetValue(_entrance);
+            var floor = Map.terrainGrid.TerrainAt(exit.Position);
+            foreach (var cell in CellRect.FromLimits(context.Cell(2, 2), context.Cell(13, 13)))
+            {
+                Map.terrainGrid.SetTerrain(cell, floor);
+                Map.fogGrid.Unfog(cell);
+            }
+        }
+
+        // Its cells are the same coordinates as the ground map's
+        public List<IntVec3> ZoneCells(
+            ScenarioContext context
+        ) => CellRect.CenteredOn(context.Cell(10, 10), 1).Cells.ToList();
+
+        // A light-mech charger on the level, on a power net with a charged battery, as FreeCharger makes on the ground.
+        // It goes when the level does.
+        public async Task<Building_MechCharger> FreeCharger(
+            ScenarioContext context,
+            Pawn mech
+        )
+        {
+            var charger = (Building_MechCharger)Build(ThingDef.Named("BasicRecharger"), context.Cell(10, 4));
+            var battery = Build(ThingDef.Named("Battery"), context.Cell(12, 4));
+            battery.TryGetComp<CompPowerBattery>().SetStoredEnergyPct(1f);
+            await context.Until($"the charger upstairs is powered: net {charger.PowerComp.PowerNet != null}", () => charger.CanPawnChargeCurrently(mech), 300, 30);
+            return charger;
+        }
+
+        private Thing Build(
+            ThingDef def,
+            IntVec3 cell
+        )
+        {
+            var thing = ThingMaker.MakeThing(def, def.MadeFromStuff ? GenStuff.DefaultStuffFor(def) : null);
+            thing.SetFaction(Faction.OfPlayer);
+            return GenSpawn.Spawn(thing, cell, Map);
+        }
+
+        // Moves a pawn the scenario spawned on the ground up to the level. Respawning undrafts it, so a mechanitor would go
+        // and haul the mech itself; it's drafted again.
+        public void MoveHere(
+            Pawn pawn,
+            IntVec3 cell
+        )
+        {
+            var drafted = pawn.Drafted;
+            pawn.DeSpawn();
+            GenSpawn.Spawn(pawn, cell, Map);
+            if (drafted)
+            {
+                pawn.drafter.Drafted = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            if (Map == null)
+            {
+                return;
+            }
+
+            foreach (var zone in Map.zoneManager.AllZones.ToList())
+            {
+                zone.Delete();
+            }
+
+            foreach (var pawn in Map.mapPawns.AllPawnsSpawned.ToList())
+            {
+                pawn.Destroy();
+            }
+
+            AccessTools.Method(_entrance.GetType(), "DeleteConnectedLevel").Invoke(_entrance, null);
+        }
+    }
+
+    // A hauler on the ground carries the mech upstairs with the tweak's cross-level job, then the same-map one puts it in the
+    // zone there. jobName is the same-map job.
+    private static Task<bool> CarriedUpstairs(
+        ScenarioContext context,
+        Pawn mech,
+        Pawn hauler,
+        UpperLevel level,
+        ICollection<IntVec3> cells,
+        string jobName
+    ) => CarriedTo(context, mech, hauler, level.Map, "the zone upstairs", jobName, crossLevel: true,
+        () => mech.Spawned && mech.Map == level.Map && cells.Contains(mech.Position));
+
+    // A hauler takes the mech to destMap, where jobName (a same-map job) finishes the trip and done becomes true. With
+    // crossLevel, the tweak's cross-level job must have carried it there; without, it mustn't have.
+    private static async Task<bool> CarriedTo(
+        ScenarioContext context,
+        Pawn mech,
+        Pawn hauler,
+        Map destMap,
+        string destination,
+        string jobName,
+        bool crossLevel,
+        Func<bool> done
+    )
+    {
+        var carried = false;
+        var hauled = false;
+        // Each change in what the hauler is doing, and who holds the mech, for when it goes wrong
+        var trace = new List<string>();
+        _tracedHauler = hauler;
+        TracedJobEnds.Clear();
+        var harmony = new Harmony(HarmonyId);
+        harmony.Patch(AccessTools.Method(typeof(Verse.AI.Pawn_JobTracker), nameof(Verse.AI.Pawn_JobTracker.EndCurrentJob)),
+            prefix: new HarmonyMethod(typeof(TweaksScenarios), nameof(RecordJobEnd)));
+        bool arrived;
+        try
+        {
+            arrived = await context.Until(
+                $"the hauler takes the mech to {destination}: hauler {Stage.Describe(hauler)} on {hauler.MapHeld}; mech {Stage.Describe(mech)} on {mech.MapHeld}",
+                () =>
+                {
+                    var holder = (mech.ParentHolder as Pawn_CarryTracker)?.pawn;
+                    var state = $"{hauler.CurJobDef?.defName}/{hauler.jobs?.curDriver?.CurToilIndex} at {hauler.PositionHeld} on {hauler.MapHeld}, "
+                                + $"mech held by {(holder == null ? "nobody" : $"{holder.LabelShort} ({holder.CurJobDef?.defName})")}";
+                    if (trace.Count == 0 || trace[^1] != state)
+                    {
+                        trace.Add(state);
+                    }
+
+                    carried |= hauler.CurJobDef?.defName == "Ordo_CarryMechToOtherLevel";
+                    hauled |= hauler.CurJobDef?.defName == jobName && hauler.Map == destMap;
+                    return done() && hauler.carryTracker.CarriedThing == null;
+                }, 4000);
+        }
+        finally
+        {
+            harmony.UnpatchAll(HarmonyId);
+            _tracedHauler = null;
+        }
+
+        var traced = $"hauler's trace: {string.Join(" | ", trace.Take(30))}; jobs ended: {string.Join(" | ", TracedJobEnds.Take(20))}";
+        context.Check(traced, arrived && carried == crossLevel && hauled);
+        context.Check(crossLevel ? "the cross-level job carried it" : "the cross-level job wasn't needed", carried == crossLevel);
+        context.Check($"{jobName} took it to {destination}", hauled);
+        return arrived;
+    }
+
+    // With chargers on the ground taken or missing, a hauler carries the mech up to the free one upstairs, where it charges
+    private static Task<bool> ChargedUpstairs(
+        ScenarioContext context,
+        Pawn mech,
+        Pawn hauler,
+        UpperLevel level
+    ) => CarriedTo(context, mech, hauler, level.Map, "the charger upstairs", "Ordo_DeliverMechToCharger", crossLevel: true,
+        () => mech.Spawned && mech.Map == level.Map && mech.CurJobDef == JobDefOf.MechCharge);
+
+    private static WorkGiver_Scanner ChargerGiver => (WorkGiver_Scanner)DefDatabase<WorkGiverDef>.GetNamed("Ordo_HaulMechToChargerOnOtherLevel").Worker;
+
+    private static async Task LevelsUnpoweredMechToCharger(
+        ScenarioContext context
+    )
+    {
+        var mech = await UnpoweredMech(context, 0, 0);
+        using var level = new UpperLevel(context);
+        await level.FreeCharger(context, mech);
+        var hauler = context.Worker(-6, 0, WorkTypeDefOf.Hauling);
+        await ChargedUpstairs(context, mech, hauler, level);
+    }
+
+    // Vanilla takes a downed mech below its recharge limit to a free charger, so the tweak does the same across levels
+    private static async Task LevelsDownedMechToCharger(
+        ScenarioContext context
+    )
+    {
+        var mech = DownedMech(context, 0, 0);
+        mech.needs.energy.CurLevelPercentage = 0.1f;
+        using var level = new UpperLevel(context);
+        await level.FreeCharger(context, mech);
+        var hauler = context.Worker(-6, 0, WorkTypeDefOf.Hauling);
+        await ChargedUpstairs(context, mech, hauler, level);
+    }
+
+    // A free charger upstairs wins over a zone on the mech's own level: charging beats waiting
+    private static async Task LevelsChargerBeatsZone(
+        ScenarioContext context
+    )
+    {
+        var mech = await UnpoweredMech(context, 0, 0);
+        using var level = new UpperLevel(context);
+        await level.FreeCharger(context, mech);
+        var zone = ShutdownZone(context, CellRect.CenteredOn(context.Cell(-6, -8), 1).Cells);
+        try
+        {
+            var hauler = context.Worker(-6, 0, WorkTypeDefOf.Hauling);
+            await ChargedUpstairs(context, mech, hauler, level);
+        }
+        finally
+        {
+            zone.Delete();
+        }
+    }
+
+    // A mech already waiting in a zone on the ground, which the zone tweaks leave alone, still goes to a charger that's
+    // free upstairs
+    private static async Task LevelsParkedMechToCharger(
+        ScenarioContext context
+    )
+    {
+        var cells = CellRect.CenteredOn(context.Cell(-6, -8), 1).Cells.ToList();
+        var zone = ShutdownZone(context, cells);
+        try
+        {
+            // Hauled into the zone by the zone tweak, as in play: left to itself it shuts down wherever its energy need
+            // picks, which can be just outside
+            var mech = await UnpoweredMech(context, 0, 0);
+            var hauler = context.Worker(-6, 0, WorkTypeDefOf.Hauling);
+            if (!await HauledToZone(context, mech, hauler, cells))
+            {
+                return;
+            }
+
+            using var level = new UpperLevel(context);
+            await level.FreeCharger(context, mech);
+            await ChargedUpstairs(context, mech, hauler, level);
+        }
+        finally
+        {
+            zone.Delete();
+        }
+    }
+
+    private static async Task LevelsChargerOff(
+        ScenarioContext context
+    )
+    {
+        var mech = await UnpoweredMech(context, 0, 0);
+        var start = mech.Position;
+        using var level = new UpperLevel(context);
+        await level.FreeCharger(context, mech);
+        await WithSetting("ChargersAcrossLevels", "false", async () =>
+        {
+            var hauler = context.Worker(-6, 0, WorkTypeDefOf.Hauling);
+            context.Check("with the setting off, the work giver skips", ChargerGiver.ShouldSkip(hauler));
+            await context.Step(600);
+            context.Check($"the mech stayed where it was: {mech.PositionHeld} on {mech.MapHeld}", mech.Spawned && mech.Map == context.Map && mech.Position == start);
+        });
+    }
+
+    // Down rather than up: the hauler and the mech upstairs, the zone on the ground
+    private static async Task LevelsDownedMechCarriedDownstairs(
+        ScenarioContext context
+    )
+    {
+        var mech = DownedMech(context, 0, 0);
+        var mechanitor = mech.GetOverseer();
+        using var level = new UpperLevel(context);
+        level.MoveHere(mechanitor, context.Cell(3, 3));
+        level.MoveHere(mech, context.Cell(4, 11));
+        var cells = CellRect.CenteredOn(context.Cell(-6, -8), 1).Cells.ToList();
+        var zone = ShutdownZone(context, cells);
+        try
+        {
+            var hauler = context.Worker(-6, 0, WorkTypeDefOf.Hauling);
+            level.MoveHere(hauler, context.Cell(12, 12));
+            context.Check("the tweak has a job for the zone downstairs", DownedGiver.HasJobOnThing(hauler, mech));
+            await CarriedTo(context, mech, hauler, context.Map, "the zone on the ground", "HaulMechForRepair", crossLevel: true,
+                () => mech.Spawned && mech.Map == context.Map && cells.Contains(mech.Position));
+        }
+        finally
+        {
+            zone.Delete();
+        }
+    }
+
+    // While CarriedTo watches a hauler: each job it ends, with how and at which toil, since a job that fails as it starts
+    // never shows in the per-tick trace
+    private static Pawn _tracedHauler;
+    private static readonly List<string> TracedJobEnds = new();
+
+    public static void RecordJobEnd(
+        Verse.AI.Pawn_JobTracker __instance,
+        Verse.AI.JobCondition condition
+    )
+    {
+        if (__instance.curJob != null && AccessTools.Field(typeof(Verse.AI.Pawn_JobTracker), "pawn").GetValue(__instance) == _tracedHauler)
+        {
+            TracedJobEnds.Add($"{__instance.curJob.def.defName} {condition} at toil {__instance.curDriver?.CurToilIndex} on {_tracedHauler.MapHeld}");
+        }
+    }
+
+    // MultiFloors' own work scan: a hauler with nothing to do on its level tries the work givers from a stair on each other
+    // level, then takes the stairs to do the job it found. A downed mech upstairs, with a zone upstairs (the same-map job)
+    // or on the ground (the cross-level one, planned from upstairs)
+    private static async Task LevelsHaulerFetchesMech(
+        ScenarioContext context,
+        bool zoneUpstairs
+    )
+    {
+        var mech = DownedMech(context, 0, 0);
+        var mechanitor = mech.GetOverseer();
+        using var level = new UpperLevel(context);
+        level.MoveHere(mechanitor, context.Cell(3, 3));
+        level.MoveHere(mech, context.Cell(4, 11));
+        var hauler = context.Worker(-6, 0, WorkTypeDefOf.Hauling);
+        if (zoneUpstairs)
+        {
+            var cells = level.ZoneCells(context);
+            ShutdownZone(context, cells, level.Map);
+            await CarriedTo(context, mech, hauler, level.Map, "the zone upstairs", "HaulMechForRepair", crossLevel: false,
+                () => mech.Spawned && mech.Map == level.Map && cells.Contains(mech.Position));
+            return;
+        }
+
+        var groundCells = CellRect.CenteredOn(context.Cell(-6, -8), 1).Cells.ToList();
+        var zone = ShutdownZone(context, groundCells);
+        try
+        {
+            await CarriedTo(context, mech, hauler, context.Map, "the zone on the ground", "HaulMechForRepair", crossLevel: true,
+                () => mech.Spawned && mech.Map == context.Map && groundCells.Contains(mech.Position));
+        }
+        finally
+        {
+            zone.Delete();
+        }
+    }
+
+    private static async Task LevelsDownedMechCarriedUpstairs(
+        ScenarioContext context
+    )
+    {
+        var mech = DownedMech(context, 0, 0);
+        using var level = new UpperLevel(context);
+        var cells = level.ZoneCells(context);
+        ShutdownZone(context, cells, level.Map);
+        var hauler = context.Worker(-6, 0, WorkTypeDefOf.Hauling);
+        await CarriedUpstairs(context, mech, hauler, level, cells, "HaulMechForRepair");
+    }
+
+    private static async Task LevelsUnpoweredMechCarriedUpstairs(
+        ScenarioContext context
+    )
+    {
+        var mech = await UnpoweredMech(context, 0, 0);
+        using var level = new UpperLevel(context);
+        var cells = level.ZoneCells(context);
+        ShutdownZone(context, cells, level.Map);
+        var hauler = context.Worker(-6, 0, WorkTypeDefOf.Hauling);
+        if (await CarriedUpstairs(context, mech, hauler, level, cells, "Ordo_HaulMechToShutdownZone"))
+        {
+            await context.Until($"it shuts down again where it was put: {Stage.Describe(mech)}", () => mech.needs.energy.IsLowEnergySelfShutdown, 300, 30);
+            context.Check($"it's still in the zone upstairs: {mech.Position} on {mech.Map}", mech.Map == level.Map && cells.Contains(mech.Position));
+        }
+    }
+
+    // A zone on the mech's own level wins over one on another level
+    private static async Task LevelsOwnLevelFirst(
+        ScenarioContext context
+    )
+    {
+        var mech = DownedMech(context, 0, 0);
+        using var level = new UpperLevel(context);
+        ShutdownZone(context, level.ZoneCells(context), level.Map);
+        var cells = CellRect.CenteredOn(context.Cell(-6, -8), 1).Cells.ToList();
+        var zone = ShutdownZone(context, cells);
+        try
+        {
+            var hauler = context.Worker(-6, 0, WorkTypeDefOf.Hauling);
+            var carried = false;
+            await context.Until($"the hauler takes the mech to the zone on the ground: hauler {Stage.Describe(hauler)}; mech at {mech.PositionHeld} on {mech.MapHeld}", () =>
+            {
+                carried |= hauler.CurJobDef?.defName == "Ordo_CarryMechToOtherLevel";
+                return mech.Spawned && mech.Map == context.Map && cells.Contains(mech.Position);
+            }, 2500);
+            context.Check("it wasn't carried upstairs", !carried);
+        }
+        finally
+        {
+            zone.Delete();
+        }
+    }
+
+    private static async Task LevelsHaulOff(
+        ScenarioContext context
+    )
+    {
+        var mech = DownedMech(context, 0, 0);
+        var start = mech.Position;
+        using var level = new UpperLevel(context);
+        ShutdownZone(context, level.ZoneCells(context), level.Map);
+        await WithSetting("ShutdownZonesAcrossLevels", "false", async () =>
+        {
+            var hauler = context.Worker(-6, 0, WorkTypeDefOf.Hauling);
+            context.Check("with the setting off, there's no job for a zone upstairs", !DownedGiver.HasJobOnThing(hauler, mech));
+            await context.Step(600);
+            context.Check($"the mech stayed where it was: {mech.PositionHeld} on {mech.MapHeld}", mech.Spawned && mech.Map == context.Map && mech.Position == start);
+        });
+    }
+
+    // WVC's Ambush mode sends a mech to an ambush shutdown zone when no enemy is about. With none on its level, it takes the
+    // stairs to the one upstairs; with the setting off, it shuts down where it is.
+    private static async Task LevelsWorkModeWalks(
+        ScenarioContext context,
+        bool on
+    )
+    {
+        var mechanitor = context.Mechanitor(-12, 6);
+        var mech = context.ControlledMech("Mech_Lifter", mechanitor, 0, 0);
+        using var level = new UpperLevel(context);
+        var cells = level.ZoneCells(context);
+        ShutdownZone(context, cells, level.Map);
+        await WithSetting("ShutdownZonesAcrossLevels", on ? "true" : "false", async () =>
+        {
+            mechanitor.mechanitor.GetControlGroup(mech).SetWorkMode(DefDatabase<MechWorkModeDef>.GetNamed("WVC_Ambush"));
+            if (on)
+            {
+                await context.Until($"the mech walks upstairs to the zone: {Stage.Describe(mech)} at {mech.PositionHeld} on {mech.MapHeld}",
+                    () => mech.Spawned && mech.Map == level.Map && cells.Contains(mech.Position), 4000);
+            }
+            else
+            {
+                await context.Step(1500);
+                context.Check($"it stayed on the ground: {Stage.Describe(mech)} on {mech.MapHeld}", mech.Map == context.Map);
+            }
+        });
     }
 
     // Weapons that raise a work stat when equipped, and nothing else, are in the tools category, wherever they came from.

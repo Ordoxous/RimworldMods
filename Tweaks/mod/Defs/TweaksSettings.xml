@@ -50,6 +50,18 @@
         <label>Haul unpowered mechs to shutdown zones</label>
         <tooltip>When a colony mech has shut down for lack of power and no charger is free for it, haulers carry it to the shutdown zone cell nearest a charger it can use, out of the way until one frees up. Needs a shutdown zone from WVC - Work Modes.</tooltip>
       </li>
+      <li MayRequire="telardo.MultiFloors" Class="XmlExtensions.Setting.Checkbox">
+        <key>ShutdownZonesAcrossLevels</key>
+        <defaultValue>true</defaultValue>
+        <label>Shutdown zones on other levels</label>
+        <tooltip>With MultiFloors, when a mech's level has no free shutdown zone cell, haulers carry downed and unpowered mechs up or down the stairs to a zone on another level, and mechs in a shutdown work mode walk there. A zone on the mech's own level is always used first.</tooltip>
+      </li>
+      <li MayRequire="telardo.MultiFloors" Class="XmlExtensions.Setting.Checkbox">
+        <key>ChargersAcrossLevels</key>
+        <defaultValue>true</defaultValue>
+        <label>Chargers on other levels</label>
+        <tooltip>With MultiFloors, when a downed or unpowered mech needs charging and no charger is free on its level, haulers carry it up or down the stairs to a free charger on another level. This comes before taking it to a shutdown zone, and also moves mechs already waiting in one.</tooltip>
+      </li>
       <li Class="XmlExtensions.Setting.Checkbox">
         <key>LightMechsUseStandardChargers</key>
         <defaultValue>true</defaultValue>

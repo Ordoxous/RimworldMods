@@ -1,5 +1,6 @@
 using System.Globalization;
 using UnityEngine;
+using Verse;
 using XmlExtensions;
 
 namespace Ordo.Tweaks;
@@ -16,6 +17,12 @@ internal static class TweaksSettings
     public static bool LimitHemogenFarming => GetBool("LimitHemogenFarming", true);
     public static int HemogenPackCap => Mathf.RoundToInt(GetFloat("HemogenPackCap", 30f));
     public static bool ToolsCategory => GetBool("ToolsCategory", true);
+
+    // Off without MultiFloors, so nothing reaches its types
+    public static bool ShutdownZonesAcrossLevels => MultiFloorsActive && GetBool("ShutdownZonesAcrossLevels", true);
+    public static bool ChargersAcrossLevels => MultiFloorsActive && GetBool("ChargersAcrossLevels", true);
+
+    private static readonly bool MultiFloorsActive = ModsConfig.IsActive("telardo.MultiFloors");
 
     private static bool GetBool(string key, bool defaultValue) =>
         SettingsManager.TryGetSetting(ModId, key, out var value) && bool.TryParse(value, out var parsed)

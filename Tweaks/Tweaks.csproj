@@ -5,6 +5,8 @@
         <WorkshopReference Include="WVC_MoreMechanoidsWorkModes_Main" WorkshopId="2888380373" />
         <!-- Optional: its types are only touched from methods that run when the mod is active -->
         <WorkshopReference Include="BiotechPatch" WorkshopId="3461060466" />
+        <!-- Optional, as above: MultiFloors (1.6 only), for shutdown zones on other levels -->
+        <WorkshopReference Include="MultiFloors" WorkshopId="3384660931" />
     </ItemGroup>
 
 </Project>

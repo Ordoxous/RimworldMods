@@ -49,53 +49,38 @@ public static class UnpoweredMechHauling
         return RimWorld.JobGiver_GetEnergy_Charger.GetClosestCharger(mech, hauler, forced) != null;
     }
 
-    // The zone cell nearest a charger the mech is compatible with (taken or not), or a random one when there's none
+    // The zone cell on the hauler's map nearest a charger the mech is compatible with (taken or not), or a random one
+    // when there's none
     public static bool TryFindCell(
         Pawn hauler,
         Pawn mech,
         out IntVec3 cell
+    ) => ShutdownCells.TryFindCell(hauler, mech, MechanoidWorkType.Work, nearCharger: true, out cell);
+
+    // The job taking the mech to a zone: on the hauler's level, else (with MultiFloors) on another one
+    public static Job MakeJob(
+        Pawn hauler,
+        Pawn mech
     )
     {
-        cell = IntVec3.Invalid;
-        var map = mech.Map;
-        var cells = new List<IntVec3>();
-        foreach (var zone in map.zoneManager.AllZones)
+        if (TryFindCell(hauler, mech, out var cell))
         {
-            if (zone is Zone_MechanoidShutdown shutdownZone
-                && ShutdownUtility.MechanoidWorkTypeIsCorrect(shutdownZone, MechanoidWorkType.Work, mech))
-            {
-                cells.AddRange(shutdownZone.Cells);
-            }
+            var job = JobMaker.MakeJob(TweaksDefOf.Ordo_HaulMechToShutdownZone, mech, cell);
+            job.count = 1;
+            return job;
         }
 
-        if (cells.Count == 0)
-        {
-            return false;
-        }
-
-        var chargers = map.listerThings.ThingsInGroup(ThingRequestGroup.MechCharger)
-            .OfType<Building_MechCharger>()
-            .Where(charger => charger.IsCompatibleWithCharger(mech.kindDef) && !charger.IsForbidden(hauler))
-            .Select(charger => charger.InteractionCell)
-            .ToList();
-
-        IEnumerable<IntVec3> ordered = chargers.Count > 0
-            ? cells.OrderBy(candidate => chargers.Min(spot => candidate.DistanceToSquared(spot)))
-            : cells.InRandomOrder();
-
-        foreach (var candidate in ordered)
-        {
-            if (ShutdownUtility.CanSelfShutdown(candidate, mech, map)
-                && hauler.CanReach(candidate, PathEndMode.OnCell, Danger.Some)
-                && hauler.CanReserve(candidate))
-            {
-                cell = candidate;
-                return true;
-            }
-        }
-
-        return false;
+        return TweaksSettings.ShutdownZonesAcrossLevels
+            ? MultiFloorsShutdown.TryMakeCarryJob(hauler, mech, MechanoidWorkType.Work, nearCharger: true)
+            : null;
     }
+
+    public static bool HasCell(
+        Pawn hauler,
+        Pawn mech
+    ) => TryFindCell(hauler, mech, out _)
+         || (TweaksSettings.ShutdownZonesAcrossLevels
+             && MultiFloorsShutdown.HasCellOnOtherLevel(hauler, mech, MechanoidWorkType.Work, nearCharger: true));
 }
 
 public class WorkGiver_HaulMechToShutdownZone : WorkGiver_Scanner
@@ -129,25 +114,14 @@ public class WorkGiver_HaulMechToShutdownZone : WorkGiver_Scanner
             return false;
         }
 
-        return UnpoweredMechHauling.TryFindCell(pawn, mech, out _);
+        return UnpoweredMechHauling.HasCell(pawn, mech);
     }
 
     public override Job JobOnThing(
         Pawn pawn,
         Thing target,
         bool forced = false
-    )
-    {
-        var mech = (Pawn)target;
-        if (!UnpoweredMechHauling.TryFindCell(pawn, mech, out var cell))
-        {
-            return null;
-        }
-
-        var job = JobMaker.MakeJob(TweaksDefOf.Ordo_HaulMechToShutdownZone, mech, cell);
-        job.count = 1;
-        return job;
-    }
+    ) => UnpoweredMechHauling.MakeJob(pawn, (Pawn)target);
 }
 
 public class JobDriver_HaulMechToShutdownZone : JobDriver
@@ -157,21 +131,25 @@ public class JobDriver_HaulMechToShutdownZone : JobDriver
 
     private Pawn Mech => (Pawn)job.GetTarget(MechIndex).Thing;
 
+    // A hauler arriving from another MultiFloors level starts this job already carrying the mech
     public override bool TryMakePreToilReservations(
         bool errorOnFailed
     )
     {
         return pawn.Reserve(job.GetTarget(CellIndex), job, errorOnFailed: errorOnFailed)
-               && pawn.Reserve(job.GetTarget(MechIndex), job, errorOnFailed: errorOnFailed);
+               && (pawn.IsCarryingThing(Mech) || pawn.Reserve(job.GetTarget(MechIndex), job, errorOnFailed: errorOnFailed));
     }
 
     public override IEnumerable<Toil> MakeNewToils()
     {
         this.FailOnDestroyedOrNull(MechIndex);
+        var carrying = Toils_General.Label();
+        yield return Toils_Jump.JumpIf(carrying, () => pawn.IsCarryingThing(Mech));
         yield return Toils_Goto.GotoThing(MechIndex, PathEndMode.ClosestTouch)
             .FailOnSomeonePhysicallyInteracting(MechIndex)
             .FailOn(() => !UnpoweredMechHauling.NeedsCharger(Mech));
         yield return Toils_Haul.StartCarryThing(MechIndex);
+        yield return carrying;
         yield return Toils_Haul.CarryHauledThingToCell(CellIndex, PathEndMode.OnCell);
         yield return Toils_Haul.PlaceHauledThingInCell(CellIndex, null, false);
         // Shut it down where it was put, as vanilla starts the charge job after carrying a mech to a charger. Otherwise
