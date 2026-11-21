@@ -19,6 +19,7 @@ public class DisallowedZone : MapComponent, ICellBoolGiver
 
     private BoolGrid grid;
     private bool active;
+    private bool visible = true;
     private CellBoolDrawer drawer;
 
     // Effective areas by the pawn's own allowed area; the unrestricted one is kept separately.
@@ -32,6 +33,13 @@ public class DisallowedZone : MapComponent, ICellBoolGiver
     }
 
     public bool Active => active;
+
+    /// <summary>Whether the zone is drawn while it's on. The zone designators always draw it.</summary>
+    public bool Visible
+    {
+        get => visible;
+        set => visible = value;
+    }
 
     public int CellCount => grid.TrueCount;
 
@@ -167,7 +175,7 @@ public class DisallowedZone : MapComponent, ICellBoolGiver
 
     public override void MapComponentUpdate()
     {
-        if (active)
+        if (active && visible)
             MarkForDraw();
         drawer?.CellBoolDrawerUpdate();
     }
@@ -201,6 +209,7 @@ public class DisallowedZone : MapComponent, ICellBoolGiver
     {
         Scribe_Deep.Look(ref grid, "grid");
         Scribe_Values.Look(ref active, "active");
+        Scribe_Values.Look(ref visible, "visible", true);
         if (Scribe.mode == LoadSaveMode.PostLoadInit && grid == null)
             grid = new BoolGrid(map);
     }

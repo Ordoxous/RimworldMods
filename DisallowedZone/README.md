@@ -28,11 +28,11 @@ A zone you paint once and switch on when there's danger, such as a mech cluster,
 **The zone itself** (`DisallowedZone`, a `MapComponent`) is a `BoolGrid` plus an on/off flag, both saved with the map. It isn't an `Area`, so it never appears in the area lists.
 - **Switching it on** ends any current job that targets a cell the pawn may no longer use. Vanilla does the same when you change a pawn's area. Expanding the zone while it's on does this too.
 - **Clearing its last cell** switches it off. An empty zone can't be switched on.
-- **While it's on**, the zone is drawn in red.
+- **While it's on**, the zone is drawn in red, unless it's hidden with the play-settings icon. The zone designators draw it either way. Whether it's shown is saved with the map.
 
 **UI:**
 - Zone tab: expand, clear (vanilla's allowed-area icons, tinted red) and a toggle button whose label shows the state. They're added after "Clear allowed area" by `Patches/DesignationCategories.xml`.
-- An on/off icon among the bottom-right play settings, shown once the map has a zone.
+- A show/hide icon among the bottom-right play settings, shown once the map has a zone. It only hides the overlay; switching the zone on and off is the Zone tab button or the key binding.
 - An alert while any zone is on. Clicking it jumps to that map.
 - The key binding "toggle disallowed zone", unbound by default.
 
@@ -55,13 +55,14 @@ A zone you paint once and switch on when there's danger, such as a mech cluster,
 | | `ai_hauling_skips_zone` | A hauler takes the steel outside the zone and leaves the steel inside until it's switched off |
 | `path` | `path_routes_around_zone` | With a wall of zone across the site, a path crosses it while off and still crosses while on, because there's no way around. A tick after a gap is cleared, the path goes through the gap |
 
-**Results:** 2026-11-20: 8/8 passed in `disallowedzone-headless`, and 8/8 in the windowed `disallowedzone` profile, both with no errors in the log. The windowed run drew the zone overlay, the alert and the play-settings icon while zones were on, so drawing errors would have failed it. Nothing was checked by eye.
+**Results:** 2026-11-20: 8/8 passed in `disallowedzone-headless`, and 8/8 in the windowed `disallowedzone` profile, both with no errors in the log. The windowed run drew the zone overlay, the alert and the play-settings icon while zones were on, so drawing errors would have failed it. Nothing was checked by eye. 2026-11-21, after the visibility change: 8/8 in the windowed profile. No scenario covers hiding the zone.
 
 Planted fault: with the `Notify_CellDelta` calls removed, `path_routes_around_zone` still passed, both in the same tick and one tick later. On the test map something else makes the path finder rebuild its grids every tick, so the test can't show the call is needed. It's kept because it costs nothing and covers a quiet map. Within a single tick, paths can use a grid from before a zone edit; vanilla allowed areas behave the same.
 
 ## History
 
 - 2026-11-20: first version.
+- 2026-11-21: the play-settings icon shows or hides the zone instead of switching it on and off.
 
 ## Open questions
 

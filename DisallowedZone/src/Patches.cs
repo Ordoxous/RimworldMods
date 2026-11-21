@@ -100,7 +100,7 @@ public static class Patches
         DisallowedZone.For(__instance.map)?.Notify_BaseAreaRemoved(area);
     }
 
-    /// <summary>An on/off icon among the bottom-right toggles, once the map has a zone.</summary>
+    /// <summary>A show/hide icon for the zone among the bottom-right toggles, once the map has a zone.</summary>
     private static void PlaySettings_Postfix(
         WidgetRow row,
         bool worldView
@@ -111,9 +111,8 @@ public static class Patches
         var zone = DisallowedZone.For(Find.CurrentMap);
         if (zone == null || (zone.CellCount == 0 && !zone.Active))
             return;
-        var value = zone.Active;
-        row.ToggleableIcon(ref value, Textures.Toggle, "Ordo_DisallowedZone_ToggleTip".Translate(), SoundDefOf.Mouseover_ButtonToggle);
-        if (value != zone.Active)
-            zone.SetActive(value);
+        var value = zone.Visible;
+        row.ToggleableIcon(ref value, Textures.Toggle, "Ordo_DisallowedZone_VisibilityTip".Translate(), SoundDefOf.Mouseover_ButtonToggle);
+        zone.Visible = value;
     }
 }
