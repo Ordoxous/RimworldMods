@@ -18,8 +18,8 @@ dotnet build <Mod>/<Mod>.csproj -t:CopyToRimworld    # build, then deploy
 - Building copies `mod/` into `out/` and deletes files from `out/` that are no longer in `mod/`, except `Assemblies`.
 - Building checks `mod/About/About.xml` (target `CheckAboutXml` in `Directory.Build.targets`) and fails with `ORDO001` errors naming the line. The rules are in the repo README's Conventions.
 - Other mods' DLLs come in as `<WorkshopReference Include="<AssemblyName>" WorkshopId="<id>" />`, resolved before compiling to the 1.7 `Assemblies` folder, or the 1.6 one. A missing Workshop mod fails the build with its ID.
-- With the installed game's version matching `Krafs.Rimworld.Ref`, `build/LocalRimWorldReferences.targets` swaps in the real game assemblies ("Local RimWorld referenced: true"), so Rider shows real method bodies.
-- `Krafs.Rimworld.Ref` floats (`1.7.*-*`), so projects restored at different times can compile against different game builds. `dotnet restore --force-evaluate` brings them in line.
+- `build/LocalRimWorldReferences.targets` swaps in the real game assemblies when their version matches `Krafs.Rimworld.Ref`, so Rider shows real method bodies. It looks for them in `*/Managed`, which the 1.7 Waylith build doesn't have, so for now it always prints "Local RimWorld referenced: false" and compiles against the package.
+- `Krafs.Rimworld.Ref` is pinned in `Directory.Build.props` (`1.7.5014-unstable`), so every project compiles against the same game build. When the game updates, raise it to the package version matching the build number in the game's `Version.txt` (the build prints both as "RimWorld version" and "Krafs.Rimworld.Ref version").
 - BridgeTools sets `IsRimWorldMod` false (no About.xml check, no `mod/` copy) and a `DeployTarget` of its own. It references every mod project through a glob, so a new mod needs no change there.
 - Mods compile against a publicized `Assembly-CSharp` (`Krafs.Publicizer`), so protected and private game members are reachable. Overrides of protected methods must then be declared `public override`.
 
