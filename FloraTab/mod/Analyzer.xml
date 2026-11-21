@@ -15,6 +15,8 @@
       <li>Ordo.FloraTab.MainTabWindow_Flora:Survey</li>
       <li>Ordo.FloraTab.MainTabWindow_Flora:DoToolbar</li>
       <li>Ordo.FloraTab.MainTabWindow_Flora:SwitchTo</li>
+      <li>Ordo.FloraTab.PawnTablePage:Draw</li>
+      <li>Ordo.FloraTab.PawnTablePage:Survey</li>
       <li>Ordo.FloraTab.PlantsPage:Build</li>
       <li>Ordo.FloraTab.PlantsPage:DoYieldsCell</li>
       <li>Ordo.FloraTab.PlantsPage:JumpToNext</li>

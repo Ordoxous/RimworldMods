@@ -59,6 +59,10 @@
 
   <Ordo_FloraTab_PlantsPage>Plants</Ordo_FloraTab_PlantsPage>
   <Ordo_FloraTab_MineralsPage>Minerals</Ordo_FloraTab_MineralsPage>
+  <Ordo_FloraTab_AnimalsPage>Animals</Ordo_FloraTab_AnimalsPage>
+  <Ordo_FloraTab_NoAnimals>No colony animals on this map.</Ordo_FloraTab_NoAnimals>
+  <Ordo_FloraTab_WildlifePage>Wildlife</Ordo_FloraTab_WildlifePage>
+  <Ordo_FloraTab_NoWildlife>No wild animals in view.</Ordo_FloraTab_NoWildlife>
 
   <Ordo_FloraTab_Mineral>Mineral</Ordo_FloraTab_Mineral>
   <Ordo_FloraTab_MineralYieldsTip>What mining it gives. Click for its info card.</Ordo_FloraTab_MineralYieldsTip>

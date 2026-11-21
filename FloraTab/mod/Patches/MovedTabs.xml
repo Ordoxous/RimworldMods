@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+
+  <!-- The Animals and Wildlife tabs move into the Resources tab as pages: their buttons are hidden, and their hotkeys open
+       those pages. Each field is replaced where a def already sets it and added where it doesn't; success is Always
+       because either half may find nothing to do. -->
+  <Operation Class="PatchOperationReplace">
+    <success>Always</success>
+    <xpath>Defs/MainButtonDef[defName="Animals" or defName="Wildlife"]/buttonVisible</xpath>
+    <value><buttonVisible>false</buttonVisible></value>
+  </Operation>
+  <Operation Class="PatchOperationAdd">
+    <success>Always</success>
+    <xpath>Defs/MainButtonDef[(defName="Animals" or defName="Wildlife") and not(buttonVisible)]</xpath>
+    <value><buttonVisible>false</buttonVisible></value>
+  </Operation>
+
+  <Operation Class="PatchOperationReplace">
+    <success>Always</success>
+    <xpath>Defs/MainButtonDef[defName="Animals" or defName="Wildlife"]/workerClass</xpath>
+    <value><workerClass>Ordo.FloraTab.MainButtonWorker_ResourcesPage</workerClass></value>
+  </Operation>
+  <Operation Class="PatchOperationAdd">
+    <success>Always</success>
+    <xpath>Defs/MainButtonDef[(defName="Animals" or defName="Wildlife") and not(workerClass)]</xpath>
+    <value><workerClass>Ordo.FloraTab.MainButtonWorker_ResourcesPage</workerClass></value>
+  </Operation>
+
+</Patch>

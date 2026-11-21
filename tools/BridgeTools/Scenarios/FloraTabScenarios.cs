@@ -40,7 +40,12 @@ public static class FloraTabScenarios
         new("minerals_designate_and_cancel", "minerals", MineralsDesignateAndCancel),
         new("minerals_area", "minerals", MineralsArea),
         new("minerals_distance_and_nearest", "minerals", MineralsDistanceAndNearest),
-        new("perf_mineral_survey", "perf", MineralSurveyCost)
+        new("perf_mineral_survey", "perf", MineralSurveyCost),
+        new("animals_lists_colony_animals_and_searches", "animals", AnimalsListAndSearch),
+        new("animals_hotkey_opens_the_page", "animals", AnimalsHotkey),
+        new("animals_hosts_animal_tab", "animals", HostsAnimalTab, requiresMod: "fluffy.animaltab"),
+        new("wildlife_lists_wild_animals_and_searches", "animals", WildlifeListAndSearch),
+        new("wildlife_hotkey_opens_the_page", "animals", WildlifeHotkey)
     };
 
     private static readonly FloraFilter Wild = new();
@@ -79,7 +84,13 @@ public static class FloraTabScenarios
         var def = DefDatabase<MainButtonDef>.GetNamedSilentFail("Ordo_Flora");
         context.Check("the Ordo_Flora main button loaded", def != null);
         context.Check($"it opens the Resources window: {def?.tabWindowClass}", def?.tabWindowClass == typeof(MainTabWindow_Flora));
-        context.Check($"it sits just after Wildlife: {def?.order}", def != null && def.order > DefDatabase<MainButtonDef>.GetNamed("Wildlife").order);
+        var animals = DefDatabase<MainButtonDef>.GetNamed("Animals");
+        context.Check($"it takes the Animals button's place: {def?.order} vs {animals.order}", def != null && def.order == animals.order);
+        foreach (var moved in new[] { animals, DefDatabase<MainButtonDef>.GetNamed("Wildlife") })
+        {
+            context.Check($"the {moved.defName} button is hidden", !moved.buttonVisible);
+            context.Check($"the {moved.defName} hotkey opens its page: {moved.workerClass}", moved.Worker is MainButtonWorker_ResourcesPage);
+        }
         context.Check("the window is made", def?.TabWindow is MainTabWindow_Flora);
         return Task.CompletedTask;
     }
@@ -626,6 +637,167 @@ public static class FloraTabScenarios
         context.Check(lines[1], forecastAvg < 5);
         context.Check(lines[2], coldAvg < 20);
         context.Check(lines[3], warmAvg < 10);
+        return Task.CompletedTask;
+    }
+
+    // The page lists what the vanilla Animals tab lists: the map's colony animals, not wild ones
+    private static Task AnimalsListAndSearch(
+        ScenarioContext context
+    )
+    {
+        var page = new AnimalsPage();
+        page.Survey(context.Map, null, 0);
+        context.Check($"hosts a mod's window only when Animal Tab is loaded: {page.HostedWindow != null}",
+            page.HostedWindow != null == ModsConfig.IsActive("fluffy.animaltab"));
+        int before = page.Listed.Count;
+
+        var tame = context.Spawn("Muffalo", 0, 0, PawnMode.Tamed);
+        var wild = context.Spawn("Muffalo", 2, 0, PawnMode.Wild);
+        var hen = context.Spawn("Chicken", 4, 0, PawnMode.Tamed);
+        page.Survey(context.Map, null, 0);
+        context.Check($"lists the two tame animals: {before} -> {page.Listed.Count}", page.Listed.Count - before == 2);
+        context.Check("lists the tame muffalo", page.Listed.Contains(tame));
+        context.Check("not the wild one", !page.Listed.Contains(wild));
+
+        var search = new QuickSearchFilter { Text = "chicken" };
+        page.SearchFor(search);
+        context.Check($"searching \"chicken\" lists the hen and not the muffalo: {page.Listed.Count}",
+            page.Listed.Contains(hen) && !page.Listed.Contains(tame));
+
+        tame.Name = new NameSingle("Bessiezq");
+        search.Text = "bessiezq";
+        page.SearchFor(search);
+        context.Check($"searching by name finds the muffalo: {page.Listed.Count}", page.Listed.Count == 1 && page.Listed[0] == tame);
+
+        search.Text = "";
+        page.SearchFor(search);
+        context.Check($"clearing the search lists them all again: {page.Listed.Count}", page.Listed.Count - before == 2);
+        page.Clear();
+        return Task.CompletedTask;
+    }
+
+    // F4 goes to the hidden Animals button, whose worker opens the Resources tab on the Animals page and closes it again
+    private static Task AnimalsHotkey(
+        ScenarioContext context
+    )
+    {
+        var resources = DefDatabase<MainButtonDef>.GetNamed("Ordo_Flora");
+        var animals = DefDatabase<MainButtonDef>.GetNamed("Animals");
+        var tabs = Find.MainTabsRoot;
+        tabs.EscapeCurrentTab(false);
+
+        animals.Worker.Activate();
+        context.Check($"opens the Resources tab: {tabs.OpenTab?.defName}", tabs.OpenTab == resources);
+        context.Check($"on the Animals page: {MainTabWindow_Flora.Page.GetType().Name}", MainTabWindow_Flora.Page is AnimalsPage);
+
+        animals.Worker.Activate();
+        context.Check($"pressing it again closes it: {tabs.OpenTab?.defName}", tabs.OpenTab == null);
+
+        // Open on another page, the hotkey switches to Animals rather than closing
+        tabs.SetCurrentTab(resources, false);
+        ((MainTabWindow_Flora)resources.TabWindow).SwitchTo(0);
+        context.Check($"another page shows first: {MainTabWindow_Flora.Page.GetType().Name}", MainTabWindow_Flora.Page is PlantsPage);
+        animals.Worker.Activate();
+        context.Check($"from another page it switches to Animals: {MainTabWindow_Flora.Page.GetType().Name}, open {tabs.OpenTab?.defName}",
+            tabs.OpenTab == resources && MainTabWindow_Flora.Page is AnimalsPage);
+
+        tabs.EscapeCurrentTab(false);
+        return Task.CompletedTask;
+    }
+
+    // With Animal Tab, the page hosts its window: the button def's own instance, which its filters reach through
+    // MainTabWindow_Animals.Instance. Turning its filter bar on makes the window build a new table, which must still get
+    // the page's search.
+    private static Task HostsAnimalTab(
+        ScenarioContext context
+    )
+    {
+        var page = new AnimalsPage();
+        var hosted = page.HostedWindow;
+        context.Check($"hosts Animal Tab's window: {hosted?.GetType().FullName}", page.HostedWindow != null
+            && hosted?.GetType().FullName == "AnimalTab.MainTabWindow_Animals");
+        var instance = hosted?.GetType().GetProperty("Instance", BindingFlags.Public | BindingFlags.Static)?.GetValue(null);
+        context.Check("it is the window Animal Tab's filters use", instance != null && instance == hosted);
+
+        var tame = context.Spawn("Muffalo", 0, 0, PawnMode.Tamed);
+        page.Survey(context.Map, null, 0);
+        context.Check($"lists the tame muffalo: {page.Listed.Count}", page.Listed.Contains(tame));
+        // A headless game has no real screen size, so the size is checked only with a window
+        if (UI.screenHeight >= 480)
+            context.Check($"its window is sized: {page.Width:F0} x {page.Height:F0}", page.Width > 200f && page.Height > 50f);
+
+        var filter = hosted!.GetType().GetProperty("Filter")!;
+        var search = new QuickSearchFilter();
+        try
+        {
+            filter.SetValue(hosted, true);
+            page.Survey(context.Map, null, 0);
+            context.Check($"with its filter bar on, the muffalo is still listed: {page.Listed.Count}", page.Listed.Contains(tame));
+
+            search.Text = "zzzqx";
+            page.SearchFor(search);
+            context.Check($"the search still applies to its new table: {page.Listed.Count}", page.Listed.Count == 0);
+        }
+        finally
+        {
+            search.Text = "";
+            page.SearchFor(search);
+            filter.SetValue(hosted, false);
+        }
+        context.Check($"with the search cleared it's listed again: {page.Listed.Count}", page.Listed.Contains(tame));
+        page.Clear();
+        return Task.CompletedTask;
+    }
+
+    // The page lists what the vanilla Wildlife tab lists: wild animals in view, not the colony's
+    private static Task WildlifeListAndSearch(
+        ScenarioContext context
+    )
+    {
+        var page = new WildlifePage();
+        page.Survey(context.Map, null, 0);
+        int before = page.Listed.Count;
+
+        var wild = context.Spawn("Muffalo", 0, 0, PawnMode.Wild);
+        var hare = context.Spawn("Hare", 2, 0, PawnMode.Wild);
+        var tame = context.Spawn("Muffalo", 4, 0, PawnMode.Tamed);
+        page.Survey(context.Map, null, 0);
+        context.Check($"lists the two wild animals: {before} -> {page.Listed.Count}", page.Listed.Count - before == 2);
+        context.Check("lists the wild muffalo", page.Listed.Contains(wild));
+        context.Check("not the tame one", !page.Listed.Contains(tame));
+
+        var search = new QuickSearchFilter { Text = "hare" };
+        page.SearchFor(search);
+        context.Check($"searching \"hare\" lists the hare and not the muffalo: {page.Listed.Count}",
+            page.Listed.Contains(hare) && !page.Listed.Contains(wild));
+        search.Text = "";
+        page.SearchFor(search);
+        page.Clear();
+        return Task.CompletedTask;
+    }
+
+    // F5 goes to the hidden Wildlife button, which opens the Resources tab on the Wildlife page, and from Animals switches
+    private static Task WildlifeHotkey(
+        ScenarioContext context
+    )
+    {
+        var resources = DefDatabase<MainButtonDef>.GetNamed("Ordo_Flora");
+        var animals = DefDatabase<MainButtonDef>.GetNamed("Animals");
+        var wildlife = DefDatabase<MainButtonDef>.GetNamed("Wildlife");
+        var tabs = Find.MainTabsRoot;
+        tabs.EscapeCurrentTab(false);
+
+        wildlife.Worker.Activate();
+        context.Check($"opens the Wildlife page: {tabs.OpenTab?.defName}, {MainTabWindow_Flora.Page.GetType().Name}",
+            tabs.OpenTab == resources && MainTabWindow_Flora.Page is WildlifePage);
+        animals.Worker.Activate();
+        context.Check($"the Animals hotkey switches to Animals: {MainTabWindow_Flora.Page.GetType().Name}",
+            tabs.OpenTab == resources && MainTabWindow_Flora.Page is AnimalsPage);
+        wildlife.Worker.Activate();
+        context.Check($"and F5 back to Wildlife: {MainTabWindow_Flora.Page.GetType().Name}",
+            tabs.OpenTab == resources && MainTabWindow_Flora.Page is WildlifePage);
+        wildlife.Worker.Activate();
+        context.Check($"pressing it again closes it: {tabs.OpenTab?.defName}", tabs.OpenTab == null);
         return Task.CompletedTask;
     }
 }

@@ -36,7 +36,12 @@ public interface IResourcePage
 {
     string LabelKey { get; }
     float Width { get; }
-    int RowCount { get; }
+
+    // The height the page would like, below the toolbar
+    float Height { get; }
+
+    // Whether the window's area and distance filters apply to it
+    bool UsesPlaceFilters { get; }
 
     // Draws the page's own toggles from x, and returns whether any changed
     bool DoToggles(
@@ -81,8 +86,9 @@ public abstract class TablePage<TRow> : IResourcePage
 
     public abstract string LabelKey { get; }
     protected abstract string NoneKey { get; }
-    public int RowCount => rows.Count;
     public float Width => Columns.Sum(c => c.width);
+    public float Height => HeaderHeight + RowHeight * Mathf.Clamp(rows.Count, 3, 16);
+    public bool UsesPlaceFilters => true;
 
     protected List<Column<TRow>> Columns => columns ??= MakeColumns();
 

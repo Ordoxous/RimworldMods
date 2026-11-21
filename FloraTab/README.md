@@ -1,27 +1,32 @@
 # FloraTab
 
-Shows "Flora Tab" in game, package ID `Ordo.FloraTab`. It adds a **Resources** main tab next to Wildlife with two pages, each a table with one row per kind:
+Shows "Flora Tab" in game, package ID `Ordo.FloraTab`. It adds a **Resources** main tab, in the Animals button's place, with four pages:
 - **Plants:** the harvestable wild plants on the current map, such as berry bushes, wild healroot, agave and, if you turn it on, trees.
 - **Minerals:** the visible ore, such as steel, gold, plasteel, jade, uranium and compacted machinery.
+- **Animals:** the Animals tab, moved in: the game's, or a mod's replacement such as Animal Tab. Its button is hidden, and its hotkey (F4) opens this page.
+- **Wildlife:** the Wildlife tab, moved in the same way. Its hotkey (F5) opens this page.
+
+Plants and Minerals are tables with one row per kind.
 
 The mod and the button def keep their Flora names (`Ordo.FloraTab`, `Ordo_Flora`, `MainTabWindow_Flora`) so saves and mod lists aren't affected.
 
 ## Dependencies
 
-- **Hard:** none. It has no Harmony patches.
+- **Hard:** none. It has no Harmony patches; hiding the Animals and Wildlife buttons is an XML patch.
 - **DLCs:** none needed. With Ideology, marking trees gives vanilla's warning about tree-loving ideoligions once per click.
 
 ## How it works
 
 | Part | Where |
 |---|---|
-| The main button: `Ordo_Flora`, order 51, so it sits just after Wildlife (50) | `mod/Defs/MainButtons.xml` |
+| The main button: `Ordo_Flora`, order 40, the same as vanilla's Animals button, which it replaces | `mod/Defs/MainButtons.xml` |
+| The Animals and Wildlife buttons: hidden (`buttonVisible`), and given `MainButtonWorker_ResourcesPage`, so each hotkey opens its page, switches to it, or closes the window if that page is showing | `mod/Patches/MovedTabs.xml`, `src/MainButtonWorker_ResourcesPage.cs` |
 | The survey: one row per plant kind, with its counts, readiness, risk and distance | `src/FloraSurvey.cs` |
 | The forecast: the map's next 7 days hour by hour, used for frost and days until ready | `src/MapForecast.cs` |
 | Harvest and Cancel for a whole row | `src/FloraDesignations.cs` |
-| The window: the Plants and Minerals tabs, and the shared toolbar with area and distance dropdowns and a search box. Each page adds its own toggles. | `src/MainTabWindow_Flora.cs` |
+| The window: the page tabs, and the shared toolbar with area and distance dropdowns (Plants and Minerals only) and a search box. Each page adds its own toggles. It resizes to fit when a survey changes the page's size. | `src/MainTabWindow_Flora.cs` |
 | The table both pages use: columns that each say how they sort and draw, the header, scrolling, hover and jump-to-next | `src/TablePage.cs` |
-| The pages: their columns, toggles and row buttons | `src/PlantsPage.cs`, `src/MineralsPage.cs` |
+| The pages: their columns, toggles and row buttons | `src/PlantsPage.cs`, `src/MineralsPage.cs`, `src/PawnTablePage.cs` (Animals and Wildlife) |
 | Minerals: the survey, Mine and Cancel, and the hover highlight | `src/MineralSurvey.cs`, `src/MineralDesignations.cs`, `src/MineralHighlight.cs` |
 | Hover highlight: hovering a row outlines its plants on the map. Yellow is marked for harvest, red at risk, green ready and white growing. If none are on screen, an arrow at the screen edge points to the nearest ready one. | `src/FloraHighlight.cs` |
 
@@ -95,11 +100,26 @@ The mod and the button def keep their Flora names (`Ordo.FloraTab`, `Ordo_Flora`
 - **Cancel** removes both Mine and Mine vein designations from the row's cells.
 - **The hover highlight** outlines marked cells in yellow, overhead cells in orange and the rest in white. If none are on screen, an arrow points to the vein nearest the base.
 
+## Animals and Wildlife pages
+
+Both are a `PawnTablePage`, which takes over one main button: `AnimalsPage` for `Animals` and `PawnTableDefOf.Animals`, `WildlifePage` for `Wildlife` and `PawnTableDefOf.Wildlife`. The Wildlife page lists what `MainTabWindow_Wildlife` lists: spawned, unfogged wild animals and wild men, not in a prison cell. Animal Tab doesn't replace the Wildlife window, only adds a Handler column to its table, so Wildlife draws the vanilla table with that column.
+
+**Two modes:**
+- **Hosting a mod's window:** when the `Animals` button's `tabWindowClass` is a `MainTabWindow_PawnTable` other than vanilla's, as with Animal Tab (`Fluffy.AnimalTab`, `AnimalTab.MainTabWindow_Animals`), the page draws that window's `DoWindowContents` in its own rect, so its filter bar and buttons come along. It uses the button def's own `TabWindow` instance, because Animal Tab's filters reach the window through its static `Instance`, which its constructor sets. The page makes the window's table as its `PostOpen` would (`CreateTable`, via the publicized assembly), then fits each table the window makes (`SetMinMaxSize`) below the tabs and toolbar and wraps its `pawnsGetter` with the search. Animal Tab makes a new table whenever its filter bar opens or closes, so the page checks for a new table each time it uses it. The window resizes every frame, to follow the filter bar.
+- **Vanilla:** otherwise it draws the vanilla `PawnTable` for `PawnTableDefOf.Animals`, made just as `MainTabWindow_PawnTable` makes it, over `mapPawns.ColonyAnimals`. Columns that other mods add to that table def show up here too. In this mode the Manage auto-slaughter button sits in the toolbar; a hosted window draws its own. Area and Within don't apply in either mode.
+
+- **Search** filters by the animal's name, its gendered kind label ("hen") or its race ("chicken").
+- **Refresh:** vanilla refreshes the table only when `MainTabWindowUtility.NotifyAllPawnTables_PawnsChanged` finds a `MainTabWindow_PawnTable`, and this window isn't one. So the page marks the table dirty on each 1-second survey instead.
+- **Size:** the table is made with the screen size minus the window's tabs, toolbar and margins as its limit, and made again when the screen size changes.
+- **Mods that patch vanilla's `MainTabWindow_Animals`** won't reach the vanilla mode, since it doesn't use that window. A replacement window that isn't a `MainTabWindow_PawnTable` isn't hosted, and the vanilla table shows instead. Mods that open the Animals tab through `MainButtonDefOf.Animals` get the Animals page, through the worker.
+
 ## Testing
 
 **Profiles:**
 - `floratab`: Harmony, Core, RimBridgeServer and the mod.
 - `floratab-headless`: the same with no window.
+- `floratab-animaltab` and `floratab-animaltab-headless`: as `floratab`, plus Ideology and Animal Tab, for the hosted mode. Without Ideology, Animal Tab logs an error the first time its window is made: its static `MemeDef_Rancher` field looks up Ideology's Rancher meme. `animals_hosts_animal_tab` only runs when Animal Tab is loaded.
+- **Run the whole suite headless.** Steps advance one tick per frame, and windowed frames are capped, so the growth scenario's 60,000 ticks take many minutes windowed and the bridge stops answering until they're done. Windowed, run only `suite=animals` or another short suite.
 - `floratab-profiling`: as `floratab`, plus Dubs Performance Analyzer. It's windowed, because DPA fails headless.
 
 ### Profiling
@@ -137,7 +157,7 @@ That's about 1 ms once a second while the tab is open, and nothing while it's cl
 
 | Suite | Scenarios | What it checks |
 |---|---|---|
-| `setup` | `setup_main_button` | The button def loads, opens `MainTabWindow_Flora` and comes after Wildlife |
+| `setup` | `setup_main_button` | The button def loads, opens `MainTabWindow_Flora` and takes the Animals button's order. The Animals and Wildlife buttons are hidden and have the page worker. |
 | `survey` | `survey_counts_ready_soon_and_yield` | 2 grown and 1 young berry bush: count +3, ready +2, yield +2 full harvests, and the product is berries |
 | | `survey_skips_unharvestable_and_fogged` | Grass has no row. Wild healroot is listed, and hidden once fogged. |
 | `filter` | `filter_trees` | An oak is hidden by default and listed with Trees on |
@@ -152,8 +172,20 @@ That's about 1 ms once a second while the tab is open, and nothing while it's cl
 | | `risk_frost_kills_only_die_if_leafless` | On a made-up forecast with -100° at hour 12, an outdoor potato is killed in 0.5 days and a berry bush isn't. With no frost, nothing is killed. |
 | `growth` | `growth_days_until_ready_matches_a_day` | A ready bush is ready in 0 days. A young bush's growth over a real day, stepped 2000 ticks at a time, is within 25% of the forecast's. |
 | `perf` | `perf_survey_and_forecast` | Times the survey and the forecast on the current map. See Profiling. |
+| `minerals` | `minerals_*` | Ore kinds, counts, veins, yield, overhead, fog, Mine and Cancel, area and distance |
+| `animals` | `animals_lists_colony_animals_and_searches` | Lists tame animals and not wild ones; search by kind ("chicken" finds a rooster) and by name; hosts a window only with Animal Tab |
+| | `animals_hotkey_opens_the_page` | The Animals worker opens the tab on Animals, closes it, and switches to Animals from another page |
+| | `animals_hosts_animal_tab` | Only with Animal Tab: hosts its window (the same instance as its `Instance`), lists a tame muffalo, and keeps the search after its filter bar rebuilds the table |
+| | `wildlife_lists_wild_animals_and_searches` | Lists wild animals and not tame ones; "hare" finds the hare |
+| | `wildlife_hotkey_opens_the_page` | F5 opens Wildlife, F4 switches to Animals, F5 back, and F5 again closes |
 
 **Stepping time:** one `context.Step(60000)` grew a bush only about half as much as 30 steps of 2000 ticks did. That was seen twice, against two different estimates. A diagnostic stepping 2000 ticks at a time saw growth match the game's own `GrowthPerTick × 2000` to within 10%. Step in chunks when a test depends on ticking over a long time.
+
+**Results:** 2026-11-21, after adding the Wildlife page: `floratab-headless` 26/26 passed with the Animal Tab scenario skipped, and `floratab-animaltab-headless` 27/27. In `floratab-animaltab` windowed, F5 opened the Wildlife page with a wild muffalo and hare, the hunt and tame columns and Animal Tab's Handler column, and Wildlife was gone from the bottom bar. That was checked by eye from a screenshot.
+
+**Results:** 2026-11-21, `floratab-animaltab-headless`, after hosting Animal Tab: 25/25 passed. `floratab-animaltab` windowed: the animals suite passed, and F4 showed Animal Tab's window inside the page, with its handler, milk and meat columns, filter button and auto-slaughter icon. That was checked by eye from a screenshot. Opening Animal Tab's filter bar was only tested by its scenario, not by eye.
+
+**Results:** 2026-11-21, `floratab-headless`, after adding the Animals page: 24/24 passed. Then in the windowed `floratab` profile, F4 opened the Resources tab on the Animals page, with a trained muffalo and rooster in the vanilla table, Manage auto-slaughter in the toolbar, and the Resources button between Assign and Wildlife. That was checked by eye from a screenshot.
 
 **Results:** 2026-11-20, `floratab-headless`, after adding risk, area and days until ready: 14/14 passed, with no errors in the log. Earlier the same day, in the windowed `floratab` profile, the first version of the tab opened next to Wildlife with correct counts, and Harvest appeared only on rows with unmarked ready plants. That was checked by eye from a screenshot.
 
@@ -163,6 +195,10 @@ That's about 1 ms once a second while the tab is open, and nothing while it's cl
 - 2026-11-20: hovering a row outlines its plants on the map.
 - 2026-11-20: Dubs Performance Analyzer tab (`mod/Analyzer.xml`), the `floratab-profiling` profile, and the `perf` suite. A survey of 827 plants takes about 1 ms.
 - 2026-11-20: At risk (dying, old age, frost), Next ready from an hourly forecast, Area and Within filters, and the Nearest column. Soon became part of Next ready's tooltip.
+- 2026-11-20: several yields per plant, Hide yieldless, sortable columns, and the Minerals page. The tab became Resources.
+- 2026-11-21: the Animals tab moved in as a third page.
+- 2026-11-21: with Animal Tab loaded, the Animals page hosts its window.
+- 2026-11-21: the Wildlife tab moved in as a fourth page.
 
 ## Open questions
 
@@ -171,4 +207,5 @@ That's about 1 ms once a second while the tab is open, and nothing while it's cl
 - **Width:** the window is 1026 px wide. On a 1280 px screen it fits, but narrower screens would clip the right-hand buttons.
 - **Truncated label:** "Within: Any distance" is cut off to "Within: Any dista..." on its 130 px button.
 - Should rows be grouped by product, for example several berry-like plants from mods all giving berries?
-- Should there be a hotkey? Wildlife uses F5, and nothing is bound here yet.
+- **Hotkeys:** F4 and F5 (the Animals and Wildlife hotkeys) open their pages. Plants and Minerals have no hotkey of their own.
+- **Name:** the tab is still called Resources, though it now holds Animals and Wildlife too.

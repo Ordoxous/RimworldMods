@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
@@ -7,7 +8,8 @@ using Verse;
 namespace Ordo.FloraTab;
 
 // The Resources main tab: a page for the map's harvestable wild plants and one for its ore, each a table of kinds, like
-// Wildlife is for animals. The area, distance and search are shared by both pages.
+// Wildlife is for animals, and the Animals and Wildlife tabs moved in. The area and distance are shared by the plants and
+// minerals pages, the search by all four.
 public class MainTabWindow_Flora : MainTabWindow
 {
     private const float ToolbarHeight = 32f;
@@ -16,7 +18,8 @@ public class MainTabWindow_Flora : MainTabWindow
     private static readonly int[] DistanceChoices = { 0, 25, 50, 75, 100, 150, 200 };
 
     // Kept across openings, as the Wildlife tab keeps its sort
-    private static readonly IResourcePage[] Pages = { new PlantsPage(), new MineralsPage() };
+    private static readonly IResourcePage[] Pages =
+        { new PlantsPage(), new MineralsPage(), new AnimalsPage(), new WildlifePage() };
     private static int currentPage;
     private static Area area;
     private static int maxDistance;
@@ -29,14 +32,33 @@ public class MainTabWindow_Flora : MainTabWindow
     private Map surveyedMap;
     private float lastSurvey = -999f;
 
-    private static IResourcePage Page => Pages[currentPage];
+    public static IResourcePage Page => Pages[currentPage];
 
     public override Vector2 RequestedTabSize => new(
         Page.Width + 70f,
-        Mathf.Max(260f, TabDrawer.TabHeight + ToolbarHeight + TablePage<object>.HeaderHeight
-            + TablePage<object>.RowHeight * Mathf.Clamp(Page.RowCount, 3, 16) + Margin * 2 + 16f));
+        Mathf.Max(260f, TabDrawer.TabHeight + ToolbarHeight + Page.Height + Margin * 2 + 16f));
 
     public static void SurveyNow() => surveyRequested = true;
+
+    // What a hidden button that moved in, such as Animals or Wildlife, and its hotkey do: open this window on that
+    // button's page, or close it if that page is showing
+    public static void TogglePageFor(MainButtonDef button)
+    {
+        int page = Array.FindIndex(Pages, p => p is PawnTablePage tablePage && tablePage.ButtonDefName == button.defName);
+        if (page < 0)
+            return;
+        MainButtonDef def = DefDatabase<MainButtonDef>.GetNamed("Ordo_Flora");
+        MainTabsRoot tabsRoot = Find.MainTabsRoot;
+        if (tabsRoot.OpenTab != def)
+        {
+            currentPage = page;
+            tabsRoot.SetCurrentTab(def);
+        }
+        else if (currentPage == page)
+            tabsRoot.EscapeCurrentTab();
+        else
+            ((MainTabWindow_Flora)def.TabWindow).SwitchTo(page);
+    }
 
     public override void PostOpen()
     {
@@ -57,6 +79,11 @@ public class MainTabWindow_Flora : MainTabWindow
         if (surveyRequested || Find.CurrentMap != surveyedMap || Time.realtimeSinceStartup - lastSurvey > RefreshSeconds)
             Survey();
 
+        // Grow or shrink with the page, as rows and animals come and go and Animal Tab's filter bar opens and closes
+        Vector2 wanted = RequestedTabSize;
+        if (Mathf.Abs(wanted.x - windowRect.width) > 1f || Mathf.Abs(wanted.y - windowRect.height) > 1f)
+            SetInitialSizeAndPosition();
+
         // The tabs hang above the rect they're given, inside the window
         inRect.yMin += TabDrawer.TabHeight;
         tabs ??= Pages.Select((page, i) => new TabRecord(page.LabelKey.Translate(), () => SwitchTo(i), () => currentPage == i))
@@ -76,7 +103,7 @@ public class MainTabWindow_Flora : MainTabWindow
         Page.WindowUpdate(Find.CurrentMap);
     }
 
-    private void SwitchTo(int page)
+    public void SwitchTo(int page)
     {
         if (page == currentPage)
             return;
@@ -102,8 +129,11 @@ public class MainTabWindow_Flora : MainTabWindow
         if (Page.DoToggles(ref x, rect))
             Survey();
 
-        AreaButton(ref x, rect);
-        DistanceButton(ref x, rect);
+        if (Page.UsesPlaceFilters)
+        {
+            AreaButton(ref x, rect);
+            DistanceButton(ref x, rect);
+        }
 
         float searchWidth = Mathf.Min(200f, rect.xMax - x - 10f);
         search.OnGUI(new Rect(rect.xMax - searchWidth, rect.y + (rect.height - QuickSearchWidget.WidgetHeight) / 2f,
