@@ -122,14 +122,48 @@ public abstract class PawnTablePage : IResourcePage
         {
             if (table == null || tableScreenWidth != UI.screenWidth || tableScreenHeight != UI.screenHeight)
             {
+                RememberSort();
                 tableScreenWidth = UI.screenWidth;
                 tableScreenHeight = UI.screenHeight;
                 table = (PawnTable)Activator.CreateInstance(TableDef.workerClass, TableDef,
                     (Func<IEnumerable<Pawn>>)(() => Searched(map == null ? Enumerable.Empty<Pawn>() : VanillaPawns(map))),
                     UI.screenWidth - (int)WindowChromeWidth, (int)(UI.screenHeight - WindowChromeHeight));
+                if (sortBy != null && TableDef.columns.Contains(sortBy))
+                    table.SortBy(sortBy, sortDescending);
             }
             return table;
         }
+    }
+
+    // The game's table's sort, kept here so it outlives the table: a new one is made when the screen size changes, and
+    // the sort is saved with the game. A hosted window, such as Numbers', keeps its own sort.
+    private PawnColumnDef sortBy;
+    private bool sortDescending;
+
+    private void RememberSort()
+    {
+        if (table == null)
+            return;
+        sortBy = table.SortingBy;
+        sortDescending = table.SortingDescending;
+    }
+
+    public void ExposeSort()
+    {
+        if (Scribe.mode == LoadSaveMode.Saving)
+            RememberSort();
+        Scribe_Defs.Look(ref sortBy, "sortBy");
+        Scribe_Values.Look(ref sortDescending, "sortDescending");
+        // Made again with the loaded sort
+        if (Scribe.mode == LoadSaveMode.LoadingVars)
+            table = null;
+    }
+
+    public void ResetSort()
+    {
+        sortBy = null;
+        sortDescending = false;
+        table = null;
     }
 
     private PawnTable CurrentTable => HostedWindow != null ? HostedTable : Table;

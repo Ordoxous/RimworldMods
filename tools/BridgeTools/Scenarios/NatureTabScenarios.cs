@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using HarmonyLib;
 using Ordo.NatureTab;
 using RimWorld;
 using RimWorld.Planet;
@@ -34,8 +35,9 @@ public static class NatureTabScenarios
         new("growth_days_until_ready_matches_a_day", "growth", DaysUntilReadyMatchesADay),
         new("filter_area", "filter area", AreaFilter),
         new("filter_distance_and_nearest", "filter area", DistanceAndNearest),
-        new("filter_area_per_page", "filter area", AreaPerPage),
+        new("filter_area_and_distance_per_page", "filter area", AreaPerPage),
         new("filter_area_follows_the_map", "filter area", AreaFollowsTheMap),
+        new("saved_with_the_game", "filter area save", SavedWithTheGame),
         new("perf_survey_and_forecast", "perf", SurveyAndForecastCost),
         new("minerals_ore_kinds", "minerals", MineralsSetup),
         new("minerals_counts_veins_yield_and_overhead", "minerals", MineralsCountsVeinsYieldAndOverhead),
@@ -560,7 +562,8 @@ public static class NatureTabScenarios
         return Task.CompletedTask;
     }
 
-    // Plants and Minerals each keep their own area: one set on Plants isn't used by Minerals, and is back on Plants
+    // Plants and Minerals each keep their own area and distance: those set on Plants aren't used by Minerals, and are
+    // back on Plants
     private static Task AreaPerPage(
         ScenarioContext context
     )
@@ -575,20 +578,130 @@ public static class NatureTabScenarios
         {
             window.SwitchTo(1);
             window.SetArea(null);
+            window.SetDistance(0);
             window.SwitchTo(0);
             window.SetArea(home);
+            window.SetDistance(50);
             context.Check($"Plants uses the home area: {MainTabWindow_Nature.CurrentArea?.Label}", MainTabWindow_Nature.CurrentArea == home);
+            context.Check($"and within 50 cells: {MainTabWindow_Nature.MaxDistance}", MainTabWindow_Nature.MaxDistance == 50);
             window.SwitchTo(1);
             context.Check($"Minerals still lists anywhere: {MainTabWindow_Nature.CurrentArea?.Label}", MainTabWindow_Nature.CurrentArea == null);
+            context.Check($"at any distance: {MainTabWindow_Nature.MaxDistance}", MainTabWindow_Nature.MaxDistance == 0);
             window.SwitchTo(0);
             context.Check($"back on Plants it's the home area again: {MainTabWindow_Nature.CurrentArea?.Label}",
                 MainTabWindow_Nature.CurrentArea == home);
+            context.Check($"and within 50 cells again: {MainTabWindow_Nature.MaxDistance}", MainTabWindow_Nature.MaxDistance == 50);
         }
         finally
         {
             window.SwitchTo(0);
             window.SetArea(null);
+            window.SetDistance(0);
             tabs.EscapeCurrentTab(false);
+        }
+        return Task.CompletedTask;
+    }
+
+    // Each page's area and distance, the Plants checkboxes and the pages' sorts are saved with the game: they survive a
+    // save and load, and a new game (a new component) starts from the defaults. The component is saved and loaded through
+    // the save format on its own, as the game does inside a save. The player's own choices are put back afterwards.
+    private static Task SavedWithTheGame(
+        ScenarioContext context
+    )
+    {
+        var nature = DefDatabase<MainButtonDef>.GetNamed("Ordo_Nature");
+        var tabs = Find.MainTabsRoot;
+        tabs.EscapeCurrentTab(false);
+        tabs.SetCurrentTab(nature, false);
+        var window = (MainTabWindow_Nature)nature.TabWindow;
+        var pages = (IResourcePage[])AccessTools.Field(typeof(MainTabWindow_Nature), "Pages").GetValue(null);
+        var plants = (PlantsPage)pages[0];
+        var wildlife = (WildlifePage)pages.First(p => p is WildlifePage);
+        var filterField = AccessTools.Field(typeof(PlantsPage), "filter");
+        var sortByField = AccessTools.Field(typeof(TablePage<FloraRow>), "sortBy");
+        var sortDescendingField = AccessTools.Field(typeof(TablePage<FloraRow>), "sortDescending");
+        var columns = (List<Column<FloraRow>>)AccessTools.Property(typeof(TablePage<FloraRow>), "Columns").GetValue(plants);
+        var wildlifeTable = AccessTools.Property(typeof(PawnTablePage), "Table");
+        var comp = Current.Game.GetComponent<GameComponent_NatureTab>();
+        context.Check("the game has the component", comp != null);
+        if (comp == null)
+            return Task.CompletedTask;
+
+        string dir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "ordo_naturetab_save_test");
+        System.IO.Directory.CreateDirectory(dir);
+        string Save(string name)
+        {
+            string path = System.IO.Path.Combine(dir, name + ".xml");
+            Scribe.saver.InitSaving(path, "test");
+            comp.ExposeData();
+            Scribe.saver.FinalizeSaving();
+            return System.IO.File.ReadAllText(path);
+        }
+        void Load(string name)
+        {
+            Scribe.loader.InitLoading(System.IO.Path.Combine(dir, name + ".xml"));
+            comp.ExposeData();
+            Scribe.loader.FinalizeLoading();
+        }
+
+        Area home = context.Map.areaManager.Home;
+        Save("player");
+        try
+        {
+            window.SwitchTo(1);
+            window.SetDistance(25);
+            window.SwitchTo(0);
+            window.SetArea(home);
+            window.SetDistance(50);
+            var filter = (FloraFilter)filterField.GetValue(plants);
+            filter.includeTrees = true;
+            filter.hideYieldless = false;
+            filterField.SetValue(plants, filter);
+            sortByField.SetValue(plants, columns.First(c => c.labelKey == "Ordo_NatureTab_Ready"));
+            sortDescendingField.SetValue(plants, false);
+            var table = (PawnTable)wildlifeTable.GetValue(wildlife);
+            table.SortBy(DefDatabase<PawnColumnDef>.GetNamed("Gender"), true);
+            string chosen = Save("chosen");
+            context.Check("the save has the Plants area, distance, checkboxes and sort",
+                chosen.Contains(home.Label) && chosen.Contains("plantsIncludeTrees") && chosen.Contains("Ordo_NatureTab_Ready"));
+
+            // A new game makes a new component, which starts from the defaults
+            comp = new GameComponent_NatureTab(Current.Game);
+            window.SwitchTo(1);
+            window.SwitchTo(0);
+            context.Check($"a new game lists Plants anywhere at any distance: {MainTabWindow_Nature.CurrentArea?.Label}, {MainTabWindow_Nature.MaxDistance}",
+                MainTabWindow_Nature.CurrentArea == null && MainTabWindow_Nature.MaxDistance == 0);
+            filter = (FloraFilter)filterField.GetValue(plants);
+            context.Check($"with the default checkboxes: trees {filter.includeTrees}, hide yieldless {filter.hideYieldless}",
+                !filter.includeTrees && filter.hideYieldless);
+            var sortBy = (Column<FloraRow>)sortByField.GetValue(plants);
+            context.Check($"and the default sort: {sortBy?.labelKey}", sortBy == columns[3] && (bool)sortDescendingField.GetValue(plants));
+            context.Check($"Wildlife's table is unsorted: {((PawnTable)wildlifeTable.GetValue(wildlife)).SortingBy}",
+                ((PawnTable)wildlifeTable.GetValue(wildlife)).SortingBy == null);
+
+            Load("chosen");
+            window.SwitchTo(1);
+            context.Check($"loaded, Minerals is within 25 cells: {MainTabWindow_Nature.MaxDistance}", MainTabWindow_Nature.MaxDistance == 25);
+            window.SwitchTo(0);
+            context.Check($"Plants is the home area within 50 cells: {MainTabWindow_Nature.CurrentArea?.Label}, {MainTabWindow_Nature.MaxDistance}",
+                MainTabWindow_Nature.CurrentArea == home && MainTabWindow_Nature.MaxDistance == 50);
+            filter = (FloraFilter)filterField.GetValue(plants);
+            context.Check($"with trees and yieldless shown: trees {filter.includeTrees}, hide yieldless {filter.hideYieldless}",
+                filter.includeTrees && !filter.hideYieldless);
+            sortBy = (Column<FloraRow>)sortByField.GetValue(plants);
+            context.Check($"sorted by Ready, least first: {sortBy?.labelKey}, descending {sortDescendingField.GetValue(plants)}",
+                sortBy?.labelKey == "Ordo_NatureTab_Ready" && !(bool)sortDescendingField.GetValue(plants));
+            table = (PawnTable)wildlifeTable.GetValue(wildlife);
+            context.Check($"and Wildlife by gender, descending: {table.SortingBy}, descending {table.SortingDescending}",
+                table.SortingBy == DefDatabase<PawnColumnDef>.GetNamed("Gender") && table.SortingDescending);
+            context.Check("saving again writes the same", Save("again") == chosen);
+        }
+        finally
+        {
+            Load("player");
+            window.SwitchTo(0);
+            tabs.EscapeCurrentTab(false);
+            System.IO.Directory.Delete(dir, true);
         }
         return Task.CompletedTask;
     }

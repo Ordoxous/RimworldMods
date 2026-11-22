@@ -9,7 +9,7 @@ namespace Ordo.NatureTab;
 
 // The Nature main tab: a page for the map's harvestable wild plants and one for its ore, each a table of kinds, like
 // Wildlife is for animals, and the Animals and Wildlife tabs moved in. The plants and minerals pages each have their own area
-// and share the distance; the search is shared by all four.
+// and distance; the search is shared by all four.
 public class MainTabWindow_Nature : MainTabWindow
 {
     private const float ToolbarHeight = 32f;
@@ -21,11 +21,18 @@ public class MainTabWindow_Nature : MainTabWindow
     private static readonly IResourcePage[] Pages =
         { new PlantsPage(), new MineralsPage(), new AnimalsPage(), new WildlifePage() };
     private static int currentPage;
-    private static int maxDistance;
 
-    // Each page's own area
+    // Each page's own area and distance, in cells (0 for any), saved with the game by GameComponent_NatureTab
     private static readonly AreaChoice[] Areas = Pages.Select(_ => new AreaChoice()).ToArray();
+    private static readonly int[] Distances = new int[Pages.Length];
     private static Area area;
+
+    // The current page's distance
+    public static int MaxDistance
+    {
+        get => Distances[currentPage];
+        private set => Distances[currentPage] = value;
+    }
 
     // Set by a page's buttons, so the window surveys again on its next frame
     private static bool surveyRequested;
@@ -45,6 +52,60 @@ public class MainTabWindow_Nature : MainTabWindow
         Mathf.Max(260f, TabDrawer.TabHeight + ToolbarHeight + Page.Height + Margin * 2 + 16f));
 
     public static void SurveyNow() => surveyRequested = true;
+
+    // Back to anywhere at any distance, for a new or loaded game, so one save's choices don't carry into another
+    internal static void ResetChoices()
+    {
+        for (int i = 0; i < Pages.Length; i++)
+        {
+            Areas[i] = new AreaChoice();
+            Distances[i] = 0;
+            (Pages[i] as PlantsPage)?.ResetToggles();
+            Pages[i].ResetSort();
+        }
+        area = null;
+    }
+
+    // Each page's choices, by its label key, so adding or reordering pages keeps them
+    internal static void ExposeChoices()
+    {
+        var areas = new Dictionary<string, AreaChoice>();
+        var distances = new Dictionary<string, int>();
+        if (Scribe.mode == LoadSaveMode.Saving)
+        {
+            for (int i = 0; i < Pages.Length; i++)
+            {
+                areas[Pages[i].LabelKey] = Areas[i];
+                distances[Pages[i].LabelKey] = Distances[i];
+            }
+        }
+        Scribe_Collections.Look(ref areas, "areas", LookMode.Value, LookMode.Deep);
+        Scribe_Collections.Look(ref distances, "distances", LookMode.Value, LookMode.Value);
+        foreach (IResourcePage page in Pages)
+        {
+            (page as PlantsPage)?.ExposeToggles();
+            // Each page's sort in a node of its own, named by its label key
+            if (!Scribe.EnterNode(page.LabelKey))
+                continue;
+            try
+            {
+                page.ExposeSort();
+            }
+            finally
+            {
+                Scribe.ExitNode();
+            }
+        }
+        if (Scribe.mode != LoadSaveMode.LoadingVars)
+            return;
+        for (int i = 0; i < Pages.Length; i++)
+        {
+            if (areas != null && areas.TryGetValue(Pages[i].LabelKey, out AreaChoice choice) && choice != null)
+                Areas[i] = choice;
+            if (distances != null && distances.TryGetValue(Pages[i].LabelKey, out int cells))
+                Distances[i] = cells;
+        }
+    }
 
     // What a hidden button that moved in, such as Animals or Wildlife, and its hotkey do: open this window on that
     // button's page, or close it if that page is showing
@@ -151,7 +212,7 @@ public class MainTabWindow_Nature : MainTabWindow
         surveyedMap = Find.CurrentMap;
         lastSurvey = Time.realtimeSinceStartup;
         area = Areas[currentPage].On(surveyedMap);
-        Page.Survey(surveyedMap, area, maxDistance);
+        Page.Survey(surveyedMap, area, MaxDistance);
     }
 
     private void DoToolbar(Rect rect)
@@ -205,28 +266,30 @@ public class MainTabWindow_Nature : MainTabWindow
         Survey();
     }
 
+    public void SetDistance(int cells)
+    {
+        MaxDistance = cells;
+        Survey();
+    }
+
     private void DistanceButton(
         ref float x,
         Rect bar)
     {
         var rect = new Rect(x, bar.y, 160f, bar.height);
         x += rect.width + 8f;
-        string current = maxDistance > 0
-            ? "Ordo_NatureTab_Cells".Translate(maxDistance).ToString()
+        string current = MaxDistance > 0
+            ? "Ordo_NatureTab_Cells".Translate(MaxDistance).ToString()
             : "Ordo_NatureTab_AnyDistance".Translate().ToString();
         TooltipHandler.TipRegion(rect, "Ordo_NatureTab_WithinTip".Translate());
         if (Mouse.IsOver(rect))
-            HoverReach(maxDistance);
+            HoverReach(MaxDistance);
         if (!Widgets.ButtonText(rect, "Ordo_NatureTab_Within".Translate(current).Truncate(rect.width - 10f)))
             return;
 
         var options = DistanceChoices.Select(cells => new FloatMenuOption(
             cells > 0 ? "Ordo_NatureTab_Cells".Translate(cells).ToString() : "Ordo_NatureTab_AnyDistance".Translate().ToString(),
-            () =>
-            {
-                maxDistance = cells;
-                Survey();
-            },
+            () => SetDistance(cells),
             mouseoverGuiAction: _ => HoverReach(cells))).ToList();
         Find.WindowStack.Add(new FloatMenu(options));
     }

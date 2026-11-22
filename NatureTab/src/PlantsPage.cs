@@ -10,10 +10,21 @@ namespace Ordo.NatureTab;
 // The Plants page: the map's harvestable wild plants grouped by kind, like Wildlife is for animals
 public class PlantsPage : TablePage<FloraRow>
 {
-    // Kept across openings, as the Wildlife tab keeps its sort
+    // Kept across openings, as the Wildlife tab keeps its sort. The toggles are saved with the game, with the area and
+    // distance (GameComponent_NatureTab).
     private FloraFilter filter = new() { hideYieldless = true };
 
     public PlantsPage() => SortByDefault(3, descending: true);
+
+    internal void ResetToggles() => filter = new FloraFilter { hideYieldless = true };
+
+    internal void ExposeToggles()
+    {
+        Scribe_Values.Look(ref filter.includeTrees, "plantsIncludeTrees");
+        Scribe_Values.Look(ref filter.includeCultivated, "plantsIncludeCultivated");
+        Scribe_Values.Look(ref filter.onlyReady, "plantsOnlyReady");
+        Scribe_Values.Look(ref filter.hideYieldless, "plantsHideYieldless", true);
+    }
 
     public override string LabelKey => "Ordo_NatureTab_PlantsPage";
     protected override string NoneKey => "Ordo_NatureTab_None";

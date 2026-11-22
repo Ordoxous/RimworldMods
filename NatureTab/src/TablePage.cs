@@ -65,6 +65,11 @@ public interface IResourcePage
 
     // Drops the rows, so a closed tab doesn't keep a map's things alive
     void Clear();
+
+    // The sort, saved with the game by GameComponent_NatureTab, and back to the page's default for a new or loaded game
+    void ExposeSort();
+
+    void ResetSort();
 }
 
 // A sortable table of rows, one per kind of thing on the map: the header, scrolling, hover highlight and the shared cell
@@ -122,10 +127,39 @@ public abstract class TablePage<TRow> : IResourcePage
         int column,
         bool descending)
     {
+        defaultSortColumn = column;
+        defaultSortDescending = descending;
         if (sortBy != null)
             return;
         sortBy = Columns[column];
         sortDescending = descending;
+    }
+
+    private int defaultSortColumn = -1;
+    private bool defaultSortDescending;
+
+    public void ResetSort()
+    {
+        sortBy = defaultSortColumn >= 0 ? Columns[defaultSortColumn] : null;
+        sortDescending = defaultSortDescending;
+        Sort();
+    }
+
+    // The column is kept by its header's key, so adding or reordering columns keeps it
+    public void ExposeSort()
+    {
+        string key = sortBy?.labelKey;
+        bool descending = sortDescending;
+        Scribe_Values.Look(ref key, "sortBy");
+        Scribe_Values.Look(ref descending, "sortDescending");
+        if (Scribe.mode != LoadSaveMode.LoadingVars)
+            return;
+        Column<TRow> column = Columns.FirstOrDefault(c => c.Sortable && c.labelKey != null && c.labelKey == key);
+        if (column == null)
+            return;
+        sortBy = column;
+        sortDescending = descending;
+        Sort();
     }
 
     public void Survey(

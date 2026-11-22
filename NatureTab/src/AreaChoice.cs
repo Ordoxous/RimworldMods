@@ -5,8 +5,9 @@ using Verse;
 namespace Ordo.NatureTab;
 
 // A page's chosen area, kept by name (or as the home area), since areas belong to one map: the same choice carries to
-// another map, as when a gravship moves the colony, wherever that map has an area of that name
-public sealed class AreaChoice
+// another map, as when a gravship moves the colony, wherever that map has an area of that name. Saved with the game by
+// GameComponent_NatureTab.
+public sealed class AreaChoice : IExposable
 {
     // Null means anywhere
     private string label;
@@ -14,6 +15,12 @@ public sealed class AreaChoice
 
     // The area last found, so a rename on its map is followed
     private Area found;
+
+    public void ExposeData()
+    {
+        Scribe_Values.Look(ref label, "label");
+        Scribe_Values.Look(ref isHome, "isHome");
+    }
 
     public void Set(Area chosen)
     {
