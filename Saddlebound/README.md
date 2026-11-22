@@ -30,6 +30,7 @@ Icons are vanilla placeholders: the rancher meme icon, and the animal connection
 **Tracking riding** (`RidingTracker`, a saved `GameComponent`): postfixes on Giddy-Up's `MountUtility.Mount` (private, found with `AccessTools`) and `MountUtility.Dismount` record each rider's last riding tick, on mounting and on dismounting. It's keyed by thing ID and stores ticks, not live state.
 - **Riding now** means `IsMounted()`, or in a world caravan with the mount Giddy-Up paired them with (`ReservedMount`) in the same caravan. A pawn riding for days without dismounting counts as riding the whole time.
 - **A pawn the tracker hasn't seen** starts its count when first asked, so new colonists and old saves don't start at −5.
+- **Gone pawns are forgotten on save.** A death removes a pawn's records at once; other pawns the game discards, such as mounted raiders who fled, are dropped when the game saves: any rider or mount not among `PawnsFinder.AllMapsWorldAndTemporary_AliveOrDead` (`RidingTracker.PruneGone`). One missed only loses its ride counts, and its time since riding starts again.
 - **Per mount,** it counts rides by each rider. The usual rider is the living player pawn who rode it most, ties going to the last rider.
 - **Why not the `ExtendedPawnData.Mount` setter:** it's a one-line `set => _mount = value;`, which the JIT may inline into its callers, so a postfix may never run. Every mount goes through `Mount` (from `GoMount` with `Instant`, which the mount job calls when it ends), apart from the WTH mechanoid raid patch, which sets the field for raider mechs and doesn't matter here.
 
@@ -85,6 +86,7 @@ The test save was made on 2026-11-15 with these mods loaded, so the player has a
 | `setup` | `setup_no_load_errors` | No errors mention the mod, the meme loaded, and the player has an ideoligion |
 | | `setup_giddyup_api` | Every Giddy-Up member the adapter uses resolves, and `Mount`, `Dismount`, `GenerateMounts` and `Pawn.Kill` carry the mod's patches |
 | `riding` | `riding_tracks_mount_and_dismount` | Mounting and dismounting update the tick, and the horse's record names the rider |
+| | `riding_save_forgets_gone_pawns` | Saving drops the last ride of a discarded rider, the record of a discarded horse and the discarded rider's rides on a kept horse, and keeps the rest |
 | | `riding_respected_thought` | "Rode recently" while riding and for a day after, gone after that, and no Essential thought |
 | | `riding_essential_stages` | Just rode, a day and a bit, 3 days and 5 days give stages 0, none, 1 and 2 |
 | | `riding_essential_long_ride` | A pawn mounted 5 days ago and still riding is at stage 0 |
@@ -101,6 +103,7 @@ The test save was made on 2026-11-15 with these mods loaded, so the player has a
 | `raids` | `horde_raid_mount_chance` | A test prefix running after the mod's reads the chance Giddy-Up would use and skips generation: Giddy-Up's chance without the meme, 90 with it, the settings put back afterwards, and Giddy-Up's chance again with the setting off |
 
 **Results:**
+- **2026-11-22, pruning gone pawns:** 18/18 on `saddlebound-headless`, with no leaks reported by the runner's new leak check once the stage discards its destroyed pawns.
 - **2026-11-15, first run:** 12/12 on `saddlebound-headless`, and nothing in the launch log but an About.xml warning (Harmony's Workshop link, since added).
 - **Fault planting:** with three faults hot reloaded (riding now ignores `IsMounted`, mounted kills skip the mounted check, and "my mount died" never fires), exactly `riding_essential_long_ride`, `mounted_kill_glory` and `mount_death_memory` failed. After reverting, 12/12 again.
 - **2026-11-15, preferred mounts:** 17/17 on `saddlebound-headless`. With three more faults planted (preferred never matches, generation adds none, and the lesser memory ignores Essential), exactly `preferred_mount_memory`, `preferred_mount_lesser_needs_essential` and `preferred_mount_generation` failed. After reverting, 17/17 again.

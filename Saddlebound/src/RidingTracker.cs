@@ -153,8 +153,35 @@ public class RidingTracker : GameComponent
         return candidates.Any(animal => animal.RaceProps.Animal && !animal.Dead && GiddyUpAdapter.CouldRide(rider, animal));
     }
 
+    // Drops the records of pawns the game no longer has, alive or dead, such as mounted raiders who fled and were later
+    // discarded. Only a death removes a pawn's records as it happens, so without this they would build up in the save.
+    // A pawn missed here only loses its ride counts, and its time since riding starts again, as for a new pawn.
+    public void PruneGone()
+    {
+        var known = new HashSet<int>(PawnsFinder.AllMapsWorldAndTemporary_AliveOrDead.Select(pawn => pawn.thingIDNumber));
+        foreach (var id in _lastRideTick.Keys.Where(id => !known.Contains(id)).ToList())
+        {
+            _lastRideTick.Remove(id);
+        }
+
+        foreach (var id in _mounts.Keys.Where(id => !known.Contains(id)).ToList())
+        {
+            _mounts.Remove(id);
+        }
+
+        foreach (var record in _mounts.Values)
+        {
+            record.PruneRiders(known);
+        }
+    }
+
     public override void ExposeData()
     {
+        if (Scribe.mode == LoadSaveMode.Saving)
+        {
+            PruneGone();
+        }
+
         Scribe_Collections.Look(ref _lastRideTick, "lastRideTick", LookMode.Value, LookMode.Value);
         Scribe_Collections.Look(ref _mounts, "mounts", LookMode.Value, LookMode.Deep);
         if (Scribe.mode == LoadSaveMode.PostLoadInit)
@@ -183,6 +210,17 @@ public class MountRecord : IExposable
     public int RideCount(
         Pawn rider
     ) => _rideCounts.TryGetValue(rider.thingIDNumber, out var count) ? count : 0;
+
+    // Forgets riders the game no longer has; the last rider's ID is kept, as it only breaks ties among living riders
+    public void PruneRiders(
+        HashSet<int> known
+    )
+    {
+        foreach (var id in _rideCounts.Keys.Where(id => !known.Contains(id)).ToList())
+        {
+            _rideCounts.Remove(id);
+        }
+    }
 
     // The living player pawn who rode it most; ties go to whoever rode it last
     public Pawn UsualRider()
