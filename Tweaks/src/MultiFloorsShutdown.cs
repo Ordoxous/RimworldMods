@@ -334,6 +334,10 @@ public static class MultiFloorsShutdownPatches
         MultiFloorsReadout.Patch(harmony);
         MultiFloorsBills.Patch(harmony);
         MultiFloorsSupercharger.Patch(harmony);
+        if (MultiFloorsWorkTab.WorkTabActive)
+        {
+            MultiFloorsWorkTab.Patch(harmony);
+        }
     }
 }
 

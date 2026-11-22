@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -147,6 +148,86 @@ public static partial class TweaksScenarios
         {
             groundZone.Delete();
             context.Map.resourceCounter.UpdateResourceCounts();
+        }
+    }
+
+    // Work Tab and MultiFloors' prioritized scanner. A colonist does only construction, at Work Tab priority 1, with one of
+    // its tasks at 1, one switched off and one at 5. MultiFloors' cached lists, rebuilt with a level above, keep the first
+    // as high priority, leave out the one switched off, and put the one at 5 with the low priority work (the threshold is 2
+    // by default). With the setting off, MultiFloors' own lists still have the task switched off.
+    private static async Task LevelsWorkTabPriorities(
+        ScenarioContext context
+    )
+    {
+        var colonist = context.Colonist(-6, 0);
+        using var level = new UpperLevel(context);
+        if (level.Map == null)
+        {
+            return;
+        }
+
+        var scanner = AccessTools.TypeByName("MultiFloors.HarmonyPatches.HarmonyPatch_ScanJobsOnOtherLevelPrioritized");
+        var cache = AccessTools.Method(scanner, "CacheWorkGiversInOrder");
+        var fields = AccessTools.TypeByName("MultiFloors.PrepatcherFields");
+        var highList = AccessTools.Method(fields, "HighPriorityWorkGiversInOrderNormal");
+        var lowList = AccessTools.Method(fields, "LowPriorityWorkGiversInOrderNormal");
+        var extensions = AccessTools.TypeByName("WorkTab.Pawn_Extensions");
+        var setType = AccessTools.Method(extensions, "SetPriority", [typeof(Pawn), typeof(WorkTypeDef), typeof(int), typeof(List<int>)]);
+        var setGiver = AccessTools.Method(extensions, "SetPriority", [typeof(Pawn), typeof(WorkGiverDef), typeof(int), typeof(List<int>)]);
+        context.Check("found MultiFloors' scanner and Work Tab's priorities",
+            cache != null && highList != null && lowList != null && setType != null && setGiver != null);
+        if (cache == null || highList == null || lowList == null || setType == null || setGiver == null)
+        {
+            return;
+        }
+
+        var givers = WorkTypeDefOf.Construction.workGiversByPriority.Where(giver => !giver.emergency).Take(3).ToList();
+        context.Check($"construction has three tasks: {string.Join(", ", givers.Select(giver => giver.defName))}", givers.Count == 3);
+        var usedPriorities = Find.PlaySettings.useWorkPriorities;
+        Find.PlaySettings.useWorkPriorities = true;
+        try
+        {
+            var hours = Enumerable.Range(0, 24).ToList();
+            var settings = colonist.workSettings;
+            settings.DisableAll();
+            setType.Invoke(null, [colonist, WorkTypeDefOf.Construction, 1, hours]);
+            setGiver.Invoke(null, [colonist, givers[0], 1, hours]);
+            setGiver.Invoke(null, [colonist, givers[1], 0, hours]);
+            setGiver.Invoke(null, [colonist, givers[2], 5, hours]);
+
+            (List<WorkGiver> high, List<WorkGiver> low) Lists()
+            {
+                settings.Notify_UseWorkPrioritiesChanged();
+                cache.Invoke(null, [settings]);
+                return ((List<WorkGiver>)highList.Invoke(null, [settings]), (List<WorkGiver>)lowList.Invoke(null, [settings]));
+            }
+
+            string Names(
+                List<WorkGiver> list
+            ) => string.Join(", ", list.Select(giver => giver.def.defName));
+
+            var (high, low) = Lists();
+            context.Check($"Work Tab's list has the task at 1 and the one at 5, not the one switched off: {Names(settings.WorkGiversInOrderNormal)}",
+                settings.WorkGiversInOrderNormal.Any(giver => giver.def == givers[0])
+                && settings.WorkGiversInOrderNormal.Any(giver => giver.def == givers[2])
+                && settings.WorkGiversInOrderNormal.All(giver => giver.def != givers[1]));
+            context.Check($"high priority: the task at 1 only. High: {Names(high)}; low: {Names(low)}",
+                high.Any(giver => giver.def == givers[0]) && high.All(giver => giver.def != givers[2]));
+            context.Check("low priority: the task at 5", low.Any(giver => giver.def == givers[2]));
+            context.Check("the task switched off is in neither", high.Concat(low).All(giver => giver.def != givers[1]));
+
+            await WithSetting("WorkTabPrioritiesAcrossLevels", "false", () =>
+            {
+                var (offHigh, offLow) = Lists();
+                context.Check($"with the setting off, MultiFloors' lists have the task switched off: {Names(offHigh)}; {Names(offLow)}",
+                    offHigh.Concat(offLow).Any(giver => giver.def == givers[1]));
+                return Task.CompletedTask;
+            });
+        }
+        finally
+        {
+            Find.PlaySettings.useWorkPriorities = usedPriorities;
+            colonist.workSettings.Notify_UseWorkPrioritiesChanged();
         }
     }
 

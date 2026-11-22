@@ -225,6 +225,12 @@
         <text>Mod compatibility</text>
         <font>Medium</font>
       </li>
+      <li MayRequire="telardo.MultiFloors,Fluffy.WorkTab" Class="XmlExtensions.Setting.Checkbox">
+        <key>WorkTabPrioritiesAcrossLevels</key>
+        <defaultValue>true</defaultValue>
+        <label>MultiFloors keeps Work Tab's task priorities</label>
+        <tooltip>With MultiFloors and Work Tab, colonists follow Work Tab's priorities for each task and hour. MultiFloors otherwise orders work by work type alone, so a task you switched off inside a work type is still done. Each task counts as high priority for MultiFloors' cross-level scan by its own priority.</tooltip>
+      </li>
       <li MayRequire="drilledhead.MechaWeaponChanger" Class="XmlExtensions.Setting.Checkbox">
         <key>MinifiableMechaWeaponChanger</key>
         <defaultValue>true</defaultValue>
