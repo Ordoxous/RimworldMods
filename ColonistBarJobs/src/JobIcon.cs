@@ -102,6 +102,7 @@ public static class JobIconResolver
         _byJob = null;
         _byWorkType = null;
         _recreationIcon = null;
+        MultiFloorsLevels.Reset();
     }
 
     private static void EnsureLookups()

@@ -21,6 +21,7 @@
     <li>Ludeon.RimWorld.Biotech</li>
     <li>GoGaTio.MechanoidUpgrades</li>
     <li>Fluffy.WorkTab</li>
+    <li>telardo.MultiFloors</li>
   </loadAfter>
   <packageId>Ordo.MechUpgradesUi</packageId>
   <description>

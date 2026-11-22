@@ -46,6 +46,8 @@ public static class MechUpgradesUiScenarios
         new("ai_interval", "ai settings", Interval),
         new("ai_end_to_end", "ai end_to_end", EndToEnd),
         new("ai_stock_gone_on_arrival", "ai", StockGoneOnArrival),
+        new("ai_upgrader_on_other_level", "ai levels", UpgraderOnOtherLevel, requiresMod: "telardo.MultiFloors"),
+        new("ai_own_level_first", "ai levels", OwnLevelFirst, requiresMod: "telardo.MultiFloors"),
 
         new("player_insert_dialog", "player settings", context => ManualInsert(context, showDialog: true)),
         new("player_insert_no_dialog", "player settings", context => ManualInsert(context, showDialog: false)),
@@ -442,6 +444,104 @@ public static class MechUpgradesUiScenarios
 
         context.Check("no dialog opened", Find.WindowStack.WindowOfType<Dialog_ConfigureUpgrades>() == null);
         context.Check($"the mech didn't go in: {site.Upgrader.State}", site.Upgrader.Occupant != site.Mech);
+    }
+
+    // With MultiFloors: a stocked auto upgrader on the level above, built as Site.Set builds one on the ground. The mech and
+    // its mechanitor stay on the ground.
+    private static Site LevelSite(
+        ScenarioContext context,
+        UpperLevel level,
+        Site ground = null
+    )
+    {
+        var upgrader = (Building_AutoMechUpgrader)level.Build(ThingDef.Named(UpgraderDef), context.Cell(5, 10), Rot4.South);
+        Stage.Power(upgrader, true);
+        var storage = level.Build(ThingDef.Named(StorageDef), context.Cell(9, 10));
+        var site = ground ?? Site.Set(context, linkedStorage: false);
+        return new Site
+        {
+            Upgrader = upgrader,
+            Storage = storage,
+            StorageComp = storage.TryGetComp<CompUpgradesStorage>(),
+            Mechanitor = site.Mechanitor,
+            Mech = site.Mech,
+            Comp = site.Comp
+        };
+    }
+
+    // The only stocked upgrader is upstairs. The status names it with no blocker, and the mech takes the stairs, with the
+    // trip into the upgrader queued, then heads in once there.
+    private static async Task UpgraderOnOtherLevel(
+        ScenarioContext context
+    )
+    {
+        using var level = new UpperLevel(context);
+        if (level.Map == null)
+        {
+            return;
+        }
+
+        var site = LevelSite(context, level);
+        var (a, _) = TwoCompatible(context, site.Mech);
+        if (a == null)
+        {
+            return;
+        }
+
+        Stock(site.Storage, new[] { a });
+        using var policy = new TempPolicy(site, a);
+        UpgradeStatus.Invalidate();
+        var status = UpgradeStatus.Compute(site.Comp);
+        context.Check($"the status adds {a.defName} at the upgrader upstairs: upgrader {status.Upgrader?.Map}, blocker {status.Blocker}, [{Names(status.Additions)}]",
+            status.Upgrader == site.Upgrader && status.Blocker == null && status.HasChanges);
+
+        Due(site.Mech);
+        var tookStairs = false;
+        if (!await context.Until($"the mech heads into the upgrader upstairs: {Stage.Describe(site.Mech)}", () =>
+            {
+                tookStairs |= site.Mech.CurJobDef?.defName == "MF_ChangeLevelThroughStair" && site.Mech.CurJob.targetC.Thing == site.Upgrader;
+                return site.Mech.Map == level.Map && HeadingIn(site);
+            }, TripTicks * 2))
+        {
+            return;
+        }
+
+        context.Check("it got there by MultiFloors' stair job, aimed at the upgrader", tookStairs);
+        context.Check($"the upgrader's inspect pane lists it on its way: {site.Upgrader.GetInspectString()}",
+            site.Upgrader.GetInspectString().Contains(site.Mech.LabelShort));
+    }
+
+    // Upgraders on both levels with the same stock: the mech's own level wins the tie
+    private static Task OwnLevelFirst(
+        ScenarioContext context
+    )
+    {
+        using var level = new UpperLevel(context);
+        if (level.Map == null)
+        {
+            return Task.CompletedTask;
+        }
+
+        var ground = Site.Set(context);
+        var upstairs = LevelSite(context, level, ground);
+        var (a, _) = TwoCompatible(context, ground.Mech);
+        if (a == null)
+        {
+            return Task.CompletedTask;
+        }
+
+        Stock(ground.Storage, new[] { a });
+        Stock(upstairs.Storage, new[] { a });
+        using var policy = new TempPolicy(ground, a);
+        var usable = Building_AutoMechUpgrader.UsableBy(ground.Mech);
+        context.Check($"both upgraders are usable, the ground's first: [{string.Join(", ", usable.Select(upgrader => upgrader.Map))}]",
+            usable.Count == 2 && usable[0] == ground.Upgrader && usable[1] == upstairs.Upgrader);
+
+        Due(ground.Mech);
+        var job = new JobGiver_OptimizeUpgrades().TryGiveJob(ground.Mech);
+        context.Check($"the trip is into the upgrader on the ground: {job?.def.defName} {job?.targetA.Thing?.Map}",
+            job?.def == JobDefOf.EnterBuilding && job.targetA.Thing == ground.Upgrader);
+        return Task.CompletedTask;
     }
 
     // A player-ordered insert, as MU's float menu option and gizmo make: MU's dialog when the setting is on, the policy otherwise

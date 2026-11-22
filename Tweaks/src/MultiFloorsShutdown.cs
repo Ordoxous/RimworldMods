@@ -331,6 +331,8 @@ public static class MultiFloorsShutdownPatches
         MultiFloorsShutdown.Patch(harmony);
         MultiFloorsShutdown.RegisterChangingLevelJob();
         MultiFloorsResources.Patch(harmony);
+        MultiFloorsReadout.Patch(harmony);
+        MultiFloorsBills.Patch(harmony);
     }
 }
 

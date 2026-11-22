@@ -35,7 +35,13 @@
         <key>ResourcesAcrossLevels</key>
         <defaultValue>true</defaultValue>
         <label>Building costs count other levels</label>
-        <tooltip>With MultiFloors, the cost shown while placing a building or painting, and in the Architect's info panel, counts what's stored on every level, so it isn't marked "not enough stored" when the materials are on another floor. The resource list at the top left still shows only the current level.</tooltip>
+        <tooltip>With MultiFloors, the cost shown while placing a building or painting, and in the Architect's info panel, counts what's stored on every level, so it isn't marked "not enough stored" when the materials are on another floor. The resource list at the top left has its own setting below.</tooltip>
+      </li>
+      <li MayRequire="telardo.MultiFloors" Class="XmlExtensions.Setting.Checkbox">
+        <key>ReadoutAcrossLevels</key>
+        <defaultValue>true</defaultValue>
+        <label>Resource list counts other levels</label>
+        <tooltip>With MultiFloors, the resource list at the top left shows the totals of every level, not just the one you're looking at.</tooltip>
       </li>
       <li Class="XmlExtensions.Setting.GapLine"><spacing>12</spacing></li>
 
@@ -115,6 +121,12 @@
         <min>5</min>
         <max>200</max>
         <decimals>0</decimals>
+      </li>
+      <li MayRequire="telardo.MultiFloors" Class="XmlExtensions.Setting.Checkbox">
+        <key>BillsAcrossLevels</key>
+        <defaultValue>true</defaultValue>
+        <label>Bills count products on other levels</label>
+        <tooltip>With MultiFloors, a "Do until you have X" bill counts the product on every level, so a kitchen upstairs stops cooking when the freezer downstairs is full. A bill that counts only one stockpile still counts only that stockpile.</tooltip>
       </li>
       <li Class="XmlExtensions.Setting.Checkbox">
         <key>ToolsCategory</key>

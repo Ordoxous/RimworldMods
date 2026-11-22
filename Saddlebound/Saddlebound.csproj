@@ -3,6 +3,8 @@
     <ItemGroup>
         <!-- Giddy-Up 2 - Continued is a hard dependency, so it's referenced directly. Every call into it goes through src/GiddyUpAdapter.cs -->
         <WorkshopReference Include="GiddyUpCore" WorkshopId="3674332861" />
+        <!-- Optional: MultiFloors (1.6 only). Its types are only touched from src/MultiFloorsLevels.cs, when it's active -->
+        <WorkshopReference Include="MultiFloors" WorkshopId="3384660931" />
     </ItemGroup>
 
 </Project>

@@ -52,8 +52,9 @@ public class ReplaceBlueprintMaterials
         return cached;
     }
 
-    private static bool IsAvailable(ThingDef materialDef, Map map) =>
-        DebugSettings.godMode || map.listerThings.ThingsOfDef(materialDef).Count > 0;
+    // With MultiFloors, stock on another level counts: its haulers bring it to the blueprint
+    public static bool IsAvailable(ThingDef materialDef, Map map) =>
+        DebugSettings.godMode || map.listerThings.ThingsOfDef(materialDef).Count > 0 || MultiFloorsLevels.AnyOnOtherLevels(materialDef, map);
 
     // Plain loops: these run every frame for every selected blueprint.
     private static bool HasAlternative(List<(TerrainDef def, ThingDef materialDef)> similarDefs, TerrainDef current, Map map)

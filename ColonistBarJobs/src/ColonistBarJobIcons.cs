@@ -34,7 +34,8 @@ public static class ColonistBarJobIcons
         Pawn pawn
     )
     {
-        var job = pawn.CurJob;
+        // With MultiFloors, a pawn taking the stairs to work on another level shows that work, not the stair
+        var job = MultiFloorsLevels.JobAfterStairs(pawn, pawn.CurJob) ?? pawn.CurJob;
         var jobId = job?.loadID ?? -1;
         if (Cache.TryGetValue(pawn, out var cached) && cached.jobId == jobId)
         {

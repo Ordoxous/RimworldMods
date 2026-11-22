@@ -16,6 +16,7 @@
   </modDependencies>
   <loadAfter>
     <li>brrainz.harmony</li>
+    <li>telardo.MultiFloors</li>
   </loadAfter>
   <packageId>Ordo.BlueprintMaterials</packageId>
   <description>Replace blueprint ingredients in-place</description>

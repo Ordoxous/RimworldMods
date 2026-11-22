@@ -45,6 +45,8 @@ public class Building_AutoMechUpgrader : Building_MechUpgrader
     /// The auto upgraders on the mech's map that it could go to by itself: powered, not forbidden and reachable. Another mech
     /// being inside doesn't count against one, since it will be free again. Why each of the others can't be used goes in
     /// <paramref name="reasons"/>. The job giver and the status shown to the player both start from this, so they agree.
+    /// With MultiFloors, the upgraders on the other levels of the base count too, reached through the stairs; the mech's
+    /// own level comes first.
     /// </summary>
     public static List<Building_AutoMechUpgrader> UsableBy(Pawn mech, List<string> reasons = null)
     {
@@ -53,13 +55,16 @@ public class Building_AutoMechUpgrader : Building_MechUpgrader
         if (map == null)
             return usable;
 
-        foreach (var upgrader in map.listerBuildings.AllColonistBuildingsOfType<Building_AutoMechUpgrader>())
+        foreach (var level in MultiFloorsLevels.OtherLevelsFor(mech).Prepend(map))
         {
-            var reason = upgrader.UnusableReason(mech);
-            if (reason == null)
-                usable.Add(upgrader);
-            else
-                reasons?.Add(reason);
+            foreach (var upgrader in level.listerBuildings.AllColonistBuildingsOfType<Building_AutoMechUpgrader>())
+            {
+                var reason = upgrader.UnusableReason(mech);
+                if (reason == null)
+                    usable.Add(upgrader);
+                else
+                    reasons?.Add(reason);
+            }
         }
 
         return usable;
@@ -68,13 +73,14 @@ public class Building_AutoMechUpgrader : Building_MechUpgrader
     /// <summary>Why the mech can't use this upgrader on its own trips, or null if it can.</summary>
     public string UnusableReason(Pawn mech)
     {
+        var otherLevel = Map != mech.MapHeld;
         if (!PowerOn)
             return "MU_Upgrades_Ui_Upgrader_NoPower".Translate();
         // Vanilla doesn't hold controlled mechs to forbidding, so this only stops a mech that cares
-        if (this.IsForbidden(mech))
+        if (otherLevel ? MultiFloorsLevels.IsForbidden(this, mech) : this.IsForbidden(mech))
             return "MU_Upgrades_Ui_Upgrader_Forbidden".Translate();
         // A mech inside an upgrader isn't spawned, so there's no path to ask about
-        if (mech.Spawned && !mech.CanReach(this, PathEndMode.InteractionCell, Danger.Deadly))
+        if (mech.Spawned && !(otherLevel ? MultiFloorsLevels.CanReach(mech, this) : mech.CanReach(this, PathEndMode.InteractionCell, Danger.Deadly)))
             return "MU_Upgrades_Ui_Upgrader_Unreachable".Translate();
         return null;
     }
@@ -93,9 +99,11 @@ public class Building_AutoMechUpgrader : Building_MechUpgrader
 
         if (Spawned)
         {
-            var mechs = CompUpgradableMechWithPolicy.PlayerMechs(Map).ToList();
+            // With MultiFloors, mechs on other levels may be on their way or waiting too
+            var mechs = MultiFloorsLevels.OtherLevels(Map).Prepend(Map).SelectMany(CompUpgradableMechWithPolicy.PlayerMechs).ToList();
             var onTheWay = mechs
-                .Where(c => c.Mech.CurJobDef == JobDefOf.EnterBuilding && c.Mech.CurJob.targetA.Thing == this)
+                .Where(c => c.Mech.CurJobDef == JobDefOf.EnterBuilding && c.Mech.CurJob.targetA.Thing == this
+                    || MultiFloorsLevels.IsTakingStairsTo(c.Mech, this))
                 .ToList();
             var waiting = mechs
                 .Where(c => !onTheWay.Contains(c) && c.EffectiveUpgradePolicy != null)

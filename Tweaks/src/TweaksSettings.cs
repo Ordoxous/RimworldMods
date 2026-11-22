@@ -22,6 +22,8 @@ internal static class TweaksSettings
     public static bool ShutdownZonesAcrossLevels => MultiFloorsActive && GetBool("ShutdownZonesAcrossLevels", true);
     public static bool ChargersAcrossLevels => MultiFloorsActive && GetBool("ChargersAcrossLevels", true);
     public static bool ResourcesAcrossLevels => MultiFloorsActive && GetBool("ResourcesAcrossLevels", true);
+    public static bool ReadoutAcrossLevels => MultiFloorsActive && GetBool("ReadoutAcrossLevels", true);
+    public static bool BillsAcrossLevels => MultiFloorsActive && GetBool("BillsAcrossLevels", true);
 
     private static readonly bool MultiFloorsActive = ModsConfig.IsActive("telardo.MultiFloors");
 

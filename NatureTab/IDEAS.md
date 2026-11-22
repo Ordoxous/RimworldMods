@@ -32,4 +32,4 @@ Ideas not yet planned or built. The README holds the design, the plan and the op
 
 ## Discarded ideas
 
-None yet.
+- **Every MultiFloors level** (M, MultiFloors). A level choice on Plants and Minerals (this level or every level), so ore in a basement shows without switching level. Turned down in the MultiFloors round (2026-11-22).

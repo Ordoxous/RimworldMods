@@ -7,6 +7,7 @@ Shows "Colonist Bar Job Icons" in game, package ID `Ordo.ColonistBarJobs`. It ad
 - **Hard:** Harmony.
 - **DLCs:** none needed.
 - **Works with:** CM Color Coded Mood Bar (`CrashM.ColorCodedMoodBar.11`), checked in game on 2026-11-15 and 2026-11-16. It replaces `DrawColonist` with its own copy and its own icon list, so the activity row hooks its `MoodCache.DoIconVars` (to rearrange the list) and `MoodPatch.DrawIcons` (to draw over the placeholder) by name. If those names change, a warning is logged and the icon goes to its corner instead. Its bleeding mark sits on the body. Its other icons (illness, temperature, relationships, gender) weren't triggered.
+- **Optional: MultiFloors** (`telardo.MultiFloors`, Workshop 3384660931, 1.6 only, loaded on 1.7 from its 1.6 folder). Each level of a base is its own map. A pawn with work only on another level first takes `MF_ChangeLevelThroughStair`, whose target is the stair, and MultiFloors keeps the job it will start on arrival in the pawn's `NextJobThinkResult` (a Prepatcher field; Waylith provides it without the Prepatcher mod). While a pawn is on that stair job, `IconFor` resolves the queued job instead, so the bar shows the work it's going to. With nothing queued (a plain move order) it shows the stair as before. The tooltip is still the stair job's report. Its types are only touched in `src/MultiFloorsLevels.cs`, in a NoInlining method run only when it's active.
 - **Mods that replace the bar:** won't show the icons. **Colonist Bar KF** rewrites the whole bar, so this mod's postfix on the vanilla drawer never runs with it loaded.
 
 ## How it works
@@ -47,6 +48,7 @@ Shows "Colonist Bar Job Icons" in game, package ID `Ordo.ColonistBarJobs`. It ad
 - `colonistbarjobs`: Harmony, Core, RimBridgeServer and the mod.
 - `colonistbarjobs-headless`: the same with no window. Textures still load headless, so the setup check works there.
 - `colonistbarjobs-moodbar` and its `-headless` twin: plus CM Color Coded Mood Bar, from the Workshop (needs Steam running).
+- `colonistbarjobs-multifloors` and its `-headless` twin: plus Prepatcher and MultiFloors, from the Workshop (needs Steam running), for `resolve_stairs_show_the_work_upstairs`.
 
 **Finding vanilla textures:** the game's textures are packed. `ordo/list_textures` lists a folder's textures by name, and `ordo/textures_exist` checks exact paths.
 
@@ -64,6 +66,7 @@ Shows "Colonist Bar Job Icons" in game, package ID `Ordo.ColonistBarJobs`. It ad
 | `settings` | `settings_activity_row` | The row is the default and hooked; with a job icon the placeholder leads and idle goes but burning stays; with none, idle stays; the slot is vanilla's size |
 | | `settings_corners_size_and_offsets` | Each corner, offsets inward and outward, and offsets scaling with a doubled portrait |
 | `cache` | `cache_follows_job` | A real miner shows the mining icon while mining, and nothing once drafted |
+| `levels` | `resolve_stairs_show_the_work_upstairs` (also `resolve`) | With MultiFloors, a miner whose only rock is on the level above (`UpperLevel`) takes the stairs: the stair job alone wouldn't show mining, but the bar does, and still does once it mines upstairs |
 
 **Checking by eye:** `ordo/stage_colonistbarjobs` (`ColonistBarJobsTools.cs`) clears the map and leaves four colonists working: a hauler with steel and a stockpile, an idle colonist, a miner, and a builder at wooden wall blueprints. It unpauses the game.
 - The bar lists colonists in spawn order. Dev mode's toolbar covers the top of the middle slots, so the hauler spawns first and the builder last.
@@ -78,6 +81,7 @@ Shows "Colonist Bar Job Icons" in game, package ID `Ordo.ColonistBarJobs`. It ad
 - **2026-11-15, settings and off-work icons:** 9/9 on `colonistbarjobs-headless`. Windowed on `colonistbarjobs-moodbar`: the four icons drew over the mood bar mod's portraits, wandering colonists showed the idle icon, and there were no errors in the log.
 
 - **2026-11-16, activity row:** 10/10 on `colonistbarjobs-headless` and on `colonistbarjobs-moodbar-headless`, with no errors in the log. Windowed, on both `colonistbarjobs` and `colonistbarjobs-moodbar`: steel, the pickaxe and the wooden wall drew first in the bottom-left row, and the idle colonist kept vanilla's clock.
+- **2026-11-22, MultiFloors:** 11/11 on `colonistbarjobs-multifloors-headless`, and 10/10 on `colonistbarjobs-headless`, where the levels scenario skips. Not looked at windowed, and the scenario wasn't seen to fail against a broken build.
 
 ## Open questions
 

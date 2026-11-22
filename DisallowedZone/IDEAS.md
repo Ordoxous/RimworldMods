@@ -23,4 +23,4 @@ Ideas not yet planned or built. The README holds the design, the plan and the op
 
 ## Discarded ideas
 
-None yet.
+- **MultiFloors check** (S, MultiFloors). A scenario showing pawns that MultiFloors moves onto another level to look for work skip work inside that level's zone. Turned down in the MultiFloors round (2026-11-22): the zone works per map, and the work scan reads the map the pawn is moved to, so it most likely needs no code.

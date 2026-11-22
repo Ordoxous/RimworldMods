@@ -28,6 +28,7 @@
     <li>Ludeon.RimWorld.Ideology</li>
     <li>MemeGoddess.GiddyUp</li>
     <li>VanillaExpanded.VMemesE</li>
+    <li>telardo.MultiFloors</li>
   </loadAfter>
   <packageId>Ordo.Saddlebound</packageId>
   <description>Ideology memes and precepts for Giddy-Up riders. Riding becomes a cultural practice: some ideoligions resent the saddle, others need it. Horde Riders raid on horseback, mourn their fallen mounts, and glory in kills made from the saddle.

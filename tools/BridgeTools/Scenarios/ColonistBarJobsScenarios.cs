@@ -27,7 +27,8 @@ public static class ColonistBarJobsScenarios
         new("resolve_blueprint_shows_what_it_builds", "resolve", BlueprintShowsWhatItBuilds),
         new("resolve_nothing_to_show", "resolve", NothingToShow),
         new("resolve_off_work", "resolve offwork", OffWork),
-        new("cache_follows_job", "cache", CacheFollowsJob)
+        new("cache_follows_job", "cache", CacheFollowsJob),
+        new("resolve_stairs_show_the_work_upstairs", "resolve levels", StairsShowTheWorkUpstairs, requiresMod: "telardo.MultiFloors")
     };
 
     private static JobIconDef Icon(
@@ -246,6 +247,42 @@ public static class ColonistBarJobsScenarios
         var three = ActivityRow.SlotRect(portrait, 3, 2f);
         context.Check($"three icons share the row's 46 px, scaled with the bar: {three}", Mathf.Approximately(three.width, 46f / 3f * 2f));
         return Task.CompletedTask;
+    }
+
+    // With MultiFloors, a miner with rock to mine only upstairs takes the stairs first. The stair job's own target is the
+    // stair, but the bar shows the mining it's going for, then the mining itself once there.
+    private static async Task StairsShowTheWorkUpstairs(
+        ScenarioContext context
+    )
+    {
+        ColonistBarJobIcons.ClearCache();
+        using var level = new UpperLevel(context);
+        if (level.Map == null)
+        {
+            return;
+        }
+
+        var rock = GenSpawn.Spawn(DefDatabase<ThingDef>.GetNamed("Granite"), context.Cell(10, 10), level.Map);
+        level.Map.designationManager.AddDesignation(new Designation(rock, DesignationDefOf.Mine));
+        var miner = context.Worker(0, 0, WorkTypeDefOf.Mining);
+
+        if (!await context.Until("the miner takes the stairs", () => miner.CurJobDef?.defName == "MF_ChangeLevelThroughStair", 600))
+        {
+            return;
+        }
+
+        var stairs = JobIconResolver.For(miner.CurJob);
+        var shown = ColonistBarJobIcons.IconFor(miner);
+        context.Check($"the stair job alone doesn't show mining: {stairs}", stairs.Source != Icon("Ordo_JobIcon_Mining"));
+        context.Check($"on the stairs, the bar shows the mining upstairs: {shown}", shown.Source == Icon("Ordo_JobIcon_Mining"));
+
+        if (!await context.Until("the miner mines upstairs", () => miner.Map == level.Map && miner.CurJobDef == JobDefOf.Mine, 1200))
+        {
+            return;
+        }
+
+        var mining = ColonistBarJobIcons.IconFor(miner);
+        context.Check($"upstairs, the bar shows mining: {mining}", mining.Source == Icon("Ordo_JobIcon_Mining"));
     }
 
     private static async Task CacheFollowsJob(

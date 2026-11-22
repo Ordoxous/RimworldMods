@@ -24,27 +24,33 @@ public class JobGiver_OptimizeUpgrades : ThinkNode_JobGiver
         pawn.mindState.nextApparelOptimizeTick = Find.TickManager.TicksGame + Rand.Range((int)(intervalTicks * 0.8f), (int)(intervalTicks * 1.2f));
 
         // The status shown to the player starts from UsableBy too. Being free right now only matters for an actual trip
+        // With MultiFloors an upgrader may be on another level, where the mech can't reserve it from here
         var upgraders = Building_AutoMechUpgrader.UsableBy(pawn)
-            .Where(b => b.CanAcceptPawn(pawn) && pawn.CanReserve(b))
+            .Where(b => b.CanAcceptPawn(pawn)
+                && (b.Map == pawn.Map ? pawn.CanReserve(b) : !b.Map.reservationManager.IsReservedByAnyoneOf(b, pawn.Faction)))
             .ToList();
 
         if (upgraders.Count == 0)
             return null;
 
+        // The most operations wins; on a tie, the mech's own level, since UsableBy lists it first and the first maximum is kept
         var policy = mechComp.EffectiveUpgradePolicy;
-        var operationsByUpgrader = upgraders.ToDictionary(
-            upgrader => upgrader,
-            upgrader => upgrader.WantedOperations(pawn, mechComp.upgrades, policy)
-        );
-
-        if (operationsByUpgrader.TryMaxBy(e => e.Value.Count, out var mostOperations))
+        Building_AutoMechUpgrader best = null;
+        var mostOperations = 0;
+        foreach (var upgrader in upgraders)
         {
-            if (mostOperations.Value.Count > 0)
+            var count = upgrader.WantedOperations(pawn, mechComp.upgrades, policy).Count;
+            if (count > mostOperations)
             {
-                return JobMaker.MakeJob(JobDefOf.EnterBuilding, (LocalTargetInfo)(Thing)mostOperations.Key);
+                best = upgrader;
+                mostOperations = count;
             }
         }
 
-        return null;
+        if (best == null)
+            return null;
+
+        var enter = JobMaker.MakeJob(JobDefOf.EnterBuilding, (LocalTargetInfo)(Thing)best);
+        return best.Map == pawn.Map ? enter : MultiFloorsLevels.TripTo(pawn, best, enter);
     }
 }

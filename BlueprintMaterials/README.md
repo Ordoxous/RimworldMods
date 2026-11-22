@@ -7,6 +7,7 @@ This README is for working on the mod. The player-facing description is in `mod/
 ## Dependencies
 
 - **Harmony.** Nothing else, and no DLC. With Ideology, a blueprint's chosen style (`selectedStyleDef`) only changes the gizmo's icon.
+- **Optional: MultiFloors** (`telardo.MultiFloors`, Workshop 3384660931, 1.6 only, loaded on 1.7 from its 1.6 folder). Each level of a base is its own map, and its haulers deliver to a blueprint from any level, so stock on another level counts as available. Its types are only touched in `src/MultiFloorsLevels.cs`, in a NoInlining method run only when it's active.
 
 ## How it works
 
@@ -16,7 +17,7 @@ It's all in `src/ReplaceBlueprintMaterials.cs`: a Harmony postfix on `Blueprint_
 |---|---|
 | Stuffed buildings (walls, doors, furniture) | The gizmo lists the stuffs the building allows (`GenStuff.AllowedStuffsFor`). Picking one sets `stuffToUse` on every selected blueprint the gizmo stands for, then calls `map.enrouteManager.InterruptEnroutePawns`, so anyone already hauling the old material gets a new job |
 | Floors (a `TerrainDef` with a `designatorDropdown`) | Floors carry their material in the def, so the gizmo lists the other terrains in the same dropdown group. Picking one destroys each selected blueprint (`DestroyMode.Cancel`), places a new one for the chosen terrain and selects it. A group whose terrains share a material (carpets, which differ by colour) is labelled by terrain (`LabelCap`); the others by material (`LabelAsStuff`) |
-| Availability | Only materials with at least one thing of that def on the map are listed, plus the current one; in god mode, everything is. With no alternative, the gizmo is disabled with "No other material is available." |
+| Availability | Only materials with at least one thing of that def on the map, or with MultiFloors on another level of the base, are listed, plus the current one; in god mode, everything is. With no alternative, the gizmo is disabled with "No other material is available." |
 | Grouping (`Command_Action_AlternativeMaterial`) | `GroupsWith` and `SelectedBlueprints` use the same rule: same blueprint def and same current material. Wood and steel walls selected together show two gizmos, and each changes only its own walls. Vanilla's own grouping already separates gizmos with different icons; the mod's rule is what separates materials whose icons are the same, such as granite and marble walls |
 | The gizmo's look | The building's (or floor's) icon in the current material, the dropdown triangle at the top right, and the mod's own swap icon (`mod/Textures/UI/Gizmos/Ordo_BlueprintMaterials_ChangeMaterial.png`) 24 px in the top-left corner |
 | Caches | `SimilarTerrainCache` and `StuffCache` are filled once per def, since the gizmo is built every frame for every selected blueprint. A def hot reload makes new def objects, so the caches just miss and rebuild (checked; see below) |
@@ -30,6 +31,7 @@ Style: as set in the repo's `.editorconfig` (4 spaces, braces on their own line)
 **Profiles** (in `~/.gabs/config.json`):
 
 - `blueprintmaterials`, `blueprintmaterials-headless` and `blueprintmaterials-showcase` load Harmony, Core, RimBridgeServer and this mod. No DLCs.
+- `blueprintmaterials-multifloors` and its `-headless` twin add Prepatcher and MultiFloors (Workshop, needs Steam running), for `availability_lists_what_is_on_other_levels`. Data folder `~/.gabs/rimworld/blueprintmaterials-multifloors`, a copy of `blueprintmaterials`' with its save.
 - The windowed and headless profiles share the data folder `~/.gabs/rimworld/blueprintmaterials`. The showcase profile has its own, with a 1920x1080 window on the main monitor.
 - The save was made fresh for this mod list from the main menu, not copied from another mod's.
 - Headless works: building the gizmos and opening their menus logs nothing without rendering. Drawing them is only exercised windowed, so run the suite both ways.
@@ -42,7 +44,7 @@ Run the suite with `ordo/run_scenarios` (add `mod: Ordo.BlueprintMaterials` if a
 | `visuals` | `visuals_gizmos_draw` | A wall's and a floor's gizmos stay on screen for 60 ticks, so any error drawing them fails the scenario. Only windowed: headless it passes without testing anything |
 | `stuff` | `stuff_change`, `stuff_only_the_gizmos_group`, `stuff_unselected_untouched`, `stuff_haulers_replanned` | The material changes on every selected wall; only the clicked gizmo's group changes (granite and marble walls, whose gizmos look alike); unselected blueprints keep theirs; a colonist carrying wood to the wall stops when it becomes steel, nothing is left en route, and they bring steel instead |
 | `grouping` | `stuff_only_the_gizmos_group`, `stuff_unselected_untouched`, `floor_change` | Which blueprints a click changes |
-| `availability` | `availability_disabled_without_alternative`, `availability_lists_what_is_on_the_map`, `availability_god_mode_lists_everything` | Disabled with its reason when nothing else is on the map; with steel on the map, exactly wood (current) and steel are offered; in god mode, every material a wall allows |
+| `availability` | `availability_disabled_without_alternative`, `availability_lists_what_is_on_the_map`, `availability_god_mode_lists_everything`, `availability_lists_what_is_on_other_levels` | Disabled with its reason when nothing else is on the map; with steel on the map, exactly wood (current) and steel are offered; in god mode, every material a wall allows; with MultiFloors, steel only on the level above (`UpperLevel`) enables the gizmo and is offered next to wood |
 | `floor` | `floor_change`, `floor_labels_by_terrain_when_material_shared` | Two floor blueprints are replaced by the chosen floor at the same cells, and the new ones are selected; carpets are offered by their own names, not all as "cloth" |
 | `ai` | `stuff_haulers_replanned` | The hauler, through the real work givers |
 
@@ -75,6 +77,8 @@ Every behaviour scenario was seen to fail against a build with that behaviour br
 | `GroupsWith` ignores material | `stuff_only_the_gizmos_group`, once it used granite and marble; with wood and steel it passed, because their different icons already kept the gizmos apart |
 | The Ideology texture (the build before the fix in History) | `visuals_gizmos_draw`, windowed |
 
+**With MultiFloors (2026-11-22):** 12/12 on `blueprintmaterials-multifloors-headless` and 11/11 on `blueprintmaterials-headless`, where the levels scenario skips. The new scenario wasn't seen to fail against a broken build, but it checks the ground has no steel and that the menu still offers it.
+
 ## Showcase
 
 `tools/BridgeTools/Showcase/BlueprintMaterialsShowcase.cs`, recorded on `blueprintmaterials-showcase` into `tools/BridgeTools/videos/blueprintmaterials` (about 30 s to record). Both clips keep the UI and film the whole window (`ShowcaseFrame.Window`), because the gizmos are at its bottom edge. The cursor is RimBridge's virtual one, placed on the gizmo with `ShowcaseStage.GizmoCenter`, and the game pauses while it works the menu, as a player would.
@@ -86,6 +90,7 @@ Blueprints look the same on the map whatever their material, so the change shows
 
 ## History
 
+- **2026-11-22, MultiFloors.** Materials stocked on another level count as available, with their own profile pair and scenario.
 - **2026-11-14, tests, a showcase and its own icon.**
   - Fixed: the gizmo logged "Could not load Texture2D at 'UI/Gizmos/ChangeStyle'" the first time it was drawn in any game without Ideology. That texture is Ideology's, and the gizmo drew it as an overlay. The gizmo now has its own swap icon in its top-left corner, in every game. The old overlay sat in the middle, covering the material's icon, and on floors it was cropped by the terrain icon's texture coordinates.
   - The scenario suite, profiles and showcase above.

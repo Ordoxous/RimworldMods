@@ -26,6 +26,7 @@ public static class SaddleboundScenarios
         new("riding_essential_stages", "riding", EssentialStages),
         new("riding_essential_long_ride", "riding", EssentialLongRide),
         new("riding_essential_suppressed_no_mounts", "riding", EssentialSuppressedNoMounts),
+        new("riding_essential_mount_on_other_level", "riding levels", EssentialMountOnOtherLevel, requiresMod: "telardo.MultiFloors"),
         new("riding_disliked_memory", "riding", DislikedMemory),
         new("mount_death_memory", "mounts", MountDeathMemory),
         new("mount_death_unridden_ignored", "mounts", MountDeathUnridden),
@@ -343,6 +344,31 @@ public static class SaddleboundScenarios
         Horse(context, 1, 0);
         var tame = StateOf(rider, "Ordo_RidingEssential");
         context.Check($"the penalty comes back with a trained horse: {Describe(tame)}", tame.Active && tame.StageIndex == 2);
+        return Task.CompletedTask;
+    }
+
+    // With MultiFloors, a trained horse on the level above is still one the pawn could ride, so the penalty applies
+    private static Task EssentialMountOnOtherLevel(
+        ScenarioContext context
+    )
+    {
+        var rider = context.Colonist(0, 0);
+        using var _ = Use(rider, "Ordo_Riding_Essential");
+        using var level = new UpperLevel(context);
+        if (level.Map == null)
+        {
+            return Task.CompletedTask;
+        }
+
+        RidingTracker.Instance.SetLastRideTick(rider, Now - 5 * GenDate.TicksPerDay);
+        var none = StateOf(rider, "Ordo_RidingEssential");
+        context.Check($"no penalty with no animal on either level: {Describe(none)}", !none.Active);
+
+        var horse = Horse(context, 1, 0);
+        level.MoveHere(horse, context.Cell(10, 10));
+        context.Check($"the horse is upstairs: {horse.Map}", horse.Map == level.Map);
+        var upstairs = StateOf(rider, "Ordo_RidingEssential");
+        context.Check($"the penalty applies with a trained horse upstairs: {Describe(upstairs)}", upstairs.Active && upstairs.StageIndex == 2);
         return Task.CompletedTask;
     }
 

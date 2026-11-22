@@ -139,7 +139,10 @@ public class RidingTracker : GameComponent
         IEnumerable<Pawn> candidates;
         if (rider.Spawned)
         {
-            candidates = rider.Map.mapPawns.SpawnedPawnsInFaction(rider.Faction);
+            // With MultiFloors, an animal on another level of the base counts too
+            candidates = MultiFloorsLevels.OtherLevels(rider.Map)
+                .Prepend(rider.Map)
+                .SelectMany(map => map.mapPawns.SpawnedPawnsInFaction(rider.Faction));
         }
         else if (rider.GetCaravan() is { } caravan)
         {

@@ -2,6 +2,8 @@
 
     <ItemGroup>
         <WorkshopReference Include="MechanoidUpgrades" WorkshopId="3365118555" />
+        <!-- Optional: MultiFloors (1.6 only). Its types are only touched from src/MultiFloorsLevels.cs, when it's active -->
+        <WorkshopReference Include="MultiFloors" WorkshopId="3384660931" />
     </ItemGroup>
 
 </Project>

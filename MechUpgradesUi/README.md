@@ -12,6 +12,7 @@ This README is for working on the mod. The player-facing description is in `mod/
   - MU's own types are in the `MU` namespace.
   - MU is a Workshop mod, so the Steam client must be running for the game to load it.
 - **Optional: Work Tab.** It swaps one Mechs tab column for its own. Not worth testing.
+- **Optional: MultiFloors** (`telardo.MultiFloors`, Workshop 3384660931, 1.6 only, loaded on 1.7 from its 1.6 folder). Each level of a base is its own map, linked by stairs. With it, `UsableBy` also lists the auto upgraders on the other levels, after the mech's own level's, unless MultiFloors' "stay on this level" is set for the mech. One on another level must pass MultiFloors' `IsForbiddenAcrossLevel` and `CanReachAcrossLevel` instead of the same-map checks, and be unreserved (`IsReservedByAnyoneOf`, since `CanReserve` refuses a claimant on another map). The job giver keeps the first upgrader with the most operations, so the mech's own level wins a tie. A trip to another level is MultiFloors' `MF_ChangeLevelThroughStair`, aimed at the upgrader, with the enter job queued in the mech's `NextJobThinkResult`, as MultiFloors' own `HarmonyPatch_MechChargeAcrossLevel` does for chargers. The status and alerts follow `UsableBy`, so they name an upgrader upstairs; a reach check for the status clears the stair path it keeps. The upgrader's inspect pane counts mechs on every level, and one on the stairs to it as on its way. Its types are only touched in `src/MultiFloorsLevels.cs`, in NoInlining methods run only when it's active. Not covered: elevators, untested.
 
 The mod doesn't use Harmony. All its changes to MU and the game are XML patches and subclasses.
 
@@ -43,6 +44,7 @@ Style: as set in the repo's `.editorconfig` (4 spaces).
 
 - `mechupgradesui`, `mechupgradesui-headless` and `mechupgradesui-showcase` load Harmony, Core, Biotech, RimBridgeServer, MU and this mod.
 - The windowed and headless profiles share the data folder `~/.gabs/rimworld/mechupgradesui`. The showcase profile has its own.
+- `mechupgradesui-multifloors` and its `-headless` twin add Prepatcher and MultiFloors (Workshop), for the `levels` scenarios. Data folder `~/.gabs/rimworld/mechupgradesui-multifloors`, a copy of `mechupgradesui`' with its save.
 - The `mechupgradesui` save was made fresh for this mod list. The SillyAnimalThings save it was copied from stopped silently at the main menu, with no error logged.
 
 Run the suite with `ordo/run_scenarios` (add `mod: Ordo.MechUpgradesUi` if anything else is loaded). The scenarios are in `tools/BridgeTools/Scenarios/MechUpgradesUiScenarios.cs`.
@@ -53,6 +55,7 @@ Run the suite with `ordo/run_scenarios` (add `mod: Ordo.MechUpgradesUi` if anyth
 | `policy` | `policy_database`, `policy_keep_and_want` | Create, default, `SetDefaultPolicy`, deleting refused for a living mech and clearing a dead one's; the plan drops a disallowed upgrade and adds an allowed one in the same trip |
 | `operations` | `operations_point_budget`, `operations_exclusions`, `operations_removals_run_first`, `operations_linked_storage_only` | `WantedOperations` called directly |
 | `ai` | `ai_no_policy_no_trip`, `ai_unpowered_no_trip`, `ai_default_for_unassigned`, `ai_interval`, `ai_end_to_end`, `ai_stock_gone_on_arrival` | Trips through the think tree, plus `JobGiver_OptimizeUpgrades` called directly where the think tree can't show the decision |
+| `levels` | `ai_upgrader_on_other_level`, `ai_own_level_first` (also `ai`) | With MultiFloors and a level above (`UpperLevel`): with the only stocked upgrader upstairs, the status names it with no blocker, and the mech takes the stair job aimed at it, then heads in on the level, and the upgrader's inspect pane lists it as on its way. With the same stock on both levels, `UsableBy` lists the ground's first and the trip goes there |
 | `player` | `player_insert_dialog`, `player_insert_no_dialog` | A player-ordered insert (`upgrader.OrderForceTarget(mech)`, as MU's gizmo and float menu do) with the dialog setting on and off |
 | `ui` | `ui_policy_dialog`, `ui_preview_matches_operations`, `ui_preview_skips`, `ui_load_upgrade_set`, `ui_mech_gizmos`, `ui_upgrades_status`, `ui_upgrader_inspect`, `ui_upgrader_no_storage`, `ui_status_unusable_upgrader`, `ui_alert_not_in_stock`, `ui_dialog_defaults`, `ui_use_default_confirmation` | The logic behind the UI, not its drawing: the dialog's starting policy, mech type, "Used by" and hidden filters (the dialog is only constructed), the preview against the upgrader's real picks and its skip reasons, loading an upgrade set, the gizmos and "Check upgrades" (disabled with a reason when there's nothing to do), the Mechs tab status and tooltip, an unpowered upgrader not counted (with the blocker, the gizmo and the blocked alert), the not-in-stock alert and its setting, the upgrader's inspect text, and the warning before using the default policy |
 | `ranking` | `ranking_conflicts`, `ranking_points`, `ranking_unranked_last`, `ranking_move`, `ranking_saved_and_copied`, `ranking_replace`, `ranking_replace_not_for_points` | The ranking decides conflicts (in the operations and the preview) and the point budget; unranked upgrades go last by defName; `Move` as dragging calls it, with an unshown ranked upgrade keeping its place; the ranking and the replace setting survive a save and load (through `Scribe` to a temporary file) and `CopyFrom`; replacing happens only with the setting on and the better upgrade in stock, removes last, shows as "replacing" in the status, and doesn't swap back once done; and a mech over its points with nothing better in stock loses nothing |
@@ -103,6 +106,8 @@ Every behaviour scenario was seen to fail with a fault planted by hot reload, in
 - `ai_unpowered_no_trip` at first passed with its fault planted. Vanilla's enter job drops a trip to an unpowered building at once, so no trip is ever seen. It now also asks the job giver directly.
 
 ## History
+
+- **2026-11-22, MultiFloors.** Auto upgraders on other levels are used, through the stairs (Dependencies, above). 36/36 on `mechupgradesui-multifloors-headless`, and 34/34 on `mechupgradesui-headless`, where the two `levels` scenarios skip. Neither was seen to fail against a broken build.
 
 - **2026-11-14, ranking upgrades.**
   - Each policy has a ranking, dragged in the dialog's preview. It decides what fills a mech's points and which of two conflicting upgrades it gets, instead of defName order. Unranked upgrades still go by defName, so existing policies pick as before.

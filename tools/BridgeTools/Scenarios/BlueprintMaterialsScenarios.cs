@@ -28,6 +28,7 @@ public static class BlueprintMaterialsScenarios
         new("availability_disabled_without_alternative", "availability", DisabledWithoutAlternative),
         new("availability_lists_what_is_on_the_map", "availability", ListsWhatIsOnTheMap),
         new("availability_god_mode_lists_everything", "availability", GodModeListsEverything),
+        new("availability_lists_what_is_on_other_levels", "availability levels", ListsWhatIsOnOtherLevels, requiresMod: "telardo.MultiFloors"),
 
         new("floor_change", "floor grouping", FloorChange),
         new("floor_labels_by_terrain_when_material_shared", "floor", LabelsByTerrain)
@@ -253,6 +254,44 @@ public static class BlueprintMaterialsScenarios
                 var labels = Stage.MenuLabels(menu);
                 var expected = new[] { Wood.LabelAsStuff, Steel.LabelAsStuff };
                 context.Check($"with steel on the map, the menu lists the current wood and steel only: [{string.Join(", ", labels)}]", labels.Count == 2 && expected.All(labels.Contains));
+                menu?.Close(false);
+            }
+        );
+        return Task.CompletedTask;
+    }
+
+    // With MultiFloors, steel on the level above counts: its haulers bring it down to the blueprint
+    private static Task ListsWhatIsOnOtherLevels(
+        ScenarioContext context
+    )
+    {
+        using var level = new UpperLevel(context);
+        if (level.Map == null)
+        {
+            return Task.CompletedTask;
+        }
+
+        var steel = ThingMaker.MakeThing(Steel);
+        steel.stackCount = Stack;
+        GenSpawn.Spawn(steel, context.Cell(10, 10), level.Map);
+        var wall = context.Blueprint(ThingDefOf.Wall, 0, 0, Wood);
+        WithGodMode(
+            false,
+            () =>
+            {
+                context.Check($"the ground has no steel: {context.Map.listerThings.ThingsOfDef(Steel).Count}", context.Map.listerThings.ThingsOfDef(Steel).Count == 0);
+                Stage.Select(wall);
+                var gizmo = MaterialGizmo(context, wall);
+                if (gizmo == null)
+                {
+                    return;
+                }
+
+                context.Check($"with steel upstairs, the gizmo is enabled: {gizmo.disabledReason}", !gizmo.Disabled);
+                var menu = context.OpenMenu(gizmo);
+                var labels = Stage.MenuLabels(menu);
+                var expected = new[] { Wood.LabelAsStuff, Steel.LabelAsStuff };
+                context.Check($"the menu lists the current wood and the steel upstairs: [{string.Join(", ", labels)}]", labels.Count == 2 && expected.All(labels.Contains));
                 menu?.Close(false);
             }
         );

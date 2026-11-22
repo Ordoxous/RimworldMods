@@ -8,6 +8,7 @@ This README replaces the design handoff of 2026-11-14. Version 1 is built. Versi
 
 - **Hard:** Harmony, Ideology, **Giddy-Up 2 - Continued** (`MemeGoddess.GiddyUp`, Workshop `3674332861`, v2.2.5 when built, supports 1.4–1.7). It's all-in-one: Core, Ride and Roll, Battle Mounts and Caravans ship in one mod and are switched on in its settings.
 - **Optional:** Vanilla Ideology Expanded - Memes and Structures (`VanillaExpanded.VMemesE`). When it's loaded, the Riding precepts list its `VME_Nomad` meme among their associated memes (`MayRequire` in the XML). Not yet tested with it loaded.
+- **Optional: MultiFloors** (`telardo.MultiFloors`, Workshop 3384660931, 1.6 only, loaded on 1.7 from its 1.6 folder). Each level of a base is its own map, so `HasRideableMount` also looks at the player's animals on the other levels of the pawn's map (`src/MultiFloorsLevels.cs`, whose NoInlining method only runs when it's active).
 - **Build:** `GiddyUpCore.dll` is referenced directly from the Workshop folder (`Private=false`). Every call into it is in `src/GiddyUpAdapter.cs`, so an API change breaks one file. Soft dependencies, when they get code, go through reflection as Tweaks does.
 
 ## What's in version 1
@@ -37,7 +38,7 @@ Icons are vanilla placeholders: the rancher meme icon, and the animal connection
 **Thoughts:**
 - **Riding:** situational thoughts with C# workers, `ThoughtWorker_Precept_RodeRecently` and `ThoughtWorker_Precept_RidingEssential`. "Had to ride" comes from the `Ordo_Mounted` history event, fired in the `Mount` postfix with the rider as doer, only for the player's pawns.
 - **Mount death and glory:** history events with vanilla comps, all XML. `Ordo_MountDied` has no doer, so every free colonist hears of it (`PreceptComp_KnowsMemoryThought`). `Ordo_OwnMountDied` and `Ordo_KilledFromSaddle` have the rider or killer as doer (`PreceptComp_SelfTookMemoryThought`). A prefix on `Pawn.Kill` decides what to fire before the death (the victim's faction, the killer still mounted), and the postfix fires it once the pawn is dead.
-- **Essential's penalties** check `HasRideableMount`: an animal on the pawn's map, or in their caravan, that Giddy-Up would let them ride. That means its mod options, faction, tameness and "who may ride" setting, and the rider being old enough. The answer is cached per pawn for an hour of game time.
+- **Essential's penalties** check `HasRideableMount`: an animal on the pawn's map (with MultiFloors, on any level of it), or in their caravan, that Giddy-Up would let them ride. That means its mod options, faction, tameness and "who may ride" setting, and the rider being old enough. The answer is cached per pawn for an hour of game time.
 - **The Riding precepts** have `enabledForNPCFactions` off. NPC pawns aren't tracked off the map, and their mood doesn't matter.
 
 **Preferred mounts** (`src/PreferredMounts.cs`): modelled on vanilla's venerated animals, with one precept per species (`Ordo_PreferredMount`) in an issue that allows several.
@@ -76,6 +77,7 @@ As read from the v2.2.5 source shipped in the Workshop folder (`Source/`), 2026-
 **Profiles:**
 - `saddlebound`: Harmony, Core, Ideology, RimBridgeServer, Giddy-Up 2 - Continued (Workshop, needs Steam running) and the mod.
 - `saddlebound-headless`: the same with no window.
+- `saddlebound-multifloors` and its `-headless` twin: plus Prepatcher and MultiFloors (Workshop), for `riding_essential_mount_on_other_level`. A copy of `saddlebound`'s data folder and save.
 
 The test save was made on 2026-11-15 with these mods loaded, so the player has an ideoligion.
 
@@ -91,6 +93,7 @@ The test save was made on 2026-11-15 with these mods loaded, so the player has a
 | | `riding_essential_stages` | Just rode, a day and a bit, 3 days and 5 days give stages 0, none, 1 and 2 |
 | | `riding_essential_long_ride` | A pawn mounted 5 days ago and still riding is at stage 0 |
 | | `riding_essential_suppressed_no_mounts` | No penalty with no animal, or with only a wild horse. The penalty comes back with a trained horse. |
+| | `riding_essential_mount_on_other_level` (also `levels`) | With MultiFloors: no penalty with no animal on either level, and the penalty with a trained horse only on the level above (`UpperLevel`) |
 | | `riding_disliked_memory` | Mounting gives "had to ride", and no "rode recently" |
 | `mounts` | `mount_death_memory` | A ridden horse dies: both colonists get "our mount died", only the rider gets "my mount died", and the record is dropped |
 | | `mount_death_unridden_ignored` | A horse no one rode isn't mourned |
@@ -103,6 +106,7 @@ The test save was made on 2026-11-15 with these mods loaded, so the player has a
 | `raids` | `horde_raid_mount_chance` | A test prefix running after the mod's reads the chance Giddy-Up would use and skips generation: Giddy-Up's chance without the meme, 90 with it, the settings put back afterwards, and Giddy-Up's chance again with the setting off |
 
 **Results:**
+- **2026-11-22, MultiFloors:** 19/19 on `saddlebound-multifloors-headless`, and 18/18 on `saddlebound-headless`, where the levels scenario skips.
 - **2026-11-22, pruning gone pawns:** 18/18 on `saddlebound-headless`, with no leaks reported by the runner's new leak check once the stage discards its destroyed pawns.
 - **2026-11-15, first run:** 12/12 on `saddlebound-headless`, and nothing in the launch log but an About.xml warning (Harmony's Workshop link, since added).
 - **Fault planting:** with three faults hot reloaded (riding now ignores `IsMounted`, mounted kills skip the mounted check, and "my mount died" never fires), exactly `riding_essential_long_ride`, `mounted_kill_glory` and `mount_death_memory` failed. After reverting, 12/12 again.
