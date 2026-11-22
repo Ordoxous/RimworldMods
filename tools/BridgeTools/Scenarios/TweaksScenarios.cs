@@ -86,6 +86,8 @@ public static partial class TweaksScenarios
         new("levels_build_costs_clearly_have_enough", "levels resources", LevelsBuildCostsClearlyHaveEnough, requiresMod: MultiFloorsId + ",Mlie.IClearlyHaveEnough"),
         new("levels_readout_counts_other_levels", "levels resources settings", LevelsReadoutCountsOtherLevels, requiresMod: MultiFloorsId),
         new("levels_bills_count_other_levels", "levels bills settings", LevelsBillsCountOtherLevels, requiresMod: MultiFloorsId),
+        new("levels_supercharger_upstairs", "levels supercharger", context => LevelsSupercharger(context, on: true), requiresMod: MultiFloorsId + ",Ludeon.RimWorld.Ideology"),
+        new("levels_supercharger_off", "levels supercharger settings", context => LevelsSupercharger(context, on: false), requiresMod: MultiFloorsId + ",Ludeon.RimWorld.Ideology"),
         new("tools_category", "tools", context => ToolsCategory(context, requireTools: false)),
         new("tools_category_power_tools", "tools", context => ToolsCategory(context, requireTools: true), requiresMod: "setosa.power.tools"),
         new("tools_work_jackhammer_away_for_walks", "tools tools_work", context => ToolsWalkWithoutJackhammer(context, on: true), requiresMod: PowerTools),

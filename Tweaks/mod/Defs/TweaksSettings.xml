@@ -128,6 +128,12 @@
         <label>Bills count products on other levels</label>
         <tooltip>With MultiFloors, a "Do until you have X" bill counts the product on every level, so a kitchen upstairs stops cooking when the freezer downstairs is full. A bill that counts only one stockpile still counts only that stockpile.</tooltip>
       </li>
+      <li MayRequire="telardo.MultiFloors" Class="XmlExtensions.Setting.Checkbox">
+        <key>SuperchargersAcrossLevels</key>
+        <defaultValue>true</defaultValue>
+        <label>Neural superchargers on other levels</label>
+        <tooltip>With MultiFloors and Ideology, colonists due a neural supercharge take the stairs to a charged supercharger on another level when there's none on theirs. A supercharger on their own level is always used first.</tooltip>
+      </li>
       <li Class="XmlExtensions.Setting.Checkbox">
         <key>ToolsCategory</key>
         <defaultValue>true</defaultValue>

@@ -149,4 +149,49 @@ public static partial class TweaksScenarios
             context.Map.resourceCounter.UpdateResourceCounts();
         }
     }
+
+    // A charged neural supercharger upstairs, set to auto-use for everyone, and an idle colonist on the ground who has
+    // never been charged. The colonist takes the stairs and gets charged; with the setting off, it stays on the ground.
+    private static async Task LevelsSupercharger(
+        ScenarioContext context,
+        bool on
+    )
+    {
+        var colonist = context.Colonist(-6, 0);
+        using var level = new UpperLevel(context);
+        if (level.Map == null)
+        {
+            return;
+        }
+
+        var supercharger = level.Build(ThingDef.Named("NeuralSupercharger"), context.Cell(10, 8));
+        var comp = supercharger.TryGetComp<CompNeuralSupercharger>();
+        comp.autoUseMode = CompNeuralSupercharger.AutoUseMode.AutoUseForEveryone;
+        AccessTools.Field(typeof(CompRechargeable), "ticksUntilCharged").SetValue(comp, 0);
+        context.Check("the supercharger upstairs is charged", comp.Charged);
+
+        foreach (var need in colonist.needs.AllNeeds)
+        {
+            need.CurLevelPercentage = 1f;
+        }
+
+        colonist.health.lastReceivedNeuralSuperchargeTick = -1;
+        await WithSetting("SuperchargersAcrossLevels", on ? "true" : "false", async () =>
+        {
+            colonist.drafter.Drafted = false;
+            if (on)
+            {
+                await context.Until($"the colonist goes upstairs and is charged: {Stage.Describe(colonist)} on {colonist.MapHeld}",
+                    () => colonist.health.lastReceivedNeuralSuperchargeTick != -1, 4000);
+                context.Check($"it was charged upstairs: {colonist.MapHeld}", colonist.MapHeld == level.Map);
+            }
+            else
+            {
+                await context.Step(1500);
+                // Not checked to stay on the ground: idle, it may go upstairs for MultiFloors' own work scan
+                context.Check($"it wasn't charged: {Stage.Describe(colonist)} on {colonist.MapHeld}",
+                    colonist.health.lastReceivedNeuralSuperchargeTick == -1);
+            }
+        });
+    }
 }

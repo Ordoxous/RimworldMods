@@ -24,6 +24,7 @@ internal static class TweaksSettings
     public static bool ResourcesAcrossLevels => MultiFloorsActive && GetBool("ResourcesAcrossLevels", true);
     public static bool ReadoutAcrossLevels => MultiFloorsActive && GetBool("ReadoutAcrossLevels", true);
     public static bool BillsAcrossLevels => MultiFloorsActive && GetBool("BillsAcrossLevels", true);
+    public static bool SuperchargersAcrossLevels => MultiFloorsActive && GetBool("SuperchargersAcrossLevels", true);
 
     // Off without Simple Sidearms, which carries the tools, so nothing reaches its types
     public static bool ToolsSwitchForWork => ToolsForWork.SimpleSidearmsActive && GetBool("ToolsSwitchForWork", true);

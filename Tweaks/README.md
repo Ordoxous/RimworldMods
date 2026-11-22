@@ -74,6 +74,7 @@ All are on by default.
 | `ResourcesAcrossLevels` | The Architect's costs, beside the cursor while placing or painting and in the info panel, count what's stored on every level, so they aren't marked "not enough stored" when the materials are on another floor. A new build designator keeps its default material when it's stocked on any level | MultiFloors | `src/MultiFloorsResources.cs` |
 | `ReadoutAcrossLevels` | The resource list at the top left shows the totals of every level, in both its simple and categorized views | MultiFloors | `src/MultiFloorsReadout.cs` |
 | `BillsAcrossLevels` | A "Do until you have X" bill counts the product on every level, so a kitchen upstairs stops when the freezer downstairs is full. A bill counting one stockpile still counts only that one | MultiFloors | `src/MultiFloorsBills.cs` |
+| `SuperchargersAcrossLevels` | A colonist due a neural supercharge (Ideology) takes the stairs to a charged supercharger on another level when there's none on theirs | MultiFloors, Ideology | `src/MultiFloorsSupercharger.cs` |
 | `LightMechsUseStandardChargers` | Light mechs can use the standard recharger | Always | `Patches/ChargeSmallMechsInTheBigCharger.xml` |
 | `MechItemsAtMachiningTable` | Things made at the subcore encoder can also be made at the machining table | Always | `Patches/CraftMechThingsAtMachiningTable.xml` |
 | `SmallMechsInLargeGestator` | The large mech gestator can also make what the small one makes | Always | `Patches/CraftSmallMechsInTheBigGestator.xml` |
@@ -114,6 +115,9 @@ Notes on the tweaks:
   - A transpiler swaps every `Bill.Map` read in `CountProducts`, its private `GetCarriedCount`, and the butchering and stone block counters' overrides for `MultiFloorsBills.MapOf`: the bill's map, or the level being counted.
   - A postfix on each `CountProducts` then runs the same counter once per other level with that level set, and adds what it finds, so the bill's own rules (hit points, quality, tainted, equipped, carried) apply there too. Re-entering, the postfix returns at once.
   - A bill counting one stockpile (`GetIncludeSlotGroup`) is left alone, since that stockpile is on one level. Modded counters that override `CountProducts` still count one level.
+- **`SuperchargersAcrossLevels`** (2026-11-22). Vanilla's `JobGiver_GetNeuralSupercharge` searches the pawn's map only, and its `GetPriority` is 0 when it finds nothing there, so the think tree's priority sorter never asks it for a job. MultiFloors handles mech chargers this way (`HarmonyPatch_MechChargeAcrossLevel`) but not superchargers.
+  - A postfix on `GetPriority` returns vanilla's 9.25 when vanilla gave 0, the pawn is off vanilla's 30000-tick cooldown, and a supercharger on another level passes vanilla's validator (charged, `CanAutoUse`), MultiFloors' `IsForbiddenAcrossLevel`, is unreserved by the faction and is reachable with `CanReachAcrossLevel`. It clears the stair path that check keeps.
+  - A postfix on `TryGiveJob`, when vanilla gives none, does the same search and returns `MF_ChangeLevelThroughStair` with vanilla's `GetNeuralSupercharge` job in `NextJobThinkResult`, as MultiFloors' charger patch does. Levels nearest first, 8 reach checks per level.
 - **`HemogenTilSet`** runs every tick, so it checks the 15000-tick interval before reading the setting. It skips pawns that aren't spawned (in caravans and transport pods, comps still tick).
 - **`ShowArmorIndicators`** uses `MapHeld` and `PositionHeld`, because a killing blow despawns the pawn.
 - **`DeteriorationAlertSkipTainted`** (2026-11-20) finds TD's alert by name, so Tweaks has no reference to TD's assembly, and logs a warning instead of patching if the type or method is gone. TD's alert lists every haulable, unforbidden, unfogged thing below half its hit points that deteriorates where it lies; the postfix removes tainted apparel from that list, and turns the alert off when nothing else is left. Block Unwanted Minutiae's "MessageDeterioratedAway - But only tainted apparel" option covers the separate vanilla message, by matching its text.
@@ -348,6 +352,9 @@ How the scenarios are built:
 - `levels_bills_count_other_levels`: a "Do until you have 8" simple meal bill on a fueled stove on the ground, with 2 meals stockpiled on the ground and 7 upstairs. It counts 9 and isn't worked; counting only the ground's stockpile it's 2; with the setting off it's 2 and is worked. With a hit point limit, which counts thing by thing, it's 2 across the levels and 1 with the setting off: vanilla counts each stack there as one. Its first run expected 9 there and failed. Each patched method is checked to read no `Bill.Map` directly.
 - The readout wasn't looked at in a windowed game.
 
+**With `SuperchargersAcrossLevels` (2026-11-22):** the `levels` suite 20/20 (I Clearly Have Enough's skips) on `tweaks-multifloors-headless` with Ideology added to the profile for the run and removed afterwards, as it isn't in any profile; the two supercharger scenarios skip without it. No errors in the launch log.
+- `levels_supercharger_upstairs`: a charged supercharger upstairs set to auto-use for everyone, and an idle, never-charged colonist on the ground with full needs. It walks up and is charged there. `levels_supercharger_off`: with the setting off, it isn't charged in 1500 ticks. It isn't checked to stay on the ground, since an idle pawn may go upstairs for MultiFloors' own work scan.
+
 Every scenario was seen to fail (bar the `levels` ones noted above):
 
 - **Before the fixes below:** `setup_no_load_errors` (the FSFMerge and mass errors), the four minifiable mass checks, and both tools scenarios.
@@ -367,6 +374,7 @@ Every scenario was seen to fail (bar the `levels` ones noted above):
 
 ## History
 
+- **2026-11-22, neural superchargers across MultiFloors levels.** `SuperchargersAcrossLevels` (above).
 - **2026-11-22, tools for work.** `ToolsSwitchForWork` and `ToolsFetch` (above), with Simple Sidearms carrying the tools, a new `tweaks-tools` profile and the `tools_work` suite. `ToolsCategory.IsTool` is now the shared test for what a tool is.
 - **2026-11-22, the resource list and bills across MultiFloors levels.** `ReadoutAcrossLevels` and `BillsAcrossLevels` (above). The scenarios' `UpperLevel` moved to its own file in BridgeTools for the other mods' MultiFloors scenarios.
 - **2026-11-22, building costs across MultiFloors levels.** `ResourcesAcrossLevels` (above).

@@ -333,6 +333,7 @@ public static class MultiFloorsShutdownPatches
         MultiFloorsResources.Patch(harmony);
         MultiFloorsReadout.Patch(harmony);
         MultiFloorsBills.Patch(harmony);
+        MultiFloorsSupercharger.Patch(harmony);
     }
 }
 
