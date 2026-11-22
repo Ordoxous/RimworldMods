@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Which stats each kind of work uses, for choosing a tool (ToolsSwitchForWork, ToolsFetch). Names, so a row can name another
+     mod's defs: missing ones are skipped. Bills need no rows: their stats come from the recipe, and a bill work type's from
+     every recipe its benches offer. -->
+<Defs>
+
+    <Ordo.Tweaks.ToolWorkDef>
+        <defName>Ordo_ToolWork_Mining</defName>
+        <workTypes><li>Mining</li></workTypes>
+        <jobs><li>Mine</li></jobs>
+        <stats><li>MiningSpeed</li><li>MiningYield</li></stats>
+    </Ordo.Tweaks.ToolWorkDef>
+
+    <Ordo.Tweaks.ToolWorkDef>
+        <defName>Ordo_ToolWork_Plants</defName>
+        <workTypes><li>Growing</li><li>PlantCutting</li></workTypes>
+        <jobs><li>CutPlant</li><li>CutPlantDesignated</li><li>Harvest</li><li>HarvestDesignated</li><li>Sow</li><li>ExtractTree</li></jobs>
+        <stats><li>PlantWorkSpeed</li><li>PlantHarvestYield</li></stats>
+    </Ordo.Tweaks.ToolWorkDef>
+
+    <Ordo.Tweaks.ToolWorkDef>
+        <defName>Ordo_ToolWork_Construction</defName>
+        <workTypes><li>Construction</li></workTypes>
+        <jobs>
+            <li>FinishFrame</li><li>Repair</li><li>Deconstruct</li><li>Uninstall</li><li>SmoothFloor</li><li>SmoothWall</li>
+            <li>FixBrokenDownBuilding</li><li>BuildRoof</li><li>RemoveRoof</li><li>RemoveFloor</li>
+        </jobs>
+        <stats><li>ConstructionSpeed</li><li>ConstructSuccessChance</li><li>SmoothingSpeed</li><li>FixBrokenDownBuildingSuccessChance</li></stats>
+    </Ordo.Tweaks.ToolWorkDef>
+
+    <Ordo.Tweaks.ToolWorkDef>
+        <defName>Ordo_ToolWork_Cleaning</defName>
+        <workTypes><li>Cleaning</li></workTypes>
+        <jobs><li>Clean</li></jobs>
+        <stats><li>CleaningSpeed</li></stats>
+    </Ordo.Tweaks.ToolWorkDef>
+
+    <Ordo.Tweaks.ToolWorkDef>
+        <defName>Ordo_ToolWork_Tending</defName>
+        <workTypes><li>Doctor</li></workTypes>
+        <jobs><li>TendPatient</li></jobs>
+        <stats><li>MedicalTendSpeed</li><li>MedicalTendQuality</li></stats>
+    </Ordo.Tweaks.ToolWorkDef>
+
+    <Ordo.Tweaks.ToolWorkDef>
+        <defName>Ordo_ToolWork_AnimalGathering</defName>
+        <workTypes><li>Handling</li></workTypes>
+        <jobs><li>Milk</li><li>Shear</li></jobs>
+        <stats><li>AnimalGatherSpeed</li><li>AnimalGatherYield</li></stats>
+    </Ordo.Tweaks.ToolWorkDef>
+
+    <Ordo.Tweaks.ToolWorkDef>
+        <defName>Ordo_ToolWork_Research</defName>
+        <workTypes><li>Research</li></workTypes>
+        <jobs><li>Research</li></jobs>
+        <stats><li>ResearchSpeed</li></stats>
+    </Ordo.Tweaks.ToolWorkDef>
+
+    <Ordo.Tweaks.ToolWorkDef>
+        <defName>Ordo_ToolWork_Fishing</defName>
+        <workTypes><li>Fishing</li></workTypes>
+        <jobs><li>Fish</li></jobs>
+        <stats><li>FishingSpeed</li></stats>
+    </Ordo.Tweaks.ToolWorkDef>
+
+    <!-- Biotech's mech repair work giver is in Smithing -->
+    <Ordo.Tweaks.ToolWorkDef>
+        <defName>Ordo_ToolWork_MechRepair</defName>
+        <workTypes><li>Smithing</li></workTypes>
+        <jobs><li>RepairMech</li></jobs>
+        <stats><li>MechRepairSpeed</li></stats>
+    </Ordo.Tweaks.ToolWorkDef>
+
+</Defs>

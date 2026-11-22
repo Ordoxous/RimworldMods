@@ -25,6 +25,13 @@ internal static class TweaksSettings
     public static bool ReadoutAcrossLevels => MultiFloorsActive && GetBool("ReadoutAcrossLevels", true);
     public static bool BillsAcrossLevels => MultiFloorsActive && GetBool("BillsAcrossLevels", true);
 
+    // Off without Simple Sidearms, which carries the tools, so nothing reaches its types
+    public static bool ToolsSwitchForWork => ToolsForWork.SimpleSidearmsActive && GetBool("ToolsSwitchForWork", true);
+    // Also off with Simple Sidearms' own tool autoswitch off: fetched tools would never come out
+    public static bool ToolsFetch => ToolsForWork.SimpleSidearmsActive && GetBool("ToolsFetch", true) && ToolsForWork.SidearmsToolAutoSwitch();
+    public static int ToolsPerPawn => Mathf.Clamp(Mathf.RoundToInt(GetFloat("ToolsPerPawn", 2f)), 1, 4);
+    public static int ToolsMainWorkPriority => Mathf.Clamp(Mathf.RoundToInt(GetFloat("ToolsMainWorkPriority", 2f)), 1, 9);
+
     private static readonly bool MultiFloorsActive = ModsConfig.IsActive("telardo.MultiFloors");
 
     private static bool GetBool(string key, bool defaultValue) =>

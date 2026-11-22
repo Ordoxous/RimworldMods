@@ -31,7 +31,7 @@ public static partial class TweaksScenarios
         "VSE_Critical", "AMT_Handwear_BlacksmithGloves", "VFE_PortableWoodFiredGenerator", "VFE_PortableChemfuelPoweredGenerator",
         "VFE_IndustrialWoodFiredGenerator", "VFE_IndustrialChemfuelPoweredGenerator", "MechaWeaponChanger", "RS_GeneCentrifuge",
         "RS_XenoGermDuplicator", "VFE_ComponentFabricationBench", "VFE_FabricationCabinet", "VTE_WallMountedHeater",
-        "VTE_WallMountedCooler", "VTE_WallMountedVent", "WaterWellInlet", "DeepWaterWellInlet"
+        "VTE_WallMountedCooler", "VTE_WallMountedVent", "WaterWellInlet", "DeepWaterWellInlet", "Ordo_ToolWork", "ToolWorkDef", "JobGiver_FetchTool", "MainColonistBehaviorCore"
     };
 
     // Suites: "setup" for loading, "patches" for the XML patches, one per C# tweak ("armor", "haul_mechs", "tools", "hemogen", "deterioration"),
@@ -88,6 +88,29 @@ public static partial class TweaksScenarios
         new("levels_bills_count_other_levels", "levels bills settings", LevelsBillsCountOtherLevels, requiresMod: MultiFloorsId),
         new("tools_category", "tools", context => ToolsCategory(context, requireTools: false)),
         new("tools_category_power_tools", "tools", context => ToolsCategory(context, requireTools: true), requiresMod: "setosa.power.tools"),
+        new("tools_work_jackhammer_away_for_walks", "tools tools_work", context => ToolsWalkWithoutJackhammer(context, on: true), requiresMod: PowerTools),
+        new("tools_work_sidearms_alone_walks_with_jackhammer", "tools tools_work settings", context => ToolsWalkWithoutJackhammer(context, on: false), requiresMod: PowerTools),
+        new("tools_work_plant_cutter_keeps_scythe", "tools tools_work", ToolsPlantCutterKeepsScythe, requiresMod: DarkAgesTools),
+        new("tools_work_bonesaw_not_for_surgery", "tools tools_work", ToolsBonesawNotForSurgery, requiresMod: DarkAgesTools),
+        new("tools_work_cleaner_uses_broom", "tools tools_work", context => ToolsCleanerUsesBroom(context, on: true), requiresMod: DarkAgesTools),
+        new("tools_work_switch_off", "tools tools_work settings", context => ToolsCleanerUsesBroom(context, on: false), requiresMod: DarkAgesTools),
+        new("tools_fetch_miner_fetches", "tools tools_work", context => ToolsMinerFetches(context, on: true), requiresMod: DarkAgesTools),
+        new("tools_fetch_off", "tools tools_work settings", context => ToolsMinerFetches(context, on: false), requiresMod: DarkAgesTools),
+        new("tools_fetch_skilled_miner_first", "tools tools_work", ToolsSkilledMinerFirst, requiresMod: DarkAgesTools),
+        new("tools_fetch_outfit_bans", "tools tools_work", ToolsOutfitBans, requiresMod: DarkAgesTools + ",Snues.AutoArm"),
+        new("tools_fetch_auto_arm_forced", "tools tools_work", ToolsAutoArmForced, requiresMod: DarkAgesTools + ",Snues.AutoArm"),
+        new("tools_fetch_hand_back", "tools tools_work", ToolsHandBack, requiresMod: DarkAgesTools),
+        new("tools_fetch_player_tool_kept", "tools tools_work", ToolsPlayerToolKept, requiresMod: DarkAgesTools),
+        new("tools_work_jackhammer_kept_between_adjacent_rocks", "tools tools_work", context => ToolsWalkWithoutJackhammer(context, on: true, adjacent: true), requiresMod: PowerTools),
+        new("tools_work_no_jackhammer_as_everyday_weapon", "tools tools_work settings", ToolsNoJackhammerAsEverydayWeapon, requiresMod: PowerTools),
+        new("tools_work_side_jobs_no_switch", "tools tools_work", ToolsSideJobsNoSwitch, requiresMod: SidearmsId),
+        new("tools_fetch_area_restricted", "tools tools_work", ToolsAreaRestricted, requiresMod: DarkAgesTools),
+        new("tools_fetch_needs_autoswitch", "tools tools_work settings", ToolsFetchNeedsAutoswitch, requiresMod: DarkAgesTools),
+        new("tools_fetch_copy_stays_fetched", "tools tools_work", ToolsCopyStaysFetched, requiresMod: DarkAgesTools),
+        new("tools_fetch_taken_fetched_is_players", "tools tools_work", ToolsTakenFetchedIsPlayers, requiresMod: DarkAgesTools),
+        new("tools_fetch_hand_back_needs_storage", "tools tools_work", ToolsHandBackNeedsStorage, requiresMod: DarkAgesTools),
+        new("tools_fetch_skilled_work_first", "tools tools_work", ToolsSkilledWorkFirst, requiresMod: DarkAgesTools),
+        new("tools_fetch_upgrade_at_cap", "tools tools_work settings", ToolsUpgradeAtCap, requiresMod: PowerTools + ",van.datools"),
         new("hemogen_below_cap_queues", "hemogen", context => Hemogen(context, packs: 0, limit: true, expectBill: true), requiresMod: "biotechpatch.1trickPwnyta"),
         new("hemogen_at_cap_waits", "hemogen", context => Hemogen(context, packs: 30, limit: true, expectBill: false), requiresMod: "biotechpatch.1trickPwnyta"),
         new("hemogen_off_ignores_cap", "hemogen settings", context => Hemogen(context, packs: 30, limit: false, expectBill: true), requiresMod: "biotechpatch.1trickPwnyta"),
@@ -195,7 +218,11 @@ public static partial class TweaksScenarios
             ["BillsAcrossLevels"] = "true",
             ["ToolsCategory"] = "true",
             ["LimitHemogenFarming"] = "true",
-            ["HemogenPackCap"] = "30"
+            ["HemogenPackCap"] = "30",
+            ["ToolsSwitchForWork"] = "true",
+            ["ToolsFetch"] = "true",
+            ["ToolsPerPawn"] = "2",
+            ["ToolsMainWorkPriority"] = "2"
         };
         foreach (var (key, value) in expected)
         {
@@ -208,6 +235,11 @@ public static partial class TweaksScenarios
                 {
                     continue;
                 }
+            }
+
+            if (key.StartsWith("Tools") && key != "ToolsCategory" && !ModsConfig.IsActive(SidearmsId))
+            {
+                continue;
             }
 
             if (key == "DeteriorationAlertSkipTainted" && !ModsConfig.IsActive("MemeGoddess.TDPack"))

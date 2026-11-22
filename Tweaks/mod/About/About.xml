@@ -51,6 +51,8 @@
     <li>VanillaExpanded.VFEProduction</li>
     <li>VanillaExpanded.Temperature</li>
     <li>dubwise.dubsbadhygiene</li>
+    <li>PeteTimesSix.SimpleSidearms</li>
+    <li>Snues.AutoArm</li>
   </loadAfter>
   <packageId>Ordo.Tweaks</packageId>
   <description>Various configurable tweaks</description>

@@ -134,6 +134,35 @@
         <label>Tools category for stockpiles *</label>
         <tooltip>Adds weapons that boost a work stat when equipped to a "tools" category. Weapons with only other stat changes, such as the minigun's move speed penalty, are left out.</tooltip>
       </li>
+      <li MayRequire="PeteTimesSix.SimpleSidearms" Class="XmlExtensions.Setting.Checkbox">
+        <key>ToolsSwitchForWork</key>
+        <defaultValue>true</defaultValue>
+        <label>Better tool switching for work</label>
+        <tooltip>Takes over Simple Sidearms' "tool use autoswitch" (which must be on). The tool is chosen by the stats each kind of work uses, adding up its bonuses, and a tool with a penalty for the work (such as the bonesaw's surgery success) is never used for it. Cleaning, research and other work without a skill switch too. A tool that slows walking, such as the jackhammer, is put away for the walk to the next job and taken out again when the work starts.</tooltip>
+      </li>
+      <li MayRequire="PeteTimesSix.SimpleSidearms" Class="XmlExtensions.Setting.Checkbox">
+        <key>ToolsFetch</key>
+        <defaultValue>true</defaultValue>
+        <label>Colonists fetch tools for their main work</label>
+        <tooltip>Colonists pick up a tool from storage for the work they mainly do, best tools to the most skilled, within Simple Sidearms' weight and slot limits (its default limits are too low for heavy tools such as the jackhammer). They carry it back to storage when the work is no longer theirs for a day, or they get a better one. Tools you gave them yourself are never put back. Needs Simple Sidearms' "Tool use autoswitch". With Auto Arm, fetched tools are marked forced so it doesn't swap them for weapons, and outfit policies apply.</tooltip>
+      </li>
+      <li MayRequire="PeteTimesSix.SimpleSidearms" Class="XmlExtensions.Setting.Slider">
+        <key>ToolsPerPawn</key>
+        <defaultValue>2</defaultValue>
+        <label>Tools fetched per colonist: {key}</label>
+        <min>1</min>
+        <max>4</max>
+        <decimals>0</decimals>
+      </li>
+      <li MayRequire="PeteTimesSix.SimpleSidearms" Class="XmlExtensions.Setting.Slider">
+        <key>ToolsMainWorkPriority</key>
+        <defaultValue>2</defaultValue>
+        <label>Main work is work priority 1 to {key}</label>
+        <tooltip>With manual work priorities. Without them, main work is any enabled work the colonist has a passion for.</tooltip>
+        <min>1</min>
+        <max>9</max>
+        <decimals>0</decimals>
+      </li>
       <li Class="XmlExtensions.Setting.GapLine"><spacing>12</spacing></li>
 
       <!-- Mod balance -->

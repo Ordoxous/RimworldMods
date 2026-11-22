@@ -9,4 +9,13 @@
         <WorkshopReference Include="MultiFloors" WorkshopId="3384660931" />
     </ItemGroup>
 
+    <!-- Optional, as above: Simple Sidearms carries the tools for work. Its folders are named v1.6, not 1.6, so it can't be a
+         WorkshopReference. It declares no 1.7 support and loads its v1.6 folder. -->
+    <ItemGroup>
+        <Reference Include="SimpleSidearms">
+            <HintPath>$(WorkshopDirectory)\927155256\v1.6\Assemblies\SimpleSidearms.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+    </ItemGroup>
+
 </Project>

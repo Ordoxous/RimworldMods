@@ -38,7 +38,9 @@ public static class ToolsCategory
         toolsCategory.sortedChildThingDefsCached = toolsCategory.childThingDefs.OrderBy(def => def.label, System.StringComparer.CurrentCulture).ToList();
     }
 
-    private static bool IsTool(ThingDef def) =>
+    // Also what counts as a tool for switching and fetching (ToolsForWork, ToolsFetch). Read live, so offsets another mod
+    // sets after startup count there whether or not this category is on.
+    internal static bool IsTool(ThingDef def) =>
         def.IsWeapon
         && def.thingCategories != null
         && def.equippedStatOffsets != null

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- ToolsFetch: colonists fetch a tool just before they pick normal work. Only with Simple Sidearms, which carries the tools.
+     JobGiver_FetchTool's priority is JobGiver_Work's plus a little, so the priority sorter tries it first. -->
+<Patch>
+    <Operation Class="PatchOperationFindMod">
+        <mods>
+            <li>Simple sidearms</li>
+        </mods>
+        <match Class="PatchOperationInsert">
+            <xpath>/Defs/ThinkTreeDef[defName="MainColonistBehaviorCore"]/thinkRoot/subNodes/li[@Class="ThinkNode_PrioritySorter"]/subNodes/li[@Class="JobGiver_Work"]</xpath>
+            <value>
+                <li Class="Ordo.Tweaks.JobGiver_FetchTool" />
+            </value>
+        </match>
+    </Operation>
+</Patch>
