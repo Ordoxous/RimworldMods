@@ -21,6 +21,7 @@ public class PlantsPage : TablePage<FloraRow>
     internal void ExposeToggles()
     {
         Scribe_Values.Look(ref filter.includeTrees, "plantsIncludeTrees");
+        Scribe_Values.Look(ref filter.includeTreesWithExtras, "plantsIncludeTreesWithExtras");
         Scribe_Values.Look(ref filter.includeCultivated, "plantsIncludeCultivated");
         Scribe_Values.Look(ref filter.onlyReady, "plantsOnlyReady");
         Scribe_Values.Look(ref filter.hideYieldless, "plantsHideYieldless", true);
@@ -97,9 +98,13 @@ public class PlantsPage : TablePage<FloraRow>
         new()
         {
             width = 80f,
-            draw = (rect, row) => ButtonCell(rect,
-                row.plants.Any(p => p.HarvestableNow && map.designationManager.DesignationOn(p, DesignationDefOf.HarvestPlant) == null),
-                "Ordo_NatureTab_HarvestAll", "Ordo_NatureTab_HarvestAllTip".Translate(row.def.label), () => HarvestAll(row)),
+            // None for a kind the game never lets be harvested, such as the anima tree
+            draw = (rect, row) =>
+            {
+                if (FloraDesignations.CanEverHarvest(row))
+                    ButtonCell(rect, FloraDesignations.CanHarvestNow(row, map), "Ordo_NatureTab_HarvestAll",
+                        "Ordo_NatureTab_HarvestAllTip".Translate(row.def.label), () => HarvestAll(row));
+            },
         },
         new()
         {
@@ -115,6 +120,7 @@ public class PlantsPage : TablePage<FloraRow>
     {
         bool changed = false;
         changed |= Toggle(ref x, bar, "Ordo_NatureTab_IncludeTrees", ref filter.includeTrees);
+        changed |= Toggle(ref x, bar, "Ordo_NatureTab_IncludeTreesWithExtras", ref filter.includeTreesWithExtras);
         changed |= Toggle(ref x, bar, "Ordo_NatureTab_IncludeCultivated", ref filter.includeCultivated);
         changed |= Toggle(ref x, bar, "Ordo_NatureTab_OnlyReady", ref filter.onlyReady);
         changed |= Toggle(ref x, bar, "Ordo_NatureTab_HideYieldless", ref filter.hideYieldless);

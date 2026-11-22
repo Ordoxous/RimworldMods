@@ -1,3 +1,4 @@
+using System.Linq;
 using RimWorld;
 using Verse;
 
@@ -30,6 +31,41 @@ public static class MineralDesignations
         if (count > 0)
             Designator_Mine.PossiblyWarnPlayerOnDesignatingMining();
         return count;
+    }
+
+    private static Designator_MineVein veinDesignator;
+
+    // The nearest of the row's veins that Mine vein would still mark, held by its cell nearest the base, or null. None for
+    // a kind the game doesn't vein-mine.
+    public static Mineable NextVein(
+        MineralRow row,
+        Map map)
+    {
+        if (!row.def.building.veinMineable)
+            return null;
+        Designator_MineVein designator = veinDesignator ??= new Designator_MineVein();
+        foreach (Mineable mineable in row.veins)
+        {
+            if (mineable.Spawned && mineable.Map == map && designator.CanDesignateThing(mineable).Accepted)
+                return mineable;
+        }
+        return null;
+    }
+
+    // Marks the next vein as the game's Mine vein does, flooding every visible touching cell of the kind whatever the
+    // row's area or distance; returns how many cells it marked
+    public static int MineVein(
+        MineralRow row,
+        Map map)
+    {
+        Mineable start = NextVein(row, map);
+        if (start == null)
+            return 0;
+        DesignationManager designations = map.designationManager;
+        int before = designations.SpawnedDesignationsOfDef(DesignationDefOf.MineVein).Count();
+        Designator_MineVein.FloodFillDesignations(start.Position, map, row.def);
+        Designator_Mine.PossiblyWarnPlayerOnDesignatingMining();
+        return designations.SpawnedDesignationsOfDef(DesignationDefOf.MineVein).Count() - before;
     }
 
     // Removes both mine and mine-vein designations; returns how many it removed

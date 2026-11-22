@@ -31,7 +31,7 @@ The mod was called Flora Tab (`Ordo.FloraTab`) until 2026-11-21. Classes about p
 | Hover highlight: hovering a row outlines its plants on the map. Yellow is marked for harvest, red at risk, green ready and white growing. If none are on screen, an arrow at the screen edge points to the nearest ready one. | `src/FloraHighlight.cs` |
 
 **What's listed:** plants in the map's `ThingRequestGroup.HarvestablePlant` lister group, meaning plants whose def has a harvest product. Stumps aren't listed. Plants in fog are never listed, even in god mode, which shows the fogged map.
-- **Trees** are hidden by default.
+- **Trees** are hidden by default. **Trees with extras** (also off by default) lists trees that give anything but wood logs (`FloraYields.GivesMoreThanWood`), such as a mod's fruit tree, even with Trees off. Both are saved with the game.
 - **Cultivated plants** are hidden by default. "Cultivated" uses vanilla's `Plant.DeliberatelyCultivated()`: the plant is in a growing zone set to that plant, or on a building that supports plants.
 - **Only ready** hides kinds with nothing ready now.
 - **Hide yieldless** is on by default. It hides kinds that give nothing when harvested: no `harvestedThingDef` and no secondary output. Every vanilla plant in the group has a product, so this only affects modded plants with a harvest yield but no product.
@@ -68,7 +68,7 @@ The mod was called Flora Tab (`Ordo.FloraTab`) until 2026-11-21. Classes about p
 **Row actions:**
 - **Click the plant name** to jump to and select the next plant of that kind. At-risk plants come first, then ready ones, then the order goes by position.
 - **Click a product's icon** to open its info card. Clicking the names opens the first product's card.
-- **Harvest** checks every listed plant with vanilla's `CanDesignateThing`, using `Designator_PlantsHarvest`, or `Designator_PlantsHarvestWood` for trees. It then designates the plant the way `Designator_Plants.DesignateThing` does: an existing cut designation becomes a harvest designation. It skips the wood designator's per-tree messages.
+- **Harvest** checks every listed plant with vanilla's `CanDesignateThing`, using `Designator_PlantsHarvest`, or `Designator_PlantsHarvestWood` for trees. It then designates the plant the way `Designator_Plants.DesignateThing` does: an existing cut designation becomes a harvest designation. It skips the wood designator's per-tree messages. The button is enabled when the designator would take at least one listed plant, and left out for a kind the game never lets be harvested: a tree whose `CompPlantPreventCutting` forbids cutting (the anima tree), or a plant whose harvest tag isn't `Standard`.
 - **Cancel** removes the row's harvest designations.
 
 **Cost, and why it doesn't use TD Find Lib or Ctrl-F:**
@@ -97,6 +97,7 @@ The mod was called Flora Tab (`Ordo.FloraTab`) until 2026-11-21. Classes about p
 
 **Row actions:**
 - **Mine** checks each listed cell with vanilla's `Designator_Mine.CanDesignateThing`, then adds a Mine designation and removes any smoothing designation, as `DesignateSingleCell` does. It skips that method's ideoligion warning for each cell and gives it once per click instead. It also skips its god-mode instant mining. Cells already marked, including for vein mining, are left alone.
+- **Mine vein** marks the nearest vein that vanilla's `Designator_MineVein` would still take (its cell nearest the base has no Mine vein designation), with vanilla's `FloodFillDesignations`: every visible touching cell of the kind, whatever the area or distance, and Mine designations in it become Mine vein ones. Vanilla's `JobDriver_Mine` floods again from each vein cell it mines, so cells uncovered later are marked too. Press again for the next vein. The button is left out for kinds without `veinMineable`.
 - **Cancel** removes both Mine and Mine vein designations from the row's cells.
 - **The hover highlight** outlines marked cells in yellow, overhead cells in orange and the rest in white. If none are on screen, an arrow points to the vein nearest the base.
 
@@ -162,6 +163,7 @@ That's about 1 ms once a second while the tab is open, and nothing while it's cl
 | `survey` | `survey_counts_ready_soon_and_yield` | 2 grown and 1 young berry bush: count +3, ready +2, yield +2 full harvests, and the product is berries |
 | | `survey_skips_unharvestable_and_fogged` | Grass has no row. Wild healroot is listed, and hidden once fogged. |
 | `filter` | `filter_trees` | An oak is hidden by default and listed with Trees on |
+| | `filter_trees_with_extras` | A willow made to give berries is listed with Trees with extras and Trees off; an oak isn't; both are with Trees |
 | | `filter_cultivated` | A potato counts as wild until a potato growing zone covers it |
 | | `filter_only_ready` | A kind with nothing ready is hidden, and shown once one plant is grown |
 | `filter area` | `filter_area` | Only the bush in the home area is listed, and Harvest marks only it |
@@ -171,12 +173,13 @@ That's about 1 ms once a second while the tab is open, and nothing while it's cl
 | | `saved_with_the_game` | Each page's area and Within, the Plants checkboxes and the Plants and Wildlife sorts survive a save and load of the component, saving again writes the same, and a new component (a new game) starts from the defaults. Also in the `save` suite. |
 | `designate` | `designate_ready_and_cancel` | Harvest marks the grown bush and not the young one, and replaces a cut designation. A second press marks nothing. Cancel clears the designations. |
 | | `designate_trees` | A grown oak is marked for wood |
+| | `designate_anima_tree_no_harvest` | Royalty only: an anima tree's row has no Harvest button and Harvest would mark none of it; a grown oak's can be harvested now |
 | `risk` | `risk_old_age_and_dying` | A bush 2 days from its lifespan counts as old age, with old age in 2 days. A bush past its lifespan is dying. |
 | | `risk_forecast_first_hour_below` | The forecast's first-hour-below search, on a made-up forecast |
 | | `risk_frost_kills_only_die_if_leafless` | On a made-up forecast with -100° at hour 12, an outdoor potato is killed in 0.5 days and a berry bush isn't. With no frost, nothing is killed. |
 | `growth` | `growth_days_until_ready_matches_a_day` | A ready bush is ready in 0 days. A young bush's growth over a real day, stepped 2000 ticks at a time, is within 25% of the forecast's. |
 | `perf` | `perf_survey_and_forecast` | Times the survey and the forecast on the current map. See Profiling. |
-| `minerals` | `minerals_*` | Ore kinds, counts, veins, yield, overhead, fog, Mine and Cancel, area and distance |
+| `minerals` | `minerals_*` | Ore kinds, counts, veins, yield, overhead, fog, Mine, Mine vein (`minerals_mine_vein`: the nearer of two veins first, whole, then the other, then none) and Cancel, area and distance |
 | `animals` | `animals_lists_colony_animals_and_searches` | Lists tame animals and not wild ones; search by kind ("chicken" finds a rooster) and by name; hosts a window only with Animal Tab |
 | | `animals_hotkey_opens_the_page` | The Animals worker opens the tab on Animals, closes it, and switches to Animals from another page |
 | | `animals_hosts_animal_tab` | Only with Animal Tab: hosts its window (the same instance as its `Instance`), lists a tame muffalo, and keeps the search after its filter bar rebuilds the table |
@@ -185,6 +188,8 @@ That's about 1 ms once a second while the tab is open, and nothing while it's cl
 | | `numbers_wildlife_and_animals_pages_show_their_tables` | Only with Numbers: with both its settings on, Wildlife hosts its wild animals table and Animals its animals table, each with the right pawns, also after switching back; with the Animals setting off, Animals hosts what it had before |
 
 **Stepping time:** one `context.Step(60000)` grew a bush only about half as much as 30 steps of 2000 ticks did. That was seen twice, against two different estimates. A diagnostic stepping 2000 ticks at a time saw growth match the game's own `GrowthPerTick × 2000` to within 10%. Step in chunks when a test depends on ticking over a long time.
+
+**Results:** 2026-11-22, after Mine vein, Trees with extras and hiding Harvest for anima trees: `naturetab-headless` 31/31 passed with no leaks and the three mod scenarios skipped; with Royalty added to the profile's mod list for one run, 32/32 including `designate_anima_tree_no_harvest`, and no errors in the log. The new column and toggle haven't been looked at in a windowed game yet.
 
 **Results:** 2026-11-22, after saving the choices and sorts with the game: `naturetab-headless` 29/29 passed with the two mod scenarios skipped, and no errors in the log. A real save and load of the game, after `ordo/long_events markDisplayed` let the headless load run, logged only the game's own "Couldn't find valid neighbor for road piece" from the autosave; the `area` suite run after it passed except `filter_distance_and_nearest`, which said the map was too small around the base. That was the scenarios' own leftovers, saved into that save: `filter_cultivated`'s growing zone and the `minerals` ore (placed as player buildings) made the game add home area, 180 cells by the end of a run, which moved the base to (21, 16) and the far cell off the east edge. Ore is now placed unowned, `filter_cultivated` removes the home area its zone added, and both distance scenarios use the side of the base with room. After that a full run left the home area empty, and a second run in the same session passed.
 

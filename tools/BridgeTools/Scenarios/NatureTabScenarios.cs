@@ -25,10 +25,12 @@ public static class NatureTabScenarios
         new("survey_counts_ready_soon_and_yield", "survey", CountsReadySoonAndYield),
         new("survey_skips_unharvestable_and_fogged", "survey", SkipsUnharvestableAndFogged),
         new("filter_trees", "filter", Trees),
+        new("filter_trees_with_extras", "filter", TreesWithExtras),
         new("filter_cultivated", "filter", Cultivated),
         new("filter_only_ready", "filter", OnlyReady),
         new("designate_ready_and_cancel", "designate", DesignateReadyAndCancel),
         new("designate_trees", "designate", DesignateTrees),
+        new("designate_anima_tree_no_harvest", "designate", AnimaTreeNoHarvest, requiresMod: "ludeon.rimworld.royalty"),
         new("risk_old_age_and_dying", "risk", OldAgeAndDying),
         new("risk_forecast_first_hour_below", "risk", ForecastFirstHourBelow),
         new("risk_frost_kills_only_die_if_leafless", "risk", FrostKillsOnlyDieIfLeafless),
@@ -43,6 +45,7 @@ public static class NatureTabScenarios
         new("minerals_counts_veins_yield_and_overhead", "minerals", MineralsCountsVeinsYieldAndOverhead),
         new("minerals_fogged_hidden", "minerals", MineralsFoggedHidden),
         new("minerals_designate_and_cancel", "minerals", MineralsDesignateAndCancel),
+        new("minerals_mine_vein", "minerals", MineralsMineVein),
         new("minerals_area", "minerals", MineralsArea),
         new("minerals_distance_and_nearest", "minerals", MineralsDistanceAndNearest),
         new("perf_mineral_survey", "perf", MineralSurveyCost),
@@ -229,6 +232,47 @@ public static class NatureTabScenarios
         return Task.CompletedTask;
     }
 
+    // Mine vein marks the nearest vein whole, as the game's Mine vein does, turning a Mine designation in it into a vein
+    // one; a second press marks the other vein, and a third has none left
+    private static Task MineralsMineVein(
+        ScenarioContext context
+    )
+    {
+        var jade = Def("MineableJade");
+        var map = context.Map;
+        var west = new[] { context.Place(jade, -4, 0), context.Place(jade, -3, 0) };
+        var east = new[] { context.Place(jade, 3, 0), context.Place(jade, 4, 0), context.Place(jade, 4, 1) };
+        IntVec3 center = FloraSurvey.BaseCenter(map);
+        float Nearest(Thing[] vein) => vein.Min(cell => (cell.Position - center).LengthHorizontalSquared);
+        var (near, far) = Nearest(west) <= Nearest(east) ? (west, east) : (east, west);
+        var designations = map.designationManager;
+        designations.AddDesignation(new Designation(near[0].Position, DesignationDefOf.Mine));
+        bool Vein(Thing cell) => designations.DesignationAt(cell.Position, DesignationDefOf.MineVein) != null;
+        try
+        {
+            var row = MineralRow(context, jade, default);
+            context.Check($"two veins: {row?.veins.Count}", row?.veins.Count == 2);
+            int first = MineralDesignations.MineVein(row, map);
+            context.Check($"the first press marks the nearer vein's {near.Length} cells: {first}", first == near.Length && near.All(Vein));
+            context.Check("its Mine designation became a vein one", designations.DesignationAt(near[0].Position, DesignationDefOf.Mine) == null);
+            context.Check("and the farther vein is untouched", !far.Any(Vein));
+
+            row = MineralRow(context, jade, default);
+            int second = MineralDesignations.MineVein(row, map);
+            context.Check($"the second marks the farther vein's {far.Length}: {second}", second == far.Length && far.All(Vein));
+            row = MineralRow(context, jade, default);
+            context.Check("then there's no vein left to mark", MineralDesignations.NextVein(row, map) == null && MineralDesignations.MineVein(row, map) == 0);
+            context.Check($"and the row counts every cell marked: {row?.marked}", row?.marked == near.Length + far.Length);
+        }
+        finally
+        {
+            var row = MineralRow(context, jade, default);
+            if (row != null)
+                MineralDesignations.Cancel(row, map);
+        }
+        return Task.CompletedTask;
+    }
+
     private static Task MineralsDesignateAndCancel(
         ScenarioContext context
     )
@@ -356,6 +400,59 @@ public static class NatureTabScenarios
         context.Check("trees are left out by default", Row(context, oak, Wild) == null);
         context.Check("trees are listed with the toggle",
             Count(Row(context, oak, new FloraFilter { includeTrees = true })) == before + 1);
+        return Task.CompletedTask;
+    }
+
+    // A tree giving something besides wood is listed with Trees with extras, even with Trees off, and a wood-only tree
+    // isn't. No vanilla tree gives anything else, so the willow is made to give berries for the scenario.
+    private static Task TreesWithExtras(
+        ScenarioContext context
+    )
+    {
+        var oak = Def("Plant_TreeOak");
+        var willow = Def("Plant_TreeWillow");
+        var cache = (Dictionary<ThingDef, List<YieldSource>>)AccessTools.Field(typeof(FloraYields), "SourcesByDef").GetValue(null);
+        var product = willow.plant.harvestedThingDef;
+        willow.plant.harvestedThingDef = Def("RawBerries");
+        cache.Remove(willow);
+        try
+        {
+            PlacePlant(context, oak, 0, 0, 1f);
+            PlacePlant(context, willow, 2, 0, 1f);
+            var extras = new FloraFilter { includeTreesWithExtras = true };
+            context.Check("the berry willow gives more than wood, the oak doesn't",
+                FloraYields.GivesMoreThanWood(willow) && !FloraYields.GivesMoreThanWood(oak));
+            context.Check("with both toggles off, neither is listed", Row(context, willow, Wild) == null && Row(context, oak, Wild) == null);
+            context.Check("with Trees with extras, the willow is listed", Row(context, willow, extras) != null);
+            context.Check("but not the oak", Row(context, oak, extras) == null);
+            context.Check("with Trees, both are",
+                Row(context, willow, new FloraFilter { includeTrees = true }) != null && Row(context, oak, new FloraFilter { includeTrees = true }) != null);
+        }
+        finally
+        {
+            willow.plant.harvestedThingDef = product;
+            cache.Remove(willow);
+        }
+        return Task.CompletedTask;
+    }
+
+    // An anima tree can't be cut, so its row has no Harvest button; an oak's does, and is enabled while one is ready
+    private static Task AnimaTreeNoHarvest(
+        ScenarioContext context
+    )
+    {
+        var anima = Def("Plant_TreeAnima");
+        var oak = Def("Plant_TreeOak");
+        PlacePlant(context, anima, 0, 0, 1f);
+        PlacePlant(context, oak, 3, 0, 1f);
+        var trees = new FloraFilter { includeTrees = true };
+        var animaRow = Row(context, anima, trees);
+        var oakRow = Row(context, oak, trees);
+        context.Check("the anima tree is listed", animaRow != null);
+        context.Check("but can never be harvested, so it has no Harvest button", animaRow != null && !FloraDesignations.CanEverHarvest(animaRow));
+        context.Check("and Harvest would mark none of it", animaRow != null && !FloraDesignations.CanHarvestNow(animaRow, context.Map));
+        context.Check("the grown oak can be harvested now",
+            oakRow != null && FloraDesignations.CanEverHarvest(oakRow) && FloraDesignations.CanHarvestNow(oakRow, context.Map));
         return Task.CompletedTask;
     }
 

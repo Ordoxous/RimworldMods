@@ -88,6 +88,17 @@ public class MineralsPage : TablePage<MineralRow>
         },
         new()
         {
+            width = 90f,
+            // None for a kind the game doesn't vein-mine
+            draw = (rect, row) =>
+            {
+                if (row.def.building.veinMineable)
+                    ButtonCell(rect, MineralDesignations.NextVein(row, map) != null, "Ordo_NatureTab_MineVein",
+                        "Ordo_NatureTab_MineVeinTip".Translate(row.def.label), () => MineVein(row));
+            },
+        },
+        new()
+        {
             width = 70f,
             draw = (rect, row) => ButtonCell(rect, row.marked > 0, "Ordo_NatureTab_Cancel",
                 "Ordo_NatureTab_CancelMineTip".Translate(row.def.label), () => CancelAll(row)),
@@ -124,6 +135,17 @@ public class MineralsPage : TablePage<MineralRow>
             return;
         SoundDefOf.Designate_Mine.PlayOneShotOnCamera();
         Messages.Message("Ordo_NatureTab_DesignatedMine".Translate(count, row.def.label), MessageTypeDefOf.SilentInput,
+            historical: false);
+        MainTabWindow_Nature.SurveyNow();
+    }
+
+    private void MineVein(MineralRow row)
+    {
+        int count = MineralDesignations.MineVein(row, map);
+        if (count == 0)
+            return;
+        SoundDefOf.Designate_Mine.PlayOneShotOnCamera();
+        Messages.Message("Ordo_NatureTab_DesignatedMineVein".Translate(count, row.def.label), MessageTypeDefOf.SilentInput,
             historical: false);
         MainTabWindow_Nature.SurveyNow();
     }

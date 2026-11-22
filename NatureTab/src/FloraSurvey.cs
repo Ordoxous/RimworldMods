@@ -58,6 +58,9 @@ public class FloraRow
 public struct FloraFilter
 {
     public bool includeTrees;
+
+    // Trees that give something besides wood, listed even with includeTrees off
+    public bool includeTreesWithExtras;
     public bool includeCultivated;
     public bool onlyReady;
 
@@ -95,7 +98,7 @@ public static class FloraSurvey
             ThingDef def = plant.def;
             if (def.plant.isStump || !def.selectable)
                 continue;
-            if (!filter.includeTrees && def.plant.IsTree)
+            if (def.plant.IsTree && !filter.includeTrees && !(filter.includeTreesWithExtras && FloraYields.GivesMoreThanWood(def)))
                 continue;
             if (filter.hideYieldless && FloraYields.For(def).Count == 0)
                 continue;

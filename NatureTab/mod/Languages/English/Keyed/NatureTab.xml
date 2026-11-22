@@ -41,6 +41,8 @@
   <Ordo_NatureTab_JumpTip>Click to jump to the next {0} on the map, ready ones first.</Ordo_NatureTab_JumpTip>
   <Ordo_NatureTab_IncludeTrees>Trees</Ordo_NatureTab_IncludeTrees>
   <Ordo_NatureTab_IncludeTreesTip>Also list trees harvested for wood.</Ordo_NatureTab_IncludeTreesTip>
+  <Ordo_NatureTab_IncludeTreesWithExtras>Trees with extras</Ordo_NatureTab_IncludeTreesWithExtras>
+  <Ordo_NatureTab_IncludeTreesWithExtrasTip>Also list trees that give something besides wood, such as fruit from a mod's fruit tree, even with Trees off.</Ordo_NatureTab_IncludeTreesWithExtrasTip>
   <Ordo_NatureTab_IncludeCultivated>Cultivated</Ordo_NatureTab_IncludeCultivated>
   <Ordo_NatureTab_IncludeCultivatedTip>Also list plants in growing zones and hydroponics basins.</Ordo_NatureTab_IncludeCultivatedTip>
   <Ordo_NatureTab_OnlyReady>Only ready</Ordo_NatureTab_OnlyReady>
@@ -81,6 +83,9 @@
   <Ordo_NatureTab_MarkedMineTip>How many cells are already designated for mining.</Ordo_NatureTab_MarkedMineTip>
   <Ordo_NatureTab_MineAll>Mine</Ordo_NatureTab_MineAll>
   <Ordo_NatureTab_MineAllTip>Designate every {0} cell listed for mining.</Ordo_NatureTab_MineAllTip>
+  <Ordo_NatureTab_MineVein>Mine vein</Ordo_NatureTab_MineVein>
+  <Ordo_NatureTab_MineVeinTip>Designate the nearest unmarked vein of {0} for vein mining, as the game's Mine vein does: every visible cell touching it, whatever the area or distance, and more as mining uncovers them. Press again for the next vein.</Ordo_NatureTab_MineVeinTip>
+  <Ordo_NatureTab_DesignatedMineVein>Designated a vein of {0} cells of {1} for vein mining.</Ordo_NatureTab_DesignatedMineVein>
   <Ordo_NatureTab_CancelMineTip>Remove the mining designation from every {0} cell.</Ordo_NatureTab_CancelMineTip>
   <Ordo_NatureTab_NoMinerals>No minerals found. Ore inside unexplored rock shows up once it's uncovered.</Ordo_NatureTab_NoMinerals>
   <Ordo_NatureTab_DesignatedMine>Designated {0} cells of {1} for mining.</Ordo_NatureTab_DesignatedMine>

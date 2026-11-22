@@ -41,6 +41,17 @@ public static class FloraYields
 
     private static readonly Dictionary<ThingDef, List<YieldSource>> SourcesByDef = new();
 
+    // Whether the kind gives anything but wood logs, such as a fruit tree's secondary output
+    public static bool GivesMoreThanWood(ThingDef def)
+    {
+        foreach (YieldSource source in For(def))
+        {
+            if (source.thing != ThingDefOf.WoodLog)
+                return true;
+        }
+        return false;
+    }
+
     public static List<YieldSource> For(ThingDef def)
     {
         if (SourcesByDef.TryGetValue(def, out List<YieldSource> sources))
