@@ -107,10 +107,12 @@ public static partial class TweaksScenarios
             context.Check("with 9 of 8, the bill isn't worked now", !bill.ShouldDoNow());
 
             // A bill limited by hit points counts thing by thing, not through the resource counter. Vanilla counts each
-            // stack there as one, so it's one stack on each level
+            // stack there as one, so it's one stack on each level. The unofficial 1.7 Better Workbench Management (the only
+            // one with DetachedBillData) adds the rest of each stack, so it's every meal
+            var wholeStacks = AccessTools.TypeByName("ImprovedWorkbenches.DetachedBillData") != null;
             bill.hpRange = new FloatRange(0.5f, 1f);
             var byThing = counter.CountProducts(bill);
-            context.Check($"counting thing by thing, both levels' stacks count: {byThing}", byThing == 2);
+            context.Check($"counting thing by thing, both levels' stacks count: {byThing}", byThing == (wholeStacks ? 9 : 2));
             bill.hpRange = FloatRange.ZeroToOne;
 
             bill.SetIncludeGroup(groundZone.slotGroup);
@@ -139,7 +141,7 @@ public static partial class TweaksScenarios
                 context.Check($"with the setting off, the bill counts the ground's 2: {counter.CountProducts(bill)}", counter.CountProducts(bill) == 2);
                 context.Check("with 2 of 8, the bill is worked now", bill.ShouldDoNow());
                 bill.hpRange = new FloatRange(0.5f, 1f);
-                context.Check($"with the setting off, thing by thing counts the ground's stack: {counter.CountProducts(bill)}", counter.CountProducts(bill) == 1);
+                context.Check($"with the setting off, thing by thing counts the ground's stack: {counter.CountProducts(bill)}", counter.CountProducts(bill) == (wholeStacks ? 2 : 1));
                 bill.hpRange = FloatRange.ZeroToOne;
                 return Task.CompletedTask;
             });

@@ -20,6 +20,10 @@ namespace Ordo.Tweaks;
 ///   counters, which override <c>CountProducts</c>.
 /// - A postfix on each <c>CountProducts</c> then runs the same counter once for every other level and adds what it finds,
 ///   so every rule the bill sets (hit points, quality, tainted, equipped) applies there too.
+/// - Better Workbench Management adds to the count in its own postfix (additional products, things outside stockpiles,
+///   things pawns carry), reading <c>bill.Map</c> itself. Without the same swap there, each extra level added the bill's
+///   own level's share again. Its helper, <c>RecipeWorkerCounter_CountProducts_Detour.CountProducts</c>, gets the
+///   transpiler too; its away-pawn count then matches no pawn on another level, so caravans count once.
 /// A bill counting only one stockpile (<c>GetIncludeSlotGroup</c>) is left alone: that stockpile is on one level.
 /// Modded counters that override <c>CountProducts</c> still count only the bill's level.
 /// Everything here touches MultiFloors' types, so it's only patched when MultiFloors is active.
@@ -56,7 +60,21 @@ public static class MultiFloorsBills
             "bills don't count products carried on other levels",
             transpiler: transpiler
         );
+
+        // Better Workbench Management, or its unofficial 1.7 port: same type and method in both
+        var betterWorkbenches = GenTypes.GetTypeInAnyAssembly(BetterWorkbenchesCounter);
+        if (betterWorkbenches != null)
+        {
+            harmony.TryPatch(
+                AccessTools.DeclaredMethod(betterWorkbenches, "CountProducts"),
+                $"{BetterWorkbenchesCounter}.CountProducts",
+                "Better Workbench Management's extra counts are added once more for each other level",
+                transpiler: transpiler
+            );
+        }
     }
+
+    public const string BetterWorkbenchesCounter = "ImprovedWorkbenches.RecipeWorkerCounter_CountProducts_Detour";
 
     public static IEnumerable<CodeInstruction> Transpiler(
         IEnumerable<CodeInstruction> instructions,
@@ -93,8 +111,9 @@ public static class MultiFloorsBills
         ref int __result
     )
     {
-        // While counting another level, the counter calls itself through this postfix again
-        if (counting != null || !TweaksSettings.BillsAcrossLevels || bill?.Map == null || bill.GetIncludeSlotGroup() != null)
+        // While counting another level, the counter calls itself through this postfix again. A count BillCountCache
+        // answered already includes the other levels
+        if (counting != null || BillCountCache.Answered || !TweaksSettings.BillsAcrossLevels || bill?.Map == null || bill.GetIncludeSlotGroup() != null)
         {
             return;
         }

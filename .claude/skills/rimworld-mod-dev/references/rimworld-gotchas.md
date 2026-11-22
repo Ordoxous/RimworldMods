@@ -6,7 +6,7 @@ Behaviour found while building and testing mods here. Each one cost time once.
 
 - The game runs on Waylith (Vulkan/GLFW on .NET 10, `.NET 10.0.15-waylithclr`), not Unity or Mono. Unity flags (`-batchmode`, `-nographics`) do nothing, and Mono-based tools (Reloader, Doorstop) don't apply. Its own flags include `-Headless`; strings next to it in `RimWorld.dll` suggest `NoFileLog`, `NoCrashDialog` and `ReadPixelsStaging`.
 - Without a window, a synchronous long event never runs, because it waits for its loading screen to be drawn. Anything that queues one headless (hot reloading defs, for example) needs `alreadyDisplayed` set by hand; `ordo/long_events markDisplayed` does that.
-- `rimworld/click_cell` presses at the cell but releases at the real cursor, so it never selects. Use `ordo/select`.
+- `rimworld/click_cell` presses at the cell but releases at the real cursor, so it never selects; `rimworld/drag_cell` doesn't either. Use `ordo/select`, which takes any thing's id from `ordo/things_at`.
 
 - In dev mode, `StaticConstructorOnStartupUtility.ReportProbablyMissingAttributes` reads the type of every static field of every loaded type. A field typed with an optional mod's type logs a `TypeLoadException` ("Could not load type ... from assembly ...") when that mod is missing, even behind `ModsConfig.IsActive` and `NoInlining`. C# 11+ adds such fields itself: `new HarmonyMethod(Prefix)` caches `Prefix` as a `Func<TheirType, bool>` in a hidden static field. Pass the method by name instead (found in Tweaks on 2026-11-21).
 

@@ -17,6 +17,7 @@ internal static class TweaksSettings
     public static bool LimitHemogenFarming => GetBool("LimitHemogenFarming", true);
     public static int HemogenPackCap => Mathf.RoundToInt(GetFloat("HemogenPackCap", 30f));
     public static bool ToolsCategory => GetBool("ToolsCategory", true);
+    public static bool CacheBillCounts => GetBool("CacheBillCounts", true);
 
     // Off without MultiFloors, so nothing reaches its types
     public static bool ShutdownZonesAcrossLevels => MultiFloorsActive && GetBool("ShutdownZonesAcrossLevels", true);

@@ -16,6 +16,17 @@ The runner patches every method `ordo/profiling_targets` lists for each mod unde
 
 `rimworld/dpa_patch_methods` patched a main tab's `DoWindowContents` and the methods it calls without error, but DPA recorded no calls to them, with the category set to either Update or GUI. It recorded only the window's `WindowUpdate`. That was NatureTab, windowed, over 30 s with the tab open. So for work done while drawing, time it with a `Stopwatch` in a scenario and `Log.Message` the numbers, because the runner doesn't report checks that pass. NatureTab's `perf_survey_and_forecast` is an example; read its line with `rimbridge/list_logs`.
 
+## Timing someone else's slow UI in the player's own game
+
+How the bill tab's FPS drop was found (2026-11-22, Tweaks' `CacheBillCounts`):
+
+1. Read FPS off the screen (`rimworld/take_screenshot`; the player's readout mod shows FPS and TPS) with the window open and closed. A paused game's TPS reads 0, so a drop there is all drawing.
+2. Turn a mod's features off one at a time with `rimworld/update_mod_settings` and `write: false`, which changes nothing on disk, to see which part of the window costs it.
+3. To time individual methods, hot reload a timing body into an existing bridge tool: a new tool needs a restart, but a changed body and new private methods apply (see reload-and-debug.md). Branch on an argument value, for example `ordo/runtime_info` with `mod: "perf:bills"`, call the suspects through reflection N times over the selected thing's data, and return the milliseconds. Find a mod's types and methods from its DLL's metadata (`System.Reflection.Metadata` in PowerShell) when no decompiler is installed. Revert the source afterwards; the body stays loaded until the game restarts.
+   - **Only call methods that read.** Name them in a list; a "call everything that takes a Bill" loop would also run the ones that delete, rename or suspend bills.
+   - **Don't call a patch's helper on its own if it sets static state its caller clears.** Calling Tweaks' `CountOtherLevels` directly left `MultiFloorsBills.counting` set, and every bill in the player's game counted the wrong level until it was cleared.
+   - `Harmony.GetPatchInfo` on the slow method names every mod patching it; calling one mod's postfix directly (its `ref` parameters matched by name) gives that mod's share.
+
 ## A DPA tab for players: `mod/Analyzer.xml`
 
 DPA reads `Analyzer.xml` from a mod's root folder and adds a tab under Modder > <Mod>. Without DPA it does nothing. See `SillyAnimalThings/mod/Analyzer.xml` for the format.

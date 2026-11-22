@@ -107,15 +107,15 @@ public sealed class PawnTools
         };
     }
 
-    [Tool("ordo/select", Description = "Select any pawn, including ones the built-in select_pawn rejects")]
+    [Tool("ordo/select", Description = "Select any pawn, including ones the built-in select_pawn rejects, or any other thing on the current map, such as a workbench, by its id from ordo/things_at")]
     public static object Select(
         string pawnId
     )
     {
-        var pawn = Resolve(pawnId);
+        var thing = ResolveThing(pawnId);
         Find.Selector.ClearSelection();
-        Find.Selector.Select(pawn);
-        return new { success = true, selected = Find.Selector.SelectedPawns.Count };
+        Find.Selector.Select(thing);
+        return new { success = true, selected = Find.Selector.NumSelected, label = thing.LabelCap.ToString() };
     }
 
     [Tool("ordo/train", Description = "Instantly teach a tamed animal every trainable its race can learn")]

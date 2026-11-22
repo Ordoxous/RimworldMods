@@ -122,6 +122,12 @@
         <max>200</max>
         <decimals>0</decimals>
       </li>
+      <li Class="XmlExtensions.Setting.Checkbox">
+        <key>CacheBillCounts</key>
+        <defaultValue>true</defaultValue>
+        <label>Faster bill tab</label>
+        <tooltip>The bill tab redraws each bill's "54/60" count every frame, and mods such as Better Workbench Management make each count slow. This reuses a bill's count for a quarter of a second while it's only being drawn. Colonists deciding whether to work a bill always get a fresh count.</tooltip>
+      </li>
       <li MayRequire="telardo.MultiFloors" Class="XmlExtensions.Setting.Checkbox">
         <key>BillsAcrossLevels</key>
         <defaultValue>true</defaultValue>
