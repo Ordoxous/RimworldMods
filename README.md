@@ -25,6 +25,7 @@ A mod's folder holds:
 - its C# under `src/`
 - what ships in the mod (About, Defs, Patches, Languages, textures) under `mod/`
 - its `README.md`
+- an `IDEAS.md` of ideas not yet planned or built; an idea moves into the README once it's taken on
 
 The project name, assembly name and deployed folder under `RimWorld\Mods` are the same.
 
