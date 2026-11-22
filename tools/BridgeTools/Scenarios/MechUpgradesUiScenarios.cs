@@ -317,11 +317,11 @@ public static class MechUpgradesUiScenarios
         Stock(site.Storage, new[] { a });
         var database = Database;
 
-        // Made before the snapshot if there was none, so it survives the restore
-        database.DefaultPolicy();
+        // Taken before the default policy is made, if there was none, so the restore takes it away again
         var before = database.GetPolicies().ToList();
+        var defaultPolicy = database.DefaultPolicy();
         var defaultFilter = new ThingFilter();
-        defaultFilter.CopyAllowancesFrom(database.DefaultPolicy().Filter);
+        defaultFilter.CopyAllowancesFrom(defaultPolicy.Filter);
         try
         {
             // The default policy is whatever is first, so allow A on it for the scenario and put it back afterwards
@@ -340,8 +340,9 @@ public static class MechUpgradesUiScenarios
         }
         finally
         {
+            // The filter first: DefaultPolicy() would make a new policy once the list is empty again
+            defaultPolicy.Filter.CopyAllowancesFrom(defaultFilter);
             Restore(database, before);
-            database.DefaultPolicy().Filter.CopyAllowancesFrom(defaultFilter);
         }
     }
 

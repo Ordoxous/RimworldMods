@@ -21,6 +21,7 @@ public static class SaddleboundScenarios
         new("setup_no_load_errors", "setup", NoLoadErrors),
         new("setup_giddyup_api", "setup", GiddyUpApi),
         new("riding_tracks_mount_and_dismount", "riding", TracksMountAndDismount),
+        new("riding_save_forgets_gone_pawns", "riding save", SaveForgetsGonePawns),
         new("riding_respected_thought", "riding", RespectedThought),
         new("riding_essential_stages", "riding", EssentialStages),
         new("riding_essential_long_ride", "riding", EssentialLongRide),
@@ -214,6 +215,43 @@ public static class SaddleboundScenarios
         GiddyUpAdapter.DismountNow(rider);
         context.Check("the rider is off", !GiddyUpAdapter.IsMounted(rider));
         context.Check($"dismounting updates the last ride tick", tracker.TryGetLastRideTick(rider, out var dismountedAt) && dismountedAt == Now && dismountedAt > mountedAt);
+    }
+
+    // Saving drops the records of pawns the game no longer has, as when a fled raider is discarded, and keeps the rest
+    private static Task SaveForgetsGonePawns(
+        ScenarioContext context
+    )
+    {
+        var tracker = RidingTracker.Instance;
+        var stays = context.Colonist(0, 0);
+        var goes = context.Colonist(2, 0);
+        var stayingHorse = Horse(context, 1, 0);
+        var goingHorse = Horse(context, 3, 0);
+        tracker.Notify_Mounted(stays, stayingHorse);
+        tracker.Notify_Mounted(goes, stayingHorse);
+        tracker.Notify_Mounted(goes, goingHorse);
+
+        // Gone as the game discards a pawn it no longer needs, not dead, which the tracker already handles
+        foreach (var pawn in new[] { goes, goingHorse })
+        {
+            pawn.Destroy();
+            if (Find.WorldPawns.Contains(pawn))
+            {
+                Find.WorldPawns.RemovePawn(pawn);
+            }
+
+            pawn.Discard(true);
+        }
+
+        context.Check("before saving, the gone pawns are still recorded",
+            tracker.TryGetLastRideTick(goes, out _) && tracker.HasBeenRidden(goingHorse) && tracker.RecordFor(stayingHorse)?.RideCount(goes) == 1);
+        Scribe.saver.DebugOutputFor(tracker);
+        context.Check("saved, the gone rider has no last ride", !tracker.TryGetLastRideTick(goes, out _));
+        context.Check("nor the gone horse a record", !tracker.HasBeenRidden(goingHorse));
+        context.Check("nor the gone rider rides on the staying horse", tracker.RecordFor(stayingHorse)?.RideCount(goes) == 0);
+        context.Check("the staying rider and horse are kept",
+            tracker.TryGetLastRideTick(stays, out _) && tracker.RecordFor(stayingHorse)?.RideCount(stays) == 1);
+        return Task.CompletedTask;
     }
 
     private static Task RespectedThought(

@@ -368,9 +368,7 @@ public static class NatureTabScenarios
         var plant = PlacePlant(context, potato, 0, 0, 1f);
         context.Check("a potato outside a growing zone counts as wild", Count(Row(context, potato, Wild)) == before + 1);
 
-        // The game adds home area around a new zone cell, which would outlast the scenario and move the base for later ones
-        Area home = context.Map.areaManager.Home;
-        var homeBefore = new HashSet<IntVec3>(home.ActiveCells);
+        // The game adds home area around a new zone cell; the stage's cleanup takes it away again
         var zone = new Zone_Growing(context.Map.zoneManager);
         context.Map.zoneManager.RegisterZone(zone);
         try
@@ -384,11 +382,6 @@ public static class NatureTabScenarios
         finally
         {
             zone.Delete();
-            foreach (IntVec3 cell in home.ActiveCells.ToList())
-            {
-                if (!homeBefore.Contains(cell))
-                    home[cell] = false;
-            }
         }
         return Task.CompletedTask;
     }

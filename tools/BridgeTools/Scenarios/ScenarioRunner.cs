@@ -134,6 +134,7 @@ public sealed class ScenarioRunner
         var results = new List<object>();
         var failed = 0;
         var skipped = 0;
+        var leaked = 0;
         var nextSite = 0;
         foreach (var scenario in scenarios)
         {
@@ -156,20 +157,32 @@ public sealed class ScenarioRunner
                 await profiler.BeforeScenario();
             }
 
+            var before = LeakCheck.Take(map);
             var failures = await RunOne(scenario, bridge, map, sites[nextSite++ % sites.Count], cancellationToken);
             if (profiler != null)
             {
                 await profiler.AfterScenario(scenario.Name);
             }
 
+            // Reported, not failed: some changes are the point of a scenario, but each one is seen by every later one
+            var leaks = LeakCheck.Take(map).ChangedSince(before);
+            if (leaks.Count > 0)
+            {
+                leaked++;
+            }
+
             if (failures.Count > 0)
             {
                 failed++;
-                results.Add(new { scenario.Name, status = "FAIL", failures });
+                results.Add(leaks.Count > 0
+                    ? new { scenario.Name, status = "FAIL", failures, leaks }
+                    : (object)new { scenario.Name, status = "FAIL", failures });
             }
             else
             {
-                results.Add(new { scenario.Name, status = "pass" });
+                results.Add(leaks.Count > 0
+                    ? new { scenario.Name, status = "pass", leaks }
+                    : (object)new { scenario.Name, status = "pass" });
             }
         }
 
@@ -185,6 +198,7 @@ public sealed class ScenarioRunner
             passed = scenarios.Count - failed - skipped,
             failed,
             skipped,
+            leaked,
             siteCount = sites.Count,
             results,
             profile = profiler?.Report()

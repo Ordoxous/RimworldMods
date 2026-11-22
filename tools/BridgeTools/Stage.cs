@@ -130,6 +130,64 @@ public abstract class Stage
         Map = map;
         Origin = origin;
         CancellationToken = cancellationToken;
+
+        _pawnsBefore = new HashSet<Pawn>(map.mapPawns.AllPawnsSpawned);
+        _areasBefore = map.areaManager.AllAreas.ToDictionary(area => area, area => area.ActiveCells.ToHashSet());
+        _zonesBefore = new HashSet<Zone>(map.zoneManager.AllZones);
+        _siteRect = CellRect.CenteredOn(origin, StageSites.Radius + 4).ClipInsideMap(map);
+        _terrainBefore = _siteRect.Cells.ToDictionary(cell => cell, cell => cell.GetTerrain(map));
+    }
+
+    // What the game changes around a stage, which cleanup puts back: it adds home area around player buildings and zones,
+    // leaves rough-hewn floor where rock is mined, and spawns wild animals as time passes
+    private readonly HashSet<Pawn> _pawnsBefore;
+    private readonly Dictionary<Area, HashSet<IntVec3>> _areasBefore;
+    private readonly HashSet<Zone> _zonesBefore;
+    private readonly CellRect _siteRect;
+    private readonly Dictionary<IntVec3, TerrainDef> _terrainBefore;
+
+    private void RestoreSurroundings()
+    {
+        foreach (var pawn in Map.mapPawns.AllPawnsSpawned.Where(pawn => !_pawnsBefore.Contains(pawn)).ToList())
+        {
+            pawn.Destroy();
+        }
+
+        foreach (var zone in Map.zoneManager.AllZones.Where(zone => !_zonesBefore.Contains(zone)).ToList())
+        {
+            zone.Delete();
+        }
+
+        foreach (var area in Map.areaManager.AllAreas.ToList())
+        {
+            if (!_areasBefore.TryGetValue(area, out var cells))
+            {
+                if (area.Mutable)
+                {
+                    area.Delete();
+                }
+
+                continue;
+            }
+
+            foreach (var cell in area.ActiveCells.Where(cell => !cells.Contains(cell)).ToList())
+            {
+                area[cell] = false;
+            }
+
+            foreach (var cell in cells.Where(cell => !area[cell]))
+            {
+                area[cell] = true;
+            }
+        }
+
+        foreach (var (cell, terrain) in _terrainBefore)
+        {
+            if (cell.GetTerrain(Map) != terrain)
+            {
+                Map.terrainGrid.SetTerrain(cell, terrain);
+            }
+        }
     }
 
     public abstract Task Step(
@@ -626,6 +684,18 @@ public abstract class Stage
             thing.Destroy();
         }
 
+        // A destroyed pawn stays a world pawn until the game's garbage collection discards it, so a mod that keeps records
+        // by pawn would still find it; discard the stage's pawns now, as that collection would
+        foreach (var pawn in _spawned.OfType<Pawn>().Where(pawn => pawn.Destroyed && !pawn.Discarded))
+        {
+            if (Find.WorldPawns.Contains(pawn))
+            {
+                Find.WorldPawns.RemovePawn(pawn);
+            }
+
+            pawn.Discard(true);
+        }
+
         foreach (var thing in rect.Cells.SelectMany(cell => cell.GetThingList(Map).ToList()).Distinct().ToList())
         {
             // An explosion takes several ticks to spread, and would otherwise reach whatever the next stage puts here
@@ -635,5 +705,7 @@ public abstract class Stage
                 thing.Destroy();
             }
         }
+
+        RestoreSurroundings();
     }
 }
