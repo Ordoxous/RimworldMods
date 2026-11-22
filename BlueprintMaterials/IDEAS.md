@@ -14,3 +14,4 @@ Ideas not yet planned or built. The README holds the design, the plan and the op
 - **Quick picks** (S). "Most in stock" and "Cheapest" at the top of the menu.
 - **Style with material** (M, Ideology). Pick the blueprint's style in the same menu.
 - **Remember the choice** (S). The chosen material becomes the default for the building's next placement, if vanilla's designator doesn't already keep it.
+- **Materials on other MultiFloors levels** (S). The menu lists only materials on the blueprint's own map, so with MultiFloors a material stocked on another floor isn't offered. MultiFloors fixes the same gap in vanilla's own material menu (`Designator_Build.ProcessInput`), and Tweaks' `ResourcesAcrossLevels` makes the costs count every level.

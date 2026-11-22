@@ -31,6 +31,12 @@
         <label>Deterioration alert ignores tainted apparel</label>
         <tooltip>TD Enhancement Pack's "deteriorating things" alert stops counting apparel taken from corpses. The apparel still deteriorates as normal.</tooltip>
       </li>
+      <li MayRequire="telardo.MultiFloors" Class="XmlExtensions.Setting.Checkbox">
+        <key>ResourcesAcrossLevels</key>
+        <defaultValue>true</defaultValue>
+        <label>Building costs count other levels</label>
+        <tooltip>With MultiFloors, the cost shown while placing a building or painting, and in the Architect's info panel, counts what's stored on every level, so it isn't marked "not enough stored" when the materials are on another floor. The resource list at the top left still shows only the current level.</tooltip>
+      </li>
       <li Class="XmlExtensions.Setting.GapLine"><spacing>12</spacing></li>
 
       <!-- Mechs -->

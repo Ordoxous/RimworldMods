@@ -327,8 +327,10 @@ public static class MultiFloorsShutdownPatches
             return;
         }
 
-        MultiFloorsShutdown.Patch(new Harmony(typeof(MultiFloorsShutdownPatches).Namespace));
+        var harmony = new Harmony(typeof(MultiFloorsShutdownPatches).Namespace);
+        MultiFloorsShutdown.Patch(harmony);
         MultiFloorsShutdown.RegisterChangingLevelJob();
+        MultiFloorsResources.Patch(harmony);
     }
 }
 

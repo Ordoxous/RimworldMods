@@ -35,7 +35,7 @@ public static class TweaksScenarios
     };
 
     // Suites: "setup" for loading, "patches" for the XML patches, one per C# tweak ("armor", "haul_mechs", "tools", "hemogen", "deterioration"),
-    // "levels" for shutdown zones across MultiFloors levels, and "settings" for the scenarios that turn a tweak off
+    // "levels" for shutdown zones, chargers and building costs across MultiFloors levels ("resources" for the costs alone), and "settings" for the scenarios that turn a tweak off
     public static readonly List<Scenario> All = new()
     {
         new("setup_no_load_errors", "setup", NoLoadErrors),
@@ -81,6 +81,9 @@ public static class TweaksScenarios
         new("levels_downed_mech_carried_downstairs", "haul_mechs levels", LevelsDownedMechCarriedDownstairs, requiresMod: MultiFloorsId),
         new("levels_hauler_fetches_mech_upstairs", "haul_mechs levels", context => LevelsHaulerFetchesMech(context, zoneUpstairs: true), requiresMod: MultiFloorsId),
         new("levels_hauler_fetches_mech_down", "haul_mechs levels", context => LevelsHaulerFetchesMech(context, zoneUpstairs: false), requiresMod: MultiFloorsId),
+        new("levels_build_costs_count_other_levels", "levels resources", LevelsBuildCostsCountOtherLevels, requiresMod: MultiFloorsId),
+        new("levels_build_costs_off", "levels resources settings", LevelsBuildCostsOff, requiresMod: MultiFloorsId),
+        new("levels_build_costs_clearly_have_enough", "levels resources", LevelsBuildCostsClearlyHaveEnough, requiresMod: MultiFloorsId + ",Mlie.IClearlyHaveEnough"),
         new("tools_category", "tools", context => ToolsCategory(context, requireTools: false)),
         new("tools_category_power_tools", "tools", context => ToolsCategory(context, requireTools: true), requiresMod: "setosa.power.tools"),
         new("hemogen_below_cap_queues", "hemogen", context => Hemogen(context, packs: 0, limit: true, expectBill: true), requiresMod: "biotechpatch.1trickPwnyta"),
@@ -185,6 +188,7 @@ public static class TweaksScenarios
             ["HaulUnpoweredMechs"] = "true",
             ["ShutdownZonesAcrossLevels"] = "true",
             ["ChargersAcrossLevels"] = "true",
+            ["ResourcesAcrossLevels"] = "true",
             ["ToolsCategory"] = "true",
             ["LimitHemogenFarming"] = "true",
             ["HemogenPackCap"] = "30"
@@ -207,7 +211,7 @@ public static class TweaksScenarios
                 continue;
             }
 
-            if (key is "ShutdownZonesAcrossLevels" or "ChargersAcrossLevels" && !ModsConfig.IsActive(MultiFloorsId))
+            if (key is "ShutdownZonesAcrossLevels" or "ChargersAcrossLevels" or "ResourcesAcrossLevels" && !ModsConfig.IsActive(MultiFloorsId))
             {
                 continue;
             }
@@ -1142,6 +1146,205 @@ public static class TweaksScenarios
             context.Check("with the setting off, the work giver skips", ChargerGiver.ShouldSkip(hauler));
             await context.Step(600);
             context.Check($"the mech stayed where it was: {mech.PositionHeld} on {mech.MapHeld}", mech.Spawned && mech.Map == context.Map && mech.Position == start);
+        });
+    }
+
+    // A wall's default material, stocked only upstairs, and another material stocked on the ground: what the Architect
+    // shows on the ground, and the material a new wall designator picks. Stockpiles are counted, so both are stockpiled.
+    private sealed class LevelStock : IDisposable
+    {
+        public readonly UpperLevel Level;
+        public readonly ThingDef Wall = ThingDefOf.Wall;
+        public readonly ThingDef Upstairs, Ground;
+
+        private readonly ScenarioContext _context;
+        private readonly Zone_Stockpile _groundZone;
+
+        public LevelStock(
+            ScenarioContext context
+        )
+        {
+            _context = context;
+            Level = new UpperLevel(context);
+            Upstairs = GenStuff.DefaultStuffFor(Wall);
+            Ground = Upstairs == ThingDefOf.Steel ? ThingDefOf.WoodLog : ThingDefOf.Steel;
+            if (Level.Map == null)
+            {
+                return;
+            }
+
+            Stockpile(Level.Map, context.Cell(10, 10));
+            GenSpawn.Spawn(Stack(Upstairs), context.Cell(10, 10), Level.Map);
+            _groundZone = Stockpile(context.Map, context.Cell(-10, -10));
+            context.Place(Ground, -10, -10, stackCount: 75);
+            context.Map.resourceCounter.UpdateResourceCounts();
+            Level.Map.resourceCounter.UpdateResourceCounts();
+        }
+
+        private static Thing Stack(
+            ThingDef def
+        )
+        {
+            var thing = ThingMaker.MakeThing(def);
+            thing.stackCount = 75;
+            return thing;
+        }
+
+        private static Zone_Stockpile Stockpile(
+            Map map,
+            IntVec3 center
+        )
+        {
+            var zone = new Zone_Stockpile(StorageSettingsPreset.DefaultStockpile, map.zoneManager);
+            map.zoneManager.RegisterZone(zone);
+            foreach (var cell in CellRect.CenteredOn(center, 1))
+            {
+                zone.AddCell(cell);
+            }
+
+            return zone;
+        }
+
+        public int Count(
+            Map map
+        ) => Ordo.Tweaks.MultiFloorsResources.GetCount(map.resourceCounter, Upstairs);
+
+        public ThingDef DefaultStuff => new Designator_Build(Wall).StuffDef;
+
+        public void Dispose()
+        {
+            _groundZone?.Delete();
+            Level.Dispose();
+            _context.Map.resourceCounter.UpdateResourceCounts();
+        }
+    }
+
+    private static async Task LevelsBuildCostsCountOtherLevels(
+        ScenarioContext context
+    )
+    {
+        using var stock = new LevelStock(context);
+        if (stock.Level.Map == null)
+        {
+            return;
+        }
+
+        var ground = context.Map.resourceCounter.GetCount(stock.Upstairs);
+        var upstairs = stock.Level.Map.resourceCounter.GetCount(stock.Upstairs);
+        context.Check($"the level's counter has the {stock.Upstairs.label}: {upstairs}", upstairs >= 75);
+        context.Check($"counted from the ground, both levels count: {stock.Count(context.Map)} = {ground} + {upstairs}", stock.Count(context.Map) == ground + upstairs);
+        context.Check($"counted from upstairs, both levels count: {stock.Count(stock.Level.Map)}", stock.Count(stock.Level.Map) == ground + upstairs);
+
+        foreach (var (method, name) in new (MethodBase, string)[]
+                 {
+                     (AccessTools.Method(typeof(Designator_Build), "DrawPlaceMouseAttachments"), "Designator_Build.DrawPlaceMouseAttachments"),
+                     (AccessTools.Method(typeof(Designator_Build), nameof(Designator_Build.DrawPanelReadout)), "Designator_Build.DrawPanelReadout"),
+                     (AccessTools.PropertyGetter(typeof(Designator_Build), nameof(Designator_Build.StuffDef)), "Designator_Build.StuffDef"),
+                     (AccessTools.Method(typeof(Designator_Paint), nameof(Designator_Paint.DrawMouseAttachments)), "Designator_Paint.DrawMouseAttachments")
+                 })
+        {
+            context.Check($"{name} is transpiled by Tweaks", Harmony.GetPatchInfo(method)?.Transpilers.Any(patch => patch.owner == ModId) == true);
+            CountsAcrossLevels(context, method, name);
+        }
+
+        // Vanilla swaps the default material for one in stock on the ground when it's short there
+        context.Check($"the current map is the test map: {Find.CurrentMap}", Find.CurrentMap == context.Map);
+        context.Check($"the ground has too little {stock.Upstairs.label} for a wall: {ground}", ground < stock.Wall.CostStuffCount);
+        context.Check($"a new wall defaults to the {stock.Upstairs.label} upstairs: {stock.DefaultStuff?.label}", stock.DefaultStuff == stock.Upstairs);
+
+        await Task.CompletedTask;
+    }
+
+    // The method as the game runs it, after every mod's transpilers: each count goes through Tweaks, none straight to
+    // vanilla's counter or I Clearly Have Enough's single-map count
+    private static void CountsAcrossLevels(
+        ScenarioContext context,
+        MethodBase method,
+        string name
+    )
+    {
+        var called = PatchProcessor.GetCurrentInstructions(method)
+            .Select(instruction => instruction.operand as MethodInfo)
+            .Where(m => m != null)
+            .ToList();
+        var ours = called.Count(m => m.DeclaringType?.FullName == "Ordo.Tweaks.MultiFloorsResources");
+        var direct = called.Where(m => m == AccessTools.Method(typeof(ResourceCounter), nameof(ResourceCounter.GetCount))
+            || m.Name == "GetPresentOnMap").Select(m => $"{m.DeclaringType?.Name}.{m.Name}").ToList();
+        context.Check($"{name} counts through Tweaks: {ours} calls, uncounted levels: [{string.Join(", ", direct)}]", ours > 0 && direct.Count == 0);
+    }
+
+    // I Clearly Have Enough counts everything on a map, stored or not, in the two cost readouts. With it, Tweaks adds up its
+    // count over the levels: loose steel upstairs, outside any stockpile, counts from the ground.
+    private static Task LevelsBuildCostsClearlyHaveEnough(
+        ScenarioContext context
+    )
+    {
+        using var level = new UpperLevel(context);
+        if (level.Map == null)
+        {
+            return Task.CompletedTask;
+        }
+
+        var steel = ThingDefOf.Steel;
+        var loose = ThingMaker.MakeThing(steel);
+        loose.stackCount = 60;
+        GenSpawn.Spawn(loose, context.Cell(10, 10), level.Map);
+        var component = AccessTools.TypeByName("IClearlyHaveEnough.AllResourcesCounter_MapComponent");
+        context.Check("found I Clearly Have Enough's map component", component != null);
+        if (component == null)
+        {
+            return Task.CompletedTask;
+        }
+
+        int Present(Map map)
+        {
+            var comp = map.components.FirstOrDefault(c => component.IsInstanceOfType(c));
+            AccessTools.Method(component, "UpdateResourceCounts").Invoke(comp, null);
+            return (int)AccessTools.Method(component, "GetCount").Invoke(comp, new object[] { steel });
+        }
+
+        var ground = Present(context.Map);
+        var upstairs = Present(level.Map);
+        level.Map.resourceCounter.UpdateResourceCounts();
+        context.Check($"the steel upstairs isn't stored, so vanilla's counter doesn't see it: {level.Map.resourceCounter.GetCount(steel)}", level.Map.resourceCounter.GetCount(steel) < 60);
+        context.Check($"I Clearly Have Enough sees it upstairs: {upstairs}", upstairs >= 60);
+        var across = Ordo.Tweaks.MultiFloorsResources.PresentAcrossLevels(context.Map, steel);
+        context.Check($"from the ground, both levels count: {across} = {ground} + {upstairs}", across == ground + upstairs);
+
+        foreach (var (method, name) in new (MethodBase, string)[]
+                 {
+                     (AccessTools.Method(typeof(Designator_Build), "DrawPlaceMouseAttachments"), "Designator_Build.DrawPlaceMouseAttachments"),
+                     (AccessTools.Method(typeof(Designator_Build), nameof(Designator_Build.DrawPanelReadout)), "Designator_Build.DrawPanelReadout")
+                 })
+        {
+            context.Check($"{name} is transpiled by I Clearly Have Enough", Harmony.GetPatchInfo(method)?.Transpilers.Any(patch => patch.owner == "com.chippedchap.iclearlyhaveenough") == true);
+            CountsAcrossLevels(context, method, name);
+            context.Check($"{name} calls the whole-map count across levels",
+                PatchProcessor.GetCurrentInstructions(method).Any(instruction => (instruction.operand as MethodInfo)?.Name == nameof(Ordo.Tweaks.MultiFloorsResources.PresentAcrossLevels)));
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private static async Task LevelsBuildCostsOff(
+        ScenarioContext context
+    )
+    {
+        using var stock = new LevelStock(context);
+        if (stock.Level.Map == null)
+        {
+            return;
+        }
+
+        var ground = context.Map.resourceCounter.GetCount(stock.Upstairs);
+        await WithSetting("ResourcesAcrossLevels", "false", () =>
+        {
+            context.Check($"with the setting off, only the ground counts: {stock.Count(context.Map)} = {ground}", stock.Count(context.Map) == ground);
+            context.Check($"the ground has too little {stock.Upstairs.label} for a wall: {ground}", ground < stock.Wall.CostStuffCount);
+            context.Check($"{stock.Ground.label} can stand in for the default", stock.Ground.stuffProps.canSuggestUseDefaultStuff);
+            context.Check($"a new wall falls back to the {stock.Ground.label} on the ground, as vanilla: {stock.DefaultStuff?.label}", stock.DefaultStuff == stock.Ground);
+
+            return Task.CompletedTask;
         });
     }
 
