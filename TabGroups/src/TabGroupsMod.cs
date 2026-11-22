@@ -32,7 +32,8 @@ public class TabGroupsMod : Mod
 
     public override string SettingsCategory() => "Tab Groups";
 
-    // Moves a button into a group, or onto the bar with null. Choosing its default forgets the choice.
+    // Moves a button into a group, or onto the bar with null. Choosing its default forgets the choice. Saved at once,
+    // rather than only when the settings window closes, so a crash or a quit with it open doesn't lose it.
     public static void Assign(
         MainButtonDef button,
         MainButtonDef group
@@ -42,6 +43,7 @@ public class TabGroupsMod : Mod
             Settings.assignments.Remove(button.defName);
         else
             Settings.assignments[button.defName] = group?.defName ?? "";
+        Settings.Write();
         TabGroups.Rebuild();
     }
 
@@ -55,6 +57,7 @@ public class TabGroupsMod : Mod
         if (top.ButtonText("Ordo_TabGroups_Reset".Translate(), widthPct: 0.3f))
         {
             Settings.assignments.Clear();
+            Settings.Write();
             TabGroups.Rebuild();
         }
         top.Gap(6f);

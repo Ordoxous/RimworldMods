@@ -11,12 +11,15 @@ public class TabGroupExtension : DefModExtension
     public List<string> members = new();
 }
 
-// Which group each main button is in. Rebuilt from the defs and the settings
-// at startup and whenever the settings change.
+// Which group each main button is in. Rebuilt from the defs and the settings at startup, whenever the settings change,
+// and when a mod adds a button later (Character Editor adds its own from code).
 public static class TabGroups
 {
     private static readonly Dictionary<MainButtonDef, MainButtonDef> GroupOf = new();
     private static readonly Dictionary<MainButtonDef, List<MainButtonDef>> MembersOf = new();
+
+    // How many button defs there were at the last rebuild
+    private static int builtFor = -1;
 
     // While true, the Visible postfix leaves grouped buttons alone, so a group can ask whether a member would show
     private static bool readingRaw;
@@ -28,11 +31,18 @@ public static class TabGroups
         MainButtonDef def
     ) => def.workerClass == typeof(MainButtonWorker_TabGroup);
 
-    // The buttons a player can put in a group: any shown on the bar, except groups and the inspect pane
-    public static IEnumerable<MainButtonDef> Groupable =>
+    // Every button that can be in a group, except groups and the inspect pane. Buttons hidden for now count too, since
+    // mods turn buttonVisible on after startup (Animation Manager's once a game loads, from its settings); one hidden
+    // while in a group just isn't in its menu, as WouldShow asks the button.
+    private static IEnumerable<MainButtonDef> Candidates =>
         DefDatabase<MainButtonDef>.AllDefsListForReading
-            .Where(def => def.buttonVisible && !IsGroup(def) && def != MainButtonDefOf.Inspect)
+            .Where(def => !IsGroup(def) && def != MainButtonDefOf.Inspect)
             .OrderBy(def => def.order);
+
+    // The buttons the settings list: those on the bar now, or in a group, or the player moved
+    public static IEnumerable<MainButtonDef> Groupable =>
+        Candidates.Where(def =>
+            def.buttonVisible || GroupOf.ContainsKey(def) || TabGroupsMod.Settings.assignments.ContainsKey(def.defName));
 
     public static MainButtonDef DefaultGroupOf(
         MainButtonDef button
@@ -40,15 +50,36 @@ public static class TabGroups
 
     public static MainButtonDef GroupFor(
         MainButtonDef button
-    ) => GroupOf.TryGetValue(button, out var group) ? group : null;
+    )
+    {
+        EnsureCurrent();
+        return GroupOf.TryGetValue(button, out var group) ? group : null;
+    }
 
     public static bool IsHidden(
         MainButtonDef button
-    ) => !readingRaw && GroupOf.ContainsKey(button);
+    )
+    {
+        if (readingRaw)
+            return false;
+        EnsureCurrent();
+        return GroupOf.ContainsKey(button);
+    }
 
     public static IReadOnlyList<MainButtonDef> Members(
         MainButtonDef group
-    ) => MembersOf.TryGetValue(group, out var members) ? members : (IReadOnlyList<MainButtonDef>)new List<MainButtonDef>();
+    )
+    {
+        EnsureCurrent();
+        return MembersOf.TryGetValue(group, out var members) ? members : (IReadOnlyList<MainButtonDef>)new List<MainButtonDef>();
+    }
+
+    // Rebuilds if a button def was added since the last rebuild
+    private static void EnsureCurrent()
+    {
+        if (DefDatabase<MainButtonDef>.DefCount != builtFor)
+            Rebuild();
+    }
 
     // Whether the button would be on the bar if it weren't in a group, such as Mechs only with a mechanitor
     public static bool WouldShow(
@@ -73,6 +104,7 @@ public static class TabGroups
 
     public static void Rebuild()
     {
+        builtFor = DefDatabase<MainButtonDef>.DefCount;
         GroupOf.Clear();
         MembersOf.Clear();
         var settings = TabGroupsMod.Settings;
@@ -80,7 +112,7 @@ public static class TabGroups
         foreach (var group in groups)
             MembersOf[group] = new List<MainButtonDef>();
 
-        foreach (var button in Groupable)
+        foreach (var button in Candidates)
         {
             var group = DefaultGroupOf(button);
             if (settings.assignments.TryGetValue(button.defName, out var chosen))

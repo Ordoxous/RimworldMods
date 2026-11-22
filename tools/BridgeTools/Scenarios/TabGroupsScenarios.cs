@@ -25,7 +25,8 @@ public static class TabGroupsScenarios
         new("open_click_always_lists", "open", ClickAlwaysOpensList),
         new("open_menu_lists_members", "open", MenuListsMembers),
         new("open_research_bar_shown", "open", ResearchBarShown),
-        new("settings_move_and_reset", "settings", MoveAndReset)
+        new("settings_move_and_reset", "settings", MoveAndReset),
+        new("settings_hidden_and_late_buttons", "settings", HiddenAndLateButtons)
     };
 
     private static MainButtonDef Button(
@@ -46,6 +47,8 @@ public static class TabGroupsScenarios
     )
     {
         TabGroupsMod.Settings.assignments = saved;
+        // Assign saves at once, so the file is put back too
+        TabGroupsMod.Settings.Write();
         Groups.Rebuild();
     }
 
@@ -232,6 +235,47 @@ public static class TabGroupsScenarios
         }
         finally
         {
+            RestoreSettings(saved);
+        }
+        context.Check("restored, Architect is back on the bar", Groups.GroupFor(architect) == null && architect.Worker.Visible);
+        return Task.CompletedTask;
+    }
+
+    // A button moved into a group stays there while its mod has it hidden, as Animation Manager is until a game loads,
+    // and one a mod adds from code after startup, as Character Editor does, joins the group it was moved to
+    private static Task HiddenAndLateButtons(
+        ScenarioContext context
+    )
+    {
+        var saved = new Dictionary<string, string>(TabGroupsMod.Settings.assignments);
+        var architect = Button("Architect");
+        var late = new MainButtonDef
+        {
+            defName = "Ordo_TabGroupsTest_LateButton", label = "late button", buttonVisible = true, order = 999,
+            workerClass = typeof(MainButtonWorker_ToggleTab)
+        };
+        var remove = AccessTools.Method(typeof(DefDatabase<MainButtonDef>), "Remove");
+        try
+        {
+            architect.buttonVisible = false;
+            TabGroupsMod.Assign(architect, Tools);
+            context.Check("Architect, hidden by its def, still goes into Tools", Groups.GroupFor(architect) == Tools);
+            context.Check("but isn't in its menu while hidden", !Groups.ShownMembers(Tools).Contains(architect));
+            architect.buttonVisible = true;
+            context.Check("shown again, it's in Tools' menu and off the bar",
+                Groups.ShownMembers(Tools).Contains(architect) && !architect.Worker.Visible);
+            context.Check("the settings list it", Groups.Groupable.Contains(architect));
+
+            TabGroupsMod.Settings.assignments[late.defName] = Tools.defName;
+            Groups.Rebuild();
+            DefDatabase<MainButtonDef>.Add(late);
+            context.Check($"a button added later joins Tools: {Names(Groups.Members(Tools))}", Groups.GroupFor(late) == Tools);
+        }
+        finally
+        {
+            architect.buttonVisible = true;
+            if (DefDatabase<MainButtonDef>.GetNamedSilentFail(late.defName) != null)
+                remove.Invoke(null, new object[] { late });
             RestoreSettings(saved);
         }
         context.Check("restored, Architect is back on the bar", Groups.GroupFor(architect) == null && architect.Worker.Visible);

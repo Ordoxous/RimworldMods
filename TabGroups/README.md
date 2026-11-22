@@ -19,7 +19,7 @@ The defaults are in `mod/Defs/MainButtons.xml`, chosen for the author's mod list
 | Other | 475 | Mod-specific extras: RJW, RimWorld Animations offsets, NL Facial Animation, Missile Girl, SQUISHY Ranged recoil |
 | Tools | 480 | History, Mint bills, Ctrl-F, Visible Wealth, Mint minimap, Paint Shop, AAAA, Dubs Performance Analyzer, XML Extensions mod settings |
 
-Architect, Nature (NatureTab) and Menu stay on the bar. In the settings, any button with `buttonVisible` can be moved into any group, or back onto the bar. Only the changes from the defaults are saved (`assignments`, defName to group defName, or `""` for on the bar), so new defaults still apply to buttons the player never touched.
+Architect, Nature (NatureTab) and Menu stay on the bar. In the settings, any button with `buttonVisible` can be moved into any group, or back onto the bar. A move is saved at once. Groups are built from every button, visible or not, because some mods turn `buttonVisible` on after startup (Animation Manager does once a game loads), and they are rebuilt when a mod adds a button def from code later (Character Editor). Only the changes from the defaults are saved (`assignments`, defName to group defName, or `""` for on the bar), so new defaults still apply to buttons the player never touched.
 
 ## Dependencies
 
@@ -51,6 +51,8 @@ Architect, Nature (NatureTab) and Menu stay on the bar. In the settings, any but
 - `tabgroups-headless`: the same with no window.
 
 **Suites** (`tools/BridgeTools/Scenarios/TabGroupsScenarios.cs`): `setup`, `bar`, `open` and `settings`. Drawing is checked by eye in the windowed profile.
+
+**Results, 2026-11-22:** 9 of 9 pass on `tabgroups-headless`, with no errors logged, after adding `settings_hidden_and_late_buttons` (a button hidden by its def still goes into the group it was moved to and shows in its menu once visible; a button def added after startup joins its group). The settings file is put back empty after the run.
 
 **Results, 2026-11-21:** 8 of 8 pass on `tabgroups-headless`, with no errors logged. In the windowed profile, the bar shows Architect, Colonists, Animals, Wildlife, Knowledge, World, Tools and Menu.
 
