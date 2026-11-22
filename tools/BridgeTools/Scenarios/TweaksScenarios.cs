@@ -88,6 +88,8 @@ public static partial class TweaksScenarios
         new("levels_bills_count_other_levels", "levels bills settings", LevelsBillsCountOtherLevels, requiresMod: MultiFloorsId),
         new("levels_bills_better_workbenches", "levels bills settings", LevelsBillsBetterWorkbenches, requiresMod: MultiFloorsId + ",falconne.BWM"),
         new("bills_count_cache", "bills settings", BillsCountCache),
+        new("substructure_replace_transparent", "substructure", context => ReplaceSubstructureScenario(context, on: true), requiresMod: TransparentSubstructureId),
+        new("substructure_replace_off", "substructure settings", context => ReplaceSubstructureScenario(context, on: false), requiresMod: TransparentSubstructureId),
         new("levels_supercharger_upstairs", "levels supercharger", context => LevelsSupercharger(context, on: true), requiresMod: MultiFloorsId + ",Ludeon.RimWorld.Ideology"),
         new("levels_work_tab_priorities", "levels settings", LevelsWorkTabPriorities, requiresMod: MultiFloorsId + ",Fluffy.WorkTab"),
         new("levels_supercharger_off", "levels supercharger settings", context => LevelsSupercharger(context, on: false), requiresMod: MultiFloorsId + ",Ludeon.RimWorld.Ideology"),

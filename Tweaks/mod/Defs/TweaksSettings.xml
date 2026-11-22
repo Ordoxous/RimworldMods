@@ -140,6 +140,12 @@
         <label>Neural superchargers on other levels</label>
         <tooltip>With MultiFloors and Ideology, colonists due a neural supercharge take the stairs to a charged supercharger on another level when there's none on theirs. A supercharger on their own level is always used first.</tooltip>
       </li>
+      <li MayRequire="Ludeon.RimWorld.Odyssey" Class="XmlExtensions.Setting.Checkbox">
+        <key>ReplaceSubstructure</key>
+        <defaultValue>true</defaultValue>
+        <label>Build substructure over other substructure</label>
+        <tooltip>Gravship substructure can be built over a different kind of substructure, such as Transparent Substructure's over the normal one, or back. It's swapped in place, so the ship stays whole and what stands on it stays put, and the old substructure's materials are dropped.</tooltip>
+      </li>
       <li Class="XmlExtensions.Setting.Checkbox">
         <key>ToolsCategory</key>
         <defaultValue>true</defaultValue>
