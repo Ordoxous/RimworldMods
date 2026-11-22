@@ -1,16 +1,24 @@
 # Tweaks ideas
 
-Ideas not yet planned or built. The README holds the design, the plan and the open questions; an idea moves there once it's taken on. Effort: S (an hour or two), M (about a day), L (more). "README" marks ideas the README already raises.
+Ideas not yet planned or built. The README holds the design, the plan and the open questions; an idea moves there once it's taken on. Ideas are grouped by area, smallest first. After each name come the effort, S (an hour or two), M (about a day) or L (more); "README" if the README already raises it; and any DLC or mod it needs. Discarded ideas stay listed with why they were dropped, so they aren't raised again.
 
-## First review (2026-11-22)
+## Ideas
 
-- **VFE Power fuel cost** (S, README). Align the generators' fuel use with their new output.
-- **Downed animals to beds** (M). The animal counterpart of the downed-mech hauling tweak.
-- **Recheck upstream** (S). See which parent mods have fixed what a tweak works around.
+### Existing tweaks
 
-## Second pass
-
-- **A "still needed" suite** (M). Scenarios that confirm each upstream problem still exists with its tweak off, so the next recheck is a run rather than reading every mod.
 - **Armor indicator options** (S). Size, duration, and whether they show for everyone or only colonists.
-- **Tools on demand** (L). Pawns pick up a matching tool from the tools category for the work they're about to do.
-- **Rebuild the tools category** (S, README) when Setosa's Power Tools' presets change, instead of on the next restart.
+- **Rebuild the tools category** (S, README, Setosa's Power Tools). Rebuild it when the mod's presets change, instead of on the next restart.
+- **VFE Power fuel cost** (S, README, VFE Power). Align the generators' fuel use with their new output.
+
+### New tweaks
+
+- **Downed animals to beds** (M). The animal counterpart of the downed-mech hauling tweak.
+
+### Upkeep
+
+- **Recheck upstream** (S). See which parent mods have fixed what a tweak works around.
+- **A "still needed" suite** (M). Scenarios that confirm each upstream problem still exists with its tweak off, so the next recheck is a run rather than reading every mod.
+
+## Discarded ideas
+
+None yet.
