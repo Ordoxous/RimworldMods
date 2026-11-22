@@ -296,8 +296,10 @@ public static class NatureTabScenarios
         // Place takes offsets from the scenario's origin; these go 1 and 12 cells from the base
         var map = context.Map;
         IntVec3 center = FloraSurvey.BaseCenter(map);
-        IntVec3 nearCell = center + new IntVec3(1, 0, 0);
-        IntVec3 farCell = center + new IntVec3(12, 0, 0);
+        // East of the base, or west when the base is too near the east edge, as a real home area can put it
+        int side = center.x + 12 < map.Size.x ? 1 : -1;
+        IntVec3 nearCell = center + new IntVec3(side, 0, 0);
+        IntVec3 farCell = center + new IntVec3(12 * side, 0, 0);
         if (!nearCell.InBounds(map) || !farCell.InBounds(map) || nearCell.GetEdifice(map) != null || farCell.GetEdifice(map) != null)
         {
             context.Check($"the cells 1 and 12 east of the base at {center} aren't free", false);
@@ -366,6 +368,9 @@ public static class NatureTabScenarios
         var plant = PlacePlant(context, potato, 0, 0, 1f);
         context.Check("a potato outside a growing zone counts as wild", Count(Row(context, potato, Wild)) == before + 1);
 
+        // The game adds home area around a new zone cell, which would outlast the scenario and move the base for later ones
+        Area home = context.Map.areaManager.Home;
+        var homeBefore = new HashSet<IntVec3>(home.ActiveCells);
         var zone = new Zone_Growing(context.Map.zoneManager);
         context.Map.zoneManager.RegisterZone(zone);
         try
@@ -379,6 +384,11 @@ public static class NatureTabScenarios
         finally
         {
             zone.Delete();
+            foreach (IntVec3 cell in home.ActiveCells.ToList())
+            {
+                if (!homeBefore.Contains(cell))
+                    home[cell] = false;
+            }
         }
         return Task.CompletedTask;
     }
@@ -776,8 +786,10 @@ public static class NatureTabScenarios
     {
         var map = context.Map;
         IntVec3 center = FloraSurvey.BaseCenter(map);
-        IntVec3 nearCell = center + new IntVec3(1, 0, 0);
-        IntVec3 farCell = center + new IntVec3(12, 0, 0);
+        // East of the base, or west when the base is too near the east edge, as a real home area can put it
+        int side = center.x + 12 < map.Size.x ? 1 : -1;
+        IntVec3 nearCell = center + new IntVec3(side, 0, 0);
+        IntVec3 farCell = center + new IntVec3(12 * side, 0, 0);
         if (!nearCell.InBounds(map) || !farCell.InBounds(map))
         {
             context.Check($"the map is too small around the base at {center}", false);

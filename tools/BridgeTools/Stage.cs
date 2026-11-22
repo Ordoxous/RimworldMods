@@ -220,7 +220,9 @@ public abstract class Stage
     {
         var thing = ThingMaker.MakeThing(def, stuff);
         thing.stackCount = Math.Min(stackCount, def.stackLimit);
-        if (def.CanHaveFaction)
+        // Not ore, which has no owner in the game: as a player building, the game would add home area around it, and that
+        // outlasts the scenario
+        if (def.CanHaveFaction && !def.mineable)
         {
             thing.SetFaction(Faction.OfPlayer);
         }
