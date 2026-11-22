@@ -40,6 +40,48 @@
     </jobs>
   </Ordo.ColonistBarJobs.JobIconDef>
 
+  <!-- Jobs whose target is filth, fire, a cell or the wall being smoothed, whichever work type gave them -->
+  <Ordo.ColonistBarJobs.JobIconDef>
+    <defName>Ordo_JobIcon_Clean</defName>
+    <texPath>UI/Designators/HomeAreaOn</texPath>
+    <jobs>
+      <li>Clean</li>
+    </jobs>
+  </Ordo.ColonistBarJobs.JobIconDef>
+
+  <Ordo.ColonistBarJobs.JobIconDef>
+    <defName>Ordo_JobIcon_ClearSnow</defName>
+    <texPath>UI/Designators/SnowClearAreaOn</texPath>
+    <jobs>
+      <li>ClearSnow</li>
+    </jobs>
+  </Ordo.ColonistBarJobs.JobIconDef>
+
+  <Ordo.ColonistBarJobs.JobIconDef MayRequire="Ludeon.RimWorld.Biotech">
+    <defName>Ordo_JobIcon_ClearPollution</defName>
+    <texPath>UI/Icons/PollutionClearArea</texPath>
+    <jobs>
+      <li>ClearPollution</li>
+    </jobs>
+  </Ordo.ColonistBarJobs.JobIconDef>
+
+  <Ordo.ColonistBarJobs.JobIconDef>
+    <defName>Ordo_JobIcon_Smooth</defName>
+    <texPath>UI/Designators/SmoothSurface</texPath>
+    <jobs>
+      <li>SmoothFloor</li>
+      <li>SmoothWall</li>
+    </jobs>
+  </Ordo.ColonistBarJobs.JobIconDef>
+
+  <Ordo.ColonistBarJobs.JobIconDef>
+    <defName>Ordo_JobIcon_Firefight</defName>
+    <thingIcon>FirefoamPopper</thingIcon>
+    <jobs>
+      <li>BeatFire</li>
+    </jobs>
+  </Ordo.ColonistBarJobs.JobIconDef>
+
   <!-- Off work. Recreation shows what it's done with (the TV, the chess table) when there is one, and the joy icon otherwise
        (walks, skygazing, meditating, praying). The idle icon is vanilla's own colonist bar icon. -->
   <Ordo.ColonistBarJobs.JobIconDef>
@@ -67,7 +109,9 @@
     </jobs>
   </Ordo.ColonistBarJobs.JobIconDef>
 
-  <!-- Work types whose targets are pawns, cells or plain rock -->
+  <!-- Work types whose targets are pawns, cells, filth, fire or plain rock. The li entries marked MayRequire are [FSF] Complex
+       Jobs' work types, which split vanilla's: they drop out when it isn't loaded. Its other work types target a building or an
+       item, whose own icon says enough. -->
   <Ordo.ColonistBarJobs.JobIconDef>
     <defName>Ordo_JobIcon_Mining</defName>
     <texPath>UI/Designators/Mine</texPath>
@@ -89,6 +133,7 @@
     <texPath>UI/Designators/Harvest</texPath>
     <workTypes>
       <li>Growing</li>
+      <li MayRequire="FrozenSnowFox.ComplexJobs">FSFHarvesting</li>
     </workTypes>
   </Ordo.ColonistBarJobs.JobIconDef>
 
@@ -105,6 +150,16 @@
     <texPath>UI/Designators/Tame</texPath>
     <workTypes>
       <li>Handling</li>
+      <li MayRequire="FrozenSnowFox.ComplexJobs">FSFTaming</li>
+      <li MayRequire="FrozenSnowFox.ComplexJobs">FSFTraining</li>
+    </workTypes>
+  </Ordo.ColonistBarJobs.JobIconDef>
+
+  <Ordo.ColonistBarJobs.JobIconDef>
+    <defName>Ordo_JobIcon_Warden</defName>
+    <texPath>UI/Icons/Prisoner</texPath>
+    <workTypes>
+      <li>Warden</li>
     </workTypes>
   </Ordo.ColonistBarJobs.JobIconDef>
 
@@ -113,6 +168,9 @@
     <thingIcon>MedicineIndustrial</thingIcon>
     <workTypes>
       <li>Doctor</li>
+      <li MayRequire="FrozenSnowFox.ComplexJobs">FSFNurse</li>
+      <li MayRequire="FrozenSnowFox.ComplexJobs">FSFSurgeon</li>
+      <li MayRequire="FrozenSnowFox.ComplexJobs">FSFRescue</li>
     </workTypes>
   </Ordo.ColonistBarJobs.JobIconDef>
 

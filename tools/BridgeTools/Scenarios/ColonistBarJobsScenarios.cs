@@ -14,8 +14,9 @@ namespace Ordo.BridgeTools.Scenarios;
 // relies on; one has a real colonist take jobs, for the cache. Drawing itself needs a windowed profile and is checked by eye.
 public static class ColonistBarJobsScenarios
 {
-    // Suites: "setup" for defs, textures and the patch, "resolve" for which icon a job gets, "cache" for following job changes,
-    // "settings" for where the settings put the icon
+    // Suites: "setup" for defs, textures and the patches, "resolve" for which icon a job gets, "cache" for following job changes,
+    // "settings" for where the settings put the icon, "tooltip" for what it says, "click" for where a click jumps, and "mechs"
+    // for icons in the mechanitor's control group gizmos
     public static readonly List<Scenario> All = new()
     {
         new("settings_corners_size_and_offsets", "settings", CornersSizeAndOffsets),
@@ -27,6 +28,10 @@ public static class ColonistBarJobsScenarios
         new("resolve_blueprint_shows_what_it_builds", "resolve", BlueprintShowsWhatItBuilds),
         new("resolve_nothing_to_show", "resolve", NothingToShow),
         new("resolve_off_work", "resolve offwork", OffWork),
+        new("resolve_more_mappings", "resolve mappings", MoreMappings),
+        new("tooltip_bill_and_progress", "tooltip", BillAndProgress),
+        new("click_jump_target", "click", JumpTarget),
+        new("mechs_in_control_groups", "mechs", MechsInControlGroups, requiresMod: "Ludeon.RimWorld.Biotech"),
         new("cache_follows_job", "cache", CacheFollowsJob),
         new("resolve_stairs_show_the_work_upstairs", "resolve levels", StairsShowTheWorkUpstairs, requiresMod: "telardo.MultiFloors")
     };
@@ -56,6 +61,10 @@ public static class ColonistBarJobsScenarios
         var method = AccessTools.Method(typeof(ColonistBarColonistDrawer), nameof(ColonistBarColonistDrawer.DrawColonist));
         var owners = Harmony.GetPatchInfo(method)?.Postfixes.Select(patch => patch.owner).ToList() ?? new List<string>();
         context.Check($"DrawColonist has the mod's postfix; postfix owners: [{string.Join(", ", owners)}]", owners.Contains("Ordo.ColonistBarJobs"));
+
+        var clicks = AccessTools.Method(typeof(ColonistBarColonistDrawer), nameof(ColonistBarColonistDrawer.HandleClicks));
+        var clickOwners = Harmony.GetPatchInfo(clicks)?.Prefixes.Select(patch => patch.owner).ToList() ?? new List<string>();
+        context.Check($"HandleClicks has the mod's prefix; prefix owners: [{string.Join(", ", clickOwners)}]", clickOwners.Contains("Ordo.ColonistBarJobs"));
         return Task.CompletedTask;
     }
 
@@ -306,5 +315,135 @@ public static class ColonistBarJobsScenarios
         await context.Step(10);
         var drafted = ColonistBarJobIcons.IconFor(miner);
         context.Check($"once drafted ({miner.CurJobDef?.defName}) the bar shows nothing: {drafted}", drafted.IsEmpty);
+    }
+
+    // Jobs whose target is filth, a cell, a pawn or rock being smoothed get a mapping of their own
+    private static Task MoreMappings(
+        ScenarioContext context
+    )
+    {
+        var filth = context.Place(ThingDefOf.Filth_Dirt, 0, 0);
+        var clean = JobMaker.MakeJob(JobDefOf.Clean, filth);
+        clean.workGiverDef = GiverFor(WorkTypeDefOf.Cleaning);
+        var cleaning = JobIconResolver.For(clean);
+        context.Check($"cleaning filth shows the clean icon: {cleaning}", cleaning.Source == Icon("Ordo_JobIcon_Clean"));
+
+        var snow = JobIconResolver.For(JobMaker.MakeJob(JobDefOf.ClearSnow, context.Cell(1, 0)));
+        context.Check($"clearing snow shows the snow clearing icon: {snow}", snow.Source == Icon("Ordo_JobIcon_ClearSnow"));
+
+        var rock = context.Place(DefDatabase<ThingDef>.GetNamed("Granite"), 2, 0);
+        var smooth = JobIconResolver.For(JobMaker.MakeJob(JobDefOf.SmoothWall, rock));
+        context.Check($"smoothing a granite wall shows the smoothing icon, not the rock: {smooth}", smooth.Source == Icon("Ordo_JobIcon_Smooth"));
+
+        // By the job alone, so there's no need for a real fire
+        var fire = JobIconResolver.For(JobMaker.MakeJob(JobDefOf.BeatFire, context.Cell(3, 0)));
+        context.Check($"beating out a fire shows the firefoam popper: {fire}", fire.Source == Icon("Ordo_JobIcon_Firefight"));
+
+        var prisoner = context.Colonist(4, 0);
+        var recruit = JobMaker.MakeJob(JobDefOf.PrisonerAttemptRecruit, prisoner);
+        recruit.workGiverDef = GiverFor(WorkTypeDefOf.Warden);
+        var warden = JobIconResolver.For(recruit);
+        context.Check($"recruiting a prisoner shows the prisoner icon: {warden}", warden.Source == Icon("Ordo_JobIcon_Warden"));
+
+        if (DefDatabase<JobDef>.GetNamedSilentFail("ClearPollution") is { } clearPollution)
+        {
+            var pollution = JobIconResolver.For(JobMaker.MakeJob(clearPollution, context.Cell(5, 0)));
+            context.Check($"with Biotech, clearing pollution shows the pollution clearing icon: {pollution}",
+                pollution.Source == DefDatabase<JobIconDef>.GetNamedSilentFail("Ordo_JobIcon_ClearPollution"));
+        }
+
+        return Task.CompletedTask;
+    }
+
+    // The tooltip names a job's bill, with its count, and the progress of a frame the pawn is building. A job the
+    // pawn hasn't started has no progress, since its driver is someone else's.
+    private static Task BillAndProgress(
+        ScenarioContext context
+    )
+    {
+        var bill = (Bill_Production)DefDatabase<RecipeDef>.GetNamed("CookMealSimple").MakeNewBill();
+        bill.repeatMode = BillRepeatModeDefOf.RepeatCount;
+        bill.repeatCount = 3;
+        var cook = JobMaker.MakeJob(JobDefOf.DoBill, context.Cell(0, 0));
+        cook.bill = bill;
+        var label = JobDetails.BillLabel(cook);
+        context.Check($"a cooking job names its bill and count: {label}", label == $"{bill.LabelCap} (3x)");
+        context.Check("a job with no bill names none", JobDetails.BillLabel(JobMaker.MakeJob(JobDefOf.Goto, context.Cell(1, 1))) == null);
+
+        var frame = (Frame)context.Place(ThingDefOf.Wall.frameDef, 2, 0, ThingDefOf.WoodLog);
+        frame.workDone = frame.WorkToBuild / 2f;
+        var builder = context.Colonist(2, 1);
+        var build = JobMaker.MakeJob(JobDefOf.FinishFrame, frame);
+        context.Check($"a job not yet started has no progress: {JobDetails.Progress(builder, build)}", JobDetails.Progress(builder, build) == null);
+
+        // Checked straight after starting, before a tick, so the build hasn't moved on (or failed for want of wood)
+        builder.jobs.StartJob(build, JobCondition.InterruptForced);
+        var built = JobDetails.Progress(builder, builder.CurJob);
+        context.Check($"building a half-built wall is 50% done: {built}", built is { } b && Mathf.Abs(b - 0.5f) < 0.01f);
+        var tip = JobDetails.Tooltip(builder, builder.CurJob, true);
+        context.Check($"the tooltip gives the progress and the click hint: {tip}", tip.Contains("50%") && tip.Contains(frame.LabelNoParenthesis));
+
+        var rock = context.Place(DefDatabase<ThingDef>.GetNamed("Granite"), 4, 0);
+        rock.HitPoints = rock.MaxHitPoints / 4;
+        var miner = context.Colonist(4, 1);
+        miner.jobs.StartJob(JobMaker.MakeJob(JobDefOf.Mine, rock), JobCondition.InterruptForced);
+        var mined = JobDetails.Progress(miner, miner.CurJob);
+        context.Check($"mining gives no progress of its own, since its report has the rock's health: {mined}", mined == null);
+        return Task.CompletedTask;
+    }
+
+    // A click jumps to the job's target thing, or its cell on the pawn's map; never to the pawn itself
+    private static Task JumpTarget(
+        ScenarioContext context
+    )
+    {
+        var pawn = context.Colonist(0, 0);
+        var steel = context.Place(ThingDefOf.Steel, 2, 0, stackCount: 10);
+        var haul = JobDetails.JumpTarget(pawn, JobMaker.MakeJob(JobDefOf.HaulToCell, steel, context.Cell(3, 0)));
+        context.Check($"hauling jumps to the steel: {haul}", haul.Thing == steel);
+
+        var walk = JobMaker.MakeJob(JobDefOf.Goto, context.Cell(4, 4));
+        context.Check("a cell job the pawn hasn't started jumps nowhere", !JobDetails.JumpTarget(pawn, walk).IsValid);
+        pawn.jobs.StartJob(walk, JobCondition.InterruptForced);
+        var walking = JobDetails.JumpTarget(pawn, pawn.CurJob);
+        context.Check($"walking jumps to the cell on the pawn's map: {walking}", walking.Cell == context.Cell(4, 4) && walking.Map == context.Map);
+
+        var self = JobDetails.JumpTarget(pawn, JobMaker.MakeJob(JobDefOf.Wait, pawn));
+        context.Check($"a job on the pawn itself jumps nowhere: {self}", !self.IsValid);
+        context.Check("no job jumps nowhere", !JobDetails.JumpTarget(pawn, null).IsValid);
+        return Task.CompletedTask;
+    }
+
+    // A mechanitor's mech is in a control group and gets an icon for its job like a colonist; the gizmo is patched and its
+    // portraits' layout worked out as the gizmo does
+    private static Task MechsInControlGroups(
+        ScenarioContext context
+    )
+    {
+        var method = AccessTools.Method(typeof(MechanitorControlGroupGizmo), nameof(MechanitorControlGroupGizmo.GizmoOnGUI));
+        var owners = Harmony.GetPatchInfo(method)?.Postfixes.Select(patch => patch.owner).ToList() ?? new List<string>();
+        context.Check($"the control group gizmo has the mod's postfix; owners: [{string.Join(", ", owners)}]", owners.Contains("Ordo.ColonistBarJobs"));
+        context.Check("mechs show icons by default", new ColonistBarJobsSettings().ShowOnMechs);
+
+        var mechanitor = context.Mechanitor(0, 0);
+        var mech = context.ControlledMech("Mech_Lifter", mechanitor, 2, 0);
+        context.Check("the lifter is in one of the mechanitor's control groups",
+            mechanitor.mechanitor.controlGroups.Any(group => group.MechsForReading.Contains(mech)));
+
+        ColonistBarJobIcons.ClearCache();
+        var steel = context.Place(ThingDefOf.Steel, 3, 0, stackCount: 10);
+        mech.jobs.StartJob(JobMaker.MakeJob(JobDefOf.HaulToCell, steel, context.Cell(5, 0)), JobCondition.InterruptForced);
+        var icon = ColonistBarJobIcons.IconFor(mech);
+        context.Check($"the hauling lifter shows steel: {icon}", icon.Def == ThingDefOf.Steel);
+
+        // The gizmo is 130 by 75: 6 px padding and a 30 px label row leave 118 by 33 for portraits
+        var area = MechGroupIcons.PortraitArea(new Rect(0f, 0f, 130f, 75f));
+        context.Check($"the portrait area is 118 by 33 under the label: {area}", area == new Rect(6f, 36f, 118f, 33f));
+        context.Check($"one mech gets the full height: {MechGroupIcons.Grid(area, 1)}", MechGroupIcons.Grid(area, 1) == (3, 1, 33f));
+        context.Check($"six fit in a row of 19 px: {MechGroupIcons.Grid(area, 6)}", MechGroupIcons.Grid(area, 6) == (6, 1, 19f));
+        context.Check($"twelve take two rows of 16 px: {MechGroupIcons.Grid(area, 12)}", MechGroupIcons.Grid(area, 12) == (7, 2, 16f));
+        var corner = MechGroupIcons.IconRect(new Rect(0f, 0f, 33f, 33f));
+        context.Check($"the icon sits in a 33 px portrait's bottom right: {corner}", corner == new Rect(18f, 18f, 15f, 15f));
+        return Task.CompletedTask;
     }
 }

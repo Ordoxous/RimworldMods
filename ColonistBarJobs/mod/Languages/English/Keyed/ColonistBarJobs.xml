@@ -18,5 +18,13 @@
   <Ordo_ColonistBarJobs_Backdrop>Backdrop darkness: {0}</Ordo_ColonistBarJobs_Backdrop>
   <Ordo_ColonistBarJobs_Reset>Reset to defaults</Ordo_ColonistBarJobs_Reset>
   <Ordo_ColonistBarJobs_Preview>Preview</Ordo_ColonistBarJobs_Preview>
+  <Ordo_ColonistBarJobs_ShowOnMechs>Show on mechs in control groups</Ordo_ColonistBarJobs_ShowOnMechs>
+  <Ordo_ColonistBarJobs_ShowOnMechsTip>Mechs aren't on the colonist bar. This puts their job icons on their portraits in a selected mechanitor's control group gizmos.</Ordo_ColonistBarJobs_ShowOnMechsTip>
+
+  <!-- The icon's tooltip, under the job report -->
+  <Ordo_ColonistBarJobs_Bill>Bill: {0}</Ordo_ColonistBarJobs_Bill>
+  <Ordo_ColonistBarJobs_Progress>Progress: {0}</Ordo_ColonistBarJobs_Progress>
+  <Ordo_ColonistBarJobs_ClickToJump>Click to jump to {0}.</Ordo_ColonistBarJobs_ClickToJump>
+  <Ordo_ColonistBarJobs_ClickToJumpThere>Click to jump there.</Ordo_ColonistBarJobs_ClickToJumpThere>
 
 </LanguageData>

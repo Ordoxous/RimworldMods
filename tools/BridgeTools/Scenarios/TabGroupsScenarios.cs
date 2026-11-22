@@ -251,7 +251,10 @@ public static class TabGroupsScenarios
         var architect = Button("Architect");
         var late = new MainButtonDef
         {
-            defName = "Ordo_TabGroupsTest_LateButton", label = "late button", buttonVisible = true, order = 999,
+            defName = "Ordo_TabGroupsTest_LateButton",
+            label = "late button",
+            buttonVisible = true,
+            order = 999,
             workerClass = typeof(MainButtonWorker_ToggleTab)
         };
         var remove = AccessTools.Method(typeof(DefDatabase<MainButtonDef>), "Remove");

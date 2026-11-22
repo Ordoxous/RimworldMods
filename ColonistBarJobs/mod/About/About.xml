@@ -18,7 +18,8 @@
     <li>brrainz.harmony</li>
     <li>CrashM.ColorCodedMoodBar.11</li>
     <li>telardo.MultiFloors</li>
+    <li>FrozenSnowFox.ComplexJobs</li>
   </loadAfter>
   <packageId>Ordo.ColonistBarJobs</packageId>
-  <description>Shows an icon for what each colonist is doing right now on the colonist bar: the bench they work at, the item they carry, the bed they sleep in, or the kind of work. Hover the icon for the job.</description>
+  <description>Shows an icon for what each colonist is doing right now on the colonist bar: the bench they work at, the item they carry, the wall they build, or the kind of work. Hover the icon for the job, its bill and its progress, and click it to jump to the job. With Biotech, mechs show theirs on their portraits in the mechanitor's control groups.</description>
 </ModMetaData>

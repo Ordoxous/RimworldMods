@@ -9,7 +9,7 @@ namespace Ordo.BridgeTools.Scenarios;
 
 public sealed class ColonistBarJobsTools
 {
-    [Tool("ordo/stage_colonistbarjobs", Description = "Clear the map and leave colonists at work for looking at the colonist bar's job icons: a miner at designated granite, a builder at wood wall blueprints, a hauler with steel and a stockpile, and an idle colonist. Unpauses the game. Reports each colonist's job and the icon it resolves to. Don't save afterwards.")]
+    [Tool("ordo/stage_colonistbarjobs", Description = "Clear the map and leave colonists at work for looking at the colonist bar's job icons: a miner at designated granite, a builder at wood wall blueprints, a hauler with steel and a stockpile, and an idle colonist. With Biotech, also a selected mechanitor with two lifters hauling, for the control group gizmo. Unpauses the game. Reports each colonist's job and the icon it resolves to. Don't save afterwards.")]
     public static object StageColonistBarJobs(
         IRimBridgeContext bridge,
         CancellationToken cancellationToken
@@ -64,6 +64,22 @@ public sealed class ColonistBarJobsTools
         stage.Worker(-6, 0, WorkTypeDefOf.Mining);
         stage.Worker(0, 3, WorkTypeDefOf.Construction);
 
+        // With Biotech, a mechanitor (drafted, so they stay put) and two lifters hauling more steel, selected so the control
+        // group gizmo shows the mechs' icons
+        if (ModsConfig.BiotechActive)
+        {
+            for (var x = 0; x < 3; x++)
+            {
+                stage.Place(ThingDefOf.Steel, -4 + x, -6, stackCount: 10);
+            }
+
+            var mechanitor = stage.Mechanitor(-2, -4);
+            stage.ControlledMech("Mech_Lifter", mechanitor, -4, -4);
+            stage.ControlledMech("Mech_Lifter", mechanitor, -3, -4);
+            Find.Selector.ClearSelection();
+            Find.Selector.Select(mechanitor);
+        }
+
         Find.CameraDriver.JumpToCurrentMapLoc(sites[0]);
         Find.TickManager.CurTimeSpeed = TimeSpeed.Normal;
         ColonistBarJobIcons.ClearCache();
@@ -71,7 +87,7 @@ public sealed class ColonistBarJobsTools
         return new
         {
             success = true,
-            colonists = map.mapPawns.FreeColonistsSpawned.Select(pawn => new
+            colonists = map.mapPawns.FreeColonistsSpawned.Concat(map.mapPawns.SpawnedColonyMechs).Select(pawn => new
             {
                 name = pawn.LabelShort,
                 job = pawn.CurJobDef?.defName,

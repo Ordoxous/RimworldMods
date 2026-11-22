@@ -42,6 +42,9 @@ public class ColonistBarJobsSettings : ModSettings
     // How dark the square behind the icon is: 0 for none
     public float BackdropOpacity = DefaultBackdrop;
 
+    // Icons on mechs' portraits in a mechanitor's control group gizmos (Biotech)
+    public bool ShowOnMechs = true;
+
     public override void ExposeData()
     {
         // Kept explicit so TopRight stays the default if the enum is reordered
@@ -52,6 +55,7 @@ public class ColonistBarJobsSettings : ModSettings
         Scribe_Values.Look(ref OffsetX, "offsetX");
         Scribe_Values.Look(ref OffsetY, "offsetY");
         Scribe_Values.Look(ref BackdropOpacity, "backdropOpacity", DefaultBackdrop);
+        Scribe_Values.Look(ref ShowOnMechs, "showOnMechs", true);
     }
 
     public void Reset()
@@ -62,6 +66,7 @@ public class ColonistBarJobsSettings : ModSettings
         OffsetX = 0f;
         OffsetY = 0f;
         BackdropOpacity = DefaultBackdrop;
+        ShowOnMechs = true;
     }
 
     // The rect the icon takes in a portrait's rect
@@ -141,6 +146,12 @@ public class ColonistBarJobsMod : Mod
         listing.Gap();
         settings.BackdropOpacity = listing.SliderLabeled(
             "Ordo_ColonistBarJobs_Backdrop".Translate(settings.BackdropOpacity.ToStringPercent()), settings.BackdropOpacity, 0f, 1f);
+
+        if (ModsConfig.BiotechActive)
+        {
+            listing.Gap();
+            listing.CheckboxLabeled("Ordo_ColonistBarJobs_ShowOnMechs".Translate(), ref settings.ShowOnMechs, "Ordo_ColonistBarJobs_ShowOnMechsTip".Translate());
+        }
 
         listing.Gap();
         if (listing.ButtonText("Ordo_ColonistBarJobs_Reset".Translate()))
