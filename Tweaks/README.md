@@ -422,6 +422,7 @@ How the scenarios are built:
 - `levels_fix_forbidden_ingredients`: a fueled stove with a simple meal bill linked to the level above, and 30 forbidden potatoes there, through the monitor's designation pass. They aren't designated; off, they're designated to the stove's level.
 - `levels_fix_work_filter_reused`: a level work setting with hauling off filters every work giver. Hauling's are left out and nothing else, and a second call gives back the same list; off, a new one each time. With hauling back on, the list passed in comes back.
 - With 13, 15 and the work filter (2026-11-24): the whole suite 67/67 on `tweaks-multifloors-headless`, no leaks and no `[Tweaks]` warnings.
+- **Static fields of MultiFloors' types break Tweaks without MultiFloors** (2026-11-24). On `tweaks-headless`, `setup_no_load_errors` failed: vanilla's `StaticConstructorOnStartupUtility.ReportProbablyMissingAttributes` reads every static field's `FieldType` at startup, and `FieldRef<MultiFloorManager, …>` and `FieldRef<AutoTransferWorker, …>` fields threw `TypeLoadException`. They're now `Delegate` fields made on first use, cast inside methods (whose signatures may name MultiFloors' types). Then `setup`, `armor`, `haul_mechs`, `bills` and `tools` 15/15 on `tweaks-headless`, and `levels` and `setup` 51/51 on `tweaks-multifloors-headless`.
 - Not covered by a scenario: a whole delivery run with a real blocked exit, and the fixes in the author's own game.
 
 **With `ClaimsAcrossLevels` (2026-11-23):** the whole suite 39/39 on `tweaks-multifloors-headless`, no leaks.

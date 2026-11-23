@@ -394,9 +394,15 @@ public static class MultiFloorsFixes
         return false;
     }
 
-    // MultiFloorManager's temporary floor locks: the pawn and the tick it was locked
-    private static readonly AccessTools.FieldRef<MultiFloorManager, List<(Pawn, int)>> LockedPawns =
-        AccessTools.FieldRefAccess<MultiFloorManager, List<(Pawn, int)>>("lockedPawns");
+    // MultiFloorManager's temporary floor locks: the pawn and the tick it was locked. Accessors of MultiFloors' types are
+    // kept as Delegate and made on first use: the game reads every static field's type at startup
+    // (ReportProbablyMissingAttributes), which fails for a MultiFloors type when it isn't loaded.
+    private static Delegate _lockedPawns;
+
+    private static List<(Pawn, int)> LockedPawns(
+        MultiFloorManager manager
+    ) => ((AccessTools.FieldRef<MultiFloorManager, List<(Pawn, int)>>)(_lockedPawns ??=
+        AccessTools.FieldRefAccess<MultiFloorManager, List<(Pawn, int)>>("lockedPawns")))(manager);
 
     // 9. "Prioritize work on this level" (a stair's or elevator's float menu) turns on the pawn's Lock floor, which is saved
     // with the pawn, and notes the pawn and tick in MultiFloorManager.lockedPawns, which isn't saved, for its tick to turn
@@ -522,11 +528,25 @@ public static class MultiFloorsFixes
     // split by stuff and quality, so each of a def's qualities could be queued up to the whole allowance. Each stair to
     // the same level also had the whole allowance. It's replaced by the same steps checked against everything of the def
     // queued on every stair from this level to the same level.
-    private static readonly AccessTools.FieldRef<AutoTransferWorker, Stair> TransferStair = AccessTools.FieldRefAccess<AutoTransferWorker, Stair>("stair");
-    private static readonly AccessTools.FieldRef<AutoTransferWorker, HashSet<ThingDef>> TransferBlacklist =
-        AccessTools.FieldRefAccess<AutoTransferWorker, HashSet<ThingDef>>("blacklistedThingDefs");
-    private static readonly Func<AutoTransferWorker, ThingDef, int> MaxAllowedCount =
-        AccessTools.MethodDelegate<Func<AutoTransferWorker, ThingDef, int>>(AccessTools.Method(typeof(AutoTransferWorker), "GetMaxAllowedCount"));
+    // Kept as Delegate, as _lockedPawns is
+    private static Delegate _transferStair;
+    private static Delegate _transferBlacklist;
+    private static Delegate _maxAllowedCount;
+
+    private static Stair TransferStair(
+        AutoTransferWorker worker
+    ) => ((AccessTools.FieldRef<AutoTransferWorker, Stair>)(_transferStair ??= AccessTools.FieldRefAccess<AutoTransferWorker, Stair>("stair")))(worker);
+
+    private static HashSet<ThingDef> TransferBlacklist(
+        AutoTransferWorker worker
+    ) => ((AccessTools.FieldRef<AutoTransferWorker, HashSet<ThingDef>>)(_transferBlacklist ??=
+        AccessTools.FieldRefAccess<AutoTransferWorker, HashSet<ThingDef>>("blacklistedThingDefs")))(worker);
+
+    private static int MaxAllowedCount(
+        AutoTransferWorker worker,
+        ThingDef def
+    ) => ((Func<AutoTransferWorker, ThingDef, int>)(_maxAllowedCount ??=
+        AccessTools.MethodDelegate<Func<AutoTransferWorker, ThingDef, int>>(AccessTools.Method(typeof(AutoTransferWorker), "GetMaxAllowedCount"))))(worker, def);
 
     public static bool Prefix_TryAddToTheToLoadList(
         AutoTransferWorker __instance,
