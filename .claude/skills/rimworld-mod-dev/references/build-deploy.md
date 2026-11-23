@@ -33,7 +33,8 @@ dotnet build <Mod>/<Mod>.csproj -t:CopyToRimworld    # build, then deploy
 
 ## Reading the game's code
 
-- Install ilspycmd somewhere outside the repo, such as the scratchpad: `dotnet tool install ilspycmd --tool-path <dir>`. Then run `<dir>\ilspycmd.cmd -p -o <out> "D:\SteamLibrary\steamapps\common\RimWorld\Assembly-CSharp.dll"`. Scratchpad copies don't survive between sessions, so expect to regenerate it.
+- ilspycmd is installed globally since 2026-11-23, at `~\.dotnet\tools\ilspycmd.cmd` (a `.cmd`, so run it from PowerShell, not Git Bash). Run `ilspycmd.cmd -p -o <out> "D:\SteamLibrary\steamapps\common\RimWorld\Assembly-CSharp.dll"`, with `<out>` in the scratchpad. Scratchpad output doesn't survive between sessions, so expect to regenerate it.
+- Other mods' DLLs decompile the same way, with `-r "D:\SteamLibrary\steamapps\common\RimWorld"` so it resolves the game's types: Workshop mods are under `D:\SteamLibrary\steamapps\workshop\content\294100\<id>`. MultiFloors (3384660931) has no public source repo (checked 2026-11-23), so its decompiled `1.6\Assemblies\MultiFloors.dll` is the reference; its `PrepatcherFields` lists the fields it injects and `HarmonyPatch_ExposePrepatcherFields` which of them are saved.
 - Waylith's own engine code is in `Waylith.dll`, and its launcher is in `RimWorld.dll`. When the user opens one in Rider's Assembly Explorer, the decompiled types land in `%APPDATA%\JetBrains\Rider2026.2\resharper-host\DecompilerCache`, where they can be read. Rider's MCP tools can't reach them directly.
 
 ## Conventions

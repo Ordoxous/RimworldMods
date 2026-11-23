@@ -317,6 +317,18 @@ public abstract class Stage
                 pawn.workSettings.SetPriority(workType, work.Contains(workType) ? 1 : 0);
             }
 
+            // Working whatever the hour, with no need to see to first: otherwise it may go skygazing mid-scenario, as
+            // happened on long runs whose clock had reached recreation time
+            foreach (var need in pawn.needs.AllNeeds)
+            {
+                need.CurLevelPercentage = 1f;
+            }
+
+            for (var hour = 0; hour < 24; hour++)
+            {
+                pawn.timetable.SetAssignment(hour, TimeAssignmentDefOf.Work);
+            }
+
             return pawn;
         }
 
