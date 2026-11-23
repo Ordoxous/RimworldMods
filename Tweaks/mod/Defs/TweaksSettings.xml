@@ -140,6 +140,18 @@
         <label>Neural superchargers on other levels</label>
         <tooltip>With MultiFloors and Ideology, colonists due a neural supercharge take the stairs to a charged supercharger on another level when there's none on theirs. A supercharger on their own level is always used first.</tooltip>
       </li>
+      <li MayRequire="telardo.MultiFloors" Class="XmlExtensions.Setting.Checkbox">
+        <key>ClaimsAcrossLevels</key>
+        <defaultValue>true</defaultValue>
+        <label>Unstick construction and repairs on other levels</label>
+        <tooltip>With MultiFloors, a frame, blueprint or broken-down building on another level is marked as taken while a pawn delivers to it or brings a component. MultiFloors sometimes leaves that mark behind with nobody coming, and then nobody ever delivers to or repairs it, even after a reload. On load and every in-game hour, the mark is cleared from anything no pawn's job is heading to.</tooltip>
+      </li>
+      <li MayRequire="telardo.MultiFloors" Class="XmlExtensions.Setting.Checkbox">
+        <key>MultiFloorsFixes</key>
+        <defaultValue>true</defaultValue>
+        <label>Fix MultiFloors bugs</label>
+        <tooltip>Fixes for bugs in MultiFloors: a pawn changing level no longer forgets the jobs queued for it or turns its work into a forced order; an interrupted haul to another level keeps its designation; a carried thing is no longer dropped on another level while a pawn looks for work; a blocked stair exit makes the pawn drop its load instead of standing there; cross-level work keeps working after an error; stacked stockpiles on different levels no longer hide each other's free cells; "Prioritize work on this level" no longer locks a pawn to its floor for good when the game is saved meanwhile, and no longer undoes a Lock floor you set by hand; a pawn no longer waits forever at an elevator without power; a stair's transfer limit holds across item qualities and stairs; forbidden ingredients upstairs no longer hold up a bill linked to that level; and level work settings no longer allocate on every work scan.</tooltip>
+      </li>
       <li MayRequire="Ludeon.RimWorld.Odyssey" Class="XmlExtensions.Setting.Checkbox">
         <key>ReplaceSubstructure</key>
         <defaultValue>true</defaultValue>
