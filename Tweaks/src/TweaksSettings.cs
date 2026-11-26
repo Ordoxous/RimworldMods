@@ -22,7 +22,6 @@ internal static class TweaksSettings
 
     // Off without MultiFloors, so nothing reaches its types
     public static bool ShutdownZonesAcrossLevels => MultiFloorsActive && GetBool("ShutdownZonesAcrossLevels", true);
-    public static bool ChargersAcrossLevels => MultiFloorsActive && GetBool("ChargersAcrossLevels", true);
 
     // Off without Simple Sidearms, which carries the tools, so nothing reaches its types
     public static bool ToolsSwitchForWork => ToolsForWork.SimpleSidearmsActive && GetBool("ToolsSwitchForWork", true);

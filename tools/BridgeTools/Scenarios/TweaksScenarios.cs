@@ -74,11 +74,6 @@ public static partial class TweaksScenarios
         new("levels_haul_off", "haul_mechs levels settings", LevelsHaulOff, requiresMod: MultiFloorsId),
         new("levels_wvc_mode_walks_upstairs", "levels", context => LevelsWorkModeWalks(context, on: true), requiresMod: MultiFloorsId),
         new("levels_wvc_mode_off_stays", "levels settings", context => LevelsWorkModeWalks(context, on: false), requiresMod: MultiFloorsId),
-        new("levels_unpowered_mech_to_charger_upstairs", "haul_mechs levels", LevelsUnpoweredMechToCharger, requiresMod: MultiFloorsId),
-        new("levels_downed_mech_to_charger_upstairs", "haul_mechs levels", LevelsDownedMechToCharger, requiresMod: MultiFloorsId),
-        new("levels_charger_upstairs_beats_zone", "haul_mechs levels", LevelsChargerBeatsZone, requiresMod: MultiFloorsId),
-        new("levels_parked_mech_to_charger_upstairs", "haul_mechs levels", LevelsParkedMechToCharger, requiresMod: MultiFloorsId),
-        new("levels_charger_off", "haul_mechs levels settings", LevelsChargerOff, requiresMod: MultiFloorsId),
         new("levels_downed_mech_carried_downstairs", "haul_mechs levels", LevelsDownedMechCarriedDownstairs, requiresMod: MultiFloorsId),
         new("levels_hauler_fetches_mech_upstairs", "haul_mechs levels", context => LevelsHaulerFetchesMech(context, zoneUpstairs: true), requiresMod: MultiFloorsId),
         new("levels_hauler_fetches_mech_down", "haul_mechs levels", context => LevelsHaulerFetchesMech(context, zoneUpstairs: false), requiresMod: MultiFloorsId),
@@ -211,7 +206,6 @@ public static partial class TweaksScenarios
             ["HaulDownedMechs"] = "true",
             ["HaulUnpoweredMechs"] = "true",
             ["ShutdownZonesAcrossLevels"] = "true",
-            ["ChargersAcrossLevels"] = "true",
             ["ToolsCategory"] = "true",
             ["LimitHemogenFarming"] = "true",
             ["HemogenPackCap"] = "30",
@@ -243,7 +237,7 @@ public static partial class TweaksScenarios
                 continue;
             }
 
-            if (key is "ShutdownZonesAcrossLevels" or "ChargersAcrossLevels" && !ModsConfig.IsActive(MultiFloorsId))
+            if (key is "ShutdownZonesAcrossLevels" && !ModsConfig.IsActive(MultiFloorsId))
             {
                 continue;
             }
@@ -256,7 +250,7 @@ public static partial class TweaksScenarios
                      "UnlockAllTrees", "VfeFactoryComponentResearchFix",
                      // Moved to the MultiFloors fork
                      "ResourcesAcrossLevels", "ReadoutAcrossLevels", "BillsAcrossLevels", "AlertsAcrossLevels", "SuperchargersAcrossLevels",
-                     "WorkTabPrioritiesAcrossLevels", "ClaimsAcrossLevels", "MultiFloorsFixes"
+                     "WorkTabPrioritiesAcrossLevels", "ClaimsAcrossLevels", "MultiFloorsFixes", "ChargersAcrossLevels"
                  })
         {
             context.Check($"{removed} was removed with its tweak", DefaultSetting(removed) == null);
@@ -790,7 +784,7 @@ public static partial class TweaksScenarios
     private static WorkGiver_Scanner UnpoweredGiver => (WorkGiver_Scanner)DefDatabase<WorkGiverDef>.GetNamed("Ordo_HaulMechToShutdownZone").Worker;
 
     // A light mech (a lifter) out of power: its energy need puts it into self-shutdown on its next interval
-    private static async Task<Pawn> UnpoweredMech(
+    internal static async Task<Pawn> UnpoweredMech(
         ScenarioContext context,
         int x,
         int z
@@ -942,7 +936,8 @@ public static partial class TweaksScenarios
         string destination,
         string jobName,
         bool crossLevel,
-        Func<bool> done
+        Func<bool> done,
+        string carryJobName = "Ordo_CarryMechToOtherLevel"
     )
     {
         var carried = false;
@@ -969,7 +964,7 @@ public static partial class TweaksScenarios
                         trace.Add(state);
                     }
 
-                    carried |= hauler.CurJobDef?.defName == "Ordo_CarryMechToOtherLevel";
+                    carried |= hauler.CurJobDef?.defName == carryJobName;
                     hauled |= hauler.CurJobDef?.defName == jobName && hauler.Map == destMap;
                     return done() && hauler.carryTracker.CarriedThing == null;
                 }, 4000);
@@ -993,12 +988,14 @@ public static partial class TweaksScenarios
         Pawn mech,
         Pawn hauler,
         UpperLevel level
-    ) => CarriedTo(context, mech, hauler, level.Map, "the charger upstairs", "Ordo_DeliverMechToCharger", crossLevel: true,
-        () => mech.Spawned && mech.Map == level.Map && mech.CurJobDef == JobDefOf.MechCharge);
+    ) => CarriedTo(context, mech, hauler, level.Map, "the charger upstairs", "MF_Ordo_DeliverMechToCharger", crossLevel: true,
+        () => mech.Spawned && mech.Map == level.Map && mech.CurJobDef == JobDefOf.MechCharge, "MF_Ordo_CarryMechToCharger");
 
-    private static WorkGiver_Scanner ChargerGiver => (WorkGiver_Scanner)DefDatabase<WorkGiverDef>.GetNamed("Ordo_HaulMechToChargerOnOtherLevel").Worker;
+    // Chargers on other levels are the MultiFloors fork's (MultiFloors.Ordo.ChargersAcrossLevels); these scenarios are
+    // registered in its scenario list, and use the zone helpers here
+    internal static WorkGiver_Scanner ChargerGiver => (WorkGiver_Scanner)DefDatabase<WorkGiverDef>.GetNamed("MF_Ordo_HaulMechToChargerOnOtherLevel").Worker;
 
-    private static async Task LevelsUnpoweredMechToCharger(
+    internal static async Task LevelsUnpoweredMechToCharger(
         ScenarioContext context
     )
     {
@@ -1010,7 +1007,7 @@ public static partial class TweaksScenarios
     }
 
     // Vanilla takes a downed mech below its recharge limit to a free charger, so the tweak does the same across levels
-    private static async Task LevelsDownedMechToCharger(
+    internal static async Task LevelsDownedMechToCharger(
         ScenarioContext context
     )
     {
@@ -1023,7 +1020,7 @@ public static partial class TweaksScenarios
     }
 
     // A free charger upstairs wins over a zone on the mech's own level: charging beats waiting
-    private static async Task LevelsChargerBeatsZone(
+    internal static async Task LevelsChargerBeatsZone(
         ScenarioContext context
     )
     {
@@ -1044,7 +1041,7 @@ public static partial class TweaksScenarios
 
     // A mech already waiting in a zone on the ground, which the zone tweaks leave alone, still goes to a charger that's
     // free upstairs
-    private static async Task LevelsParkedMechToCharger(
+    internal static async Task LevelsParkedMechToCharger(
         ScenarioContext context
     )
     {
@@ -1071,22 +1068,6 @@ public static partial class TweaksScenarios
         }
     }
 
-    private static async Task LevelsChargerOff(
-        ScenarioContext context
-    )
-    {
-        var mech = await UnpoweredMech(context, 0, 0);
-        var start = mech.Position;
-        using var level = new UpperLevel(context);
-        await level.FreeCharger(context, mech);
-        await WithSetting("ChargersAcrossLevels", "false", async () =>
-        {
-            var hauler = context.Worker(-6, 0, WorkTypeDefOf.Hauling);
-            context.Check("with the setting off, the work giver skips", ChargerGiver.ShouldSkip(hauler));
-            await context.Step(600);
-            context.Check($"the mech stayed where it was: {mech.PositionHeld} on {mech.MapHeld}", mech.Spawned && mech.Map == context.Map && mech.Position == start);
-        });
-    }
     // Down rather than up: the hauler and the mech upstairs, the zone on the ground
     private static async Task LevelsDownedMechCarriedDownstairs(
         ScenarioContext context

@@ -34,28 +34,4 @@
     <carryThingAfterJob>true</carryThingAfterJob>
   </JobDef>
 
-  <!-- MultiFloors: a mech to a free charger on another level, when vanilla's HaulMechsToCharger finds none on its level.
-       Scanned before vanilla's (90) and both zone tweaks (90, 89); it never takes a mech vanilla would. -->
-  <WorkGiverDef MayRequire="telardo.MultiFloors">
-    <defName>Ordo_HaulMechToChargerOnOtherLevel</defName>
-    <label>haul mechs to chargers on other levels</label>
-    <giverClass>Ordo.Tweaks.WorkGiver_HaulMechToChargerOnOtherLevel</giverClass>
-    <workType>Hauling</workType>
-    <verb>haul</verb>
-    <gerund>hauling</gerund>
-    <priorityInType>91</priorityInType>
-    <requiredCapacities>
-      <li>Manipulation</li>
-    </requiredCapacities>
-    <canBeDoneByMechs>true</canBeDoneByMechs>
-  </WorkGiverDef>
-
-  <!-- The last stage of carrying a mech to a charger on another level: vanilla's HaulMechToCharger, starting with the mech
-       already carried -->
-  <JobDef MayRequire="telardo.MultiFloors">
-    <defName>Ordo_DeliverMechToCharger</defName>
-    <driverClass>Ordo.Tweaks.JobDriver_DeliverMechToCharger</driverClass>
-    <reportString>hauling TargetA to TargetB</reportString>
-  </JobDef>
-
 </Defs>

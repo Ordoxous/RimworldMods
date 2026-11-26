@@ -13,81 +13,16 @@ using WVC_WorkModes;
 namespace Ordo.Tweaks;
 
 /// <summary>
-/// Mech chargers and WVC shutdown zones across MultiFloors levels, each of which is its own map. When a mech's level has
-/// no free charger, haulers carry it to one on another level; when it has no usable zone cell, to a zone on another level;
-/// and a mech walking to a zone in a shutdown work mode takes the stairs. Everything here touches MultiFloors' types, so
-/// it's only reached through <see cref="TweaksSettings.ShutdownZonesAcrossLevels"/> and
-/// <see cref="TweaksSettings.ChargersAcrossLevels"/>, which are false without MultiFloors, and the entry points aren't
+/// WVC shutdown zones across MultiFloors levels, each of which is its own map. When a mech's level has no usable zone cell,
+/// haulers carry it to a zone on another level, and a mech walking to a zone in a shutdown work mode takes the stairs.
+/// Chargers on other levels moved to the MultiFloors fork (2026-11-26). Everything here touches MultiFloors' types, so
+/// it's only reached through <see cref="TweaksSettings.ShutdownZonesAcrossLevels"/>, which is false without MultiFloors, and the entry points aren't
 /// inlined into callers that run without it.
 /// </summary>
 public static class MultiFloorsShutdown
 {
     // Reach across levels runs MultiFloors' stair path finder, so only this many free cells or chargers are tried per level
     private const int MaxReachChecksPerLevel = 8;
-
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    public static bool HasChargerOnOtherLevel(
-        Pawn hauler,
-        Pawn mech
-    )
-    {
-        var found = TryFindChargerOnOtherLevel(hauler, mech, out _);
-        hauler.SecondaryStairPath() = null;
-        return found;
-    }
-
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    public static Job TryMakeChargerCarryJob(
-        Pawn hauler,
-        Pawn mech
-    ) => TryFindChargerOnOtherLevel(hauler, mech, out var charger)
-        ? MakeCarryJob(mech, new GlobalTargetInfo(charger))
-        : null;
-
-    // A charger on another level, nearest levels first, as vanilla's GetClosestCharger picks one on the mech's level: it
-    // can charge the mech now, and the hauler can reach it through the stairs. Forbiddance and reservations are checked
-    // the cross-map way.
-    private static bool TryFindChargerOnOtherLevel(
-        Pawn hauler,
-        Pawn mech,
-        out Building_MechCharger charger
-    )
-    {
-        charger = null;
-        var map = hauler.Map;
-        if (map == null || hauler.StayOnCurrentMap() || !map.TryGetLevelControllerOnCurrentTile(out var controller))
-        {
-            return false;
-        }
-
-        foreach (var level in map.GetOtherMapVerticallyOutward(controller))
-        {
-            var reachChecks = 0;
-            foreach (var candidate in level.listerThings.ThingsInGroup(ThingRequestGroup.MechCharger))
-            {
-                if (candidate is not Building_MechCharger free
-                    || !free.CanPawnChargeCurrently(mech)
-                    || free.IsForbiddenAcrossLevel(hauler)
-                    || level.reservationManager.IsReservedByAnyoneOf(free, hauler.Faction))
-                {
-                    continue;
-                }
-
-                if (hauler.CanReachAcrossLevel(free, level))
-                {
-                    charger = free;
-                    return true;
-                }
-
-                if (++reachChecks >= MaxReachChecksPerLevel)
-                {
-                    break;
-                }
-            }
-        }
-
-        return false;
-    }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static bool HasCellOnOtherLevel(
@@ -127,42 +62,13 @@ public static class MultiFloorsShutdown
     }
 
     // Once the hauler is on the destination's level: the same-map job, which sees the mech is already carried. The planned
-    // charger or cell first, since it may have been taken on the way; then another charger on this level, for a mech that
-    // was going to one; then a zone cell.
+    // cell first, since it may have been taken on the way, then another zone cell there. (Chargers on other levels are the
+    // MultiFloors fork's now: MultiFloors.Ordo.ChargersAcrossLevels.)
     public static Job HaulOnArrival(
         Pawn hauler,
         Pawn mech,
         GlobalTargetInfo destination
-    )
-    {
-        if (destination.Thing is Building_MechCharger planned)
-        {
-            var charger = ChargerUsable(planned, hauler, mech)
-                ? planned
-                : hauler.Map.listerThings.ThingsInGroup(ThingRequestGroup.MechCharger)
-                    .OfType<Building_MechCharger>()
-                    .FirstOrDefault(candidate => ChargerUsable(candidate, hauler, mech));
-            if (charger != null)
-            {
-                var job = JobMaker.MakeJob(TweaksDefOf.Ordo_DeliverMechToCharger, mech, charger, charger.InteractionCell);
-                job.count = 1;
-                return job;
-            }
-        }
-
-        return ZoneJobOnArrival(hauler, mech, destination.HasThing ? IntVec3.Invalid : destination.Cell);
-    }
-
-    private static bool ChargerUsable(
-        Building_MechCharger charger,
-        Pawn hauler,
-        Pawn mech
-    ) => charger.Spawned
-         && charger.Map == hauler.Map
-         && charger.CanPawnChargeCurrently(mech)
-         && !charger.IsForbidden(hauler)
-         && hauler.CanReserve(charger)
-         && hauler.CanReach(charger, PathEndMode.InteractionCell, Danger.Some);
+    ) => ZoneJobOnArrival(hauler, mech, destination.HasThing ? IntVec3.Invalid : destination.Cell);
 
     private static Job ZoneJobOnArrival(
         Pawn hauler,

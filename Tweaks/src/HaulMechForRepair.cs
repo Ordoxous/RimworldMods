@@ -16,9 +16,6 @@ public static class TweaksDefOf
     [MayRequire("telardo.MultiFloors")]
     public static JobDef Ordo_CarryMechToOtherLevel;
 
-    [MayRequire("telardo.MultiFloors")]
-    public static JobDef Ordo_DeliverMechToCharger;
-
     static TweaksDefOf() => DefOfHelper.EnsureInitializedInCtor(typeof(TweaksDefOf));
 }
 

@@ -2,7 +2,7 @@
 
 ## Timing a scenario run
 
-1. Use a GABS profile that loads Dubs Performance Analyzer (DPA) on top of the mod's normal list, with its own data folder so the normal test profiles never load DPA. For SillyAnimalThings, that's `sillyanimalthings-profiling`.
+1. Use a GABS profile that loads Dubs Performance Analyzer (DPA) on top of the mod's normal list, with its own data folder so the normal test profiles never load DPA. For SillyAnimalThings, that's `sillyanimalthings-profiling`; for the MultiFloors fork and its levels, `tweaks-multifloors-profiling` (run with `mod: MultiFloors`).
 2. Call `ordo/run_scenarios` with `profile: true` (and `suite`, `filter` or `mod` as usual).
 
 The runner patches every method `ordo/profiling_targets` lists for each mod under test into DPA, through RimBridgeServer's `rimworld/dpa_*` tools. It resets DPA before each scenario and snapshots it after, because DPA only keeps the last 2000 ticks and a full run can be longer. The result's `profile` section has per-method calls, total, average and worst time (with the scenario it happened in), and per-scenario totals.
