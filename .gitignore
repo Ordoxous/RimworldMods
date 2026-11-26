@@ -6,3 +6,5 @@
 Directory.Build.local.props
 tools/BridgeTools/videos/
 tools/HotReloadDelta/state/
+# The MultiFloors fork: its own private repo, since the original has no license
+/MultiFloors/

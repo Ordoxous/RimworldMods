@@ -20,6 +20,14 @@
         <ProjectReference Include="..\..\*\*.csproj" Private="false" />
     </ItemGroup>
 
+    <!-- The MultiFloors fork's scenarios live in its private repo, and are compiled in only when it's checked out -->
+    <PropertyGroup Condition="Exists('$(MSBuildThisFileDirectory)..\..\MultiFloors\tests')">
+        <DefineConstants>$(DefineConstants);MULTIFLOORS_FORK</DefineConstants>
+    </PropertyGroup>
+    <ItemGroup Condition="Exists('$(MSBuildThisFileDirectory)..\..\MultiFloors\tests')">
+        <Compile Include="..\..\MultiFloors\tests\**\*.cs" Link="Scenarios\MultiFloors\%(RecursiveDir)%(Filename)%(Extension)" />
+    </ItemGroup>
+
     <!-- MechUpgradesUi's scenarios read Mechanoid Upgrades' types -->
     <ItemGroup>
         <WorkshopReference Include="MechanoidUpgrades" WorkshopId="3365118555" />

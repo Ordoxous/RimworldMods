@@ -28,6 +28,20 @@
         Resolves to the mod's $(RimworldVersion) Assemblies folder, or its $(RimworldFallbackVersion) one when it has no
         folder for this version yet. The game loads the mod itself, so the DLL stays out of the output.
     -->
+    <!--
+        A local fork replaces a Workshop mod: with MultiFloors/MultiFloors.csproj checked out (a separate, private repo;
+        see .gitignore), mods compile against the fork instead of the Workshop copy. Without it, nothing changes.
+    -->
+    <PropertyGroup>
+        <MultiFloorsForkProject>$(MSBuildThisFileDirectory)MultiFloors\MultiFloors.csproj</MultiFloorsForkProject>
+        <UseMultiFloorsFork Condition="Exists('$(MultiFloorsForkProject)') AND '$(MSBuildProjectFullPath)' != '$(MultiFloorsForkProject)'">true</UseMultiFloorsFork>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(UseMultiFloorsFork)' == 'true' AND '@(WorkshopReference->WithMetadataValue('WorkshopId', '3384660931'))' != ''">
+        <WorkshopReference Remove="@(WorkshopReference->WithMetadataValue('WorkshopId', '3384660931'))" />
+        <ProjectReference Include="$(MultiFloorsForkProject)" Private="false" />
+    </ItemGroup>
+
     <Target Name="ResolveWorkshopReferences" BeforeTargets="ResolveAssemblyReferences" Condition="'@(WorkshopReference)' != ''">
         <ItemGroup>
             <_WorkshopReference Include="@(WorkshopReference)">
@@ -85,7 +99,8 @@
     </Target>
 
     <!-- Fails the build when About.xml breaks one of the rules in the repo README's Conventions -->
-    <Target Name="CheckAboutXml" BeforeTargets="CoreCompile" Condition="'$(IsRimWorldMod)' == 'true' AND '$(DesignTimeBuild)' != 'true'">
+    <!-- A project that keeps another author's About.xml (the MultiFloors fork) sets CheckAboutXml to false -->
+    <Target Name="CheckAboutXml" BeforeTargets="CoreCompile" Condition="'$(IsRimWorldMod)' == 'true' AND '$(DesignTimeBuild)' != 'true' AND '$(CheckAboutXml)' != 'false'">
         <CheckAboutXml
             AboutFile="$(ModAboutFile)"
             PackageId="Ordo.$(MSBuildProjectName)"

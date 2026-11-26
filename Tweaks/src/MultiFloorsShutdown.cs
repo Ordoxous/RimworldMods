@@ -330,15 +330,6 @@ public static class MultiFloorsShutdownPatches
         var harmony = new Harmony(typeof(MultiFloorsShutdownPatches).Namespace);
         MultiFloorsShutdown.Patch(harmony);
         MultiFloorsShutdown.RegisterChangingLevelJob();
-        MultiFloorsResources.Patch(harmony);
-        MultiFloorsReadout.Patch(harmony);
-        MultiFloorsBills.Patch(harmony);
-        MultiFloorsSupercharger.Patch(harmony);
-        MultiFloorsFixes.Patch(harmony);
-        if (MultiFloorsWorkTab.WorkTabActive)
-        {
-            MultiFloorsWorkTab.Patch(harmony);
-        }
     }
 }
 

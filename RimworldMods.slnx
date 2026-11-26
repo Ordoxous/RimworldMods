@@ -5,6 +5,8 @@
   <Project Path="NatureTab/NatureTab.csproj" />
   <Project Path="LegendaryIsUnique/LegendaryIsUnique.csproj" />
   <Project Path="MechUpgradesUi\MechUpgradesUi.csproj" />
+  <!-- The MultiFloors fork: a separate private repo, git-ignored here. Shows as not loaded without it. -->
+  <Project Path="MultiFloors/MultiFloors.csproj" />
   <Project Path="Saddlebound/Saddlebound.csproj" />
   <Project Path="TabGroups/TabGroups.csproj" />
   <Project Path="SillyAnimalThings/SillyAnimalThings.csproj" />

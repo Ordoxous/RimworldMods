@@ -35,7 +35,8 @@ public static partial class TweaksScenarios
     };
 
     // Suites: "setup" for loading, "patches" for the XML patches, one per C# tweak ("armor", "haul_mechs", "tools", "hemogen", "deterioration"),
-    // "levels" for shutdown zones, chargers and building costs across MultiFloors levels ("resources" for the costs alone), and "settings" for the scenarios that turn a tweak off
+    // "levels" for shutdown zones and chargers across MultiFloors levels, and "settings" for the scenarios that turn a tweak off.
+    // The other MultiFloors features moved to the MultiFloors fork, with their scenarios (MultiFloorsScenarios, in its repo).
     public static readonly List<Scenario> All = new()
     {
         new("setup_no_load_errors", "setup", NoLoadErrors),
@@ -81,48 +82,9 @@ public static partial class TweaksScenarios
         new("levels_downed_mech_carried_downstairs", "haul_mechs levels", LevelsDownedMechCarriedDownstairs, requiresMod: MultiFloorsId),
         new("levels_hauler_fetches_mech_upstairs", "haul_mechs levels", context => LevelsHaulerFetchesMech(context, zoneUpstairs: true), requiresMod: MultiFloorsId),
         new("levels_hauler_fetches_mech_down", "haul_mechs levels", context => LevelsHaulerFetchesMech(context, zoneUpstairs: false), requiresMod: MultiFloorsId),
-        new("levels_build_costs_count_other_levels", "levels resources", LevelsBuildCostsCountOtherLevels, requiresMod: MultiFloorsId),
-        new("levels_build_costs_off", "levels resources settings", LevelsBuildCostsOff, requiresMod: MultiFloorsId),
-        new("levels_build_costs_clearly_have_enough", "levels resources", LevelsBuildCostsClearlyHaveEnough, requiresMod: MultiFloorsId + ",Mlie.IClearlyHaveEnough"),
-        new("levels_readout_counts_other_levels", "levels resources settings", LevelsReadoutCountsOtherLevels, requiresMod: MultiFloorsId),
-        new("levels_bills_count_other_levels", "levels bills settings", LevelsBillsCountOtherLevels, requiresMod: MultiFloorsId),
-        new("levels_bills_better_workbenches", "levels bills settings", LevelsBillsBetterWorkbenches, requiresMod: MultiFloorsId + ",falconne.BWM"),
         new("bills_count_cache", "bills settings", BillsCountCache),
         new("substructure_replace_transparent", "substructure", context => ReplaceSubstructureScenario(context, on: true), requiresMod: TransparentSubstructureId),
         new("substructure_replace_off", "substructure settings", context => ReplaceSubstructureScenario(context, on: false), requiresMod: TransparentSubstructureId),
-        new("levels_supercharger_upstairs", "levels supercharger", context => LevelsSupercharger(context, on: true), requiresMod: MultiFloorsId + ",Ludeon.RimWorld.Ideology"),
-        new("levels_work_tab_priorities", "levels settings", LevelsWorkTabPriorities, requiresMod: MultiFloorsId + ",Fluffy.WorkTab"),
-        new("levels_supercharger_off", "levels supercharger settings", context => LevelsSupercharger(context, on: false), requiresMod: MultiFloorsId + ",Ludeon.RimWorld.Ideology"),
-        new("levels_stuck_claim_released", "levels claims", context => LevelsStuckClaim(context, on: true), requiresMod: MultiFloorsId),
-        new("levels_stuck_claim_off", "levels claims settings", context => LevelsStuckClaim(context, on: false), requiresMod: MultiFloorsId),
-        new("levels_fix_follow_up_job", "levels mf_fixes", context => LevelsFixFollowUpJob(context, on: true), requiresMod: MultiFloorsId),
-        new("levels_fix_follow_up_job_off", "levels mf_fixes settings", context => LevelsFixFollowUpJob(context, on: false), requiresMod: MultiFloorsId),
-        new("levels_fix_scan_flags", "levels mf_fixes", context => LevelsFixScanFlags(context, on: true), requiresMod: MultiFloorsId),
-        new("levels_fix_scan_flags_off", "levels mf_fixes settings", context => LevelsFixScanFlags(context, on: false), requiresMod: MultiFloorsId),
-        new("levels_fix_interrupted_haul", "levels mf_fixes", context => LevelsFixInterruptedHaul(context, on: true), requiresMod: MultiFloorsId),
-        new("levels_fix_interrupted_haul_off", "levels mf_fixes settings", context => LevelsFixInterruptedHaul(context, on: false), requiresMod: MultiFloorsId),
-        new("levels_fix_drop_during_scan", "levels mf_fixes", context => LevelsFixDropDuringScan(context, on: true), requiresMod: MultiFloorsId),
-        new("levels_fix_drop_during_scan_off", "levels mf_fixes settings", context => LevelsFixDropDuringScan(context, on: false), requiresMod: MultiFloorsId),
-        new("levels_fix_blocked_exit", "levels mf_fixes", context => LevelsFixBlockedExit(context, on: true), requiresMod: MultiFloorsId),
-        new("levels_fix_blocked_exit_off", "levels mf_fixes settings", context => LevelsFixBlockedExit(context, on: false), requiresMod: MultiFloorsId),
-        new("levels_fix_marker_blacklist", "levels mf_fixes", context => LevelsFixMarkerCells(context, on: true, blacklisted: true), requiresMod: MultiFloorsId),
-        new("levels_fix_marker_blacklist_off", "levels mf_fixes settings", context => LevelsFixMarkerCells(context, on: false, blacklisted: true), requiresMod: MultiFloorsId),
-        new("levels_fix_marker_first_reservation", "levels mf_fixes", context => LevelsFixMarkerCells(context, on: true, blacklisted: false), requiresMod: MultiFloorsId),
-        new("levels_fix_marker_first_reservation_off", "levels mf_fixes settings", context => LevelsFixMarkerCells(context, on: false, blacklisted: false), requiresMod: MultiFloorsId),
-        new("levels_fix_haul_without_designation", "levels mf_fixes", context => LevelsFixHaulWithoutDesignation(context, on: true), requiresMod: MultiFloorsId),
-        new("levels_fix_temporary_lock_saved", "levels mf_fixes", context => LevelsFixTemporaryLockSaved(context, on: true), requiresMod: MultiFloorsId),
-        new("levels_fix_temporary_lock_saved_off", "levels mf_fixes settings", context => LevelsFixTemporaryLockSaved(context, on: false), requiresMod: MultiFloorsId),
-        new("levels_fix_manual_lock_kept", "levels mf_fixes", context => LevelsFixManualLockKept(context, on: true), requiresMod: MultiFloorsId),
-        new("levels_fix_manual_lock_kept_off", "levels mf_fixes settings", context => LevelsFixManualLockKept(context, on: false), requiresMod: MultiFloorsId),
-        new("levels_fix_unpowered_elevator_wait", "levels mf_fixes", context => LevelsFixUnpoweredElevatorWait(context, on: true), requiresMod: MultiFloorsId),
-        new("levels_fix_unpowered_elevator_wait_off", "levels mf_fixes settings", context => LevelsFixUnpoweredElevatorWait(context, on: false), requiresMod: MultiFloorsId),
-        new("levels_fix_transfer_limit", "levels mf_fixes", context => LevelsFixTransferLimit(context, on: true), requiresMod: MultiFloorsId),
-        new("levels_fix_transfer_limit_off", "levels mf_fixes settings", context => LevelsFixTransferLimit(context, on: false), requiresMod: MultiFloorsId),
-        new("levels_fix_forbidden_ingredients", "levels mf_fixes", context => LevelsFixForbiddenIngredients(context, on: true), requiresMod: MultiFloorsId),
-        new("levels_fix_forbidden_ingredients_off", "levels mf_fixes settings", context => LevelsFixForbiddenIngredients(context, on: false), requiresMod: MultiFloorsId),
-        new("levels_fix_work_filter_reused", "levels mf_fixes", context => LevelsFixWorkFilterReused(context, on: true), requiresMod: MultiFloorsId),
-        new("levels_fix_work_filter_reused_off", "levels mf_fixes settings", context => LevelsFixWorkFilterReused(context, on: false), requiresMod: MultiFloorsId),
-        new("levels_fix_haul_without_designation_off", "levels mf_fixes settings", context => LevelsFixHaulWithoutDesignation(context, on: false), requiresMod: MultiFloorsId),
         new("tools_category", "tools", context => ToolsCategory(context, requireTools: false)),
         new("tools_category_power_tools", "tools", context => ToolsCategory(context, requireTools: true), requiresMod: "setosa.power.tools"),
         new("tools_work_jackhammer_away_for_walks", "tools tools_work", context => ToolsWalkWithoutJackhammer(context, on: true), requiresMod: PowerTools),
@@ -250,9 +212,6 @@ public static partial class TweaksScenarios
             ["HaulUnpoweredMechs"] = "true",
             ["ShutdownZonesAcrossLevels"] = "true",
             ["ChargersAcrossLevels"] = "true",
-            ["ResourcesAcrossLevels"] = "true",
-            ["ReadoutAcrossLevels"] = "true",
-            ["BillsAcrossLevels"] = "true",
             ["ToolsCategory"] = "true",
             ["LimitHemogenFarming"] = "true",
             ["HemogenPackCap"] = "30",
@@ -284,7 +243,7 @@ public static partial class TweaksScenarios
                 continue;
             }
 
-            if (key is "ShutdownZonesAcrossLevels" or "ChargersAcrossLevels" or "ResourcesAcrossLevels" or "ReadoutAcrossLevels" or "BillsAcrossLevels" && !ModsConfig.IsActive(MultiFloorsId))
+            if (key is "ShutdownZonesAcrossLevels" or "ChargersAcrossLevels" && !ModsConfig.IsActive(MultiFloorsId))
             {
                 continue;
             }
@@ -292,7 +251,13 @@ public static partial class TweaksScenarios
             context.Check($"{key}: the menu's default ({menu ?? "none"}) matches the C# default ({value})", menu != null && string.Equals(menu, value, StringComparison.OrdinalIgnoreCase));
         }
 
-        foreach (var removed in new[] { "UnlockAllTrees", "VfeFactoryComponentResearchFix" })
+        foreach (var removed in new[]
+                 {
+                     "UnlockAllTrees", "VfeFactoryComponentResearchFix",
+                     // Moved to the MultiFloors fork
+                     "ResourcesAcrossLevels", "ReadoutAcrossLevels", "BillsAcrossLevels", "AlertsAcrossLevels", "SuperchargersAcrossLevels",
+                     "WorkTabPrioritiesAcrossLevels", "ClaimsAcrossLevels", "MultiFloorsFixes"
+                 })
         {
             context.Check($"{removed} was removed with its tweak", DefaultSetting(removed) == null);
         }
@@ -1122,206 +1087,6 @@ public static partial class TweaksScenarios
             context.Check($"the mech stayed where it was: {mech.PositionHeld} on {mech.MapHeld}", mech.Spawned && mech.Map == context.Map && mech.Position == start);
         });
     }
-
-    // A wall's default material, stocked only upstairs, and another material stocked on the ground: what the Architect
-    // shows on the ground, and the material a new wall designator picks. Stockpiles are counted, so both are stockpiled.
-    private sealed class LevelStock : IDisposable
-    {
-        public readonly UpperLevel Level;
-        public readonly ThingDef Wall = ThingDefOf.Wall;
-        public readonly ThingDef Upstairs, Ground;
-
-        private readonly ScenarioContext _context;
-        private readonly Zone_Stockpile _groundZone;
-
-        public LevelStock(
-            ScenarioContext context
-        )
-        {
-            _context = context;
-            Level = new UpperLevel(context);
-            Upstairs = GenStuff.DefaultStuffFor(Wall);
-            Ground = Upstairs == ThingDefOf.Steel ? ThingDefOf.WoodLog : ThingDefOf.Steel;
-            if (Level.Map == null)
-            {
-                return;
-            }
-
-            Stockpile(Level.Map, context.Cell(10, 10));
-            GenSpawn.Spawn(Stack(Upstairs), context.Cell(10, 10), Level.Map);
-            _groundZone = Stockpile(context.Map, context.Cell(-10, -10));
-            context.Place(Ground, -10, -10, stackCount: 75);
-            context.Map.resourceCounter.UpdateResourceCounts();
-            Level.Map.resourceCounter.UpdateResourceCounts();
-        }
-
-        private static Thing Stack(
-            ThingDef def
-        )
-        {
-            var thing = ThingMaker.MakeThing(def);
-            thing.stackCount = 75;
-            return thing;
-        }
-
-        public static Zone_Stockpile Stockpile(
-            Map map,
-            IntVec3 center
-        )
-        {
-            var zone = new Zone_Stockpile(StorageSettingsPreset.DefaultStockpile, map.zoneManager);
-            map.zoneManager.RegisterZone(zone);
-            foreach (var cell in CellRect.CenteredOn(center, 1))
-            {
-                zone.AddCell(cell);
-            }
-
-            return zone;
-        }
-
-        public int Count(
-            Map map
-        ) => Ordo.Tweaks.MultiFloorsResources.GetCount(map.resourceCounter, Upstairs);
-
-        public ThingDef DefaultStuff => new Designator_Build(Wall).StuffDef;
-
-        public void Dispose()
-        {
-            _groundZone?.Delete();
-            Level.Dispose();
-            _context.Map.resourceCounter.UpdateResourceCounts();
-        }
-    }
-
-    private static async Task LevelsBuildCostsCountOtherLevels(
-        ScenarioContext context
-    )
-    {
-        using var stock = new LevelStock(context);
-        if (stock.Level.Map == null)
-        {
-            return;
-        }
-
-        var ground = context.Map.resourceCounter.GetCount(stock.Upstairs);
-        var upstairs = stock.Level.Map.resourceCounter.GetCount(stock.Upstairs);
-        context.Check($"the level's counter has the {stock.Upstairs.label}: {upstairs}", upstairs >= 75);
-        context.Check($"counted from the ground, both levels count: {stock.Count(context.Map)} = {ground} + {upstairs}", stock.Count(context.Map) == ground + upstairs);
-        context.Check($"counted from upstairs, both levels count: {stock.Count(stock.Level.Map)}", stock.Count(stock.Level.Map) == ground + upstairs);
-
-        foreach (var (method, name) in new (MethodBase, string)[]
-                 {
-                     (AccessTools.Method(typeof(Designator_Build), "DrawPlaceMouseAttachments"), "Designator_Build.DrawPlaceMouseAttachments"),
-                     (AccessTools.Method(typeof(Designator_Build), nameof(Designator_Build.DrawPanelReadout)), "Designator_Build.DrawPanelReadout"),
-                     (AccessTools.PropertyGetter(typeof(Designator_Build), nameof(Designator_Build.StuffDef)), "Designator_Build.StuffDef"),
-                     (AccessTools.Method(typeof(Designator_Paint), nameof(Designator_Paint.DrawMouseAttachments)), "Designator_Paint.DrawMouseAttachments")
-                 })
-        {
-            context.Check($"{name} is transpiled by Tweaks", Harmony.GetPatchInfo(method)?.Transpilers.Any(patch => patch.owner == ModId) == true);
-            CountsAcrossLevels(context, method, name);
-        }
-
-        // Vanilla swaps the default material for one in stock on the ground when it's short there
-        context.Check($"the current map is the test map: {Find.CurrentMap}", Find.CurrentMap == context.Map);
-        context.Check($"the ground has too little {stock.Upstairs.label} for a wall: {ground}", ground < stock.Wall.CostStuffCount);
-        context.Check($"a new wall defaults to the {stock.Upstairs.label} upstairs: {stock.DefaultStuff?.label}", stock.DefaultStuff == stock.Upstairs);
-
-        await Task.CompletedTask;
-    }
-
-    // The method as the game runs it, after every mod's transpilers: each count goes through Tweaks, none straight to
-    // vanilla's counter or I Clearly Have Enough's single-map count
-    private static void CountsAcrossLevels(
-        ScenarioContext context,
-        MethodBase method,
-        string name
-    )
-    {
-        var called = PatchProcessor.GetCurrentInstructions(method)
-            .Select(instruction => instruction.operand as MethodInfo)
-            .Where(m => m != null)
-            .ToList();
-        var ours = called.Count(m => m.DeclaringType?.FullName == "Ordo.Tweaks.MultiFloorsResources");
-        var direct = called.Where(m => m == AccessTools.Method(typeof(ResourceCounter), nameof(ResourceCounter.GetCount))
-            || m.Name == "GetPresentOnMap").Select(m => $"{m.DeclaringType?.Name}.{m.Name}").ToList();
-        context.Check($"{name} counts through Tweaks: {ours} calls, uncounted levels: [{string.Join(", ", direct)}]", ours > 0 && direct.Count == 0);
-    }
-
-    // I Clearly Have Enough counts everything on a map, stored or not, in the two cost readouts. With it, Tweaks adds up its
-    // count over the levels: loose steel upstairs, outside any stockpile, counts from the ground.
-    private static Task LevelsBuildCostsClearlyHaveEnough(
-        ScenarioContext context
-    )
-    {
-        using var level = new UpperLevel(context);
-        if (level.Map == null)
-        {
-            return Task.CompletedTask;
-        }
-
-        var steel = ThingDefOf.Steel;
-        var loose = ThingMaker.MakeThing(steel);
-        loose.stackCount = 60;
-        GenSpawn.Spawn(loose, context.Cell(10, 10), level.Map);
-        var component = AccessTools.TypeByName("IClearlyHaveEnough.AllResourcesCounter_MapComponent");
-        context.Check("found I Clearly Have Enough's map component", component != null);
-        if (component == null)
-        {
-            return Task.CompletedTask;
-        }
-
-        int Present(Map map)
-        {
-            var comp = map.components.FirstOrDefault(c => component.IsInstanceOfType(c));
-            AccessTools.Method(component, "UpdateResourceCounts").Invoke(comp, null);
-            return (int)AccessTools.Method(component, "GetCount").Invoke(comp, new object[] { steel });
-        }
-
-        var ground = Present(context.Map);
-        var upstairs = Present(level.Map);
-        level.Map.resourceCounter.UpdateResourceCounts();
-        context.Check($"the steel upstairs isn't stored, so vanilla's counter doesn't see it: {level.Map.resourceCounter.GetCount(steel)}", level.Map.resourceCounter.GetCount(steel) < 60);
-        context.Check($"I Clearly Have Enough sees it upstairs: {upstairs}", upstairs >= 60);
-        var across = Ordo.Tweaks.MultiFloorsResources.PresentAcrossLevels(context.Map, steel);
-        context.Check($"from the ground, both levels count: {across} = {ground} + {upstairs}", across == ground + upstairs);
-
-        foreach (var (method, name) in new (MethodBase, string)[]
-                 {
-                     (AccessTools.Method(typeof(Designator_Build), "DrawPlaceMouseAttachments"), "Designator_Build.DrawPlaceMouseAttachments"),
-                     (AccessTools.Method(typeof(Designator_Build), nameof(Designator_Build.DrawPanelReadout)), "Designator_Build.DrawPanelReadout")
-                 })
-        {
-            context.Check($"{name} is transpiled by I Clearly Have Enough", Harmony.GetPatchInfo(method)?.Transpilers.Any(patch => patch.owner == "com.chippedchap.iclearlyhaveenough") == true);
-            CountsAcrossLevels(context, method, name);
-            context.Check($"{name} calls the whole-map count across levels",
-                PatchProcessor.GetCurrentInstructions(method).Any(instruction => (instruction.operand as MethodInfo)?.Name == nameof(Ordo.Tweaks.MultiFloorsResources.PresentAcrossLevels)));
-        }
-
-        return Task.CompletedTask;
-    }
-
-    private static async Task LevelsBuildCostsOff(
-        ScenarioContext context
-    )
-    {
-        using var stock = new LevelStock(context);
-        if (stock.Level.Map == null)
-        {
-            return;
-        }
-
-        var ground = context.Map.resourceCounter.GetCount(stock.Upstairs);
-        await WithSetting("ResourcesAcrossLevels", "false", () =>
-        {
-            context.Check($"with the setting off, only the ground counts: {stock.Count(context.Map)} = {ground}", stock.Count(context.Map) == ground);
-            context.Check($"the ground has too little {stock.Upstairs.label} for a wall: {ground}", ground < stock.Wall.CostStuffCount);
-            context.Check($"{stock.Ground.label} can stand in for the default", stock.Ground.stuffProps.canSuggestUseDefaultStuff);
-            context.Check($"a new wall falls back to the {stock.Ground.label} on the ground, as vanilla: {stock.DefaultStuff?.label}", stock.DefaultStuff == stock.Ground);
-
-            return Task.CompletedTask;
-        });
-    }
-
     // Down rather than up: the hauler and the mech upstairs, the zone on the ground
     private static async Task LevelsDownedMechCarriedDownstairs(
         ScenarioContext context

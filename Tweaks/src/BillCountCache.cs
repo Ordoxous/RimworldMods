@@ -13,22 +13,28 @@ namespace Ordo.Tweaks;
 /// which is the bill tab and the bill dialog drawing their "54/60" labels. Those redraw every frame, and a bill tab like
 /// Nice Bill Tab asks for each bill's count several times a frame.
 /// - A count is cheap in vanilla, but mods add to it. Better Workbench Management counts every extra product a bill's
-///   "count additional items" filter allows, one full count each (60 for a meal bill that counts every meal), and Tweaks'
-///   BillsAcrossLevels counts each MultiFloors level again. Four such meal bills took the bill tab from 72 to 12 FPS.
+///   "count additional items" filter allows, one full count each (60 for a meal bill that counts every meal), and the MultiFloors
+///   fork's BillsAcrossLevels counts each level again. Four such meal bills took the bill tab from 72 to 12 FPS.
 /// - Counts asked for during a tick (pawns deciding whether to work a bill) are always fresh, so the colony's behaviour
 ///   doesn't change. Only what's drawn can be up to 0.25 s old.
 /// - A cached count is dropped when the bill's own counting options change (equipped, tainted, hit points, quality,
 ///   stuff, stockpile), so the bill dialog shows the new count at once.
 /// - It covers every counter's <c>CountProducts</c>, vanilla and modded. Only the outermost call is cached: a counter
-///   calling its base, or BillsAcrossLevels counting another level, goes straight through.
+///   calling its base, or the fork counting another level, goes straight through.
 /// - On a cache answer the original and the patches inside it are skipped. Better Workbench Management's postfix and
-///   BillsAcrossLevels' are skipped too, and a last postfix puts the cached count back, so another mod's postfix that adds
+///   the fork's are skipped too, and a last postfix puts the cached count back, so another mod's postfix that adds
 ///   to the count can't add twice.
 /// </summary>
 [StaticConstructorOnStartup]
 public static class BillCountCache
 {
     private const float MaxAgeSeconds = 0.25f;
+
+    private const string BetterWorkbenchesCounter = "ImprovedWorkbenches.RecipeWorkerCounter_CountProducts_Detour";
+
+    // The MultiFloors fork's cross-level bill count, found by name: Tweaks may run with the Workshop MultiFloors or none
+    private const string LevelsBillsType = "MultiFloors.Ordo.BillsAcrossLevels";
+    private static readonly Func<bool> LevelsBillsOn = LevelsBillsSetting();
 
     private sealed class Entry
     {
@@ -55,7 +61,7 @@ public static class BillCountCache
             equipped = bill.includeEquipped;
             tainted = bill.includeTainted;
             stuff = bill.limitToAllowedStuff;
-            acrossLevels = TweaksSettings.BillsAcrossLevels;
+            acrossLevels = LevelsBillsOn();
             hp = bill.hpRange;
             quality = bill.qualityRange;
             group = bill.GetIncludeSlotGroup();
@@ -80,6 +86,19 @@ public static class BillCountCache
 
     // Inside TickManager.DoSingleTick, where counts must be fresh
     private static int ticking;
+
+    // Whether the fork counts bills across levels, read from its settings; always false without the fork
+    private static Func<bool> LevelsBillsSetting()
+    {
+        var settings = AccessTools.Field(GenTypes.GetTypeInAnyAssembly("MultiFloors.MultiFloorsModHandler"), "Settings");
+        var field = settings == null ? null : AccessTools.Field(settings.FieldType, "BillsAcrossLevels");
+        if (field == null)
+        {
+            return () => false;
+        }
+
+        return () => settings.GetValue(null) is { } value && (bool)field.GetValue(value);
+    }
 
     /// <summary>True while a count is being answered from the cache, for postfixes that would otherwise add to it.</summary>
     public static bool Answered => answered;
@@ -108,13 +127,25 @@ public static class BillCountCache
             finalizer: new HarmonyMethod(typeof(BillCountCache), nameof(Finalizer_DoSingleTick))
         );
 
+        // The fork's cross-level count runs every other level's count again; skip it when the cache answered
+        var levelsBills = GenTypes.GetTypeInAnyAssembly(LevelsBillsType);
+        if (levelsBills != null)
+        {
+            harmony.TryPatch(
+                AccessTools.DeclaredMethod(levelsBills, "Postfix_CountProducts"),
+                $"{LevelsBillsType}.Postfix_CountProducts",
+                "a cached bill count still counts the other MultiFloors levels again",
+                prefix: new HarmonyMethod(typeof(BillCountCache), nameof(Prefix_SkipWhenAnswered))
+            );
+        }
+
         // Better Workbench Management's postfix is the expensive part; skip it when the cache answered
-        var betterWorkbenches = GenTypes.GetTypeInAnyAssembly(MultiFloorsBills.BetterWorkbenchesCounter);
+        var betterWorkbenches = GenTypes.GetTypeInAnyAssembly(BetterWorkbenchesCounter);
         if (betterWorkbenches != null)
         {
             harmony.TryPatch(
                 AccessTools.DeclaredMethod(betterWorkbenches, "Postfix"),
-                $"{MultiFloorsBills.BetterWorkbenchesCounter}.Postfix",
+                $"{BetterWorkbenchesCounter}.Postfix",
                 "Better Workbench Management still counts in full each time the bill tab asks",
                 prefix: new HarmonyMethod(typeof(BillCountCache), nameof(Prefix_SkipWhenAnswered))
             );

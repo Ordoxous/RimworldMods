@@ -20,6 +20,10 @@ public static class ScenarioSets
         ("Ordo.Saddlebound", () => SaddleboundScenarios.All),
         ("Ordo.NatureTab", () => NatureTabScenarios.All),
         ("Ordo.DisallowedZone", () => DisallowedZoneScenarios.All),
-        ("Ordo.TabGroups", () => TabGroupsScenarios.All)
+        ("Ordo.TabGroups", () => TabGroupsScenarios.All),
+#if MULTIFLOORS_FORK
+        // The MultiFloors fork keeps MultiFloors' packageId; its scenarios are in the fork's own repo
+        ("telardo.MultiFloors", () => MultiFloorsScenarios.All),
+#endif
     };
 }
