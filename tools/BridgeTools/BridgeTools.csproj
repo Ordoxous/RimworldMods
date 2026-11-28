@@ -7,12 +7,10 @@
         <DeployTarget>DeployCompanion</DeployTarget>
     </PropertyGroup>
 
-    <!-- The host bridge supplies this at runtime, and NuGet doesn't carry the version it ships, so compile against its copy -->
+    <!-- The host bridge supplies this at runtime, and NuGet doesn't carry the version it ships, so compile against its copy:
+         the Workshop RimBridgeServer (since 2.5.0; before, a local copy in RimWorld\Mods) -->
     <ItemGroup>
-        <Reference Include="RimBridgeServer.Sdk">
-            <HintPath>$(RimWorldDirectory)\Mods\RimBridgeServer\1.6\Assemblies\RimBridgeServer.Sdk.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
+        <WorkshopReference Include="RimBridgeServer.Sdk" WorkshopId="3727949765" />
     </ItemGroup>
 
     <!-- The scenarios read every mod's types; the game loads the mods itself, so their DLLs stay out of this output -->
