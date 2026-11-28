@@ -45,6 +45,13 @@ A 33x33 map of flat soil with no pawns, things, roofs or fog, at midday. It's ju
 
 | `level_bill_check` | Why a MultiFloors workbench set to Listen to another level isn't working: its bills, the first to do, each ingredient on each level and on its way, the tile's haul-to-level designations, and whether each colonist may start the bill. `runMonitor` runs the bill monitor once and reports what it threw. Defined in the fork's `tests/LevelBillTools.cs`. Safe on the player's own game |
 | `bridge_connection` | This game's bridge port, token and mode (standalone or GABS) |
+| `log` | The game's own log queue (its last 1000 entries), newest first, by level and text, with stack traces on request. Prefer it to `rimbridge/list_logs`, whose buffer keeps only the last few dozen lines. `writeWarning` logs a marker first |
+| `find_things` | Things on every map (levels included) by a regex on def name or id, spawned or held in containers and inventories: map, position, holder, forbidden, designations |
+| `designations`, `areas`, `power_nets` | The same across every map: designations counted by def (with targets for one def), every area's cell count (`rimworld/list_areas` sees only the map shown), and each power net's production, use, stored energy and biggest parts |
+
+**The error mirror:** BridgeTools copies every warning and error of each game (test games too) to `~/.gabs/rimworld/logs/<pid>.log`, starting with what the game logged before the bridge came up. It survives the next game replacing `Player.log`, and the 20 newest files are kept. Read the player's from the pid in `standalone.json`.
+
+**Scripts in `tools/`, for when there's no GABS game:** `gabp.ps1` calls any bridge tool on the player's own game (`pwsh tools/gabp.ps1 ordo/find_things '{"match":"^Steel$"}'`, `-List` for the names); `save_query.ps1` reads things or designations per map out of a save without loading it; `mod_list_check.ps1` checks the player's mod list for missing dependencies, load-order rule violations and libraries no active mod needs.
 
 A tool class must not be `static`: RimBridgeServer skips abstract types, and a static class is one. Use `public sealed class` with static `[Tool]` methods.
 

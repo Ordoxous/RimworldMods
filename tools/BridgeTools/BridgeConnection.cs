@@ -28,6 +28,7 @@ public sealed class BridgeConnection
     {
         if (Interlocked.Exchange(ref started, 1) == 0)
         {
+            ErrorMirror.Start();
             new Thread(WaitAndWrite) { IsBackground = true, Name = "Ordo bridge connection" }.Start();
         }
     }
