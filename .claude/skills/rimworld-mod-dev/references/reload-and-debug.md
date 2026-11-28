@@ -22,6 +22,8 @@ Waylith's runtime (`.NET 10.0.15-waylithclr`) accepts hot reload updates for a m
 - **Not rerun:** static constructors, such as `[StaticConstructorOnStartup]` Harmony patching. A new or changed Harmony patch needs a restart.
 - **Not reloaded:** files outside the project folder, such as `shared/`. The tool treats them as unchanged, so a change there needs a rebuild, deploy and restart.
 - **Lost on restart:** the deployed DLL on disk is unchanged, so after a restart deploy a fresh build and `-Reset`.
+- **Blocked by Windows Application Control (2026-11-28):** `hot_reload.ps1` failed with "An Application Control policy has blocked this file" loading the freshly built `tools/HotReloadDelta/bin/Debug/net10.0/HotReloadDelta.dll` (Smart App Control or WDAC). That's the machine's security policy: don't work around it. Restart the game instead, and ask the user whether they want to allow the tool.
+- **The baseline must be what the game loaded.** After deploying a newer build, rebuild the loaded source (stash the change; builds are deterministic) and `-Reset` before making a delta, then redeploy the new build for the next start.
 - `ordo/apply_update` with no delta paths fails for every assembly ("The assembly update failed."): the runtime rejects an empty delta. It says nothing about whether real deltas will apply; try a real one.
 
 ### The bridge tools

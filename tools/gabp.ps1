@@ -23,7 +23,7 @@ $ErrorActionPreference = 'Stop'
 
 if (-not $Token) {
     $file = Join-Path $HOME '.gabs/rimworld/standalone.json'
-    if (-not (Test-Path $file)) { throw "No $file: start the game with BridgeTools deployed, or pass -Port and -Token." }
+    if (-not (Test-Path $file)) { throw "No ${file}: start the game with BridgeTools deployed, or pass -Port and -Token." }
     $saved = Get-Content $file -Raw | ConvertFrom-Json
     if (-not (Get-Process -Id $saved.pid -ErrorAction SilentlyContinue)) { throw "The game in $file (pid $($saved.pid)) isn't running." }
     $Port = $saved.port
