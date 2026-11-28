@@ -68,6 +68,32 @@ public sealed class DiagnoseTools
                 thingMap = targetMap?.ToString(),
                 canReserveAndReach = worker.CanReserveAndReach(target, PathEndMode.Touch, Danger.Deadly),
                 forbidden = target.IsForbidden(worker),
+                // WorkGiver_DoBill.JobOnThing's early checks, which give no fail reason when they stop it
+                billGiver = target is IBillGiver billGiver
+                    ? new
+                    {
+                        usable = DefDatabase<WorkGiverDef>.AllDefsListForReading
+                            .Where(d => d.Worker is WorkGiver_DoBill && d.fixedBillGiverDefs?.Contains(target.def) == true)
+                            .Select(d => (bool?)((WorkGiver_DoBill)d.Worker).ThingIsUsableBillGiver(target)).FirstOrDefault(),
+                        anyShouldDoNow = billGiver.BillStack.AnyShouldDoNow,
+                        // A gestator or other autonomous bench works one bill at a time: while it gathers or forms one, the
+                        // others aren't allowed to start, and the game gives no reason
+                        activeBill = target is Building_WorkTableAutonomous autonomous && autonomous.ActiveBill != null
+                            ? $"{autonomous.ActiveBill.LabelCap} ({autonomous.ActiveBill.State}, {autonomous.innerContainer.Count} things inside)"
+                            : null,
+                        usableAfterFueling = billGiver.UsableForBillsAfterFueling(),
+                        canReserve = worker.CanReserve(target),
+                        burning = target.IsBurning(),
+                        interactionCell = target.def.hasInteractionCell ? target.InteractionCell.ToString() : null,
+                        canReserveInteractionCell = !target.def.hasInteractionCell || worker.CanReserveSittableOrSpot(target.InteractionCell, target),
+                        interactionCellReservedBy = target.def.hasInteractionCell
+                            ? targetMap.reservationManager.FirstRespectedReserver(target.InteractionCell, worker)?.LabelShort
+                            : null,
+                        onInteractionCell = target.def.hasInteractionCell
+                            ? string.Join(", ", target.InteractionCell.GetThingList(targetMap).Select(t => t.LabelShort))
+                            : null
+                    }
+                    : null,
                 givers,
                 bills
             };

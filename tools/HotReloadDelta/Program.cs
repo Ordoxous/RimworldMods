@@ -17,8 +17,9 @@ namespace Ordo.HotReloadDelta;
 // loaded DLL was built from and the source as it is now, with the same compiler arguments, diffs their methods, and has Roslyn
 // emit the metadata, IL and PDB deltas that MetadataUpdater.ApplyUpdate takes (ordo/apply_update in the game).
 //
-// Usage: HotReloadDelta <csc arguments file> <project dir> <loaded dll> <output dir> <snapshot dir>...
-// The arguments file holds the csc command line from a build of the project. Each snapshot dir mirrors the project dir: the
+// Usage: HotReloadDelta <csc arguments file> <project dir> <source root> <loaded dll> <output dir> <snapshot dir>...
+// The arguments file holds the csc command line from a build of the project. Each snapshot dir mirrors the source root (the
+// repo), so files linked in from outside the project folder are versioned too: the
 // first as it was when the loaded DLL was built, then one for each delta applied since, in order. Deltas chain, so this replays
 // the earlier ones to get the baseline for the next. Handles changed method bodies, new methods, new fields and new types;
 // anything else (removals, signature changes, new constructors or virtual methods on existing types) is reported and needs a
@@ -35,14 +36,14 @@ public static class Program
         string[] args
     )
     {
-        if (args.Length < 5)
+        if (args.Length < 6)
         {
-            Console.Error.WriteLine("Usage: HotReloadDelta <csc arguments file> <project dir> <loaded dll> <output dir> <snapshot dir>...");
+            Console.Error.WriteLine("Usage: HotReloadDelta <csc arguments file> <project dir> <source root> <loaded dll> <output dir> <snapshot dir>...");
             return 2;
         }
 
-        var (argumentsFile, projectDir, loadedDll, outputDir) = (args[0], Path.GetFullPath(args[1]), args[2], args[3]);
-        var snapshots = args.Skip(4).Select(Path.GetFullPath).ToList();
+        var (argumentsFile, projectDir, sourceRoot, loadedDll, outputDir) = (args[0], Path.GetFullPath(args[1]), Path.GetFullPath(args[2]), args[3], args[4]);
+        var snapshots = args.Skip(5).Select(Path.GetFullPath).ToList();
 
         var parsed = CSharpCommandLineParser.Default.Parse(
             CommandLineParser.SplitCommandLineIntoArguments(File.ReadAllText(argumentsFile), removeHashComments: false),
@@ -60,7 +61,7 @@ public static class Program
 
         // The source at each step: the snapshots in order, then the project as it is now
         var versions = snapshots
-            .Select(snapshot => Compile(name, parsed, references, path => SnapshotPath(path, projectDir, snapshot)))
+            .Select(snapshot => Compile(name, parsed, references, path => SnapshotPath(path, sourceRoot, snapshot)))
             .Append(Compile(name, parsed, references, path => path))
             .ToList();
 
@@ -181,15 +182,17 @@ public static class Program
         return CSharpCompilation.Create(name, trees, references, parsed.CompilationOptions);
     }
 
-    // Files outside the project, and generated ones under obj, are the same in every version
+    // Files outside the repo, generated ones under obj or bin, and any a snapshot doesn't hold are the same in every version
     private static string SnapshotPath(
         string path,
-        string projectDir,
+        string sourceRoot,
         string snapshotDir
     )
     {
-        var relative = Path.GetRelativePath(projectDir, path);
-        if (relative.StartsWith("..") || relative.StartsWith("obj"))
+        var relative = Path.GetRelativePath(sourceRoot, path);
+        var separator = Path.DirectorySeparatorChar;
+        if (relative.StartsWith("..") || relative.Contains($"{separator}obj{separator}") || relative.Contains($"{separator}bin{separator}")
+            || !File.Exists(Path.Combine(snapshotDir, relative)))
         {
             return path;
         }

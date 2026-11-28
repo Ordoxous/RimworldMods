@@ -23,7 +23,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$root = Resolve-Path (Join-Path $PSScriptRoot '..\..')
+$root = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 
 # A mod's folder at the repo root, or a tool's under tools (BridgeTools)
 $projectDir = Join-Path $root $Project
@@ -82,19 +82,29 @@ if (-not (Test-Path $tool))
     & $dotnet build (Join-Path $PSScriptRoot 'HotReloadDelta.csproj') -nologo -v q | Out-Null
 }
 
-# Every C# file the project compiles, at its path within the project. Mods keep theirs under src, the bridge tools at the top.
+# Every C# file the project compiles, at its path within the repo: the project's own, and files linked in from elsewhere in
+# the repo (shared/, the MultiFloors fork's tests in BridgeTools), read from the compiler's command line. Generated files
+# under obj and files outside the repo are the same in every version, so they're left out.
 function Snapshot([string]$name)
 {
     $target = Join-Path $state $name
     New-Item -ItemType Directory -Force $target | Out-Null
-    $sources = Get-ChildItem $projectDir -Recurse -Filter '*.cs' |
-        Where-Object { $_.FullName.Substring($projectDir.Length + 1) -notmatch '^(obj|bin|out)\\' }
+    $own = Get-ChildItem $projectDir -Recurse -Filter '*.cs' |
+        Where-Object { $_.FullName.Substring($projectDir.Length + 1) -notmatch '^(obj|bin|out)\\' } | ForEach-Object { $_.FullName }
+    $linked = [regex]::Matches((Get-Content (Join-Path $state 'csc.args') -Raw), '"?([^"\s]+\.cs)"?') | ForEach-Object {
+        $path = $_.Groups[1].Value
+        if (-not [System.IO.Path]::IsPathRooted($path)) { $path = Join-Path $projectDir $path }
+        [System.IO.Path]::GetFullPath($path)
+    }
+    $sources = @($own) + @($linked) | Sort-Object -Unique | Where-Object {
+        $_.StartsWith($root + '\', [StringComparison]::OrdinalIgnoreCase) -and $_ -notmatch '\\(obj|bin)\\' -and (Test-Path $_)
+    }
     foreach ($source in $sources)
     {
-        $relative = $source.FullName.Substring($projectDir.Length + 1)
+        $relative = $source.Substring($root.Length + 1)
         $copy = Join-Path $target $relative
         New-Item -ItemType Directory -Force (Split-Path $copy) | Out-Null
-        Copy-Item $source.FullName $copy
+        Copy-Item $source $copy
     }
 
     $target
@@ -141,7 +151,7 @@ $snapshots = Get-ChildItem $state -Directory | Where-Object { $_.Name -match '^\
 $next = [int]$snapshots[-1].Name + 1
 $delta = Join-Path $state "delta-$next"
 
-& $dotnet $tool (Join-Path $state 'csc.args') $projectDir $loadedDll $delta @($snapshots.FullName)
+& $dotnet $tool (Join-Path $state 'csc.args') $projectDir $root $loadedDll $delta @($snapshots.FullName)
 $exit = $LASTEXITCODE
 if ($exit -eq 4)
 {
