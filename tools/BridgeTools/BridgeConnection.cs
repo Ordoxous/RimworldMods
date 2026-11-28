@@ -29,6 +29,14 @@ public sealed class BridgeConnection
         if (Interlocked.Exchange(ref started, 1) == 0)
         {
             ErrorMirror.Start();
+            try
+            {
+                HistoryTools.Start();
+            }
+            catch (Exception e)
+            {
+                Log.Warning($"[BridgeTools] Couldn't start the job and origin history: {e.Message}");
+            }
             new Thread(WaitAndWrite) { IsBackground = true, Name = "Ordo bridge connection" }.Start();
         }
     }
